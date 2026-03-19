@@ -15,3 +15,4 @@ pubspec.lock
 .env.*.local
 coverage/
 
+.volta/
