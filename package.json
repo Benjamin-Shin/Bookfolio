@@ -1,0 +1,16 @@
+{
+  "name": "bookfolio",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace @bookfolio/web run dev",
+    "build:web": "npm --workspace @bookfolio/web run build",
+    "lint:web": "npm --workspace @bookfolio/web run lint",
+    "typecheck:web": "npm --workspace @bookfolio/web run typecheck"
+  }
+}
+
