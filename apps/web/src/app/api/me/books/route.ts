@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
-import { createUserBook, listUserBooks, listUserBooksPaged } from "@/lib/books/repository";
+import {
+  createUserBook,
+  listUserBooks,
+  listUserBooksPaged,
+  UserBookAlreadyInShelfError
+} from "@/lib/books/repository";
 
 function optionalString(input: FormData, key: string): string | null {
   const raw = input.get(key)?.toString().trim();
@@ -112,9 +117,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const contentType = request.headers.get("content-type") ?? "";
   try {
     const userId = await getRequestUserId(request);
-    const contentType = request.headers.get("content-type") ?? "";
     const payload = contentType.includes("application/json")
       ? await request.json()
       : parseFormDataToCreate(await request.formData());
@@ -127,6 +132,22 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.redirect(new URL(`/dashboard/books/${created.id}`, request.url), 303);
   } catch (error) {
+    if (error instanceof UserBookAlreadyInShelfError) {
+      if (contentType.includes("application/json")) {
+        return NextResponse.json(
+          {
+            error: error.message,
+            code: error.code,
+            existingUserBookId: error.existingUserBookId
+          },
+          { status: 409 }
+        );
+      }
+      return NextResponse.redirect(
+        new URL(`/dashboard/books/${error.existingUserBookId}?already_in_shelf=1`, request.url),
+        303
+      );
+    }
     const message = error instanceof Error ? error.message : "Failed to create book";
     return NextResponse.json({ error: message }, { status: message === "Unauthorized" ? 401 : 500 });
   }

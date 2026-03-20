@@ -143,13 +143,13 @@ export function LibraryNewBookForm({ libraryId }: Props) {
           memo: memo.trim() || null
         })
       });
-      const data = (await res.json()) as { id?: string; error?: string };
+      const data = (await res.json()) as { bookId?: string; error?: string };
       if (!res.ok) {
         setFormError(data.error ?? "등록하지 못했습니다.");
         return;
       }
-      if (data.id) {
-        router.push(`/dashboard/libraries/${libraryId}/books/${data.id}` as Route);
+      if (data.bookId) {
+        router.push(`/dashboard/libraries/${libraryId}/books/${data.bookId}` as Route);
         router.refresh();
       }
     } catch {
@@ -250,7 +250,7 @@ export function LibraryNewBookForm({ libraryId }: Props) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="lib-loc">위치 (선택)</Label>
-        <p className="text-xs text-muted-foreground">이 공동서재 안에서 이 권이 있는 곳입니다.</p>
+        <p className="text-xs text-muted-foreground">개인 소장(user_books)에 저장되며, 멤버에게 함께 표시됩니다.</p>
         <Input id="lib-loc" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="예: 거실 책장" />
       </div>
       <div className="space-y-2">

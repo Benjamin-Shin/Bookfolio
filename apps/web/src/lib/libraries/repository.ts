@@ -1,19 +1,21 @@
 import type {
-  CreateLibraryBookInput,
+  BookFormat,
   CreateLibraryInput,
-  LibraryBookDetail,
-  LibraryBookSummary,
+  CreateUserBookInput,
+  LibraryAggregatedBookRow,
   LibraryMemberRow,
   LibraryMemberRole,
+  LibrarySharedOwnerRow,
   LibrarySummary,
   ReadingStatus,
-  UpdateLibraryBookInput,
+  ShareToLibraryInput,
   UpdateLibraryInput
 } from "@bookfolio/shared";
 
 import {
-  getCanonicalBookById,
-  resolveCanonicalBookForSharedLibrary,
+  createUserBook,
+  updateUserBook,
+  UserBookAlreadyInShelfError,
   type DbCanonicalBook,
   type RepositoryContext
 } from "@/lib/books/repository";
@@ -368,6 +370,22 @@ export async function removeLibraryMember(
     throw new Error("소유자는 멤버 목록에서 제거할 수 없습니다. 서재를 삭제하세요.");
   }
 
+  const { data: targetBooks, error: tbErr } = await supabase
+    .from("user_books")
+    .select("id")
+    .eq("user_id", targetUserId);
+
+  if (tbErr) throw tbErr;
+  const targetUserBookIds = (targetBooks ?? []).map((r) => r.id as string);
+  if (targetUserBookIds.length > 0) {
+    const { error: lubErr } = await supabase
+      .from("library_user_books")
+      .delete()
+      .eq("library_id", libraryId)
+      .in("user_book_id", targetUserBookIds);
+    if (lubErr) throw lubErr;
+  }
+
   const { error: delErr } = await supabase
     .from("library_members")
     .delete()
@@ -377,334 +395,418 @@ export async function removeLibraryMember(
   if (delErr) throw delErr;
 }
 
-function mapBookToLibrarySummary(
-  lb: {
+type LinkedLibraryRow = {
+  user_book_id: string;
+  linked_at: string;
+  linked_by: string | null;
+  user_books: {
     id: string;
-    library_id: string;
+    user_id: string;
     book_id: string;
-    location: string | null;
+    reading_status: string;
     memo: string | null;
-    created_at: string;
+    location: string | null;
     updated_at: string;
-  },
-  book: DbCanonicalBook
-): LibraryBookSummary {
-  return {
-    id: lb.id,
-    libraryId: lb.library_id,
-    bookId: lb.book_id,
-    isbn: book.isbn,
-    title: book.title,
-    authors: Array.isArray(book.authors) ? book.authors : [],
-    coverUrl: normalizeCoverUrlForClient(book.cover_url),
-    location: lb.location,
-    memo: lb.memo,
-    createdAt: lb.created_at,
-    updatedAt: lb.updated_at
+    books: DbCanonicalBook | DbCanonicalBook[];
   };
+};
+
+function pickBookFromNested(ub: LinkedLibraryRow["user_books"]): DbCanonicalBook | null {
+  const b = ub.books;
+  if (!b) return null;
+  return Array.isArray(b) ? b[0] ?? null : b;
+}
+
+type FlatLinked = {
+  userBookId: string;
+  linkedAt: string;
+  userId: string;
+  bookId: string;
+  readingStatus: ReadingStatus;
+  memo: string | null;
+  location: string | null;
+  book: DbCanonicalBook;
+};
+
+function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
+  const out: FlatLinked[] = [];
+  for (const r of rows) {
+    const book = pickBookFromNested(r.user_books);
+    if (!book) continue;
+    const st = r.user_books.reading_status;
+    const rs: ReadingStatus =
+      st === "unread" || st === "reading" || st === "completed" || st === "paused" || st === "dropped"
+        ? st
+        : "unread";
+    out.push({
+      userBookId: r.user_book_id,
+      linkedAt: r.linked_at,
+      userId: r.user_books.user_id,
+      bookId: r.user_books.book_id,
+      readingStatus: rs,
+      memo: r.user_books.memo,
+      location: r.user_books.location,
+      book
+    });
+  }
+  return out;
+}
+
+function buildAggregatedList(
+  libraryId: string,
+  flat: FlatLinked[],
+  profiles: Map<string, { email: string; name: string | null }>
+): LibraryAggregatedBookRow[] {
+  const byBook = new Map<string, FlatLinked[]>();
+  for (const f of flat) {
+    if (!byBook.has(f.bookId)) byBook.set(f.bookId, []);
+    byBook.get(f.bookId)!.push(f);
+  }
+
+  const result: LibraryAggregatedBookRow[] = [];
+  for (const [bookIdKey, group] of byBook) {
+    const book = group[0].book;
+    const byUser = new Map<string, FlatLinked>();
+    for (const g of group) {
+      const prev = byUser.get(g.userId);
+      if (!prev || g.linkedAt > prev.linkedAt) {
+        byUser.set(g.userId, g);
+      }
+    }
+    const owners: LibrarySharedOwnerRow[] = [...byUser.values()].map((g) => {
+      const p = profiles.get(g.userId);
+      return {
+        userId: g.userId,
+        email: p?.email ?? "",
+        name: p?.name ?? null,
+        userBookId: g.userBookId,
+        readingStatus: g.readingStatus,
+        location: g.location,
+        memo: g.memo,
+        linkedAt: g.linkedAt
+      };
+    });
+    owners.sort((a, b) => a.linkedAt.localeCompare(b.linkedAt));
+    const updatedAt = owners.reduce((m, o) => (o.linkedAt > m ? o.linkedAt : m), owners[0]?.linkedAt ?? "");
+    result.push({
+      libraryId,
+      bookId: bookIdKey,
+      isbn: book.isbn,
+      title: book.title,
+      authors: Array.isArray(book.authors) ? book.authors : [],
+      coverUrl: normalizeCoverUrlForClient(book.cover_url),
+      owners,
+      updatedAt
+    });
+  }
+
+  result.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return result;
+}
+
+async function fetchLinkedRowsForLibrary(
+  supabase: SupabaseClient,
+  libraryId: string
+): Promise<LinkedLibraryRow[]> {
+  const { data, error } = await supabase
+    .from("library_user_books")
+    .select(
+      `
+      user_book_id,
+      linked_at,
+      linked_by,
+      user_books!inner (
+        id,
+        user_id,
+        book_id,
+        reading_status,
+        memo,
+        location,
+        updated_at,
+        books!inner (
+          id,
+          isbn,
+          title,
+          authors,
+          publisher,
+          published_date,
+          cover_url,
+          description,
+          price_krw,
+          source,
+          genre_slugs,
+          literature_region,
+          original_language,
+          created_at,
+          updated_at
+        )
+      )
+    `
+    )
+    .eq("library_id", libraryId);
+
+  if (error) throw error;
+  return (data ?? []) as unknown as LinkedLibraryRow[];
+}
+
+async function loadProfilesForUserIds(
+  supabase: SupabaseClient,
+  userIds: string[]
+): Promise<Map<string, { email: string; name: string | null }>> {
+  const unique = [...new Set(userIds)];
+  if (unique.length === 0) {
+    return new Map();
+  }
+  const { data, error } = await supabase.from("app_users").select("id, email, name").in("id", unique);
+  if (error) throw error;
+  return new Map(
+    (data ?? []).map((u) => [
+      u.id as string,
+      { email: (u.email as string) ?? "", name: (u.name as string | null) ?? null }
+    ])
+  );
 }
 
 export async function listLibraryBooks(
   libraryId: string,
   userId: string,
   context?: RepositoryContext
-): Promise<LibraryBookSummary[]> {
+): Promise<LibraryAggregatedBookRow[]> {
   await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
-
-  const { data, error } = await supabase
-    .from("library_books")
-    .select(
-      `
-      id,
-      library_id,
-      book_id,
-      location,
-      memo,
-      created_at,
-      updated_at,
-      books!inner (
-        id,
-        isbn,
-        title,
-        authors,
-        publisher,
-        published_date,
-        cover_url,
-        description,
-        price_krw,
-        source,
-        genre_slugs,
-        literature_region,
-        original_language,
-        created_at,
-        updated_at
-      )
-    `
-    )
-    .eq("library_id", libraryId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-
-  type JoinedRow = {
-    id: string;
-    library_id: string;
-    book_id: string;
-    location: string | null;
-    memo: string | null;
-    created_at: string;
-    updated_at: string;
-    books: DbCanonicalBook | DbCanonicalBook[];
-  };
-
-  return (data ?? []).map((row: JoinedRow) => {
-    const b = row.books;
-    const book = Array.isArray(b) ? b[0] : b;
-    if (!book) throw new Error("연결된 도서 정보를 찾을 수 없습니다.");
-    return mapBookToLibrarySummary(row, book);
-  });
+  const rows = await fetchLinkedRowsForLibrary(supabase, libraryId);
+  const flat = flattenLinkedRows(rows);
+  const profiles = await loadProfilesForUserIds(
+    supabase,
+    flat.map((f) => f.userId)
+  );
+  return buildAggregatedList(libraryId, flat, profiles);
 }
 
-export async function addLibraryBook(
+export async function getLibraryAggregatedBook(
   libraryId: string,
-  input: CreateLibraryBookInput,
+  bookId: string,
   userId: string,
   context?: RepositoryContext
-): Promise<LibraryBookDetail> {
+): Promise<LibraryAggregatedBookRow | null> {
+  await assertLibraryMember(libraryId, userId, context);
+  const supabase = await getClient(context);
+  const rows = await fetchLinkedRowsForLibrary(supabase, libraryId);
+  const flat = flattenLinkedRows(rows).filter((f) => f.bookId === bookId);
+  if (flat.length === 0) {
+    return null;
+  }
+  const profiles = await loadProfilesForUserIds(
+    supabase,
+    flat.map((f) => f.userId)
+  );
+  return buildAggregatedList(libraryId, flat, profiles)[0] ?? null;
+}
+
+export async function shareBookToLibrary(
+  libraryId: string,
+  input: ShareToLibraryInput,
+  userId: string,
+  context?: RepositoryContext
+): Promise<LibraryAggregatedBookRow> {
   await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
 
-  let canonical: DbCanonicalBook;
+  let userBookIdToLink: string;
 
-  if ("bookId" in input && input.bookId) {
-    const found = await getCanonicalBookById(input.bookId, { userId, useAdmin: true });
-    if (!found) {
-      throw new Error("카탈로그에서 도서를 찾을 수 없습니다.");
+  if ("userBookId" in input && input.userBookId) {
+    const { data: ub, error } = await supabase
+      .from("user_books")
+      .select("id")
+      .eq("id", input.userBookId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!ub) {
+      throw new Error("내 서재에서 책을 찾을 수 없습니다.");
     }
-    canonical = found;
+    userBookIdToLink = ub.id as string;
+  } else if ("bookId" in input && input.bookId) {
+    const { data: ub, error } = await supabase
+      .from("user_books")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("book_id", input.bookId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    if (!ub) {
+      throw new Error("개인 서재에 해당 책이 없습니다. 먼저 개인 서재에 추가해 주세요.");
+    }
+    userBookIdToLink = ub.id as string;
+    if (input.location !== undefined || input.memo !== undefined) {
+      await updateUserBook(
+        userBookIdToLink,
+        {
+          ...(input.location !== undefined ? { location: input.location } : {}),
+          ...(input.memo !== undefined ? { memo: input.memo } : {})
+        },
+        { userId, useAdmin: true }
+      );
+    }
   } else {
-    const manual = input as Exclude<CreateLibraryBookInput, { bookId: string }>;
+    const manual = input as Pick<
+      CreateUserBookInput,
+      "isbn" | "title" | "authors" | "publisher" | "publishedDate" | "coverUrl" | "description" | "priceKrw"
+    > & { format?: BookFormat; location?: string | null; memo?: string | null };
     if (!manual.title?.trim()) {
       throw new Error("제목을 입력해 주세요.");
     }
-    canonical = await resolveCanonicalBookForSharedLibrary(supabase, {
-      isbn: manual.isbn ?? null,
-      title: manual.title,
-      authors: manual.authors,
-      publisher: manual.publisher ?? null,
-      publishedDate: manual.publishedDate ?? null,
-      coverUrl: manual.coverUrl ?? null,
-      description: manual.description ?? null,
-      priceKrw: manual.priceKrw ?? null
-    });
+    if (!manual.authors?.length) {
+      throw new Error("저자를 한 명 이상 입력해 주세요.");
+    }
+    try {
+      const created = await createUserBook(
+        {
+          isbn: manual.isbn ?? null,
+          title: manual.title.trim(),
+          authors: manual.authors,
+          publisher: manual.publisher ?? null,
+          publishedDate: manual.publishedDate ?? null,
+          coverUrl: manual.coverUrl ?? null,
+          description: manual.description ?? null,
+          priceKrw: manual.priceKrw ?? null,
+          format: manual.format ?? "paper",
+          location: manual.location?.trim() ? manual.location.trim() : null,
+          memo: manual.memo?.trim() ? manual.memo.trim() : null
+        },
+        { userId, useAdmin: true }
+      );
+      userBookIdToLink = created.id;
+    } catch (e) {
+      if (e instanceof UserBookAlreadyInShelfError) {
+        userBookIdToLink = e.existingUserBookId;
+        if (manual.location !== undefined || manual.memo !== undefined) {
+          await updateUserBook(
+            userBookIdToLink,
+            {
+              ...(manual.location !== undefined
+                ? { location: manual.location?.trim() ? manual.location.trim() : null }
+                : {}),
+              ...(manual.memo !== undefined
+                ? { memo: manual.memo?.trim() ? manual.memo.trim() : null }
+                : {})
+            },
+            { userId, useAdmin: true }
+          );
+        }
+      } else {
+        throw e;
+      }
+    }
   }
 
-  const loc = input.location?.trim();
-  const memo = input.memo?.trim();
-
-  const { data: inserted, error } = await supabase
-    .from("library_books")
-    .insert({
-      library_id: libraryId,
-      book_id: canonical.id,
-      location: loc ? loc : null,
-      memo: memo ? memo : null,
-      added_by: userId
-    })
-    .select("id")
-    .single();
-
-  if (error) throw error;
-
-  const detail = await getLibraryBook(inserted.id as string, userId, context);
-  if (!detail) {
-    throw new Error("추가한 책을 다시 불러오지 못했습니다.");
-  }
-  return detail;
-}
-
-export async function getLibraryBook(
-  libraryBookId: string,
-  userId: string,
-  context?: RepositoryContext
-): Promise<LibraryBookDetail | null> {
-  const supabase = await getClient(context);
-
-  const { data: lb, error: lbErr } = await supabase
-    .from("library_books")
-    .select(
-      `
-      id,
-      library_id,
-      book_id,
-      location,
-      memo,
-      created_at,
-      updated_at,
-      books!inner (
-        id,
-        isbn,
-        title,
-        authors,
-        publisher,
-        published_date,
-        cover_url,
-        description,
-        price_krw,
-        source,
-        genre_slugs,
-        literature_region,
-        original_language,
-        created_at,
-        updated_at
-      )
-    `
-    )
-    .eq("id", libraryBookId)
-    .maybeSingle();
-
-  if (lbErr) throw lbErr;
-  if (!lb) return null;
-
-  const libraryId = lb.library_id as string;
-  await assertLibraryMember(libraryId, userId, context);
-
-  const b = lb.books as DbCanonicalBook | DbCanonicalBook[];
-  const book = Array.isArray(b) ? b[0] : b;
-  if (!book) throw new Error("연결된 도서 정보를 찾을 수 없습니다.");
-
-  const summary = mapBookToLibrarySummary(lb, book);
-
-  const members = await listLibraryMembers(libraryId, userId, context);
-
-  const { data: states, error: stErr } = await supabase
-    .from("library_book_member_states")
-    .select("user_id, reading_status, updated_at")
-    .eq("library_book_id", libraryBookId);
-
-  if (stErr) throw stErr;
-
-  const stateByUser = new Map(
-    (states ?? []).map((s) => [
-      s.user_id as string,
-      { readingStatus: s.reading_status as ReadingStatus, updatedAt: s.updated_at as string }
-    ])
-  );
-
-  const memberStates = members.map((m) => {
-    const st = stateByUser.get(m.userId);
-    return {
-      userId: m.userId,
-      email: m.email,
-      name: m.name,
-      readingStatus: st?.readingStatus ?? "unread",
-      updatedAt: st?.updatedAt ?? m.joinedAt
-    };
+  const { error: insErr } = await supabase.from("library_user_books").insert({
+    library_id: libraryId,
+    user_book_id: userBookIdToLink,
+    linked_by: userId,
+    linked_at: new Date().toISOString()
   });
 
-  return {
-    ...summary,
-    memberStates
-  };
+  if (insErr) {
+    if (insErr.code === "23505") {
+      throw new Error("이미 이 서재에 올린 책입니다.");
+    }
+    throw insErr;
+  }
+
+  const { data: ubRow, error: ubErr } = await supabase
+    .from("user_books")
+    .select("book_id")
+    .eq("id", userBookIdToLink)
+    .single();
+  if (ubErr) throw ubErr;
+  const bid = ubRow?.book_id as string;
+  const agg = await getLibraryAggregatedBook(libraryId, bid, userId, context);
+  if (!agg) {
+    throw new Error("추가한 책을 다시 불러오지 못했습니다.");
+  }
+  return agg;
 }
 
-export async function updateLibraryBook(
-  libraryBookId: string,
-  input: UpdateLibraryBookInput,
-  userId: string,
-  context?: RepositoryContext
-): Promise<LibraryBookDetail> {
-  const supabase = await getClient(context);
-  const { data: lb, error: lbErr } = await supabase
-    .from("library_books")
-    .select("library_id")
-    .eq("id", libraryBookId)
-    .maybeSingle();
-
-  if (lbErr) throw lbErr;
-  if (!lb) {
-    throw new Error("Not found");
-  }
-
-  await assertLibraryMember(lb.library_id as string, userId, context);
-
-  const patch: Record<string, unknown> = {};
-  if (input.location !== undefined) {
-    const t = input.location?.trim();
-    patch.location = t ? t : null;
-  }
-  if (input.memo !== undefined) {
-    const t = input.memo?.trim();
-    patch.memo = t ? t : null;
-  }
-
-  if (Object.keys(patch).length > 0) {
-    const { error: upErr } = await supabase.from("library_books").update(patch).eq("id", libraryBookId);
-    if (upErr) throw upErr;
-  }
-
-  const detail = await getLibraryBook(libraryBookId, userId, context);
-  if (!detail) throw new Error("Not found");
-  return detail;
-}
-
-export async function deleteLibraryBook(
-  libraryBookId: string,
+export async function unlinkMyBookFromSharedLibrary(
+  libraryId: string,
+  bookId: string,
   userId: string,
   context?: RepositoryContext
 ): Promise<void> {
+  await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
-  const { data: lb, error: lbErr } = await supabase
-    .from("library_books")
-    .select("library_id")
-    .eq("id", libraryBookId)
-    .maybeSingle();
 
-  if (lbErr) throw lbErr;
-  if (!lb) {
-    throw new Error("Not found");
+  const { data: ubs, error: uErr } = await supabase
+    .from("user_books")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("book_id", bookId);
+
+  if (uErr) throw uErr;
+  const ids = (ubs ?? []).map((r) => r.id as string);
+  if (ids.length === 0) {
+    return;
   }
 
-  await assertLibraryMember(lb.library_id as string, userId, context);
+  const { error: delErr } = await supabase
+    .from("library_user_books")
+    .delete()
+    .eq("library_id", libraryId)
+    .in("user_book_id", ids);
 
-  const { error } = await supabase.from("library_books").delete().eq("id", libraryBookId);
-  if (error) throw error;
+  if (delErr) throw delErr;
 }
 
-export async function upsertMyLibraryBookState(
-  libraryBookId: string,
+export async function updateMySharedLibraryReadingStatus(
+  libraryId: string,
+  bookId: string,
   readingStatus: ReadingStatus,
   userId: string,
   context?: RepositoryContext
-): Promise<LibraryBookDetail> {
+): Promise<LibraryAggregatedBookRow> {
+  await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
-  const { data: lb, error: lbErr } = await supabase
-    .from("library_books")
-    .select("library_id")
-    .eq("id", libraryBookId)
-    .maybeSingle();
 
-  if (lbErr) throw lbErr;
-  if (!lb) {
-    throw new Error("Not found");
+  const { data: ubs, error: uErr } = await supabase
+    .from("user_books")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("book_id", bookId);
+
+  if (uErr) throw uErr;
+  const myIds = (ubs ?? []).map((r) => r.id as string);
+  if (myIds.length === 0) {
+    throw new Error("이 책에 대한 내 소장 정보가 없습니다.");
   }
 
-  await assertLibraryMember(lb.library_id as string, userId, context);
+  const { data: mapped, error: mErr } = await supabase
+    .from("library_user_books")
+    .select("user_book_id")
+    .eq("library_id", libraryId)
+    .in("user_book_id", myIds);
 
-  const { error: upErr } = await supabase.from("library_book_member_states").upsert(
-    {
-      library_book_id: libraryBookId,
-      user_id: userId,
-      reading_status: readingStatus,
-      updated_at: new Date().toISOString()
-    },
-    { onConflict: "library_book_id,user_id" }
-  );
+  if (mErr) throw mErr;
+  const linked = new Set((mapped ?? []).map((x) => x.user_book_id as string));
+  const targetIds = myIds.filter((id) => linked.has(id));
+  if (targetIds.length === 0) {
+    throw new Error("이 서재에 올리지 않은 책입니다.");
+  }
+
+  const now = new Date().toISOString();
+  const { error: upErr } = await supabase
+    .from("user_books")
+    .update({ reading_status: readingStatus, updated_at: now })
+    .eq("user_id", userId)
+    .in("id", targetIds);
 
   if (upErr) throw upErr;
 
-  const detail = await getLibraryBook(libraryBookId, userId, context);
-  if (!detail) throw new Error("Not found");
-  return detail;
+  const agg = await getLibraryAggregatedBook(libraryId, bookId, userId, context);
+  if (!agg) {
+    throw new Error("Not found");
+  }
+  return agg;
 }

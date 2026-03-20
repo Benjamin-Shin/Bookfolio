@@ -140,30 +140,29 @@ export interface LibraryMemberRow {
   joinedAt: string;
 }
 
-export interface LibraryBookMemberStateRow {
+/** 공동서재 집계 한 줄에 포함되는 소유자(개인 user_books 1행). */
+export interface LibrarySharedOwnerRow {
   userId: string;
   email: string;
   name: string | null;
+  userBookId: string;
   readingStatus: ReadingStatus;
-  updatedAt: string;
+  location: string | null;
+  memo: string | null;
+  linkedAt: string;
 }
 
-export interface LibraryBookSummary {
-  id: string;
+/** book_id 기준으로 합친 공동서재 책 한 줄. */
+export interface LibraryAggregatedBookRow {
   libraryId: string;
   bookId: string;
   isbn: string | null;
   title: string;
   authors: string[];
   coverUrl: string | null;
-  location: string | null;
-  memo: string | null;
-  createdAt: string;
+  owners: LibrarySharedOwnerRow[];
+  /** 목록 정렬용(소유자 연결 시각 중 최댓값). */
   updatedAt: string;
-}
-
-export interface LibraryBookDetail extends LibraryBookSummary {
-  memberStates: LibraryBookMemberStateRow[];
 }
 
 export interface CreateLibraryInput {
@@ -178,24 +177,24 @@ export interface UpdateLibraryInput {
   kind?: LibraryKind;
 }
 
-/** 공동서재에 책 추가: 기존 카탈로그 ID 또는 신규 서지(개인 서재 등록과 동일 필드). */
-export type CreateLibraryBookInput =
+/**
+ * 공동서재에 개인 소장을 연결.
+ * - userBookId: 이미 있는 내 user_books 행만 서재에 올림.
+ * - bookId: 내 서재에 해당 books.id가 있으면 연결(없으면 400).
+ * - 그 외: 개인 서재 등록과 동일 필드로 user_books 생성 후 연결(format 생략 시 paper).
+ */
+export type ShareToLibraryInput =
+  | { userBookId: string }
   | { bookId: string; location?: string | null; memo?: string | null }
   | ({
+      userBookId?: undefined;
       bookId?: undefined;
-      location?: string | null;
-      memo?: string | null;
     } & Pick<
       CreateUserBookInput,
       "isbn" | "title" | "authors" | "publisher" | "publishedDate" | "coverUrl" | "description" | "priceKrw"
-    >);
+    > & { format?: BookFormat; location?: string | null; memo?: string | null });
 
-export interface UpdateLibraryBookInput {
-  location?: string | null;
-  memo?: string | null;
-}
-
-export interface UpdateLibraryBookMemberStateInput {
+export interface SharedLibraryMyReadingInput {
   readingStatus: ReadingStatus;
 }
 

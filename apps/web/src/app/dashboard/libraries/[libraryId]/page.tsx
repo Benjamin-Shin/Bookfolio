@@ -76,36 +76,39 @@ export default async function LibraryDetailPage({ params }: PageProps) {
         <Card className="border-border/80 lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg">책</CardTitle>
-            <CardDescription>한 줄이 물리적 한 권입니다. 상세에서 멤버별 상태를 봅니다.</CardDescription>
+            <CardDescription>
+              같은 책은 한 줄로 묶이며, 소유자 이름이 표시됩니다. 올린 책만 보입니다.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {books.length === 0 ? (
               <p className="text-sm text-muted-foreground">아직 책이 없습니다.</p>
             ) : (
               <ul className="grid gap-3 sm:grid-cols-2">
-                {books.map((b) => (
-                  <li key={b.id}>
-                    <Link
-                      href={`/dashboard/libraries/${libraryId}/books/${b.id}` as Route}
-                      className="flex gap-3 rounded-lg border border-border/80 p-3 transition-colors hover:bg-muted/40"
-                    >
-                      <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded bg-muted">
-                        {b.coverUrl ? (
-                          <Image src={b.coverUrl} alt="" fill className="object-cover" sizes="56px" unoptimized />
-                        ) : null}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="line-clamp-2 font-medium leading-snug">{b.title}</p>
-                        <p className="line-clamp-1 text-xs text-muted-foreground">
-                          {b.authors.length > 0 ? b.authors.join(", ") : "저자 미상"}
-                        </p>
-                        {b.location ? (
-                          <p className="mt-1 text-xs text-muted-foreground">위치: {b.location}</p>
-                        ) : null}
-                      </div>
-                    </Link>
-                  </li>
-                ))}
+                {books.map((b) => {
+                  const ownerNames = b.owners.map((o) => o.name?.trim() || o.email).join(", ");
+                  return (
+                    <li key={b.bookId}>
+                      <Link
+                        href={`/dashboard/libraries/${libraryId}/books/${b.bookId}` as Route}
+                        className="flex gap-3 rounded-lg border border-border/80 p-3 transition-colors hover:bg-muted/40"
+                      >
+                        <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded bg-muted">
+                          {b.coverUrl ? (
+                            <Image src={b.coverUrl} alt="" fill className="object-cover" sizes="56px" unoptimized />
+                          ) : null}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="line-clamp-2 font-medium leading-snug">{b.title}</p>
+                          <p className="line-clamp-1 text-xs text-muted-foreground">
+                            {b.authors.length > 0 ? b.authors.join(", ") : "저자 미상"}
+                          </p>
+                          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">소유자: {ownerNames}</p>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </CardContent>

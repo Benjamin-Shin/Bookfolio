@@ -400,6 +400,16 @@ export async function getUserBookWithCanonical(
   return { userBook };
 }
 
+/** 같은 `books` 행이 이미 내 `user_books`에 있을 때 (ISBN 등으로 동일 서지 재추가). */
+export class UserBookAlreadyInShelfError extends Error {
+  readonly code = "USER_BOOK_ALREADY_EXISTS" as const;
+
+  constructor(public readonly existingUserBookId: string) {
+    super("이미 내 서재에 등록된 책입니다.");
+    this.name = "UserBookAlreadyInShelfError";
+  }
+}
+
 export async function createUserBook(
   input: CreateUserBookInput,
   context?: RepositoryContext
@@ -455,6 +465,18 @@ export async function createUserBook(
       price_krw: input.priceKrw ?? null,
       source: "manual"
     });
+  }
+
+  const { data: existingRow, error: existingErr } = await supabase
+    .from("user_books")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("book_id", canonical.id)
+    .maybeSingle();
+
+  if (existingErr) throw existingErr;
+  if (existingRow?.id) {
+    throw new UserBookAlreadyInShelfError(existingRow.id as string);
   }
 
   const loc = input.location?.trim();

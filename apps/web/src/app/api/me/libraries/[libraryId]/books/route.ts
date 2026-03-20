@@ -1,8 +1,8 @@
-import type { CreateLibraryBookInput } from "@bookfolio/shared";
+import type { ShareToLibraryInput } from "@bookfolio/shared";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
-import { addLibraryBook, listLibraryBooks } from "@/lib/libraries/repository";
+import { listLibraryBooks, shareBookToLibrary } from "@/lib/libraries/repository";
 
 function statusForMessage(message: string): number {
   if (message === "Unauthorized") return 401;
@@ -29,9 +29,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const userId = await getRequestUserId(request);
     const { libraryId } = await context.params;
-    const body = (await request.json()) as CreateLibraryBookInput;
+    const body = (await request.json()) as ShareToLibraryInput;
 
-    const created = await addLibraryBook(libraryId, body, userId, { userId, useAdmin: true });
+    const created = await shareBookToLibrary(libraryId, body, userId, { userId, useAdmin: true });
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed";
@@ -40,7 +40,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
         ? 401
         : message.includes("권한")
           ? 403
-          : message.includes("입력") || message.includes("찾을 수 없")
+          : message.includes("입력") ||
+              message.includes("찾을 수 없") ||
+              message.includes("없습니다") ||
+              message.includes("이미")
             ? 400
             : 500;
     return NextResponse.json({ error: message }, { status });

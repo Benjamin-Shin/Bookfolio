@@ -9,11 +9,12 @@ import { READING_STATUS_LABELS } from "@/components/libraries/reading-status-lab
 
 type Props = {
   libraryId: string;
-  libraryBookId: string;
+  /** `books.id` (카탈로그 도서 ID) */
+  bookId: string;
   initialStatus: ReadingStatus;
 };
 
-export function MyLibraryBookReadingForm({ libraryId, libraryBookId, initialStatus }: Props) {
+export function MyLibraryBookReadingForm({ libraryId, bookId, initialStatus }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<ReadingStatus>(initialStatus);
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,7 @@ export function MyLibraryBookReadingForm({ libraryId, libraryBookId, initialStat
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/me/libraries/${libraryId}/books/${libraryBookId}/my-state`,
+        `/api/me/libraries/${libraryId}/books/${bookId}/my-state`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

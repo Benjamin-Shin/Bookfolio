@@ -113,17 +113,18 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                           itemBuilder: (context, i) {
                             final b = _items[i];
                             final authors = b.authors.isNotEmpty ? b.authors.join(', ') : '저자 미상';
+                            final ownersLine = b.ownersLabel.isNotEmpty ? '소유자: ${b.ownersLabel}' : '';
                             return Material(
                               color: Colors.white.withValues(alpha: 0.55),
                               borderRadius: BorderRadius.circular(12),
                               child: ListTile(
                                 title: Text(b.title, maxLines: 2, overflow: TextOverflow.ellipsis),
                                 subtitle: Text(
-                                  authors,
-                                  maxLines: 1,
+                                  ownersLine.isNotEmpty ? '$authors\n$ownersLine' : authors,
+                                  maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                isThreeLine: b.location != null && b.location!.isNotEmpty,
+                                isThreeLine: ownersLine.isNotEmpty,
                               ),
                             );
                           },
