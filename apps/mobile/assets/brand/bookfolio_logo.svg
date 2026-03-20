@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Bookfolio">
+  <defs>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0%" stop-color="#4FC3F7"/>
+      <stop offset="100%" stop-color="#1E63E9"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0.1" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFBE0B"/>
+      <stop offset="100%" stop-color="#FF5A0A"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A7E33D"/>
+      <stop offset="100%" stop-color="#51BE32"/>
+    </linearGradient>
+    <clipPath id="bookmarkClip">
+      <path d="M106 50 H150 V156 L128 145 L106 156 Z"/>
+    </clipPath>
+  </defs>
+
+  <path d="M74 44 H102 V128
+           C102 152 86 168 58 184
+           L58 184
+           V58
+           C58 50 64 44 74 44 Z"
+        fill="url(#blueGrad)"/>
+
+  <path d="M157 44 H168
+           C200 44 219 62 219 90
+           C219 117 200 134 172 134
+           H157 Z"
+        fill="url(#blueGrad)"/>
+
+  <path d="M157 132 H176
+           C206 132 224 151 224 179
+           C224 208 205 224 173 224
+           H82
+           C73 224 67 218 67 209
+           V194
+           C94 184 121 170 143 153
+           C151 147 157 141 157 132 Z"
+        fill="url(#orangeGrad)"/>
+
+  <path d="M58 170
+           C86 161 111 148 132 132
+           C143 124 150 116 150 104
+           V132
+           C150 150 136 164 111 180
+           C94 191 76 199 58 206 Z"
+        fill="#2B7BEA" opacity="0.35"/>
+
+  <path d="M106 50 H150 V156 L128 145 L106 156 Z" fill="url(#greenGrad)"/>
+
+  <path d="M128 72
+           L134.8 86.2
+           L150.4 88.5
+           L139.2 99.4
+           L141.9 114.7
+           L128 107.2
+           L114.1 114.7
+           L116.8 99.4
+           L105.6 88.5
+           L121.2 86.2 Z"
+        fill="#FFFFFF"/>
+</svg>

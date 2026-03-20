@@ -7,6 +7,8 @@ import 'package:bookfolio_mobile/src/util/isbn.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+const _kLocationPresets = ['집', '회사', '빌려줌'];
+
 class BookFormScreen extends StatefulWidget {
   const BookFormScreen({super.key, this.prefill, this.existingBook});
 
@@ -24,8 +26,8 @@ class _BookFormScreenState extends State<BookFormScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _authorsController;
   late final TextEditingController _memoController;
-  late final TextEditingController _ratingController;
   late final TextEditingController _locationController;
+  int? _rating;
   BookFormat _format = BookFormat.paper;
   ReadingStatus _status = ReadingStatus.unread;
   String? _coverUrl;
@@ -45,7 +47,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
       _titleController = TextEditingController(text: ex.title);
       _authorsController = TextEditingController(text: ex.authors.join(', '));
       _memoController = TextEditingController(text: ex.memo ?? '');
-      _ratingController = TextEditingController(text: ex.rating?.toString() ?? '');
+      _rating = ex.rating;
       _locationController = TextEditingController(text: ex.location ?? '');
       _format = ex.format;
       _status = ex.readingStatus;
@@ -59,7 +61,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
       _titleController = TextEditingController(text: p?.title ?? '');
       _authorsController = TextEditingController(text: p?.authors.join(', ') ?? '');
       _memoController = TextEditingController();
-      _ratingController = TextEditingController();
       _locationController = TextEditingController();
       _coverUrl = p?.coverUrl;
       _publisher = p?.publisher;
@@ -75,7 +76,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
     _titleController.dispose();
     _authorsController.dispose();
     _memoController.dispose();
-    _ratingController.dispose();
     _locationController.dispose();
     super.dispose();
   }
@@ -138,8 +138,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
   }
 
   Map<String, dynamic> _buildUpdatePayload() {
-    final ratingStr = _ratingController.text.trim();
-    final ratingParsed = ratingStr.isEmpty ? null : int.tryParse(ratingStr);
     final memo = _memoController.text.trim();
     final loc = _locationController.text.trim();
     return {
@@ -147,7 +145,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
       'authors': _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
       'format': _format.name,
       'readingStatus': _status.name,
-      'rating': ratingParsed,
+      'rating': _rating,
       'memo': memo.isEmpty ? null : memo,
       'coverUrl': _coverUrl,
       'publisher': _publisher,
@@ -259,13 +257,33 @@ class _BookFormScreenState extends State<BookFormScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _ratingController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: '평점 (1-5)',
-              border: OutlineInputBorder(),
-            ),
+          Text(
+            '평점',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var i = 1; i <= 5; i++)
+                FilterChip(
+                  label: Text('$i'),
+                  selected: _rating == i,
+                  showCheckmark: false,
+                  onSelected: (_) => setState(() {
+                    _rating = _rating == i ? null : i;
+                  }),
+                ),
+              FilterChip(
+                label: const Text('없음'),
+                selected: _rating == null,
+                showCheckmark: false,
+                onSelected: (_) => setState(() => _rating = null),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           TextField(
@@ -277,11 +295,39 @@ class _BookFormScreenState extends State<BookFormScreen> {
             maxLines: 5,
           ),
           const SizedBox(height: 12),
+          Text(
+            '위치',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final label in _kLocationPresets)
+                FilterChip(
+                  label: Text(label),
+                  selected: _locationController.text.trim() == label,
+                  showCheckmark: false,
+                  onSelected: (selected) => setState(() {
+                    if (selected) {
+                      _locationController.text = label;
+                    } else if (_locationController.text.trim() == label) {
+                      _locationController.clear();
+                    }
+                  }),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
           TextField(
             controller: _locationController,
+            onChanged: (_) => setState(() {}),
             decoration: const InputDecoration(
-              labelText: '위치 (선택)',
-              hintText: '집 / 회사 / 빌려줌 등',
+              labelText: '직접 입력',
+              hintText: '배지 외 장소(예: 서재, 친구집)',
               border: OutlineInputBorder(),
             ),
           ),
@@ -299,7 +345,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
                   authors: _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
                   format: _format,
                   readingStatus: _status,
-                  rating: int.tryParse(_ratingController.text.trim()),
+                  rating: _rating,
                   memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
                   coverUrl: _coverUrl,
                   publisher: _publisher,

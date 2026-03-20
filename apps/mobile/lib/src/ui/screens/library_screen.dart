@@ -8,6 +8,7 @@ import 'package:bookfolio_mobile/src/ui/screens/book_detail_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/book_form_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/shared_libraries_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 class LibraryScreen extends StatefulWidget {
@@ -40,7 +41,39 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('내 서재'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              'assets/brand/bookfolio_logo.svg',
+              width: 26,
+              height: 26,
+            ),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text.rich(
+                TextSpan(
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF3E342C),
+                      ),
+                  children: const [
+                    TextSpan(text: '북폴리오'),
+                    TextSpan(
+                      text: ' - ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF7A6A5C),
+                      ),
+                    ),
+                    TextSpan(text: '내 서재'),
+                  ],
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         backgroundColor: const Color(0xFFEDE4D8),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -196,7 +229,6 @@ class _BookCard extends StatelessWidget {
     final cover = resolveCoverImageUrl(book.coverUrl);
     final hasCover = cover != null;
     final authors = book.authors.join(', ');
-    final statusColor = _readingStatusColor(book.readingStatus);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -211,32 +243,44 @@ class _BookCard extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: _coverAspect,
-              child: hasCover
-                  ? Image.network(
-                      cover,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      headers: kCoverImageRequestHeaders,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return ColoredBox(
-                          color: const Color(0xFFE8E0D8),
-                          child: Center(
-                            child: SizedBox(
-                              width: 28,
-                              height: 28,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      errorBuilder: (_, __, ___) => _CardTitlePanel(book: book),
-                    )
-                  : _CardTitlePanel(book: book),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned.fill(
+                    child: hasCover
+                        ? Image.network(
+                            cover,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            headers: kCoverImageRequestHeaders,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return ColoredBox(
+                                color: const Color(0xFFE8E0D8),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 28,
+                                    height: 28,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            errorBuilder: (_, __, ___) => _CardTitlePanel(book: book),
+                          )
+                        : _CardTitlePanel(book: book),
+                  ),
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: _ReadingStatusCoverBadge(status: book.readingStatus),
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
@@ -264,30 +308,6 @@ class _BookCard extends StatelessWidget {
                         color: const Color(0xFF6B5B4D),
                       ),
                     ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          readingStatusLabelKo(book.readingStatus),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: const Color(0xFF7A6A5C),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -296,6 +316,56 @@ class _BookCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 표지 위 읽기 상태 — 어두운 배경 + 흰 아이콘으로 대비를 확보.
+class _ReadingStatusCoverBadge extends StatelessWidget {
+  const _ReadingStatusCoverBadge({required this.status});
+
+  final ReadingStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = _readingStatusColor(status);
+    return Tooltip(
+      message: readingStatusLabelKo(status),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xD9000000),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.38), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.35),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(5),
+          child: Icon(
+            _readingStatusIcon(status),
+            size: 19,
+            color: Color.lerp(Colors.white, accent, 0.2)!,
+            shadows: const [
+              Shadow(offset: Offset(0, 0.5), blurRadius: 2.5, color: Colors.black54),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+IconData _readingStatusIcon(ReadingStatus s) {
+  return switch (s) {
+    ReadingStatus.unread => Icons.bookmark_border_rounded,
+    ReadingStatus.reading => Icons.auto_stories_rounded,
+    ReadingStatus.completed => Icons.check_circle_rounded,
+    ReadingStatus.paused => Icons.pause_circle_rounded,
+    ReadingStatus.dropped => Icons.bookmark_remove_rounded,
+  };
 }
 
 /// 표지가 없거나 로드 실패 시 — 카드 상단에 책 제목을 표시.
