@@ -168,7 +168,76 @@ export async function createLibrary(
 
   if (memErr) throw memErr;
 
+  await linkAllUserBooksToLibrary(supabase, row.id, userId);
+
   return mapLibraryRow(row, "owner");
+}
+
+/** 공동서재 목록은 매핑된 user_books만 보이므로, 소유자 개인 서재 전체를 서재 생성 시 자동 연결한다. */
+async function linkAllUserBooksToLibrary(
+  supabase: SupabaseClient,
+  libraryId: string,
+  ownerUserId: string
+): Promise<void> {
+  const { data: ubRows, error: ubErr } = await supabase
+    .from("user_books")
+    .select("id")
+    .eq("user_id", ownerUserId);
+
+  if (ubErr) throw ubErr;
+  const ids = (ubRows ?? []).map((r) => r.id as string);
+  if (ids.length === 0) {
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const payload = ids.map((userBookId) => ({
+    library_id: libraryId,
+    user_book_id: userBookId,
+    linked_by: ownerUserId,
+    linked_at: now
+  }));
+
+  const chunkSize = 200;
+  for (let i = 0; i < payload.length; i += chunkSize) {
+    const chunk = payload.slice(i, i + chunkSize);
+    const { error: linkErr } = await supabase.from("library_user_books").insert(chunk);
+    if (linkErr) throw linkErr;
+  }
+}
+
+/** 개인 서재에 책을 새로 넣었을 때, 내가 소유자인 모든 공동서재에 동일 매핑을 둔다. */
+export async function linkUserBookToOwnedLibraries(
+  userBookId: string,
+  userId: string,
+  context?: RepositoryContext
+): Promise<void> {
+  const supabase = await getClient(context);
+  const { data: libs, error } = await supabase
+    .from("library_members")
+    .select("library_id")
+    .eq("user_id", userId)
+    .eq("role", "owner");
+
+  if (error) throw error;
+  const libraryIds = [...new Set((libs ?? []).map((r) => r.library_id as string))];
+  if (libraryIds.length === 0) {
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const payload = libraryIds.map((libraryId) => ({
+    library_id: libraryId,
+    user_book_id: userBookId,
+    linked_by: userId,
+    linked_at: now
+  }));
+
+  const { error: upErr } = await supabase.from("library_user_books").upsert(payload, {
+    onConflict: "library_id,user_book_id",
+    ignoreDuplicates: true
+  });
+  if (upErr) throw upErr;
 }
 
 export async function getLibrary(
@@ -613,6 +682,8 @@ export async function shareBookToLibrary(
   const supabase = await getClient(context);
 
   let userBookIdToLink: string;
+  /** 공동서재 폼으로 새 user_books를 만든 경우에만, 소유 중인 다른 공동서재에도 같은 매핑을 둔다. */
+  let propagateNewBookToOwnedLibraries = false;
 
   if ("userBookId" in input && input.userBookId) {
     const { data: ub, error } = await supabase
@@ -679,6 +750,7 @@ export async function shareBookToLibrary(
         { userId, useAdmin: true }
       );
       userBookIdToLink = created.id;
+      propagateNewBookToOwnedLibraries = true;
     } catch (e) {
       if (e instanceof UserBookAlreadyInShelfError) {
         userBookIdToLink = e.existingUserBookId;
@@ -714,6 +786,10 @@ export async function shareBookToLibrary(
       throw new Error("이미 이 서재에 올린 책입니다.");
     }
     throw insErr;
+  }
+
+  if (propagateNewBookToOwnedLibraries) {
+    await linkUserBookToOwnedLibraries(userBookIdToLink, userId, context);
   }
 
   const { data: ubRow, error: ubErr } = await supabase

@@ -77,7 +77,8 @@ export default async function LibraryDetailPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="text-lg">책</CardTitle>
             <CardDescription>
-              같은 책은 한 줄로 묶이며, 소유자 이름이 표시됩니다. 올린 책만 보입니다.
+              서재를 만든 분의 개인 서재 책은 서재 생성 시 자동으로 여기에 올라옵니다. 멤버는「책 추가」로 자신의 책만
+              올릴 수 있고, 같은 책은 한 줄로 묶여 소유자 이름이 표시됩니다.
             </CardDescription>
           </CardHeader>
           <CardContent>

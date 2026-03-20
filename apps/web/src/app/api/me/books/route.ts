@@ -7,6 +7,7 @@ import {
   listUserBooksPaged,
   UserBookAlreadyInShelfError
 } from "@/lib/books/repository";
+import { linkUserBookToOwnedLibraries } from "@/lib/libraries/repository";
 
 function optionalString(input: FormData, key: string): string | null {
   const raw = input.get(key)?.toString().trim();
@@ -125,6 +126,7 @@ export async function POST(request: NextRequest) {
       : parseFormDataToCreate(await request.formData());
 
     const created = await createUserBook(payload, { userId, useAdmin: true });
+    await linkUserBookToOwnedLibraries(created.id, userId, { userId, useAdmin: true });
 
     if (contentType.includes("application/json")) {
       return NextResponse.json(created, { status: 201 });
