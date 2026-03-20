@@ -68,6 +68,13 @@ class _SignInScreenState extends State<SignInScreen> {
                       },
                 child: Text(auth.isLoading ? '처리 중...' : _isSignIn ? '로그인' : '회원가입'),
               ),
+              if (_isSignIn) ...[
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: auth.isLoading ? null : () => auth.signInWithGoogle(),
+                  child: const Text('Google로 계속하기'),
+                ),
+              ],
               TextButton(
                 onPressed: () => setState(() => _isSignIn = !_isSignIn),
                 child: Text(_isSignIn ? '계정 만들기' : '이미 계정이 있어요'),
