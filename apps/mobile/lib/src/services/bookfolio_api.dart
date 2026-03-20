@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:bookfolio_mobile/src/models/book_models.dart';
 import 'package:http/http.dart' as http;
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BookfolioApi {
   BookfolioApi({http.Client? client}) : _client = client ?? http.Client();
@@ -10,11 +9,14 @@ class BookfolioApi {
   final http.Client _client;
   final String _baseUrl = const String.fromEnvironment('BOOKFOLIO_API_BASE_URL');
 
+  /// [AuthController] 등에서 설정합니다.
+  String? Function()? accessToken;
+
   Future<Map<String, String>> _headers() async {
-    final session = Supabase.instance.client.auth.currentSession;
+    final token = accessToken?.call();
     return {
       'Content-Type': 'application/json',
-      if (session != null) 'Authorization': 'Bearer ${session.accessToken}',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
   }
 
@@ -41,19 +43,20 @@ class BookfolioApi {
   }
 
   Future<UserBook> updateBook(String id, Map<String, dynamic> payload) async {
-    final response = await _client.patch(
+    final response = await _client.post(
       Uri.parse('$_baseUrl/api/me/books/$id'),
       headers: await _headers(),
-      body: jsonEncode(payload),
+      body: jsonEncode({...payload, 'action': 'update'}),
     );
     _throwIfFailed(response);
     return UserBook.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<void> deleteBook(String id) async {
-    final response = await _client.delete(
+    final response = await _client.post(
       Uri.parse('$_baseUrl/api/me/books/$id'),
       headers: await _headers(),
+      body: jsonEncode({'action': 'delete'}),
     );
     _throwIfFailed(response);
   }

@@ -15,6 +15,7 @@ class BookDetailScreen extends StatefulWidget {
 class _BookDetailScreenState extends State<BookDetailScreen> {
   late final TextEditingController _memoController;
   late final TextEditingController _ratingController;
+  late final TextEditingController _locationController;
   late ReadingStatus _status;
 
   @override
@@ -22,6 +23,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     super.initState();
     _memoController = TextEditingController(text: widget.book.memo ?? '');
     _ratingController = TextEditingController(text: widget.book.rating?.toString() ?? '');
+    _locationController = TextEditingController(text: widget.book.location ?? '');
     _status = widget.book.readingStatus;
   }
 
@@ -58,15 +60,22 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             maxLines: 6,
             decoration: const InputDecoration(labelText: '메모'),
           ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _locationController,
+            decoration: const InputDecoration(labelText: '위치', hintText: '집 / 회사 / 빌려줌 등'),
+          ),
           const SizedBox(height: 20),
           FilledButton(
             onPressed: () async {
+              final loc = _locationController.text.trim();
               await library.updateBook(
                 widget.book.id,
                 {
                   'readingStatus': _status.name,
                   'rating': int.tryParse(_ratingController.text.trim()),
                   'memo': _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
+                  'location': loc.isEmpty ? null : loc,
                 },
               );
               if (mounted) Navigator.of(context).pop();

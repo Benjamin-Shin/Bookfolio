@@ -1,79 +1,223 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { listUserBooks } from "@/lib/books/repository";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { auth } from "@/auth";
+import { Bookshelf } from "@/components/books/bookshelf";
+import { DashboardBooksToolbar } from "@/components/dashboard/dashboard-books-toolbar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getUserOwnedBooksPriceStats, listUserBooksPaged } from "@/lib/books/repository";
 
-export default async function DashboardPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+const PAGE_SIZE = 14;
+const READING_SHELF_LIMIT = 50;
 
-  if (!user) {
+type DashboardPageProps = {
+  searchParams: Promise<{ q?: string; page?: string }>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
     redirect("/login");
   }
 
-  const books = await listUserBooks({});
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
+  const pageRaw = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
+  const ctx = { userId: session.user.id, useAdmin: true } as const;
+  const searchOpt = q ? q : undefined;
+
+  const [libraryProbe, readingRes, ownedRes, priceStats] = await Promise.all([
+    listUserBooksPaged({ limit: 1, offset: 0 }, ctx),
+    listUserBooksPaged(
+      {
+        readingStatus: "reading",
+        search: searchOpt,
+        limit: READING_SHELF_LIMIT,
+        offset: 0
+      },
+      ctx
+    ),
+    listUserBooksPaged(
+      {
+        isOwned: true,
+        search: searchOpt,
+        limit: PAGE_SIZE,
+        offset: (pageRaw - 1) * PAGE_SIZE
+      },
+      ctx
+    ),
+    getUserOwnedBooksPriceStats(ctx)
+  ]);
+
+  const libraryTotal = libraryProbe.total;
+  const readingBooks = readingRes.items;
+  const readingTotal = readingRes.total;
+  const ownedBooks = ownedRes.items;
+  const ownedTotal = ownedRes.total;
+
+  const ownedTotalPages = Math.max(1, Math.ceil(ownedTotal / PAGE_SIZE));
+  const ownedPage = ownedTotal === 0 ? 1 : Math.min(pageRaw, ownedTotalPages);
+
+  if (ownedTotal > 0 && pageRaw > ownedTotalPages) {
+    const np = new URLSearchParams();
+    if (q) np.set("q", q);
+    np.set("page", String(ownedTotalPages));
+    redirect(`/dashboard?${np.toString()}`);
+  }
+
+  const emptyLibrary = libraryTotal === 0 && !q;
+  const emptySearch = libraryTotal > 0 && q && readingTotal === 0 && ownedTotal === 0;
 
   return (
-    <main className="shell dashboardLayout">
-      <aside className="panel sidebar">
-        <div className="eyebrow">My Library</div>
-        <h2>{user.email}</h2>
-        <p className="muted">개인 서재 목록, 상태 관리, 평점/메모를 이 공간에서 확인합니다.</p>
-        <div className="stack">
-          <Link href="/dashboard/books/new" className="button">
-            책 추가하기
-          </Link>
-          <form action="/auth/signout" method="post">
-            <button className="buttonGhost" type="submit">
-              로그아웃
-            </button>
-          </form>
-        </div>
-      </aside>
+    <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
+      <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+        <Card className="h-fit border-border/80 lg:sticky lg:top-20">
+          <CardHeader>
+            <CardTitle className="text-lg">내 서재</CardTitle>
+            <CardDescription className="break-all">
+              {session.user.email ?? session.user.name ?? "로그인됨"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <Button asChild>
+              <Link href="/dashboard/books/new">책 추가하기</Link>
+            </Button>
+            <form action="/auth/signout" method="post">
+              <Button type="submit" variant="outline" className="w-full">
+                로그아웃
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
-      <section className="panel" style={{ padding: "1.5rem" }}>
-        <div className="inlineActions" style={{ justifyContent: "space-between" }}>
-          <div>
-            <div className="eyebrow">Dashboard</div>
-            <h1 style={{ marginTop: "0.4rem" }}>내 책장</h1>
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Dashboard</p>
+              <h1 className="text-3xl font-bold tracking-tight">내 책장</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                읽는 중인 책과 소장 책을 나눠 보여 줍니다. 같은 책이 두 곳에 있을 수 있어요(소장하면서 읽는 중).
+                표지를 누르면 상세·수정으로 이동합니다.
+              </p>
+            </div>
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/books/new">수동 등록</Link>
+            </Button>
           </div>
-          <Link href="/dashboard/books/new" className="buttonGhost">
-            수동 등록
-          </Link>
-        </div>
 
-        {books.length === 0 ? (
-          <div className="emptyState" style={{ marginTop: "1.5rem" }}>
-            <h3>아직 등록한 책이 없습니다.</h3>
-            <p className="muted">첫 번째 책을 추가해서 Bookfolio를 시작해보세요.</p>
-          </div>
-        ) : (
-          <div className="bookGrid" style={{ marginTop: "1.5rem" }}>
-            {books.map((book) => (
-              <article key={book.id} className="bookCard">
-                <div className="stack">
-                  <div>
-                    <span className="tag">{book.format}</span>
-                    <span className="tag">{book.readingStatus}</span>
-                  </div>
-                  <div>
-                    <h3>{book.title}</h3>
-                    <p className="muted">{book.authors.join(", ") || "저자 미상"}</p>
-                  </div>
-                  <p className="muted">{book.memo || "아직 메모가 없습니다."}</p>
-                  <Link href={`/dashboard/books/${book.id}`} className="buttonGhost">
-                    상세/수정
+          {!emptyLibrary ? (
+            <DashboardBooksToolbar
+              searchQuery={q}
+              page={ownedPage}
+              pageSize={PAGE_SIZE}
+              ownedTotal={ownedTotal}
+              readingTotal={readingTotal}
+            />
+          ) : null}
+
+          {!emptyLibrary && priceStats.ownedCount > 0 ? (
+            <div className="rounded-lg border border-border/80 bg-muted/25 px-4 py-3 text-sm">
+              <p className="font-medium text-foreground">소장 책 가격 합계</p>
+              <p className="mt-1 text-muted-foreground">
+                {priceStats.pricedOwnedCount > 0 ? (
+                  <>
+                    소장 {priceStats.ownedCount.toLocaleString("ko-KR")}권 중{" "}
+                    {priceStats.pricedOwnedCount.toLocaleString("ko-KR")}권에 가격이 있어요.{" "}
+                    <span className="font-semibold tabular-nums text-foreground">
+                      {priceStats.totalKrw.toLocaleString("ko-KR")}원
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    소장 {priceStats.ownedCount.toLocaleString("ko-KR")}권 — 책 등록·수정에서 가격(원)을 넣으면
+                    여기에 합계가 표시됩니다.
+                  </>
+                )}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                제공처·시점에 따라 실제 구매가와 다를 수 있는 참고 값입니다.
+              </p>
+            </div>
+          ) : null}
+
+          {emptyLibrary ? (
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle>아직 등록한 책이 없습니다</CardTitle>
+                <CardDescription>첫 책을 추가해 Bookfolio를 시작해 보세요.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild>
+                  <Link href="/dashboard/books/new">책 등록하기</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {emptySearch ? (
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle>검색 결과가 없습니다</CardTitle>
+                <CardDescription>
+                  「{q}」에 맞는 책이 없습니다. 다른 키워드로 시도하거나{" "}
+                  <Link href="/dashboard" className="text-primary underline-offset-4 hover:underline">
+                    전체 목록
                   </Link>
+                  으로 돌아가 보세요.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : null}
+
+          {!emptyLibrary && !emptySearch ? (
+            <div className="space-y-12">
+              <section className="space-y-3" aria-labelledby="dash-reading-heading">
+                <div>
+                  <h2 id="dash-reading-heading" className="text-lg font-semibold tracking-tight">
+                    읽는 중
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    읽기 상태를 「읽는 중」으로 바꾸면 이 선반에 모입니다. 최대 {READING_SHELF_LIMIT}권까지
+                    한 번에 보여 줍니다.
+                  </p>
                 </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+                {readingTotal > READING_SHELF_LIMIT ? (
+                  <p className="text-xs text-muted-foreground">
+                    읽는 중인 책이 {readingTotal.toLocaleString("ko-KR")}권입니다. 나머지는 검색으로 찾아 보세요.
+                  </p>
+                ) : null}
+                {readingBooks.length > 0 ? (
+                  <Bookshelf variant="reading" books={readingBooks} />
+                ) : (
+                  <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
+                    지금 읽는 책이 없습니다.
+                  </div>
+                )}
+              </section>
+
+              <section className="space-y-3" aria-labelledby="dash-owned-heading">
+                <div>
+                  <h2 id="dash-owned-heading" className="text-lg font-semibold tracking-tight">
+                    소장
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    「소장 중」으로 표시된 책입니다. 아래 페이지 넘김은 소장 책만 기준입니다.
+                  </p>
+                </div>
+                {ownedBooks.length > 0 ? (
+                  <Bookshelf variant="owned" books={ownedBooks} />
+                ) : (
+                  <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
+                    소장으로 표시된 책이 없습니다. 책 수정에서 「소장 중」을 켜 보세요.
+                  </div>
+                )}
+              </section>
+            </div>
+          ) : null}
+        </div>
+      </div>
     </main>
   );
 }
-

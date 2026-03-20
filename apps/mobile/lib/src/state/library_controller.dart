@@ -16,6 +16,7 @@ class LibraryController extends ChangeNotifier {
   String? get error => _error;
 
   void attach(AuthController auth) {
+    _api.accessToken = () => auth.session?.accessToken;
     final sessionChanged = _auth?.session?.accessToken != auth.session?.accessToken;
     _auth = auth;
     if (auth.isAuthenticated && sessionChanged) {

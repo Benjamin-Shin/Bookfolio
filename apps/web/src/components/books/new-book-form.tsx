@@ -1,0 +1,223 @@
+"use client";
+
+import { useRef, useState } from "react";
+
+import type { BookLookupResult } from "@bookfolio/shared";
+import { BOOK_FORMATS, READING_STATUSES } from "@bookfolio/shared";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { FormSelect } from "@/components/ui/form-select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+export function NewBookForm() {
+  const [lookupIsbn, setLookupIsbn] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+  const [lookupOk, setLookupOk] = useState(false);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  /** ISBN 검색 후 리렌더되어도 POST에 실리도록 hidden은 state로 둡니다(defaultValue + ref만 쓰면 리렌더 시 비워질 수 있음). */
+  const [metaFromLookup, setMetaFromLookup] = useState({
+    isbn: "",
+    coverUrl: "",
+    publisher: "",
+    publishedDate: ""
+  });
+  const [priceKrwInput, setPriceKrwInput] = useState("");
+
+  const titleRef = useRef<HTMLInputElement>(null);
+  const authorsRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  async function handleIsbnLookup() {
+    const raw = lookupIsbn.trim();
+    setLookupError(null);
+    setLookupOk(false);
+
+    if (!raw) {
+      setLookupError("ISBN을 입력해 주세요.");
+      return;
+    }
+
+    setLookupLoading(true);
+    try {
+      const res = await fetch("/api/books/lookup-by-isbn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isbn: raw })
+      });
+
+      const data = (await res.json()) as BookLookupResult | { error?: string };
+
+      if (!res.ok) {
+        const message =
+          "error" in data && typeof data.error === "string"
+            ? data.error
+            : "도서 정보를 가져오지 못했습니다.";
+        setLookupError(message);
+        setCoverPreview(null);
+        setPriceKrwInput("");
+        return;
+      }
+
+      const book = data as BookLookupResult;
+
+      if (titleRef.current) titleRef.current.value = book.title;
+      if (authorsRef.current) {
+        authorsRef.current.value = book.authors.length > 0 ? book.authors.join(", ") : "";
+      }
+      setMetaFromLookup({
+        isbn: book.isbn,
+        coverUrl: book.coverUrl ?? "",
+        publisher: book.publisher ?? "",
+        publishedDate: book.publishedDate ?? ""
+      });
+      setPriceKrwInput(book.priceKrw != null ? String(book.priceKrw) : "");
+
+      if (descriptionRef.current) descriptionRef.current.value = book.description ?? "";
+
+      setCoverPreview(book.coverUrl);
+      setLookupOk(true);
+    } catch {
+      setLookupError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      setCoverPreview(null);
+      setPriceKrwInput("");
+    } finally {
+      setLookupLoading(false);
+    }
+  }
+
+  return (
+    <form className="space-y-6" action="/api/me/books" method="post">
+      <div className="space-y-3 rounded-lg border border-border/80 bg-muted/30 p-4">
+        <div className="space-y-1">
+          <Label htmlFor="isbn-lookup">ISBN으로 검색</Label>
+          <p className="text-xs text-muted-foreground">
+            국립중앙도서관 → 네이버 → Google Books 순으로 시도합니다. 환경 변수로 켜 둔 제공자만 사용됩니다.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Input
+              id="isbn-lookup"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="예: 9788936434267"
+              value={lookupIsbn}
+              onChange={(e) => {
+                setLookupIsbn(e.target.value);
+                setLookupOk(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void handleIsbnLookup();
+                }
+              }}
+            />
+          </div>
+          <Button type="button" variant="secondary" disabled={lookupLoading} onClick={() => void handleIsbnLookup()}>
+            {lookupLoading ? "검색 중…" : "검색"}
+          </Button>
+        </div>
+        {lookupError ? (
+          <Alert variant="destructive">
+            <AlertTitle>검색 실패</AlertTitle>
+            <AlertDescription>{lookupError}</AlertDescription>
+          </Alert>
+        ) : null}
+        {lookupOk ? (
+          <p className="text-sm text-muted-foreground">메타데이터를 폼에 반영했습니다. 필요하면 수정한 뒤 등록하세요.</p>
+        ) : null}
+        {coverPreview ? (
+          <div className="flex justify-center pt-1">
+            <img
+              src={coverPreview}
+              alt="표지 미리보기"
+              className="max-h-48 max-w-[10rem] rounded-md border border-border object-contain shadow-sm"
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <input type="hidden" name="isbn" value={metaFromLookup.isbn} />
+      <input type="hidden" name="coverUrl" value={metaFromLookup.coverUrl} />
+      <input type="hidden" name="publisher" value={metaFromLookup.publisher} />
+      <input type="hidden" name="publishedDate" value={metaFromLookup.publishedDate} />
+
+      <div className="space-y-2">
+        <Label htmlFor="priceKrw">가격 (원)</Label>
+        <p className="text-xs text-muted-foreground">
+          ISBN 검색 시 제공자가 알려준 가격이 채워집니다(참고용). 직접 수정·비울 수 있습니다.
+        </p>
+        <Input
+          id="priceKrw"
+          name="priceKrw"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          step={1}
+          placeholder="예: 16000"
+          value={priceKrwInput}
+          onChange={(e) => setPriceKrwInput(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="title">제목</Label>
+        <Input ref={titleRef} id="title" name="title" required placeholder="책 제목" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="authorsCsv">저자</Label>
+        <Input ref={authorsRef} id="authorsCsv" name="authorsCsv" required placeholder="예: 김영하, 한강" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="format">형식</Label>
+        <FormSelect id="format" name="format" defaultValue={BOOK_FORMATS[0]}>
+          {BOOK_FORMATS.map((format) => (
+            <option key={format} value={format}>
+              {format}
+            </option>
+          ))}
+        </FormSelect>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="readingStatus">읽기 상태</Label>
+        <FormSelect id="readingStatus" name="readingStatus" defaultValue={READING_STATUSES[0]}>
+          {READING_STATUSES.map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+          ))}
+        </FormSelect>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="rating">평점 (1–5)</Label>
+        <Input id="rating" type="number" name="rating" min={1} max={5} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="memo">메모</Label>
+        <Textarea id="memo" name="memo" rows={5} placeholder="나중에 다시 보고 싶은 포인트" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="location">위치 (선택)</Label>
+        <p className="text-xs text-muted-foreground">집·회사·빌려준 곳 등 이 권이 있는 곳을 적어 두면 나중에 찾기 쉽습니다.</p>
+        <Input id="location" name="location" placeholder="예: 집 / 회사 책장" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="description">책 소개</Label>
+        <Textarea
+          ref={descriptionRef}
+          id="description"
+          name="description"
+          rows={4}
+          placeholder="ISBN 검색 시 자동으로 채워질 수 있습니다."
+        />
+      </div>
+
+      <Button type="submit">등록하기</Button>
+    </form>
+  );
+}

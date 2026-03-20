@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+
+import { SiteHeader } from "@/components/layout/site-header";
+import { Providers } from "@/components/providers";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Bookfolio",
-  description: "나만의 책 컬렉션을 기록하고 관리하는 개인 서재 서비스"
+  description: "소장 도서를 관리하고 ISBN·바코드로 빠르게 검색하는 개인 서재"
 };
 
 export default function RootLayout({
@@ -14,24 +16,11 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <div className="shell">
-          <header className="topbar">
-            <Link href="/" className="wordmark">
-              Bookfolio
-            </Link>
-            <nav className="inlineActions">
-              <Link href="/login" className="buttonGhost">
-                로그인
-              </Link>
-              <Link href="/dashboard" className="button">
-                내 서재
-              </Link>
-            </nav>
-          </header>
-        </div>
-        {children}
+        <Providers>
+          <SiteHeader />
+          {children}
+        </Providers>
       </body>
     </html>
   );
 }
-

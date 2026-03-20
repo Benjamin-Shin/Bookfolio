@@ -11,7 +11,11 @@ class BookLookupResult {
     required this.publishedDate,
     required this.coverUrl,
     required this.description,
+    this.priceKrw,
     required this.source,
+    this.genreSlugs = const [],
+    this.literatureRegion,
+    this.originalLanguage,
   });
 
   final String isbn;
@@ -21,7 +25,11 @@ class BookLookupResult {
   final String? publishedDate;
   final String? coverUrl;
   final String? description;
+  final int? priceKrw;
   final String source;
+  final List<String> genreSlugs;
+  final String? literatureRegion;
+  final String? originalLanguage;
 
   factory BookLookupResult.fromJson(Map<String, dynamic> json) {
     return BookLookupResult(
@@ -32,7 +40,11 @@ class BookLookupResult {
       publishedDate: json['publishedDate'] as String?,
       coverUrl: json['coverUrl'] as String?,
       description: json['description'] as String?,
+      priceKrw: (json['priceKrw'] as num?)?.toInt(),
       source: json['source'] as String,
+      genreSlugs: (json['genreSlugs'] as List<dynamic>? ?? []).map((e) => e.toString()).toList(),
+      literatureRegion: json['literatureRegion'] as String?,
+      originalLanguage: json['originalLanguage'] as String?,
     );
   }
 }
@@ -40,6 +52,7 @@ class BookLookupResult {
 class UserBook {
   const UserBook({
     required this.id,
+    required this.bookId,
     required this.title,
     required this.authors,
     required this.format,
@@ -52,9 +65,12 @@ class UserBook {
     required this.description,
     required this.isbn,
     required this.isOwned,
+    this.priceKrw,
+    this.location,
   });
 
   final String id;
+  final String bookId;
   final String title;
   final List<String> authors;
   final BookFormat format;
@@ -67,10 +83,13 @@ class UserBook {
   final String? description;
   final String? isbn;
   final bool isOwned;
+  final int? priceKrw;
+  final String? location;
 
   factory UserBook.fromJson(Map<String, dynamic> json) {
     return UserBook(
       id: json['id'] as String,
+      bookId: json['bookId'] as String? ?? '',
       title: json['title'] as String,
       authors: (json['authors'] as List<dynamic>? ?? []).cast<String>(),
       format: BookFormat.values.byName(json['format'] as String),
@@ -83,6 +102,8 @@ class UserBook {
       description: json['description'] as String?,
       isbn: json['isbn'] as String?,
       isOwned: json['isOwned'] as bool? ?? true,
+      priceKrw: (json['priceKrw'] as num?)?.toInt(),
+      location: json['location'] as String?,
     );
   }
 
@@ -99,7 +120,9 @@ class UserBook {
       'publisher': publisher,
       'publishedDate': publishedDate,
       'description': description,
+      'priceKrw': priceKrw,
       'isOwned': isOwned,
+      'location': location,
     };
   }
 }
