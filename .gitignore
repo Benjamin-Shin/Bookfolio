@@ -16,3 +16,4 @@ pubspec.lock
 coverage/
 
 .volta/
+.vercel

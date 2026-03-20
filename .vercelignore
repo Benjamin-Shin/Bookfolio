@@ -1,0 +1,51 @@
+# 업로드 용량 최적화 (Vercel은 저장소 루트에 둡니다)
+# https://vercel.com/docs/build-step#ignore-build-step
+
+# 의존성 — 빌드 시 원격에서 설치
+node_modules/
+
+# 빌드 산출물
+.next/
+dist/
+build/
+out/
+.turbo/
+.cache/
+
+# Flutter / 모바일 앱 (apps/web 배포에 불필요)
+apps/mobile/
+
+# 로컬·IDE
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 테스트·커버리지 (런타임/빌드에 미사용)
+coverage/
+.nyc_output/
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# 로그·임시
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 로컬 환경(비밀) — Vercel 대시보드에서 환경 변수 설정
+.env
+.env.*
+!.env.example
+
+# Supabase 로컬/마이그레이션 (Next 빌드에 불필요)
+supabase/
+
+# Git (원격 클론 시 보통 없음, 로컬 CLI 업로드 시 제외)
+.git/

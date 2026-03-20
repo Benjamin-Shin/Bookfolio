@@ -1,0 +1,50 @@
+---
+description: Bookfolio 프로젝트 비전, 로드맵, 단계별 계획
+alwaysApply: true
+---
+
+# Bookfolio 프로젝트 계획
+
+## 비전
+
+개인 서재 관리 플랫폼. 사용자가 종이책/전자책을 등록·정리하고, 읽기 상태와 감상을 기록하며, 독서 통계와 커뮤니티 기능을 통해 독서 생활을 관리하는 서비스.
+
+## 모노레포 구조
+
+- `apps/web`: Next.js 랜딩, 인증, 대시보드, API
+- `apps/mobile`: Flutter 앱 (바코드 ISBN 스캔)
+- `packages/shared`: 도메인 모델, DTO, 상수
+
+## MVP (현재 범위)
+
+- Supabase 이메일 인증
+- 도서 CRUD (개인 서재)
+- 읽기 상태, 별점, 메모
+- 바코드 ISBN 조회 (국립중앙도서관 API 사용)
+- 기본 웹 대시보드
+
+## 로드맵 3단계
+
+### Phase 1 (기반)
+auth, 도서 등록·관리, 별점·메모, 바코드 조회
+
+### Phase 2 (개인 워크플로우)
+읽기 로그, 목표, 커스텀 서가·태그, 대시보드·통계 강화
+
+### Phase 3 (공유 경험)
+공개 리뷰, 피드, 소셜 상호작용, 추천 시스템
+
+## MVP 이후 확장 예정 (README 참조)
+
+1. Personal Library Expansion: 메타데이터·커버, 서가·태그·카테고리, 위시리스트, 대출 이력
+2. Reading Management: 시작/종료일, 목표, 일지, 재독, 스트릭·리마인더
+3. Reviews and Notes: 구조화 리뷰, 인용·하이라이트, 스포일러 처리, 초안/수정 이력
+4. Statistics and Insights: 완독 통계, 평점 추이, 장르/형식 비율, 패턴 분석
+5. Community: 팔로우, 좋아요·댓글, 피드, 추천
+6. Discovery and Recommendations: 개인화 추천, 큐레이션, 트렌딩
+7. Platform: 푸시, 어드민, 분석, 검색, 스테이징
+
+## 아키텍처 원칙
+
+- ISBN 조회는 웹 서비스 레이어에 추상화 (교체 가능)
+- MVP부터 리뷰·통계·커뮤니티로 확장 가능하도록 설계

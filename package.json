@@ -1,16 +1,20 @@
 {
   "name": "bookfolio",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
+  "devDependencies": {
+    "vercel": "^39.0.0"
+  },
   "scripts": {
-    "dev:web": "npm --workspace @bookfolio/web run dev",
-    "build:web": "npm --workspace @bookfolio/web run build",
-    "lint:web": "npm --workspace @bookfolio/web run lint",
-    "typecheck:web": "npm --workspace @bookfolio/web run typecheck"
+    "dev:web": "pnpm --workspace @bookfolio/web run dev",
+    "build:web": "pnpm --workspace @bookfolio/web run build",
+    "lint:web": "pnpm --workspace @bookfolio/web run lint",
+    "typecheck:web": "pnpm --workspace @bookfolio/web run typecheck",
+    "deploy": "bash scripts/deploy-vercel.sh",
+    "deploy:prod": "bash scripts/deploy-vercel.sh prod"
   }
 }
-
