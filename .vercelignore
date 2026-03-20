@@ -44,8 +44,8 @@ yarn-error.log*
 .env.*
 !.env.example
 
-# Supabase 로컬/마이그레이션 (Next 빌드에 불필요)
-supabase/
+# Supabase CLI 로컬/마이그레이션 (저장소 루트만; apps/web/src/lib/supabase 는 Next 코드)
+/supabase/
 
 # Git (원격 클론 시 보통 없음, 로컬 CLI 업로드 시 제외)
 .git/

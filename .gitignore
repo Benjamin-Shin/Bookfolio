@@ -13,6 +13,7 @@ pubspec.lock
 .env
 .env.local
 .env.*.local
+.env.mobile
 coverage/
 
 .volta/

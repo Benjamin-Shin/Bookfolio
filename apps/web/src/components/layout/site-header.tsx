@@ -5,10 +5,20 @@ import { AdminHeaderMenu } from "@/components/layout/admin-header-menu";
 import { HeaderAccount } from "@/components/layout/header-account";
 import { Button } from "@/components/ui/button";
 import { getAppProfile } from "@/lib/auth/app-profiles";
+import { env } from "@/lib/env";
+
+function AndroidApkIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.55 1.22 12.85 1 12 1s-1.55.22-2.2.63L8.32.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.3 1.3C6.97 3.97 6 6.24 6 8.83V9h12v-.17c0-2.59-.97-4.86-2.47-6.67z" />
+    </svg>
+  );
+}
 
 export async function SiteHeader() {
   const session = await auth();
   const user = session?.user;
+  const apkUrl = env.appDownloadUrl;
 
   const profile = user?.id ? await getAppProfile(user.id) : null;
   const displayLabel =
@@ -21,6 +31,19 @@ export async function SiteHeader() {
           Bookfolio
         </Link>
         <nav className="flex min-w-0 items-center gap-2">
+          {apkUrl ? (
+            <Button variant="ghost" size="icon-sm" className="shrink-0" asChild>
+              <a
+                href={apkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Android 앱(APK) 다운로드"
+                title="Android 앱(APK) 다운로드"
+              >
+                <AndroidApkIcon className="size-4" />
+              </a>
+            </Button>
+          ) : null}
           {user?.id && user.email ? (
             <>
               {user.role === "ADMIN" ? <AdminHeaderMenu /> : null}

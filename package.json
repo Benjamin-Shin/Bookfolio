@@ -11,7 +11,13 @@
     "build:web": "pnpm --filter @bookfolio/web run build",
     "lint:web": "pnpm --filter @bookfolio/web run lint",
     "typecheck:web": "pnpm --filter @bookfolio/web run typecheck",
-    "deploy": "bash scripts/deploy-vercel.sh",
-    "deploy:prod": "bash scripts/deploy-vercel.sh prod"
+    "vercel:preview": "bash scripts/deploy-vercel.sh",
+    "vercel:prod": "bash scripts/deploy-vercel.sh prod",
+    "build:mobile": "bash scripts/build-mobile.sh apk-split",
+    "build:mobile:apk-split": "bash scripts/build-mobile.sh apk-split",
+    "build:mobile:apk": "bash scripts/build-mobile.sh apk",
+    "build:mobile:appbundle": "bash scripts/build-mobile.sh appbundle",
+    "build:mobile:ipa": "bash scripts/build-mobile.sh ipa",
+    "build:mobile:ios": "bash scripts/build-mobile.sh ios"
   }
 }
