@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 import {
   createAdminCanonicalBook,
@@ -116,12 +117,21 @@ type AdminCanonicalBookFormProps = {
   defaultValues?: Partial<AdminCanonicalBookFormValues>;
 };
 
+function kyoboSearchUrl(keyword: string) {
+  const q = keyword.trim();
+  if (!q) return null;
+  const params = new URLSearchParams({ keyword: q, gbCode: "TOT", target: "total" });
+  return `https://search.kyobobook.co.kr/search?${params.toString()}`;
+}
+
 export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCanonicalBookFormProps) {
   const initial = { ...emptyValues, ...defaultValues };
   const action = mode === "create" ? createAdminCanonicalBook : updateAdminCanonicalBook;
   const [state, formAction] = useActionState(action, null as AdminBookActionState | null);
 
-  const [lookupIsbn, setLookupIsbn] = useState("");
+  const [lookupIsbn, setLookupIsbn] = useState(() =>
+    mode === "edit" ? (defaultValues?.isbn ?? "").trim() : ""
+  );
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [lookupOk, setLookupOk] = useState(false);
@@ -138,6 +148,38 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
   const literatureRegionRef = useRef<HTMLInputElement>(null);
   const originalLanguageRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const locationInputRef = useRef<HTMLInputElement>(null);
+
+  const [locationPreset, setLocationPreset] = useState<"집" | "회사" | null>(null);
+
+  function applyLocationPreset(label: "집" | "회사") {
+    const el = locationInputRef.current;
+    if (el) {
+      el.value = label;
+    }
+    setLocationPreset(label);
+  }
+
+  function syncLocationPresetFromInput() {
+    const el = locationInputRef.current;
+    const v = el?.value.trim() ?? "";
+    if (v === "집") setLocationPreset("집");
+    else if (v === "회사") setLocationPreset("회사");
+    else setLocationPreset(null);
+  }
+
+  function kyoboSearchKeyword() {
+    const fromLookup = lookupIsbn.trim();
+    const fallback = (initial.isbn ?? "").trim();
+    return fromLookup || fallback;
+  }
+
+  function openKyoboSearchInNewWindow() {
+    const url = kyoboSearchUrl(kyoboSearchKeyword());
+    if (!url) return;
+    const win = window.open(url, "_blank");
+    if (win) win.opener = null;
+  }
 
   async function handleIsbnLookup() {
     const raw = lookupIsbn.trim();
@@ -237,9 +279,19 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
               }}
             />
           </div>
-          <Button type="button" variant="secondary" disabled={lookupLoading} onClick={() => void handleIsbnLookup()}>
-            {lookupLoading ? "검색 중…" : "검색"}
-          </Button>
+          <div className="flex flex-wrap gap-2 sm:shrink-0">
+            <Button type="button" variant="secondary" disabled={lookupLoading} onClick={() => void handleIsbnLookup()}>
+              {lookupLoading ? "검색 중…" : "검색"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={kyoboSearchKeyword() === ""}
+              onClick={openKyoboSearchInNewWindow}
+            >
+              교보문고 새 창
+            </Button>
+          </div>
         </div>
         {lookupError ? (
           <Alert variant="destructive">
@@ -386,6 +438,49 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
           defaultValue={initial.description}
         />
       </div>
+
+      {mode === "create" ? (
+        <div className="space-y-2">
+          <Label htmlFor="location">위치 (선택)</Label>
+          <p className="text-xs text-muted-foreground">
+            입력하면 관리자 계정의 내 서재에 이 도서가 함께 등록되고, 아래 위치가 저장됩니다. 비우면 공유 서지만 추가됩니다.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => applyLocationPreset("집")}
+              className={cn(
+                "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                locationPreset === "집"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-foreground hover:bg-muted/80"
+              )}
+            >
+              집
+            </button>
+            <button
+              type="button"
+              onClick={() => applyLocationPreset("회사")}
+              className={cn(
+                "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                locationPreset === "회사"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-foreground hover:bg-muted/80"
+              )}
+            >
+              회사
+            </button>
+          </div>
+          <Input
+            ref={locationInputRef}
+            id="location"
+            name="location"
+            placeholder="집·회사 외 직접 입력"
+            autoComplete="off"
+            onChange={() => syncLocationPresetFromInput()}
+          />
+        </div>
+      ) : null}
 
       <SubmitButton label={mode === "create" ? "도서 추가" : "저장"} />
     </form>

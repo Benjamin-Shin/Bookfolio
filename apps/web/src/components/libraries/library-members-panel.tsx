@@ -2,7 +2,7 @@
 
 import type { LibraryMemberRow } from "@bookfolio/shared";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,11 @@ export function LibraryMembersPanel({ libraryId, initialMembers, currentUserId, 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inviteFormMounted, setInviteFormMounted] = useState(false);
+
+  useEffect(() => {
+    setInviteFormMounted(true);
+  }, []);
 
   async function refresh() {
     const res = await fetch(`/api/me/libraries/${libraryId}/members`);
@@ -101,23 +106,37 @@ export function LibraryMembersPanel({ libraryId, initialMembers, currentUserId, 
         ))}
       </ul>
       {isOwner ? (
-        <form className="flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={(e) => void handleAdd(e)}>
-          <div className="min-w-0 flex-1 space-y-1">
-            <Label htmlFor="invite-email">멤버 초대 (가입 이메일)</Label>
-            <input
-              id="invite-email"
-              type="email"
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="friend@example.com"
-              autoComplete="email"
-            />
+        inviteFormMounted ? (
+          <form className="flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={(e) => void handleAdd(e)}>
+            <div className="min-w-0 flex-1 space-y-1">
+              <Label htmlFor="invite-email">멤버 초대 (가입 이메일)</Label>
+              <input
+                id="invite-email"
+                type="email"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="friend@example.com"
+                autoComplete="email"
+              />
+            </div>
+            <Button type="submit" disabled={loading} variant="secondary">
+              {loading ? "추가 중…" : "초대"}
+            </Button>
+          </form>
+        ) : (
+          <div
+            className="flex flex-col gap-2 sm:flex-row sm:items-end"
+            aria-busy="true"
+            aria-label="초대 폼 로드 중"
+          >
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="h-4 w-48 max-w-full rounded bg-muted/60" />
+              <div className="h-9 w-full rounded-md bg-muted/60" />
+            </div>
+            <div className="h-9 w-[4.5rem] shrink-0 rounded-md bg-muted/60 sm:mb-0" />
           </div>
-          <Button type="submit" disabled={loading} variant="secondary">
-            {loading ? "추가 중…" : "초대"}
-          </Button>
-        </form>
+        )
       ) : null}
       <p className="text-xs text-muted-foreground">
         이미 Bookfolio에 가입한 이메일만 추가할 수 있습니다. 가족·모임 서재는 같은 데이터 구조를 사용합니다.

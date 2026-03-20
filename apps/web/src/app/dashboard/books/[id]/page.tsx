@@ -4,20 +4,9 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { BOOK_FORMAT_LABEL_KO, READING_STATUS_LABEL_KO } from "@bookfolio/shared";
+
 import { getUserBookWithCanonical } from "@/lib/books/repository";
-
-const readingLabel: Record<string, string> = {
-  unread: "읽기 전",
-  reading: "읽는 중",
-  completed: "완독",
-  paused: "일시중단",
-  dropped: "하차"
-};
-
-const formatLabel: Record<string, string> = {
-  paper: "종이책",
-  ebook: "전자책"
-};
 
 function isLikelyUrl(s: string) {
   return /^https?:\/\//i.test(s.trim());
@@ -129,9 +118,9 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
           <CardContent className="space-y-4">
             <dl className="grid gap-3 text-sm sm:grid-cols-[8rem_1fr] sm:gap-x-4">
               <dt className="text-muted-foreground">형식</dt>
-              <dd>{formatLabel[userBook.format] ?? userBook.format}</dd>
+              <dd>{BOOK_FORMAT_LABEL_KO[userBook.format] ?? userBook.format}</dd>
               <dt className="text-muted-foreground">읽기 상태</dt>
-              <dd>{readingLabel[userBook.readingStatus] ?? userBook.readingStatus}</dd>
+              <dd>{READING_STATUS_LABEL_KO[userBook.readingStatus] ?? userBook.readingStatus}</dd>
               <dt className="text-muted-foreground">평점</dt>
               <dd>{userBook.rating != null ? `${userBook.rating} / 5` : "—"}</dd>
               <dt className="text-muted-foreground">소장</dt>

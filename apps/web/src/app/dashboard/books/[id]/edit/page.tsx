@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BOOK_FORMATS, READING_STATUSES } from "@bookfolio/shared";
 
+import {
+  BookFormatChoiceFieldset,
+  RatingChoiceFieldset,
+  ReadingStatusChoiceFieldset
+} from "@/components/books/shelf-choice-fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormSelect } from "@/components/ui/form-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,37 +41,9 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
         </CardHeader>
         <CardContent>
           <form action={`/api/me/books/${userBook.id}`} method="post" className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="format">형식</Label>
-              <FormSelect id="format" name="format" defaultValue={userBook.format} required>
-                {BOOK_FORMATS.map((format) => (
-                  <option key={format} value={format}>
-                    {format}
-                  </option>
-                ))}
-              </FormSelect>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="readingStatus">읽기 상태</Label>
-              <FormSelect id="readingStatus" name="readingStatus" defaultValue={userBook.readingStatus} required>
-                {READING_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </FormSelect>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="rating">평점 (1–5, 비우면 없음)</Label>
-              <Input
-                id="rating"
-                type="number"
-                name="rating"
-                min={1}
-                max={5}
-                defaultValue={userBook.rating ?? ""}
-              />
-            </div>
+            <BookFormatChoiceFieldset defaultFormat={userBook.format} />
+            <ReadingStatusChoiceFieldset defaultStatus={userBook.readingStatus} />
+            <RatingChoiceFieldset defaultRating={userBook.rating ?? null} />
             <div className="space-y-2">
               <Label htmlFor="priceKrw">가격 (원)</Label>
               <p className="text-xs text-muted-foreground">

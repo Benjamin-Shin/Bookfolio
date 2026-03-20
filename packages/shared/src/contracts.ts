@@ -10,6 +10,20 @@ export const READING_STATUSES = [
 ] as const;
 export type ReadingStatus = (typeof READING_STATUSES)[number];
 
+/** 웹·앱 UI용 한글 표기 (값은 그대로 `paper` 등 영문). */
+export const BOOK_FORMAT_LABEL_KO = {
+  paper: "종이책",
+  ebook: "전자책"
+} as const satisfies Record<BookFormat, string>;
+
+export const READING_STATUS_LABEL_KO = {
+  unread: "읽기 전",
+  reading: "읽는 중",
+  completed: "완독",
+  paused: "일시중단",
+  dropped: "하차"
+} as const satisfies Record<ReadingStatus, string>;
+
 export type EnvironmentName = "local" | "staging" | "production";
 
 export interface Profile {

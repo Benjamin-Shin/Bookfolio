@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { UserBookSummary } from "@bookfolio/shared";
+import { READING_STATUS_LABEL_KO } from "@bookfolio/shared";
 
 function chunk<T>(items: T[], size: number): T[][] {
   const rows: T[][] = [];
@@ -18,14 +19,6 @@ function tiltDegrees(bookId: string, index: number): number {
   }
   return ((h + index) % 7) - 3;
 }
-
-const statusLabel: Record<string, string> = {
-  unread: "읽기 전",
-  reading: "읽는 중",
-  completed: "완독",
-  paused: "일시중단",
-  dropped: "하차"
-};
 
 const shelfShell: Record<"reading" | "owned", string> = {
   reading:
@@ -91,7 +84,7 @@ export function Bookshelf({ books, variant = "owned" }: BookshelfProps) {
 function BookOnShelf({ book, index }: { book: UserBookSummary; index: number }) {
   const tilt = tiltDegrees(book.id, index);
   const authors = book.authors.join(", ") || "저자 미상";
-  const status = statusLabel[book.readingStatus] ?? book.readingStatus;
+  const status = READING_STATUS_LABEL_KO[book.readingStatus] ?? book.readingStatus;
   const where = book.location?.trim();
   const label = where
     ? `${book.title} — ${authors} (${status}) · ${where}`

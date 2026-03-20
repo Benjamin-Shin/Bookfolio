@@ -206,7 +206,7 @@ async function linkAllUserBooksToLibrary(
   }
 }
 
-/** 개인 서재에 책을 새로 넣었을 때, 내가 소유자인 모든 공동서재에 동일 매핑을 둔다. */
+/** 개인 서재에 책을 새로 넣었을 때, 내가 속한 모든 공동서재(소유자·멤버)에 동일 매핑을 둔다. */
 export async function linkUserBookToOwnedLibraries(
   userBookId: string,
   userId: string,
@@ -216,8 +216,7 @@ export async function linkUserBookToOwnedLibraries(
   const { data: libs, error } = await supabase
     .from("library_members")
     .select("library_id")
-    .eq("user_id", userId)
-    .eq("role", "owner");
+    .eq("user_id", userId);
 
   if (error) throw error;
   const libraryIds = [...new Set((libs ?? []).map((r) => r.library_id as string))];
@@ -395,6 +394,8 @@ export async function addLibraryMemberByEmail(
     }
     throw insErr;
   }
+
+  await linkAllUserBooksToLibrary(supabase, libraryId, targetId);
 
   return {
     userId: targetId,
@@ -682,7 +683,7 @@ export async function shareBookToLibrary(
   const supabase = await getClient(context);
 
   let userBookIdToLink: string;
-  /** 공동서재 폼으로 새 user_books를 만든 경우에만, 소유 중인 다른 공동서재에도 같은 매핑을 둔다. */
+  /** 공동서재 폼으로 새 user_books를 만든 경우에만, 내가 속한 다른 공동서재에도 같은 매핑을 둔다. */
   let propagateNewBookToOwnedLibraries = false;
 
   if ("userBookId" in input && input.userBookId) {

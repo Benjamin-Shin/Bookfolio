@@ -7,9 +7,13 @@ import { useRef, useState } from "react";
 import type { BookLookupResult, UserBookDetail } from "@bookfolio/shared";
 import { BOOK_FORMATS, READING_STATUSES } from "@bookfolio/shared";
 
+import {
+  BookFormatChoiceFieldset,
+  RatingChoiceFieldset,
+  ReadingStatusChoiceFieldset
+} from "@/components/books/shelf-choice-fields";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { FormSelect } from "@/components/ui/form-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -256,30 +260,9 @@ export function NewBookForm() {
         <Label htmlFor="authorsCsv">저자</Label>
         <Input ref={authorsRef} id="authorsCsv" name="authorsCsv" required placeholder="예: 김영하, 한강" />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="format">형식</Label>
-        <FormSelect id="format" name="format" defaultValue={BOOK_FORMATS[0]}>
-          {BOOK_FORMATS.map((format) => (
-            <option key={format} value={format}>
-              {format}
-            </option>
-          ))}
-        </FormSelect>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="readingStatus">읽기 상태</Label>
-        <FormSelect id="readingStatus" name="readingStatus" defaultValue={READING_STATUSES[0]}>
-          {READING_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </FormSelect>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="rating">평점 (1–5)</Label>
-        <Input id="rating" type="number" name="rating" min={1} max={5} />
-      </div>
+      <BookFormatChoiceFieldset defaultFormat={BOOK_FORMATS[0]} />
+      <ReadingStatusChoiceFieldset defaultStatus={READING_STATUSES[0]} />
+      <RatingChoiceFieldset defaultRating={null} />
       <div className="space-y-2">
         <Label htmlFor="memo">메모</Label>
         <Textarea id="memo" name="memo" rows={5} placeholder="나중에 다시 보고 싶은 포인트" />
