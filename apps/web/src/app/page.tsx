@@ -22,6 +22,24 @@ const features = [
   }
 ];
 
+const plannedFeatures = [
+  {
+    title: "모임서재",
+    description:
+      "독서 모임·스터디 그룹이 함께 읽을 책과 진행 상황을 한곳에서 정리하는 공용 서재를 준비하고 있습니다. 지금의 공동서재를 모임 맥락에 더 맞게 확장하는 방향입니다."
+  },
+  {
+    title: "독서 통계·인사이트",
+    description:
+      "연·월별 완독 수, 장르나 태그 분포 등 내 서재를 한눈에 요약해 보여 주는 대시보드와 기록 뷰를 더해 갈 예정입니다. 태그·시리즈·출판사 등 조합 검색과 위시·추천 목록 연동도 로드맵에 두고 있습니다."
+  },
+  {
+    title: "알림·목표",
+    description:
+      "읽기 목표를 세우고, 모임 일정이나 ‘다음에 읽을 책’을 상기해 주는 알림·리마인더를 검토 중입니다."
+  }
+];
+
 const steps = [
   { step: "1", title: "등록", body: "ISBN·바코드 또는 수동 입력으로 책을 추가합니다." },
   { step: "2", title: "상태", body: "읽는 중·완독 등 상태를 기록합니다." },
@@ -34,12 +52,24 @@ export default function HomePage() {
       <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
         <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="space-y-6">
-            <Badge variant="secondary" className="rounded-full px-3">
-              Personal library
-            </Badge>
-            <h1 className="text-4xl font-bold tracking-tight text-balance md:text-5xl lg:text-6xl">
-              내가 가진 책을, 어디서든 Bookfolio로.
-            </h1>
+            <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8 lg:items-center">
+              <img
+                src="/assets/bookfolio_b_favicon.svg"
+                alt=""
+                width={176}
+                height={176}
+                className="size-32 shrink-0 sm:size-36 md:size-40 lg:size-44"
+              />
+              <div className="min-w-0 space-y-6 text-center sm:flex-1 sm:text-left">
+                <Badge variant="secondary" className="rounded-full px-3">
+                  Personal library
+                </Badge>
+                <h1 className="text-4xl font-bold tracking-tight text-balance md:text-5xl lg:text-6xl">
+                  <span className="block">내가 가진 책을,</span>
+                  <span className="block">어디서든 Bookfolio로.</span>
+                </h1>
+              </div>
+            </div>
             <p className="max-w-xl text-lg text-muted-foreground text-pretty">
               소장 관리와 검색이 핵심입니다. 웹과 모바일에서 내 서재를 확인하고, ISBN이나 바코드로 이미
               있는 책인지 바로 찾아보세요.
@@ -108,6 +138,22 @@ export default function HomePage() {
             <Card key={feature.title} className="border-border/70">
               <CardHeader>
                 <CardTitle className="text-lg">{feature.title}</CardTitle>
+                <CardDescription className="text-pretty">{feature.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+          {plannedFeatures.map((feature) => (
+            <Card
+              key={feature.title}
+              className="border border-dashed border-border/70 bg-card/40"
+            >
+              <CardHeader>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <CardTitle className="text-lg">{feature.title}</CardTitle>
+                  <Badge variant="outline" className="shrink-0 font-normal text-muted-foreground">
+                    계획
+                  </Badge>
+                </div>
                 <CardDescription className="text-pretty">{feature.description}</CardDescription>
               </CardHeader>
             </Card>

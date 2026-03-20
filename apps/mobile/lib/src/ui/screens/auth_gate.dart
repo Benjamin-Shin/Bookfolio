@@ -1,6 +1,7 @@
 import 'package:bookfolio_mobile/src/state/auth_controller.dart';
 import 'package:bookfolio_mobile/src/ui/screens/library_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/sign_in_screen.dart';
+import 'package:bookfolio_mobile/src/ui/widgets/shared_library_invite_lifecycle.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +13,9 @@ class AuthGate extends StatelessWidget {
     return Consumer<AuthController>(
       builder: (context, auth, _) {
         if (auth.isAuthenticated) {
-          return const LibraryScreen();
+          return const SharedLibraryInviteLifecycle(
+            child: LibraryScreen(),
+          );
         }
         return const SignInScreen();
       },

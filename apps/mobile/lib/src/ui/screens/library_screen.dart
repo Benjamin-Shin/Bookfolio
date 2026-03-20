@@ -2,8 +2,11 @@ import 'package:bookfolio_mobile/src/models/book_models.dart';
 import 'package:bookfolio_mobile/src/util/cover_image_url.dart';
 import 'package:bookfolio_mobile/src/state/auth_controller.dart';
 import 'package:bookfolio_mobile/src/state/library_controller.dart';
+import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
+import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:bookfolio_mobile/src/ui/screens/book_detail_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/book_form_screen.dart';
+import 'package:bookfolio_mobile/src/ui/screens/shared_libraries_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -42,6 +45,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
+          IconButton(
+            tooltip: '공동서재',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SharedLibrariesScreen()),
+              );
+            },
+            icon: const Icon(Icons.groups_2_outlined),
+          ),
           IconButton(
             onPressed: () => context.read<AuthController>().signOut(),
             icon: const Icon(Icons.logout),
@@ -124,7 +136,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 108),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, kBookfolioFabClearancePadding),
                   sliver: SliverLayoutBuilder(
                     builder: (context, constraints) {
                       final width = constraints.crossAxisExtent;
@@ -266,7 +278,7 @@ class _BookCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          _readingStatusLabel(book.readingStatus),
+                          readingStatusLabelKo(book.readingStatus),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.labelSmall?.copyWith(
@@ -338,16 +350,6 @@ Color _readingStatusColor(ReadingStatus s) {
     ReadingStatus.unread => const Color(0xFF6D4C41),
     ReadingStatus.paused => const Color(0xFFF9A825),
     ReadingStatus.dropped => const Color(0xFF78909C),
-  };
-}
-
-String _readingStatusLabel(ReadingStatus s) {
-  return switch (s) {
-    ReadingStatus.unread => '읽기 전',
-    ReadingStatus.reading => '읽는 중',
-    ReadingStatus.completed => '완독',
-    ReadingStatus.paused => '일시중지',
-    ReadingStatus.dropped => '하차',
   };
 }
 

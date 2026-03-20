@@ -71,7 +71,7 @@ export type DbCanonicalBook = {
   updated_at: string;
 };
 
-type RepositoryContext = {
+export type RepositoryContext = {
   userId: string;
   useAdmin?: boolean;
 };
@@ -242,6 +242,65 @@ async function insertCanonicalBook(
 
   if (error) throw error;
   return data as DbCanonicalBook;
+}
+
+/**
+ * 공동서재 등 user_books 없이 `books` 행만 필요할 때 — ISBN·제목으로 카탈로그 행을 찾거나 만듭니다.
+ */
+export async function resolveCanonicalBookForSharedLibrary(
+  supabase: SupabaseClient,
+  input: Pick<
+    CreateUserBookInput,
+    "isbn" | "title" | "authors" | "publisher" | "publishedDate" | "coverUrl" | "description" | "priceKrw"
+  >
+): Promise<DbCanonicalBook> {
+  const normalized = input.isbn ? normalizeIsbn(input.isbn) : "";
+  const isbnValue = normalized.length > 0 ? normalized : null;
+
+  if (isbnValue) {
+    const found = await findCanonicalBookByIsbn(supabase, isbnValue);
+    if (found) {
+      const { error: upErr } = await supabase
+        .from("books")
+        .update({
+          title: input.title,
+          authors: input.authors,
+          publisher: input.publisher ?? null,
+          published_date: input.publishedDate ?? null,
+          cover_url: input.coverUrl ?? found.cover_url,
+          description: input.description ?? null,
+          price_krw: input.priceKrw ?? found.price_krw
+        })
+        .eq("id", found.id);
+      if (upErr) throw upErr;
+      const { data: refreshed, error: refErr } = await supabase.from("books").select("*").eq("id", found.id).single();
+      if (refErr) throw refErr;
+      return refreshed as DbCanonicalBook;
+    }
+    return insertCanonicalBook(supabase, {
+      isbn: isbnValue,
+      title: input.title,
+      authors: input.authors,
+      publisher: input.publisher ?? null,
+      published_date: input.publishedDate ?? null,
+      cover_url: input.coverUrl ?? null,
+      description: input.description ?? null,
+      price_krw: input.priceKrw ?? null,
+      source: "manual"
+    });
+  }
+
+  return insertCanonicalBook(supabase, {
+    isbn: null,
+    title: input.title,
+    authors: input.authors,
+    publisher: input.publisher ?? null,
+    published_date: input.publishedDate ?? null,
+    cover_url: input.coverUrl ?? null,
+    description: input.description ?? null,
+    price_krw: input.priceKrw ?? null,
+    source: "manual"
+  });
 }
 
 export type ListUserBooksPagedOptions = {

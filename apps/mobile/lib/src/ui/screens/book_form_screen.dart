@@ -1,14 +1,19 @@
 import 'package:bookfolio_mobile/src/models/book_models.dart';
 import 'package:bookfolio_mobile/src/state/library_controller.dart';
+import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
+import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:bookfolio_mobile/src/ui/screens/barcode_scan_screen.dart';
 import 'package:bookfolio_mobile/src/util/isbn.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class BookFormScreen extends StatefulWidget {
-  const BookFormScreen({super.key, this.prefill});
+  const BookFormScreen({super.key, this.prefill, this.existingBook});
 
   final BookLookupResult? prefill;
+  final UserBook? existingBook;
+
+  bool get isEditing => existingBook != null;
 
   @override
   State<BookFormScreen> createState() => _BookFormScreenState();
@@ -33,18 +38,35 @@ class _BookFormScreenState extends State<BookFormScreen> {
   @override
   void initState() {
     super.initState();
+    final ex = widget.existingBook;
     final p = widget.prefill;
-    _isbnController = TextEditingController(text: p?.isbn ?? '');
-    _titleController = TextEditingController(text: p?.title ?? '');
-    _authorsController = TextEditingController(text: p?.authors.join(', ') ?? '');
-    _memoController = TextEditingController();
-    _ratingController = TextEditingController();
-    _locationController = TextEditingController();
-    _coverUrl = p?.coverUrl;
-    _publisher = p?.publisher;
-    _publishedDate = p?.publishedDate;
-    _description = p?.description;
-    _priceKrw = p?.priceKrw;
+    if (ex != null) {
+      _isbnController = TextEditingController(text: ex.isbn ?? '');
+      _titleController = TextEditingController(text: ex.title);
+      _authorsController = TextEditingController(text: ex.authors.join(', '));
+      _memoController = TextEditingController(text: ex.memo ?? '');
+      _ratingController = TextEditingController(text: ex.rating?.toString() ?? '');
+      _locationController = TextEditingController(text: ex.location ?? '');
+      _format = ex.format;
+      _status = ex.readingStatus;
+      _coverUrl = ex.coverUrl;
+      _publisher = ex.publisher;
+      _publishedDate = ex.publishedDate;
+      _description = ex.description;
+      _priceKrw = ex.priceKrw;
+    } else {
+      _isbnController = TextEditingController(text: p?.isbn ?? '');
+      _titleController = TextEditingController(text: p?.title ?? '');
+      _authorsController = TextEditingController(text: p?.authors.join(', ') ?? '');
+      _memoController = TextEditingController();
+      _ratingController = TextEditingController();
+      _locationController = TextEditingController();
+      _coverUrl = p?.coverUrl;
+      _publisher = p?.publisher;
+      _publishedDate = p?.publishedDate;
+      _description = p?.description;
+      _priceKrw = p?.priceKrw;
+    }
   }
 
   @override
@@ -115,16 +137,39 @@ class _BookFormScreenState extends State<BookFormScreen> {
     }
   }
 
+  Map<String, dynamic> _buildUpdatePayload() {
+    final ratingStr = _ratingController.text.trim();
+    final ratingParsed = ratingStr.isEmpty ? null : int.tryParse(ratingStr);
+    final memo = _memoController.text.trim();
+    final loc = _locationController.text.trim();
+    return {
+      'title': _titleController.text.trim(),
+      'authors': _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+      'format': _format.name,
+      'readingStatus': _status.name,
+      'rating': ratingParsed,
+      'memo': memo.isEmpty ? null : memo,
+      'coverUrl': _coverUrl,
+      'publisher': _publisher,
+      'publishedDate': _publishedDate,
+      'description': _description,
+      'priceKrw': _priceKrw,
+      'isOwned': true,
+      'location': loc.isEmpty ? null : loc,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final library = context.read<LibraryController>();
+    final editing = widget.isEditing;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('책 등록'),
+        title: Text(editing ? '책 수정' : '책 등록'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: bookfolioMobileScrollPadding(context),
         children: [
           Text(
             'ISBN으로 서지 자동 입력',
@@ -137,38 +182,42 @@ class _BookFormScreenState extends State<BookFormScreen> {
             controller: _isbnController,
             keyboardType: TextInputType.text,
             textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(
+            readOnly: editing,
+            decoration: InputDecoration(
               labelText: 'ISBN',
-              hintText: '9788936434267 또는 978-89-3643-426-7',
-              border: OutlineInputBorder(),
+              hintText: editing ? null : '9788936434267 또는 978-89-3643-426-7',
+              border: const OutlineInputBorder(),
+              helperText: editing ? '수정 시 ISBN 변경은 지원하지 않아요.' : null,
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _lookupBusy ? null : _openBarcodeScan,
-                  icon: const Icon(Icons.qr_code_scanner),
-                  label: const Text('바코드 스캔'),
+          if (!editing) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _lookupBusy ? null : _openBarcodeScan,
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text('바코드 스캔'),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: _lookupBusy ? null : _fetchBookMetaByIsbn,
-                  icon: _lookupBusy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Icon(Icons.manage_search),
-                  label: Text(_lookupBusy ? '조회 중…' : '도서 정보 불러오기'),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: _lookupBusy ? null : _fetchBookMetaByIsbn,
+                    icon: _lookupBusy
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.manage_search),
+                    label: Text(_lookupBusy ? '조회 중…' : '도서 정보 불러오기'),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
           const SizedBox(height: 24),
           TextField(
             controller: _titleController,
@@ -189,7 +238,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
           DropdownButtonFormField<BookFormat>(
             value: _format,
             items: BookFormat.values
-                .map((format) => DropdownMenuItem(value: format, child: Text(format.name)))
+                .map((format) => DropdownMenuItem(value: format, child: Text(bookFormatLabelKo(format))))
                 .toList(),
             onChanged: (value) => setState(() => _format = value ?? BookFormat.paper),
             decoration: const InputDecoration(
@@ -201,7 +250,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
           DropdownButtonFormField<ReadingStatus>(
             value: _status,
             items: ReadingStatus.values
-                .map((status) => DropdownMenuItem(value: status, child: Text(status.name)))
+                .map((status) => DropdownMenuItem(value: status, child: Text(readingStatusLabelKo(status))))
                 .toList(),
             onChanged: (value) => setState(() => _status = value ?? ReadingStatus.unread),
             decoration: const InputDecoration(
@@ -239,30 +288,34 @@ class _BookFormScreenState extends State<BookFormScreen> {
           const SizedBox(height: 20),
           FilledButton(
             onPressed: () async {
-              final normalizedIsbn = normalizeIsbnInput(_isbnController.text);
-              final book = UserBook(
-                id: '',
-                bookId: '',
-                title: _titleController.text.trim(),
-                authors: _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
-                format: _format,
-                readingStatus: _status,
-                rating: int.tryParse(_ratingController.text.trim()),
-                memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
-                coverUrl: _coverUrl,
-                publisher: _publisher,
-                publishedDate: _publishedDate,
-                description: _description,
-                isbn: normalizedIsbn,
-                isOwned: true,
-                priceKrw: _priceKrw,
-                location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
-              );
-              await library.createBook(book);
+              if (editing) {
+                await library.updateBook(widget.existingBook!.id, _buildUpdatePayload());
+              } else {
+                final normalizedIsbn = normalizeIsbnInput(_isbnController.text);
+                final book = UserBook(
+                  id: '',
+                  bookId: '',
+                  title: _titleController.text.trim(),
+                  authors: _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                  format: _format,
+                  readingStatus: _status,
+                  rating: int.tryParse(_ratingController.text.trim()),
+                  memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
+                  coverUrl: _coverUrl,
+                  publisher: _publisher,
+                  publishedDate: _publishedDate,
+                  description: _description,
+                  isbn: normalizedIsbn,
+                  isOwned: true,
+                  priceKrw: _priceKrw,
+                  location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
+                );
+                await library.createBook(book);
+              }
               if (!context.mounted) return;
               Navigator.of(context).pop();
             },
-            child: const Text('저장'),
+            child: Text(editing ? '수정 저장' : '저장'),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -81,6 +82,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
+            <Button variant="outline" asChild>
+              <Link href={"/dashboard/libraries" as Route}>공동서재</Link>
+            </Button>
             <Button asChild>
               <Link href="/dashboard/books/new">책 추가하기</Link>
             </Button>

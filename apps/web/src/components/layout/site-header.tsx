@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 import { auth } from "@/auth";
@@ -27,7 +28,17 @@ export async function SiteHeader() {
   return (
     <header className="border-b border-border/60 bg-card/80 backdrop-blur-sm">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4">
-        <Link href="/" className="text-lg font-semibold tracking-tight text-foreground">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground"
+        >
+          <img
+            src="/assets/bookfolio_b_favicon.svg"
+            alt=""
+            width={32}
+            height={32}
+            className="size-8 shrink-0"
+          />
           Bookfolio
         </Link>
         <nav className="flex min-w-0 items-center gap-2">
@@ -48,6 +59,12 @@ export async function SiteHeader() {
             <>
               {user.role === "ADMIN" ? <AdminHeaderMenu /> : null}
               <HeaderAccount email={user.email} displayLabel={displayLabel} initialProfile={profile} />
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={"/dashboard/libraries" as Route}>공동서재</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/dashboard">내 서재</Link>
+              </Button>
               <form action="/auth/signout" method="post">
                 <Button type="submit" variant="ghost" size="sm">
                   로그아웃
@@ -55,13 +72,15 @@ export async function SiteHeader() {
               </form>
             </>
           ) : (
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">로그인</Link>
-            </Button>
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/login">로그인</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/dashboard">내 서재</Link>
+              </Button>
+            </>
           )}
-          <Button size="sm" asChild>
-            <Link href="/dashboard">내 서재</Link>
-          </Button>
         </nav>
       </div>
     </header>

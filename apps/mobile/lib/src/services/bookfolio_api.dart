@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:bookfolio_mobile/src/models/book_models.dart';
+import 'package:bookfolio_mobile/src/models/shared_library_models.dart';
 import 'package:http/http.dart' as http;
 
 class BookfolioApi {
@@ -59,6 +60,30 @@ class BookfolioApi {
       body: jsonEncode({'action': 'delete'}),
     );
     _throwIfFailed(response);
+  }
+
+  Future<List<SharedLibrarySummary>> fetchSharedLibraries() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/libraries'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as List<dynamic>;
+    return decoded
+        .map((item) => SharedLibrarySummary.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<SharedLibraryBookSummary>> fetchSharedLibraryBooks(String libraryId) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/libraries/$libraryId/books'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as List<dynamic>;
+    return decoded
+        .map((item) => SharedLibraryBookSummary.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   Future<BookLookupResult> lookupByIsbn(String isbn) async {

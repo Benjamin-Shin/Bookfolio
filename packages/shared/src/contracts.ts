@@ -114,3 +114,88 @@ export interface BooksQuery {
   readingStatus?: ReadingStatus | "all";
 }
 
+export const LIBRARY_KINDS = ["family", "club"] as const;
+export type LibraryKind = (typeof LIBRARY_KINDS)[number];
+
+export const LIBRARY_MEMBER_ROLES = ["owner", "member"] as const;
+export type LibraryMemberRole = (typeof LIBRARY_MEMBER_ROLES)[number];
+
+export interface LibrarySummary {
+  id: string;
+  name: string;
+  description: string | null;
+  kind: LibraryKind;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  /** 현재 사용자의 역할 */
+  myRole: LibraryMemberRole;
+}
+
+export interface LibraryMemberRow {
+  userId: string;
+  email: string;
+  name: string | null;
+  role: LibraryMemberRole;
+  joinedAt: string;
+}
+
+export interface LibraryBookMemberStateRow {
+  userId: string;
+  email: string;
+  name: string | null;
+  readingStatus: ReadingStatus;
+  updatedAt: string;
+}
+
+export interface LibraryBookSummary {
+  id: string;
+  libraryId: string;
+  bookId: string;
+  isbn: string | null;
+  title: string;
+  authors: string[];
+  coverUrl: string | null;
+  location: string | null;
+  memo: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LibraryBookDetail extends LibraryBookSummary {
+  memberStates: LibraryBookMemberStateRow[];
+}
+
+export interface CreateLibraryInput {
+  name: string;
+  description?: string | null;
+  kind: LibraryKind;
+}
+
+export interface UpdateLibraryInput {
+  name?: string;
+  description?: string | null;
+  kind?: LibraryKind;
+}
+
+/** 공동서재에 책 추가: 기존 카탈로그 ID 또는 신규 서지(개인 서재 등록과 동일 필드). */
+export type CreateLibraryBookInput =
+  | { bookId: string; location?: string | null; memo?: string | null }
+  | ({
+      bookId?: undefined;
+      location?: string | null;
+      memo?: string | null;
+    } & Pick<
+      CreateUserBookInput,
+      "isbn" | "title" | "authors" | "publisher" | "publishedDate" | "coverUrl" | "description" | "priceKrw"
+    >);
+
+export interface UpdateLibraryBookInput {
+  location?: string | null;
+  memo?: string | null;
+}
+
+export interface UpdateLibraryBookMemberStateInput {
+  readingStatus: ReadingStatus;
+}
+
