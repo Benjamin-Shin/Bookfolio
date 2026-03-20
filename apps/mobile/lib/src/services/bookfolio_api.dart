@@ -4,6 +4,17 @@ import 'package:bookfolio_mobile/src/models/book_models.dart';
 import 'package:bookfolio_mobile/src/models/shared_library_models.dart';
 import 'package:http/http.dart' as http;
 
+/// API가 JSON `{ "error": "..." }` 로 돌려준 메시지를 담습니다 (예: 중복 등록 409).
+class BookfolioApiException implements Exception {
+  BookfolioApiException(this.statusCode, this.message);
+
+  final int statusCode;
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class BookfolioApi {
   BookfolioApi({http.Client? client}) : _client = client ?? http.Client();
 
@@ -100,7 +111,16 @@ class BookfolioApi {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return;
     }
-    throw Exception('Request failed: ${response.statusCode} ${response.body}');
+    var message = '요청에 실패했습니다. (${response.statusCode})';
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic> && decoded['error'] is String) {
+        message = decoded['error'] as String;
+      }
+    } catch (_) {
+      // 본문이 JSON이 아니면 위 기본 메시지 유지
+    }
+    throw BookfolioApiException(response.statusCode, message);
   }
 }
 

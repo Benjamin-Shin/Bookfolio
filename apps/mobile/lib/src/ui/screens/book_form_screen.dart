@@ -1,4 +1,5 @@
 import 'package:bookfolio_mobile/src/models/book_models.dart';
+import 'package:bookfolio_mobile/src/services/bookfolio_api.dart';
 import 'package:bookfolio_mobile/src/state/library_controller.dart';
 import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
 import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
@@ -334,32 +335,44 @@ class _BookFormScreenState extends State<BookFormScreen> {
           const SizedBox(height: 20),
           FilledButton(
             onPressed: () async {
-              if (editing) {
-                await library.updateBook(widget.existingBook!.id, _buildUpdatePayload());
-              } else {
-                final normalizedIsbn = normalizeIsbnInput(_isbnController.text);
-                final book = UserBook(
-                  id: '',
-                  bookId: '',
-                  title: _titleController.text.trim(),
-                  authors: _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
-                  format: _format,
-                  readingStatus: _status,
-                  rating: _rating,
-                  memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
-                  coverUrl: _coverUrl,
-                  publisher: _publisher,
-                  publishedDate: _publishedDate,
-                  description: _description,
-                  isbn: normalizedIsbn,
-                  isOwned: true,
-                  priceKrw: _priceKrw,
-                  location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
+              try {
+                if (editing) {
+                  await library.updateBook(widget.existingBook!.id, _buildUpdatePayload());
+                } else {
+                  final normalizedIsbn = normalizeIsbnInput(_isbnController.text);
+                  final book = UserBook(
+                    id: '',
+                    bookId: '',
+                    title: _titleController.text.trim(),
+                    authors: _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                    format: _format,
+                    readingStatus: _status,
+                    rating: _rating,
+                    memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
+                    coverUrl: _coverUrl,
+                    publisher: _publisher,
+                    publishedDate: _publishedDate,
+                    description: _description,
+                    isbn: normalizedIsbn,
+                    isOwned: true,
+                    priceKrw: _priceKrw,
+                    location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
+                  );
+                  await library.createBook(book);
+                }
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+              } on BookfolioApiException catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.message)),
                 );
-                await library.createBook(book);
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
               }
-              if (!context.mounted) return;
-              Navigator.of(context).pop();
             },
             child: Text(editing ? '수정 저장' : '저장'),
           ),

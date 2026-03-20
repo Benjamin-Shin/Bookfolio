@@ -12,7 +12,7 @@ function statusForMessage(message: string): number {
 
 type RouteContext = { params: Promise<{ libraryId: string; bookId: string }> };
 
-export async function GET(_request: NextRequest, context: RouteContext) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const userId = await getRequestUserId(request);
     const { libraryId, bookId } = await context.params;
@@ -28,7 +28,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 }
 
 /** 이 서재에서 내 소장 연결만 해제(개인 서재의 user_books는 유지). */
-export async function DELETE(_request: NextRequest, context: RouteContext) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     const userId = await getRequestUserId(request);
     const { libraryId, bookId } = await context.params;

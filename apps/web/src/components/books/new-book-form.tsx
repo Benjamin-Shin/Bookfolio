@@ -1,8 +1,10 @@
 "use client";
 
+import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-import type { BookLookupResult } from "@bookfolio/shared";
+import type { BookLookupResult, UserBookDetail } from "@bookfolio/shared";
 import { BOOK_FORMATS, READING_STATUSES } from "@bookfolio/shared";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -13,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export function NewBookForm() {
+  const router = useRouter();
   const [lookupIsbn, setLookupIsbn] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
@@ -26,6 +29,8 @@ export function NewBookForm() {
     publishedDate: ""
   });
   const [priceKrwInput, setPriceKrwInput] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const titleRef = useRef<HTMLInputElement>(null);
   const authorsRef = useRef<HTMLInputElement>(null);
@@ -89,8 +94,86 @@ export function NewBookForm() {
     }
   }
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const form = e.currentTarget;
+    if (!form.reportValidity()) {
+      return;
+    }
+    e.preventDefault();
+    setSubmitError(null);
+
+    const fd = new FormData(form);
+    const title = String(fd.get("title") ?? "").trim();
+    const authors = String(fd.get("authorsCsv") ?? "")
+      .split(",")
+      .map((a) => a.trim())
+      .filter(Boolean);
+    const ratingRaw = String(fd.get("rating") ?? "").trim();
+    const priceRaw = String(fd.get("priceKrw") ?? "").trim();
+    let priceKrw: number | null = null;
+    if (priceRaw) {
+      const n = Number(priceRaw);
+      if (Number.isFinite(n) && n >= 0) {
+        priceKrw = Math.round(Math.min(n, 2_000_000_000));
+      }
+    }
+
+    const payload = {
+      title,
+      authors,
+      format: String(fd.get("format") ?? "paper") as "paper" | "ebook",
+      readingStatus: String(fd.get("readingStatus") ?? "unread") as
+        | "unread"
+        | "reading"
+        | "completed"
+        | "paused"
+        | "dropped",
+      rating: ratingRaw ? Number(ratingRaw) : null,
+      memo: (() => {
+        const m = String(fd.get("memo") ?? "").trim();
+        return m ? m : null;
+      })(),
+      isbn: String(fd.get("isbn") ?? "").trim() || null,
+      coverUrl: String(fd.get("coverUrl") ?? "").trim() || null,
+      publisher: String(fd.get("publisher") ?? "").trim() || null,
+      publishedDate: String(fd.get("publishedDate") ?? "").trim() || null,
+      description: (() => {
+        const d = String(fd.get("description") ?? "").trim();
+        return d ? d : null;
+      })(),
+      priceKrw,
+      location: (() => {
+        const loc = String(fd.get("location") ?? "").trim();
+        return loc ? loc : null;
+      })()
+    };
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/me/books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = (await res.json()) as UserBookDetail | { error?: string };
+      if (!res.ok) {
+        const msg =
+          "error" in data && typeof data.error === "string" ? data.error : "등록하지 못했습니다.";
+        setSubmitError(msg);
+        return;
+      }
+      const created = data as UserBookDetail;
+      router.push(`/dashboard/books/${created.id}` as Route);
+      router.refresh();
+    } catch {
+      setSubmitError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
-    <form className="space-y-6" action="/api/me/books" method="post">
+    <form className="space-y-6" onSubmit={(e) => void handleSubmit(e)}>
       <div className="space-y-3 rounded-lg border border-border/80 bg-muted/30 p-4">
         <div className="space-y-1">
           <Label htmlFor="isbn-lookup">ISBN으로 검색</Label>
@@ -217,7 +300,16 @@ export function NewBookForm() {
         />
       </div>
 
-      <Button type="submit">등록하기</Button>
+      {submitError ? (
+        <Alert variant="destructive">
+          <AlertTitle>등록할 수 없습니다</AlertTitle>
+          <AlertDescription>{submitError}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      <Button type="submit" disabled={submitting}>
+        {submitting ? "등록 중…" : "등록하기"}
+      </Button>
     </form>
   );
 }
