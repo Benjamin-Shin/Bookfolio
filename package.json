@@ -6,9 +6,6 @@
     "apps/*",
     "packages/*"
   ],
-  "devDependencies": {
-    "vercel": "^39.0.0"
-  },
   "scripts": {
     "dev:web": "pnpm --workspace @bookfolio/web run dev",
     "build:web": "pnpm --workspace @bookfolio/web run build",

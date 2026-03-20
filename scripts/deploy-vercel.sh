@@ -15,8 +15,8 @@ cd "$ROOT_DIR"
 # vercel link로 프로젝트 연결 후, 대시보드에서 Root Directory를 apps/web으로 설정하세요.
 if [[ "$1" == "prod" ]] || [[ "$1" == "--prod" ]]; then
   echo "🚀 Production 배포 중 (apps/web)..."
-  pnpm exec vercel --prod
+  npx vercel --prod
 else
   echo "🚀 Preview 배포 중 (apps/web)..."
-  pnpm exec vercel
+  npx vercel
 fi
