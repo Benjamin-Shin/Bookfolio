@@ -2,9 +2,8 @@
 const nextConfig = {
   transpilePackages: ["@bookfolio/shared"],
   experimental: {
-    typedRoutes: true
-  }
+    typedRoutes: true,
+  },
 };
 
 export default nextConfig;
-

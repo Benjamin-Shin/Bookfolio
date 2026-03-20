@@ -7,10 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "pnpm --workspace @bookfolio/web run dev",
-    "build:web": "pnpm --workspace @bookfolio/web run build",
-    "lint:web": "pnpm --workspace @bookfolio/web run lint",
-    "typecheck:web": "pnpm --workspace @bookfolio/web run typecheck",
+    "dev:web": "pnpm --filter @bookfolio/web run dev",
+    "build:web": "pnpm --filter @bookfolio/web run build",
+    "lint:web": "pnpm --filter @bookfolio/web run lint",
+    "typecheck:web": "pnpm --filter @bookfolio/web run typecheck",
     "deploy": "bash scripts/deploy-vercel.sh",
     "deploy:prod": "bash scripts/deploy-vercel.sh prod"
   }
