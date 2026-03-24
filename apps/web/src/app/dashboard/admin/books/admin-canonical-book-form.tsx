@@ -4,6 +4,7 @@
  * 관리자 공유 서지(`books`) 등록·수정 폼.
  *
  * @history
+ * - 2026-03-24: ISBN 조회를 국립중앙도서관·네이버 버튼으로 분리(API `provider`); 안내 문구를 실제 폴백 순서(네이버→국립→Google)에 맞춤
  * - 2026-03-24: 옮긴이(`translatorsCsv`), API소스(`apiSource`) 입력; ISBN 조회 시 API소스 칸이 비어 있으면 조회 `source`로 채움
  */
 
@@ -145,7 +146,7 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
   const [lookupIsbn, setLookupIsbn] = useState(() =>
     mode === "edit" ? (defaultValues?.isbn ?? "").trim() : ""
   );
-  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupLoading, setLookupLoading] = useState<null | "naver" | "nl">(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [lookupOk, setLookupOk] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -195,7 +196,7 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
     if (win) win.opener = null;
   }
 
-  async function handleIsbnLookup() {
+  async function handleIsbnLookup(provider: "naver" | "nl") {
     const raw = lookupIsbn.trim();
     setLookupError(null);
     setLookupOk(false);
@@ -206,12 +207,12 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
       return;
     }
 
-    setLookupLoading(true);
+    setLookupLoading(provider);
     try {
       const res = await fetch("/api/books/lookup-by-isbn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isbn: raw })
+        body: JSON.stringify({ isbn: raw, provider })
       });
 
       const data = (await res.json()) as BookLookupResult | { error?: string };
@@ -249,7 +250,7 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
     } catch {
       setLookupError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
-      setLookupLoading(false);
+      setLookupLoading(null);
     }
   }
 
@@ -268,7 +269,8 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
         <div className="space-y-1">
           <Label htmlFor="admin-isbn-lookup">ISBN으로 검색</Label>
           <p className="text-xs text-muted-foreground">
-            국립중앙도서관 → 네이버 → Google Books 순으로 시도합니다.{" "}
+            아래 버튼은 각각 해당 API만 호출합니다(로컬 카탈로그 우회). 일반 사용자·다른 화면의 ISBN 조회는 네이버 → 국립중앙도서관 →
+            Google Books 순 폴백입니다.{" "}
             {mode === "edit"
               ? "수정 모드에서는 비어 있는 필드만 채웁니다. 조회한 ISBN은 항상 ISBN 칸에 반영됩니다."
               : "신규 등록 시에는 조회 결과로 폼을 채웁니다."}
@@ -289,14 +291,27 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  void handleIsbnLookup();
+                  void handleIsbnLookup("nl");
                 }
               }}
             />
           </div>
           <div className="flex flex-wrap gap-2 sm:shrink-0">
-            <Button type="button" variant="secondary" disabled={lookupLoading} onClick={() => void handleIsbnLookup()}>
-              {lookupLoading ? "검색 중…" : "검색"}
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={lookupLoading !== null}
+              onClick={() => void handleIsbnLookup("nl")}
+            >
+              {lookupLoading === "nl" ? "검색 중…" : "국립중앙도서관"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={lookupLoading !== null}
+              onClick={() => void handleIsbnLookup("naver")}
+            >
+              {lookupLoading === "naver" ? "검색 중…" : "네이버"}
             </Button>
             <Button
               type="button"

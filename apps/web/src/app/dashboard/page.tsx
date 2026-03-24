@@ -3,20 +3,41 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
-import { Bookshelf } from "@/components/books/bookshelf";
-import { DashboardBooksToolbar } from "@/components/dashboard/dashboard-books-toolbar";
+import { Bookshelf, BOOKS_PER_SHELF } from "@/components/books/bookshelf";
+import {
+  DashboardBooksToolbar,
+  DashboardOwnedBooksPagination,
+} from "@/components/dashboard/dashboard-books-toolbar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getUserOwnedBooksPriceStats, listUserBooksPaged } from "@/lib/books/repository";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  getUserOwnedBooksPriceStats,
+  listUserBooksPaged,
+} from "@/lib/books/repository";
 
-const PAGE_SIZE = 14;
+const PAGE_SIZE = BOOKS_PER_SHELF;
 const READING_SHELF_LIMIT = 50;
 
 type DashboardPageProps = {
   searchParams: Promise<{ q?: string; page?: string }>;
 };
 
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+/**
+ * 로그인 사용자의 읽는 중·소장 책장.
+ *
+ * @history
+ * - 2026-03-24: `PAGE_SIZE` = `BOOKS_PER_SHELF` import(선반 줄 수·한 줄 권수 상수와 동기)
+ * - 2026-03-24: 소장 총권수 보정·소장 하단 페이지네이션(`DashboardOwnedBooksPagination`)
+ */
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -36,32 +57,40 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         readingStatus: "reading",
         search: searchOpt,
         limit: READING_SHELF_LIMIT,
-        offset: 0
+        offset: 0,
       },
-      ctx
+      ctx,
     ),
     listUserBooksPaged(
       {
         isOwned: true,
         search: searchOpt,
         limit: PAGE_SIZE,
-        offset: (pageRaw - 1) * PAGE_SIZE
+        offset: (pageRaw - 1) * PAGE_SIZE,
       },
-      ctx
+      ctx,
     ),
-    getUserOwnedBooksPriceStats(ctx)
+    getUserOwnedBooksPriceStats(ctx),
   ]);
 
   const libraryTotal = libraryProbe.total;
   const readingBooks = readingRes.items;
   const readingTotal = readingRes.total;
   const ownedBooks = ownedRes.items;
-  const ownedTotal = ownedRes.total;
+  /** 검색 없을 때 RPC total이 실제 소장 권수보다 작게 올 때 페이지네이션이 사라지는 경우 보정 */
+  const ownedTotalForPager =
+    q.length > 0
+      ? ownedRes.total
+      : Math.max(ownedRes.total, priceStats.ownedCount);
 
-  const ownedTotalPages = Math.max(1, Math.ceil(ownedTotal / PAGE_SIZE));
-  const ownedPage = ownedTotal === 0 ? 1 : Math.min(pageRaw, ownedTotalPages);
+  const ownedTotalPages = Math.max(
+    1,
+    Math.ceil(ownedTotalForPager / PAGE_SIZE),
+  );
+  const ownedPage =
+    ownedTotalForPager === 0 ? 1 : Math.min(pageRaw, ownedTotalPages);
 
-  if (ownedTotal > 0 && pageRaw > ownedTotalPages) {
+  if (ownedTotalForPager > 0 && pageRaw > ownedTotalPages) {
     const np = new URLSearchParams();
     if (q) np.set("q", q);
     np.set("page", String(ownedTotalPages));
@@ -69,7 +98,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   }
 
   const emptyLibrary = libraryTotal === 0 && !q;
-  const emptySearch = libraryTotal > 0 && q && readingTotal === 0 && ownedTotal === 0;
+  const emptySearch =
+    libraryTotal > 0 && q && readingTotal === 0 && ownedRes.total === 0;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
@@ -99,11 +129,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <div className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Dashboard</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Dashboard
+              </p>
               <h1 className="text-3xl font-bold tracking-tight">내 책장</h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                읽는 중인 책과 소장 책을 나눠 보여 줍니다. 같은 책이 두 곳에 있을 수 있어요(소장하면서 읽는 중).
-                표지를 누르면 상세·수정으로 이동합니다.
+                읽는 중인 책과 소장 책을 나눠 보여 줍니다. 같은 책이 두 곳에
+                있을 수 있어요(소장하면서 읽는 중). 표지를 누르면 상세·수정으로
+                이동합니다.
               </p>
             </div>
             <Button variant="outline" asChild>
@@ -116,7 +149,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               searchQuery={q}
               page={ownedPage}
               pageSize={PAGE_SIZE}
-              ownedTotal={ownedTotal}
+              ownedTotal={ownedTotalForPager}
               readingTotal={readingTotal}
             />
           ) : null}
@@ -128,15 +161,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 {priceStats.pricedOwnedCount > 0 ? (
                   <>
                     소장 {priceStats.ownedCount.toLocaleString("ko-KR")}권 중{" "}
-                    {priceStats.pricedOwnedCount.toLocaleString("ko-KR")}권에 가격이 있어요.{" "}
+                    {priceStats.pricedOwnedCount.toLocaleString("ko-KR")}권에
+                    가격이 있어요.{" "}
                     <span className="font-semibold tabular-nums text-foreground">
                       {priceStats.totalKrw.toLocaleString("ko-KR")}원
                     </span>
                   </>
                 ) : (
                   <>
-                    소장 {priceStats.ownedCount.toLocaleString("ko-KR")}권 — 책 등록·수정에서 가격(원)을 넣으면
-                    여기에 합계가 표시됩니다.
+                    소장 {priceStats.ownedCount.toLocaleString("ko-KR")}권 — 책
+                    등록·수정에서 가격(원)을 넣으면 여기에 합계가 표시됩니다.
                   </>
                 )}
               </p>
@@ -150,7 +184,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <Card className="border-dashed">
               <CardHeader>
                 <CardTitle>아직 등록한 책이 없습니다</CardTitle>
-                <CardDescription>첫 책을 추가해 Bookfolio를 시작해 보세요.</CardDescription>
+                <CardDescription>
+                  첫 책을 추가해 Bookfolio를 시작해 보세요.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild>
@@ -166,7 +202,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <CardTitle>검색 결과가 없습니다</CardTitle>
                 <CardDescription>
                   「{q}」에 맞는 책이 없습니다. 다른 키워드로 시도하거나{" "}
-                  <Link href="/dashboard" className="text-primary underline-offset-4 hover:underline">
+                  <Link
+                    href="/dashboard"
+                    className="text-primary underline-offset-4 hover:underline"
+                  >
                     전체 목록
                   </Link>
                   으로 돌아가 보세요.
@@ -177,19 +216,26 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
           {!emptyLibrary && !emptySearch ? (
             <div className="space-y-12">
-              <section className="space-y-3" aria-labelledby="dash-reading-heading">
+              <section
+                className="space-y-3"
+                aria-labelledby="dash-reading-heading"
+              >
                 <div>
-                  <h2 id="dash-reading-heading" className="text-lg font-semibold tracking-tight">
+                  <h2
+                    id="dash-reading-heading"
+                    className="text-lg font-semibold tracking-tight"
+                  >
                     읽는 중
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    읽기 상태를 「읽는 중」으로 바꾸면 이 선반에 모입니다. 최대 {READING_SHELF_LIMIT}권까지
-                    한 번에 보여 줍니다.
+                    읽기 상태를 「읽는 중」으로 바꾸면 이 선반에 모입니다. 최대{" "}
+                    {READING_SHELF_LIMIT}권까지 한 번에 보여 줍니다.
                   </p>
                 </div>
                 {readingTotal > READING_SHELF_LIMIT ? (
                   <p className="text-xs text-muted-foreground">
-                    읽는 중인 책이 {readingTotal.toLocaleString("ko-KR")}권입니다. 나머지는 검색으로 찾아 보세요.
+                    읽는 중인 책이 {readingTotal.toLocaleString("ko-KR")}
+                    권입니다. 나머지는 검색으로 찾아 보세요.
                   </p>
                 ) : null}
                 {readingBooks.length > 0 ? (
@@ -201,20 +247,36 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 )}
               </section>
 
-              <section className="space-y-3" aria-labelledby="dash-owned-heading">
+              <section
+                className="space-y-3"
+                aria-labelledby="dash-owned-heading"
+              >
                 <div>
-                  <h2 id="dash-owned-heading" className="text-lg font-semibold tracking-tight">
+                  <h2
+                    id="dash-owned-heading"
+                    className="text-lg font-semibold tracking-tight"
+                  >
                     소장
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    「소장 중」으로 표시된 책입니다. 아래 페이지 넘김은 소장 책만 기준입니다.
+                    「소장 중」으로 표시된 책입니다. 아래 페이지 넘김은 소장
+                    책만 기준입니다.
                   </p>
                 </div>
                 {ownedBooks.length > 0 ? (
-                  <Bookshelf variant="owned" books={ownedBooks} />
+                  <>
+                    <Bookshelf variant="owned" books={ownedBooks} />
+                    <DashboardOwnedBooksPagination
+                      searchQuery={q}
+                      page={ownedPage}
+                      pageSize={PAGE_SIZE}
+                      ownedTotal={ownedTotalForPager}
+                    />
+                  </>
                 ) : (
                   <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
-                    소장으로 표시된 책이 없습니다. 책 수정에서 「소장 중」을 켜 보세요.
+                    소장으로 표시된 책이 없습니다. 책 수정에서 「소장 중」을 켜
+                    보세요.
                   </div>
                 )}
               </section>

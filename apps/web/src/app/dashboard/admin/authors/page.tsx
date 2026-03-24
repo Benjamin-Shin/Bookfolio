@@ -6,6 +6,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 import { AdminAuthorCreateForm } from "./admin-author-create-form";
 import { AuthorNameForm } from "./author-name-form";
+import { DeleteZeroBookAuthorsButton } from "./delete-zero-book-authors-button";
 
 type AuthorRow = {
   id: string;
@@ -21,6 +22,7 @@ type BookAuthorLink = {
  * 관리자 전용 저자 마스터(`authors`) 목록. `book_authors` 로 도서와 연결됩니다.
  *
  * @history
+ * - 2026-03-24: 연결 도서 0인 저자 일괄 삭제 버튼·DB 전체 고아 수 집계
  * - 2026-03-24: 초기 추가 (데이터 관리 전용)
  */
 export default async function AdminAuthorsPage({
@@ -34,36 +36,48 @@ export default async function AdminAuthorsPage({
 
   const supabase = createSupabaseAdminClient();
 
-  let query = supabase.from("authors").select("id,name,created_at").order("name", { ascending: true }).limit(1000);
+  let listQuery = supabase.from("authors").select("id,name,created_at").order("name", { ascending: true }).limit(1000);
 
   const safeQ = q.replace(/[%_,]/g, "").trim();
   if (safeQ) {
-    query = query.ilike("name", `%${safeQ}%`);
+    listQuery = listQuery.ilike("name", `%${safeQ}%`);
   }
 
-  const { data: authorRows, error: authorsErr } = await query;
+  const [authorsResult, linksResult, allIdsResult] = await Promise.all([
+    listQuery,
+    supabase.from("book_authors").select("author_id"),
+    supabase.from("authors").select("id")
+  ]);
 
-  if (authorsErr) {
+  if (authorsResult.error) {
     return (
-      <p className="text-sm text-destructive">저자 목록을 불러오지 못했습니다: {authorsErr.message}</p>
+      <p className="text-sm text-destructive">저자 목록을 불러오지 못했습니다: {authorsResult.error.message}</p>
     );
   }
 
-  const authors = (authorRows ?? []) as AuthorRow[];
-
-  const { data: linkRows, error: linksErr } = await supabase.from("book_authors").select("author_id");
-
-  if (linksErr) {
+  if (linksResult.error) {
     return (
-      <p className="text-sm text-destructive">연결 정보를 불러오지 못했습니다: {linksErr.message}</p>
+      <p className="text-sm text-destructive">연결 정보를 불러오지 못했습니다: {linksResult.error.message}</p>
     );
   }
+
+  if (allIdsResult.error) {
+    return (
+      <p className="text-sm text-destructive">저자 ID 목록을 불러오지 못했습니다: {allIdsResult.error.message}</p>
+    );
+  }
+
+  const authors = (authorsResult.data ?? []) as AuthorRow[];
+  const linkRows = linksResult.data ?? [];
 
   const bookCountByAuthor = new Map<string, number>();
-  for (const row of (linkRows ?? []) as BookAuthorLink[]) {
+  for (const row of linkRows as BookAuthorLink[]) {
     const id = row.author_id;
     bookCountByAuthor.set(id, (bookCountByAuthor.get(id) ?? 0) + 1);
   }
+
+  const linkedAuthorIds = new Set((linkRows as BookAuthorLink[]).map((r) => r.author_id));
+  const orphanCount = (allIdsResult.data ?? []).filter((r: { id: string }) => !linkedAuthorIds.has(r.id)).length;
 
   return (
     <div className="space-y-6">
@@ -84,6 +98,15 @@ export default async function AdminAuthorsPage({
       </div>
 
       <AdminAuthorCreateForm />
+
+      <div className="rounded-lg border border-border/80 bg-muted/20 p-4">
+        <p className="mb-2 text-sm text-muted-foreground">
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">book_authors</code>에 한 번도 연결되지 않은 저자는
+          DB 기준 <span className="font-medium text-foreground">{orphanCount}</span>명입니다. 아래 버튼은 이들을 한
+          번에 삭제합니다(실행 시점에 다시 집계). 아래 표는 검색 결과·최대 1000명까지입니다.
+        </p>
+        <DeleteZeroBookAuthorsButton orphanCount={orphanCount} />
+      </div>
 
       <form method="get" className="flex flex-wrap items-end gap-2">
         <div className="space-y-1">

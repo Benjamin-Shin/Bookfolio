@@ -1,4 +1,5 @@
 import type {
+  BookLookupResult,
   BooksQuery,
   CreateUserBookInput,
   UpdateUserBookInput,
@@ -217,6 +218,78 @@ export async function findCanonicalBookByIsbn(
 }
 
 /**
+ * 공유 서지 `books` 행을 제목 메타 검색 API 응답 형태로 변환합니다.
+ *
+ * @history
+ * - 2026-03-24: lookup-by-isbn 라우트와 제목 검색에서 공통 사용; 제목 검색 시 ISBN 없는 행은 `requireIsbn: false`
+ */
+export function mapCanonicalBookToLookupResult(
+  row: DbCanonicalBook,
+  opts?: { requireIsbn?: boolean }
+): BookLookupResult | null {
+  const requireIsbn = opts?.requireIsbn !== false;
+  const isbn = row.isbn?.trim() ?? "";
+  if (requireIsbn && !isbn) {
+    return null;
+  }
+
+  const genreSlugs = Array.isArray(row.genre_slugs) ? row.genre_slugs : [];
+
+  return {
+    isbn,
+    title: row.title,
+    authors: Array.isArray(row.authors) ? row.authors : [],
+    publisher: row.publisher,
+    publishedDate: row.published_date,
+    coverUrl: row.cover_url,
+    description: row.description,
+    priceKrw: row.price_krw ?? null,
+    source: "catalog",
+    genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined,
+    literatureRegion: row.literature_region ?? null,
+    originalLanguage: row.original_language ?? null
+  };
+}
+
+/**
+ * `books.title` 부분 일치(대소문자 무시)로 공유 서지를 찾습니다. API 제목 검색의 1순위 소스입니다.
+ *
+ * @history
+ * - 2026-03-24: 제목 검색 시 카탈로그 우선 반영
+ */
+export async function searchCanonicalBooksByTitle(
+  supabase: SupabaseClient,
+  rawQuery: string,
+  limit = 20
+): Promise<BookLookupResult[]> {
+  const q = rawQuery.trim();
+  if (!q) {
+    return [];
+  }
+  const safe = q.replace(/[%_]/g, " ").trim();
+  if (!safe) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("books")
+    .select("*")
+    .ilike("title", `%${safe}%`)
+    .limit(Math.min(Math.max(limit, 1), 50));
+
+  if (error) throw error;
+  const rows = (data ?? []) as DbCanonicalBook[];
+  const out: BookLookupResult[] = [];
+  for (const row of rows) {
+    const mapped = mapCanonicalBookToLookupResult(row, { requireIsbn: false });
+    if (mapped) {
+      out.push(mapped);
+    }
+  }
+  return out;
+}
+
+/**
  * 공유 서지 `books` 행을 삽입하고 `book_authors`·`books.authors` 를 맞춥니다.
  *
  * @history
@@ -333,6 +406,43 @@ export type ListUserBooksPagedOptions = {
   isOwned?: boolean;
 };
 
+/**
+ * `list_user_books_paged` RPC JSON 본문 파싱.
+ *
+ * @history
+ * - 2026-03-24: 신규 — 문자열 JSON·total 키 누락 등 방어
+ */
+function parseListUserBooksPagedPayload(data: unknown): { rawItems: unknown[]; total: number } {
+  let raw: unknown = data;
+  if (typeof data === "string") {
+    try {
+      raw = JSON.parse(data) as unknown;
+    } catch {
+      return { rawItems: [], total: 0 };
+    }
+  }
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return { rawItems: [], total: 0 };
+  }
+  const o = raw as Record<string, unknown>;
+  const itemsVal = o.items;
+  const totalVal = o.total ?? o.Total;
+  const rawItems = Array.isArray(itemsVal) ? itemsVal : [];
+  const totalNum =
+    typeof totalVal === "string"
+      ? parseInt(totalVal, 10)
+      : typeof totalVal === "number"
+        ? totalVal
+        : Number(totalVal ?? 0);
+  return { rawItems, total: Number.isFinite(totalNum) ? totalNum : 0 };
+}
+
+/**
+ * 사용자 도서 목록 페이지(RPC `list_user_books_paged`).
+ *
+ * @history
+ * - 2026-03-24: RPC JSON 응답 문자열·키 누락 등 방어적 파싱(`parseListUserBooksPagedPayload`)
+ */
 export async function listUserBooksPaged(
   opts: ListUserBooksPagedOptions,
   context?: RepositoryContext
@@ -353,12 +463,10 @@ export async function listUserBooksPaged(
 
   if (error) throw error;
 
-  const body = data as { items: DbUserBook[] | null; total: number | string | null };
-  const rawItems = Array.isArray(body.items) ? body.items : [];
+  const { rawItems, total } = parseListUserBooksPagedPayload(data);
   const items = rawItems.map((row) => mapFlatRow(row as DbUserBook));
-  const total = typeof body.total === "string" ? parseInt(body.total, 10) : Number(body.total ?? 0);
 
-  return { items, total: Number.isFinite(total) ? total : 0 };
+  return { items, total };
 }
 
 export async function listUserBooks(
