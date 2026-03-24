@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { normalizeIsbn } from "@/lib/books/lookup";
+import { replaceBookAuthorLinks } from "@/lib/books/replace-book-author-links";
 import { linkUserBookToOwnedLibraries } from "@/lib/libraries/repository";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
@@ -32,9 +33,16 @@ function parseOptionalInt(raw: string | null): number | null {
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
+/**
+ * 관리자 도서 폼에서 공유 서지 필드를 파싱합니다.
+ *
+ * @history
+ * - 2026-03-24: `translatorsCsv`, `apiSource` 추가
+ */
 function readCanonicalFields(formData: FormData) {
   const title = formData.get("title")?.toString().trim() ?? "";
   const authors = parseAuthorsCsv(formData.get("authorsCsv")?.toString() ?? "");
+  const translators = parseAuthorsCsv(formData.get("translatorsCsv")?.toString() ?? "");
   const isbnRaw = formData.get("isbn")?.toString() ?? "";
   const normalizedIsbn = normalizeIsbn(isbnRaw);
   const isbn = normalizedIsbn.length > 0 ? normalizedIsbn : null;
@@ -45,6 +53,8 @@ function readCanonicalFields(formData: FormData) {
   const description = formData.get("description")?.toString().trim() || null;
   const literatureRegion = formData.get("literatureRegion")?.toString().trim() || null;
   const originalLanguage = formData.get("originalLanguage")?.toString().trim() || null;
+  const apiSourceRaw = formData.get("apiSource")?.toString().trim() ?? "";
+  const apiSource = apiSourceRaw.length > 0 ? apiSourceRaw : null;
   const priceKrw = parseOptionalInt(formData.get("priceKrw")?.toString() ?? null);
   const genreSlugs = parseGenreSlugs(formData.get("genreSlugs")?.toString() ?? "");
   const shelfLocationRaw = formData.get("location")?.toString() ?? "";
@@ -53,6 +63,7 @@ function readCanonicalFields(formData: FormData) {
   return {
     title,
     authors,
+    translators,
     isbn,
     publisher,
     publishedDate,
@@ -60,12 +71,18 @@ function readCanonicalFields(formData: FormData) {
     description,
     literatureRegion,
     originalLanguage,
+    apiSource,
     priceKrw,
     genreSlugs,
     shelfLocation
   };
 }
 
+/**
+ * @history
+ * - 2026-03-24: `translators`, `api_source` insert 반영
+ * - 2026-03-24: 저자는 `replace_book_author_links` 로 `book_authors`·`books.authors` 동기화
+ */
 export async function createAdminCanonicalBook(
   _prev: AdminBookActionState | null,
   formData: FormData
@@ -82,7 +99,7 @@ export async function createAdminCanonicalBook(
     .from("books")
     .insert({
       title: f.title,
-      authors: f.authors,
+      translators: f.translators,
       isbn: f.isbn,
       publisher: f.publisher,
       published_date: f.publishedDate,
@@ -92,6 +109,7 @@ export async function createAdminCanonicalBook(
       genre_slugs: f.genreSlugs.length > 0 ? f.genreSlugs : [],
       literature_region: f.literatureRegion,
       original_language: f.originalLanguage,
+      api_source: f.apiSource,
       source: "admin"
     })
     .select("id")
@@ -105,6 +123,13 @@ export async function createAdminCanonicalBook(
   }
 
   const bookId = data.id as string;
+
+  try {
+    await replaceBookAuthorLinks(supabase, bookId, f.authors);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "저자 정보를 저장하지 못했습니다.";
+    return { error: message };
+  }
 
   if (f.shelfLocation) {
     const adminId = session.user.id;
@@ -155,6 +180,11 @@ export async function createAdminCanonicalBook(
   redirect(`/dashboard/admin/books/${bookId}/edit`);
 }
 
+/**
+ * @history
+ * - 2026-03-24: `translators`, `api_source` update 반영
+ * - 2026-03-24: 저자는 `replace_book_author_links` 로 동기화
+ */
 export async function updateAdminCanonicalBook(
   _prev: AdminBookActionState | null,
   formData: FormData
@@ -176,7 +206,7 @@ export async function updateAdminCanonicalBook(
     .from("books")
     .update({
       title: f.title,
-      authors: f.authors,
+      translators: f.translators,
       isbn: f.isbn,
       publisher: f.publisher,
       published_date: f.publishedDate,
@@ -185,7 +215,8 @@ export async function updateAdminCanonicalBook(
       price_krw: f.priceKrw,
       genre_slugs: f.genreSlugs.length > 0 ? f.genreSlugs : [],
       literature_region: f.literatureRegion,
-      original_language: f.originalLanguage
+      original_language: f.originalLanguage,
+      api_source: f.apiSource
     })
     .eq("id", id);
 
@@ -194,6 +225,13 @@ export async function updateAdminCanonicalBook(
       return { error: "같은 ISBN의 도서가 이미 있습니다." };
     }
     return { error: error.message };
+  }
+
+  try {
+    await replaceBookAuthorLinks(supabase, id, f.authors);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "저자 정보를 저장하지 못했습니다.";
+    return { error: message };
   }
 
   revalidatePath("/dashboard/admin/books");

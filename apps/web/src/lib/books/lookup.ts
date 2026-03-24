@@ -6,8 +6,60 @@ export function normalizeIsbn(isbn: string): string {
 }
 
 /**
+ * 제목(또는 키워드)으로 도서를 검색합니다. 네이버 책검색을 우선하고, 실패·미설정 시 Google Books를 시도합니다.
+ * 결과 항목에 ISBN이 없는 경우가 있을 수 있으며, 그때는 빈 문자열로 내려갑니다.
+ *
+ * @history
+ * - 2026-03-24: 모바일·API용 제목 검색 추가 (네이버 → Google 폴백)
+ */
+export async function searchBooksByTitle(rawQuery: string): Promise<BookLookupResult[]> {
+  const query = rawQuery.trim();
+  if (!query) {
+    throw new Error("검색어가 필요합니다.");
+  }
+
+  const naverId = process.env.NAVER_API_CLIENT_ID?.trim();
+  const naverSecret = process.env.NAVER_API_CLIENT_SECRET?.trim();
+  const googleKey = process.env.GOOGLE_BOOKS_API_KEY?.trim();
+
+  const hasAnyProvider = Boolean((naverId && naverSecret) || googleKey);
+  if (!hasAnyProvider) {
+    throw new Error(
+      "제목 검색을 위해 NAVER_API_CLIENT_ID·NAVER_API_CLIENT_SECRET 또는 GOOGLE_BOOKS_API_KEY를 설정해 주세요."
+    );
+  }
+
+  let lastMessage: string | null = null;
+
+  if (naverId && naverSecret) {
+    try {
+      const fromNaver = await fetchNaverBookSearch(query, naverId, naverSecret, 20);
+      if (fromNaver.length > 0) {
+        return dedupeLookupByIsbn(fromNaver);
+      }
+    } catch (e) {
+      lastMessage = e instanceof Error ? e.message : "네이버 제목 검색 실패";
+    }
+  }
+
+  if (googleKey) {
+    try {
+      const fromGoogle = await searchGoogleBooksByTitleQuery(query, googleKey);
+      return dedupeLookupByIsbn(fromGoogle);
+    } catch (e) {
+      lastMessage = e instanceof Error ? e.message : "Google Books 제목 검색 실패";
+    }
+  }
+
+  throw new Error(lastMessage ?? "도서를 찾지 못했습니다.");
+}
+
+/**
  * 국립중앙도서관 → 네이버 책검색 → Google Books 순으로 시도합니다.
  * 환경 변수가 없는 제공자는 건너뛰고, 설정된 제공자만 순서대로 호출합니다.
+ *
+ * @history
+ * - 2026-03-24: 네이버 ISBN 조회를 공통 매핑·원시 검색 헬퍼로 정리 (동작 동일)
  */
 export async function lookupBookByIsbn(isbn: string): Promise<BookLookupResult> {
   const normalized = normalizeIsbn(isbn);
@@ -141,14 +193,93 @@ type NaverBookItem = {
   discount?: string | number;
 };
 
+function naverBookItemToLookupResult(item: NaverBookItem, isbnForResult: string): BookLookupResult {
+  const titleRaw = item.title ?? "";
+  const title = stripHtml(titleRaw) || "제목 미상";
+  const authors = splitAuthorString(stripHtml(item.author ?? ""));
+  const description = stripHtml(item.description ?? "") || null;
+
+  return {
+    isbn: isbnForResult,
+    title,
+    authors,
+    publisher: item.publisher?.trim() || null,
+    publishedDate: formatNaverPubdate(item.pubdate?.trim() ?? null),
+    coverUrl: ensureHttpsUrl(item.image?.trim() || null),
+    description,
+    priceKrw: naverPriceKrw(item),
+    source: "naver"
+  };
+}
+
+/** 네이버 `isbn` 필드(복수 ISBN 공백 구분)에서 우선 ISBN-13을 고릅니다. */
+function pickBestIsbnFromNaverField(isbnField: string | undefined): string {
+  if (!isbnField?.trim()) {
+    return "";
+  }
+  const tokens = isbnField.split(/\s+/).map((t) => normalizeIsbn(t)).filter(Boolean);
+  const isbn13 = tokens.find((t) => t.length === 13);
+  if (isbn13) {
+    return isbn13;
+  }
+  const isbn10 = tokens.find((t) => t.length === 10);
+  return isbn10 ?? tokens[0] ?? "";
+}
+
+async function fetchNaverBookSearch(
+  searchQuery: string,
+  clientId: string,
+  clientSecret: string,
+  display: number
+): Promise<BookLookupResult[]> {
+  const items = await fetchNaverBookSearchRaw(searchQuery, clientId, clientSecret, display);
+  if (!Array.isArray(items) || items.length === 0) {
+    return [];
+  }
+  return items.map((item) => naverBookItemToLookupResult(item, pickBestIsbnFromNaverField(item.isbn)));
+}
+
+function dedupeLookupByIsbn(results: BookLookupResult[]): BookLookupResult[] {
+  const seen = new Set<string>();
+  const out: BookLookupResult[] = [];
+  for (const r of results) {
+    const i = r.isbn.trim();
+    if (i) {
+      if (seen.has(i)) {
+        continue;
+      }
+      seen.add(i);
+    }
+    out.push(r);
+  }
+  return out;
+}
+
 async function lookupNaver(
   normalized: string,
   clientId: string,
   clientSecret: string
 ): Promise<BookLookupResult> {
+  const items = await fetchNaverBookSearchRaw(normalized, clientId, clientSecret, 10);
+  if (items.length === 0) {
+    throw new Error("네이버에서 책을 찾지 못했습니다.");
+  }
+
+  const matched =
+    items.find((item) => isbnFieldMatches(item.isbn, normalized)) ?? items[0];
+
+  return naverBookItemToLookupResult(matched, normalized);
+}
+
+async function fetchNaverBookSearchRaw(
+  searchQuery: string,
+  clientId: string,
+  clientSecret: string,
+  display: number
+): Promise<NaverBookItem[]> {
   const url = new URL("https://openapi.naver.com/v1/search/book.json");
-  url.searchParams.set("query", normalized);
-  url.searchParams.set("display", "10");
+  url.searchParams.set("query", searchQuery);
+  url.searchParams.set("display", String(Math.min(Math.max(display, 1), 100)));
   url.searchParams.set("sort", "sim");
 
   const response = await fetch(url.toString(), {
@@ -166,28 +297,9 @@ async function lookupNaver(
   const data = (await response.json()) as { items?: NaverBookItem[] };
   const items = data.items;
   if (!Array.isArray(items) || items.length === 0) {
-    throw new Error("네이버에서 책을 찾지 못했습니다.");
+    return [];
   }
-
-  const matched =
-    items.find((item) => isbnFieldMatches(item.isbn, normalized)) ?? items[0];
-
-  const titleRaw = matched.title ?? "";
-  const title = stripHtml(titleRaw) || "제목 미상";
-  const authors = splitAuthorString(stripHtml(matched.author ?? ""));
-  const description = stripHtml(matched.description ?? "") || null;
-
-  return {
-    isbn: normalized,
-    title,
-    authors,
-    publisher: matched.publisher?.trim() || null,
-    publishedDate: formatNaverPubdate(matched.pubdate?.trim() ?? null),
-    coverUrl: ensureHttpsUrl(matched.image?.trim() || null),
-    description,
-    priceKrw: naverPriceKrw(matched),
-    source: "naver"
-  };
+  return items;
 }
 
 type GoogleSaleInfo = {
@@ -247,6 +359,94 @@ async function lookupGoogleBooks(normalized: string, apiKey: string): Promise<Bo
     coverUrl: ensureHttpsUrl(thumb),
     description: volumeInfo.description?.trim() || null,
     priceKrw: googleBooksPriceKrw(picked?.saleInfo),
+    source: "googlebooks"
+  };
+}
+
+async function searchGoogleBooksByTitleQuery(searchQuery: string, apiKey: string): Promise<BookLookupResult[]> {
+  const url = new URL("https://www.googleapis.com/books/v1/volumes");
+  url.searchParams.set("q", searchQuery);
+  url.searchParams.set("maxResults", "20");
+  url.searchParams.set("key", apiKey);
+
+  const response = await fetch(url.toString(), { next: { revalidate: 3600 } });
+
+  if (!response.ok) {
+    throw new Error("Google Books API 요청이 실패했습니다.");
+  }
+
+  const data = (await response.json()) as { items?: GoogleVolume[]; totalItems?: number };
+  const items = data.items;
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("Google Books에서 책을 찾지 못했습니다.");
+  }
+
+  const out: BookLookupResult[] = [];
+  for (const vol of items) {
+    const row = googleVolumeToLookupResult(vol);
+    if (row) {
+      out.push(row);
+    }
+  }
+  if (out.length === 0) {
+    throw new Error("Google Books에서 책을 찾지 못했습니다.");
+  }
+  return out;
+}
+
+function pickBestIsbnFromGoogleIndustryIdentifiers(
+  ids: { type?: string; identifier?: string }[] | undefined
+): string {
+  if (!Array.isArray(ids)) {
+    return "";
+  }
+  type Tagged = { type: string; value: string };
+  const list: Tagged[] = [];
+  for (const id of ids) {
+    const value = normalizeIsbn(id.identifier ?? "");
+    if (!value) {
+      continue;
+    }
+    list.push({ type: (id.type ?? "").toUpperCase(), value });
+  }
+  const isbn13typed = list.find((x) => x.type === "ISBN_13" && x.value.length === 13);
+  if (isbn13typed) {
+    return isbn13typed.value;
+  }
+  const any13 = list.find((x) => x.value.length === 13);
+  if (any13) {
+    return any13.value;
+  }
+  const isbn10typed = list.find((x) => x.type === "ISBN_10" && x.value.length === 10);
+  if (isbn10typed) {
+    return isbn10typed.value;
+  }
+  const any10 = list.find((x) => x.value.length === 10);
+  return any10?.value ?? "";
+}
+
+function googleVolumeToLookupResult(vol: GoogleVolume): BookLookupResult | null {
+  const volumeInfo = vol.volumeInfo;
+  if (!volumeInfo) {
+    return null;
+  }
+  const title = volumeInfo.title?.trim() || "제목 미상";
+  const authors = Array.isArray(volumeInfo.authors)
+    ? volumeInfo.authors.map((a) => a.trim()).filter(Boolean)
+    : [];
+  const thumb =
+    volumeInfo.imageLinks?.thumbnail ?? volumeInfo.imageLinks?.smallThumbnail ?? null;
+  const isbn = pickBestIsbnFromGoogleIndustryIdentifiers(volumeInfo.industryIdentifiers);
+
+  return {
+    isbn,
+    title,
+    authors,
+    publisher: volumeInfo.publisher?.trim() || null,
+    publishedDate: volumeInfo.publishedDate?.trim() || null,
+    coverUrl: ensureHttpsUrl(thumb),
+    description: volumeInfo.description?.trim() || null,
+    priceKrw: googleBooksPriceKrw(vol.saleInfo),
     source: "googlebooks"
   };
 }

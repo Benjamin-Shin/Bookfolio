@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 
@@ -25,6 +26,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           className="rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           도서 관리
+        </Link>
+        <Link
+          href={"/dashboard/admin/authors" as Route}
+          className="rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          저자 관리
         </Link>
         <Link
           href="/dashboard"

@@ -107,6 +107,22 @@ class BookfolioApi {
     return BookLookupResult.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
+  /// 제목·키워드로 메타 검색 (`POST /api/books/search-by-title`).
+  ///
+  /// History:
+  /// - 2026-03-24: 모바일 책 등록용 제목 검색 API 연동
+  Future<List<BookLookupResult>> searchBooksByTitle(String query) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/books/search-by-title'),
+      headers: await _headers(),
+      body: jsonEncode({'query': query}),
+    );
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final list = decoded['results'] as List<dynamic>? ?? const [];
+    return list.map((e) => BookLookupResult.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
   void _throwIfFailed(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return;

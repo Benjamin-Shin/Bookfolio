@@ -65,5 +65,11 @@ class LibraryController extends ChangeNotifier {
   Future<BookLookupResult> lookupByIsbn(String isbn) {
     return _api.lookupByIsbn(isbn);
   }
+
+  /// History:
+  /// - 2026-03-24: 제목 검색 API 위임 추가
+  Future<List<BookLookupResult>> searchBooksByTitle(String query) {
+    return _api.searchBooksByTitle(query);
+  }
 }
 

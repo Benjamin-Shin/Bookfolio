@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * 관리자 공유 서지(`books`) 등록·수정 폼.
+ *
+ * @history
+ * - 2026-03-24: 옮긴이(`translatorsCsv`), API소스(`apiSource`) 입력; ISBN 조회 시 API소스 칸이 비어 있으면 조회 `source`로 채움
+ */
+
 import type { BookLookupResult } from "@bookfolio/shared";
 import type { RefObject } from "react";
 import { useActionState, useRef, useState } from "react";
@@ -48,6 +55,7 @@ function applyLookupToFormFields(
     literatureRegion: RefObject<HTMLInputElement | null>;
     originalLanguage: RefObject<HTMLInputElement | null>;
     description: RefObject<HTMLTextAreaElement | null>;
+    apiSource: RefObject<HTMLInputElement | null>;
   },
   mode: "create" | "edit"
 ) {
@@ -81,11 +89,13 @@ function applyLookupToFormFields(
   assign(refs.genreSlugs.current, genres);
   assign(refs.literatureRegion.current, book.literatureRegion ?? "");
   assign(refs.originalLanguage.current, book.originalLanguage ?? "");
+  assign(refs.apiSource.current, book.source ?? "");
 }
 
 export type AdminCanonicalBookFormValues = {
   title: string;
   authorsCsv: string;
+  translatorsCsv: string;
   isbn: string;
   publisher: string;
   publishedDate: string;
@@ -95,11 +105,13 @@ export type AdminCanonicalBookFormValues = {
   genreSlugs: string;
   literatureRegion: string;
   originalLanguage: string;
+  apiSource: string;
 };
 
 const emptyValues: AdminCanonicalBookFormValues = {
   title: "",
   authorsCsv: "",
+  translatorsCsv: "",
   isbn: "",
   publisher: "",
   publishedDate: "",
@@ -108,7 +120,8 @@ const emptyValues: AdminCanonicalBookFormValues = {
   priceKrw: "",
   genreSlugs: "",
   literatureRegion: "",
-  originalLanguage: ""
+  originalLanguage: "",
+  apiSource: ""
 };
 
 type AdminCanonicalBookFormProps = {
@@ -147,6 +160,7 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
   const genreSlugsRef = useRef<HTMLInputElement>(null);
   const literatureRegionRef = useRef<HTMLInputElement>(null);
   const originalLanguageRef = useRef<HTMLInputElement>(null);
+  const apiSourceRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
 
@@ -225,7 +239,8 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
           genreSlugs: genreSlugsRef,
           literatureRegion: literatureRegionRef,
           originalLanguage: originalLanguageRef,
-          description: descriptionRef
+          description: descriptionRef,
+          apiSource: apiSourceRef
         },
         mode
       );
@@ -335,6 +350,31 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
           name="authorsCsv"
           placeholder="쉼표로 구분 (예: 김영하, 한강)"
           defaultValue={initial.authorsCsv}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="translatorsCsv">옮긴이</Label>
+        <Input
+          id="translatorsCsv"
+          name="translatorsCsv"
+          placeholder="쉼표로 구분 (복수 가능)"
+          defaultValue={initial.translatorsCsv}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="apiSource">API소스</Label>
+        <p className="text-xs text-muted-foreground">
+          외부 메타 조회 출처 식별자(예: nl.go.kr, naver, googlebooks). ISBN 검색으로 채울 때 비어 있는 칸만 갱신됩니다.
+        </p>
+        <Input
+          ref={apiSourceRef}
+          id="apiSource"
+          name="apiSource"
+          placeholder="비우면 저장 시 NULL"
+          defaultValue={initial.apiSource}
+          autoComplete="off"
         />
       </div>
 

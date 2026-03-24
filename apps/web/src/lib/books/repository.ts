@@ -9,6 +9,7 @@ import type {
 import { auth } from "@/auth";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
 import { normalizeIsbn } from "@/lib/books/lookup";
+import { replaceBookAuthorLinks } from "@/lib/books/replace-book-author-links";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -53,17 +54,27 @@ type DbUserBookNestedSelect = DbUserBookOwner & {
   books: DbCanonicalBook | DbCanonicalBook[] | null;
 };
 
+/**
+ * `books` 테이블 행 (조회·조인용).
+ *
+ * @history
+ * - 2026-03-24: `translators`, `api_source` 필드 추가 (0013 마이그레이션)
+ */
 export type DbCanonicalBook = {
   id: string;
   isbn: string | null;
   title: string;
   authors: string[];
+  /** 옮긴이 (서지). 마이그레이션 0013 이전 DB는 없을 수 있음. */
+  translators?: string[];
   publisher: string | null;
   published_date: string | null;
   cover_url: string | null;
   description: string | null;
   price_krw: number | null;
   source: string;
+  /** 외부 메타 조회 API 식별. nullable. */
+  api_source?: string | null;
   genre_slugs: string[];
   literature_region: string | null;
   original_language: string | null;
@@ -205,6 +216,12 @@ export async function findCanonicalBookByIsbn(
   return data as DbCanonicalBook | null;
 }
 
+/**
+ * 공유 서지 `books` 행을 삽입하고 `book_authors`·`books.authors` 를 맞춥니다.
+ *
+ * @history
+ * - 2026-03-24: `authors` text[] 는 RPC `replace_book_author_links` 로만 반영
+ */
 async function insertCanonicalBook(
   supabase: SupabaseClient,
   row: {
@@ -224,7 +241,6 @@ async function insertCanonicalBook(
     .insert({
       isbn: row.isbn,
       title: row.title,
-      authors: row.authors,
       publisher: row.publisher,
       published_date: row.published_date,
       cover_url: row.cover_url,
@@ -241,7 +257,11 @@ async function insertCanonicalBook(
   }
 
   if (error) throw error;
-  return data as DbCanonicalBook;
+  const inserted = data as DbCanonicalBook;
+  await replaceBookAuthorLinks(supabase, inserted.id, row.authors);
+  const { data: synced, error: syncErr } = await supabase.from("books").select("*").eq("id", inserted.id).single();
+  if (syncErr) throw syncErr;
+  return synced as DbCanonicalBook;
 }
 
 /**
@@ -264,7 +284,6 @@ export async function resolveCanonicalBookForSharedLibrary(
         .from("books")
         .update({
           title: input.title,
-          authors: input.authors,
           publisher: input.publisher ?? null,
           published_date: input.publishedDate ?? null,
           cover_url: input.coverUrl ?? found.cover_url,
@@ -273,6 +292,7 @@ export async function resolveCanonicalBookForSharedLibrary(
         })
         .eq("id", found.id);
       if (upErr) throw upErr;
+      await replaceBookAuthorLinks(supabase, found.id, input.authors);
       const { data: refreshed, error: refErr } = await supabase.from("books").select("*").eq("id", found.id).single();
       if (refErr) throw refErr;
       return refreshed as DbCanonicalBook;
@@ -428,7 +448,6 @@ export async function createUserBook(
         .from("books")
         .update({
           title: input.title,
-          authors: input.authors,
           publisher: input.publisher ?? null,
           published_date: input.publishedDate ?? null,
           cover_url: input.coverUrl ?? found.cover_url,
@@ -437,6 +456,7 @@ export async function createUserBook(
         })
         .eq("id", found.id);
       if (upErr) throw upErr;
+      await replaceBookAuthorLinks(supabase, found.id, input.authors);
       const { data: refreshed, error: refErr } = await supabase.from("books").select("*").eq("id", found.id).single();
       if (refErr) throw refErr;
       canonical = refreshed as DbCanonicalBook;
@@ -502,6 +522,10 @@ export async function createUserBook(
   return detail;
 }
 
+/**
+ * @history
+ * - 2026-03-24: 공유 서지 저자 변경 시 `replaceBookAuthorLinks` 로 `book_authors` 동기화
+ */
 export async function updateUserBook(
   id: string,
   input: UpdateUserBookInput,
@@ -523,7 +547,6 @@ export async function updateUserBook(
 
   const catalogPatch: Record<string, unknown> = {};
   if (input.title !== undefined) catalogPatch.title = input.title;
-  if (input.authors !== undefined) catalogPatch.authors = input.authors;
   if (input.coverUrl !== undefined) catalogPatch.cover_url = input.coverUrl;
   if (input.publisher !== undefined) catalogPatch.publisher = input.publisher;
   if (input.publishedDate !== undefined) catalogPatch.published_date = input.publishedDate;
@@ -533,6 +556,10 @@ export async function updateUserBook(
   if (Object.keys(catalogPatch).length > 0) {
     const { error: cErr } = await supabase.from("books").update(catalogPatch).eq("id", existing.book_id);
     if (cErr) throw cErr;
+  }
+
+  if (input.authors !== undefined) {
+    await replaceBookAuthorLinks(supabase, existing.book_id as string, input.authors);
   }
 
   const userPatch: Record<string, unknown> = {};

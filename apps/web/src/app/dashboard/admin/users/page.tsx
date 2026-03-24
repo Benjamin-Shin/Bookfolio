@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
+import { UserNameForm } from "./user-name-form";
 import { UserRoleForm } from "./user-role-form";
 
 type AppUserRow = {
@@ -9,15 +10,28 @@ type AppUserRow = {
   name: string | null;
   role: string;
   created_at: string;
+  app_profiles: { display_name: string | null } | { display_name: string | null }[] | null;
 };
 
+function effectiveUserDisplayName(row: AppUserRow): string | null {
+  const prof = row.app_profiles;
+  const fromProfile = Array.isArray(prof) ? prof[0]?.display_name : prof?.display_name;
+  return (fromProfile ?? row.name) ?? null;
+}
+
+/**
+ * 관리자 전용 사용자 목록 페이지.
+ *
+ * @history
+ * - 2026-03-24: 이름 컬럼에 인라인 편집(`UserNameForm`) 및 프로필 표시명 조회
+ */
 export default async function AdminUsersPage() {
   await requireAdmin();
 
   const supabase = createSupabaseAdminClient();
   const { data: rows, error } = await supabase
     .from("app_users")
-    .select("id,email,name,role,created_at")
+    .select("id,email,name,role,created_at,app_profiles(display_name)")
     .order("created_at", { ascending: false })
     .limit(500);
 
@@ -57,7 +71,9 @@ export default async function AdminUsersPage() {
               return (
                 <tr key={u.id} className="border-b border-border/40 last:border-0">
                   <td className="px-3 py-2 font-mono text-xs">{u.email}</td>
-                  <td className="max-w-[10rem] truncate px-3 py-2 text-muted-foreground">{u.name ?? "—"}</td>
+                  <td className="px-3 py-2 align-middle">
+                    <UserNameForm userId={u.id} initialName={effectiveUserDisplayName(u)} />
+                  </td>
                   <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                     {new Date(u.created_at).toLocaleString("ko-KR")}
                   </td>

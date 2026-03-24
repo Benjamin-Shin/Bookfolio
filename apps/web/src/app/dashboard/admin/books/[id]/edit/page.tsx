@@ -10,12 +10,20 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { AdminBookDeleteForm } from "../../admin-book-delete-form";
 import { AdminCanonicalBookForm } from "../../admin-canonical-book-form";
 
+/**
+ * 관리자 도서 수정 페이지에서 로드하는 `books` 행.
+ *
+ * @history
+ * - 2026-03-24: `translators`, `api_source` 추가
+ */
 type BookRow = {
   id: string;
   isbn: string | null;
   title: string;
   authors: string[];
+  translators: string[];
   source: string;
+  api_source: string | null;
   price_krw: number | null;
   genre_slugs: string[] | null;
   literature_region: string | null;
@@ -34,7 +42,7 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
   const { data: row, error } = await supabase
     .from("books")
     .select(
-      "id,isbn,title,authors,source,price_krw,genre_slugs,literature_region,original_language,publisher,published_date,cover_url,description"
+      "id,isbn,title,authors,translators,source,api_source,price_krw,genre_slugs,literature_region,original_language,publisher,published_date,cover_url,description"
     )
     .eq("id", id)
     .single();
@@ -44,6 +52,7 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
   }
 
   const book = row as BookRow;
+  const translators = Array.isArray(book.translators) ? book.translators : [];
 
   const { data: refRows } = await supabase.from("user_books").select("is_owned").eq("book_id", id);
 
@@ -63,6 +72,7 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
   const defaultValues = {
     title: book.title,
     authorsCsv: (book.authors ?? []).join(", "),
+    translatorsCsv: translators.join(", "),
     isbn: book.isbn ?? "",
     publisher: book.publisher ?? "",
     publishedDate: book.published_date ?? "",
@@ -71,7 +81,8 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
     priceKrw: book.price_krw != null ? String(book.price_krw) : "",
     genreSlugs: (book.genre_slugs ?? []).join(", "),
     literatureRegion: book.literature_region ?? "",
-    originalLanguage: book.original_language ?? ""
+    originalLanguage: book.original_language ?? "",
+    apiSource: book.api_source ?? ""
   };
 
   return (
@@ -80,7 +91,13 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
         <div>
           <h1 className="text-2xl font-bold tracking-tight">도서 수정</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            출처: <span className="font-mono text-xs">{book.source}</span>
+            카탈로그 출처: <span className="font-mono text-xs">{book.source}</span>
+            {book.api_source ? (
+              <>
+                {" "}
+                · API소스: <span className="font-mono text-xs">{book.api_source}</span>
+              </>
+            ) : null}
             {totalRefs > 0 ? (
               <>
                 {" "}

@@ -4,10 +4,13 @@ import 'package:bookfolio_mobile/src/state/library_controller.dart';
 import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
 import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:bookfolio_mobile/src/ui/screens/barcode_scan_screen.dart';
+import 'package:bookfolio_mobile/src/ui/screens/title_search_screen.dart';
 import 'package:bookfolio_mobile/src/util/isbn.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+/// History:
+/// - 2026-03-24: 제목 검색으로 메타 불러오기 버튼 추가
 const _kLocationPresets = ['집', '회사', '빌려줌'];
 
 class BookFormScreen extends StatefulWidget {
@@ -103,6 +106,18 @@ class _BookFormScreenState extends State<BookFormScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('도서 정보를 불러왔습니다.')),
+    );
+  }
+
+  Future<void> _openTitleSearch() async {
+    final lookup = await Navigator.of(context).push<BookLookupResult>(
+      MaterialPageRoute(builder: (_) => const TitleSearchScreen()),
+    );
+    if (lookup == null || !mounted) return;
+    _applyLookup(lookup);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('선택한 도서 정보를 반영했습니다.')),
     );
   }
 
@@ -215,6 +230,15 @@ class _BookFormScreenState extends State<BookFormScreen> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _lookupBusy ? null : _openTitleSearch,
+                icon: const Icon(Icons.title),
+                label: const Text('제목으로 검색'),
+              ),
             ),
           ],
           const SizedBox(height: 24),

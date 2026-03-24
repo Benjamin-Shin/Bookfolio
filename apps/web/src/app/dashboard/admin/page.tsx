@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -9,7 +10,7 @@ export default function AdminHomePage() {
         <h1 className="text-2xl font-bold tracking-tight">관리자</h1>
         <p className="mt-1 text-sm text-muted-foreground">계정·공유 도서 메타데이터를 관리합니다.</p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card className="border-border/80">
           <CardHeader>
             <CardTitle className="text-lg">사용자 관리</CardTitle>
@@ -29,6 +30,20 @@ export default function AdminHomePage() {
           <CardContent>
             <Link href="/dashboard/admin/books" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
               도서 목록 열기
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="border-border/80">
+          <CardHeader>
+            <CardTitle className="text-lg">저자 관리</CardTitle>
+            <CardDescription>저자 마스터(`authors`)와 도서 연결(`book_authors`) 데이터를 봅니다.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={"/dashboard/admin/authors" as Route}
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              저자 목록 열기
             </Link>
           </CardContent>
         </Card>
