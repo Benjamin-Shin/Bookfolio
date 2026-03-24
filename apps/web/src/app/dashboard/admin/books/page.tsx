@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 import { AdminBookDeleteForm } from "./admin-book-delete-form";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 30;
 
@@ -42,32 +44,62 @@ async function userBookRefStatsByBookIds(
   return map;
 }
 
+/**
+ * 관리자 도서 목록 페이지네이션·필터용 링크 (`next` typed routes).
+ *
+ * @history
+ * - 2026-03-24: 장르(`genre=missing`)·검색어·페이지 쿼리 유지
+ */
+function adminBooksListHref(q: string, genreMode: "all" | "missing", page: number): Route {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (genreMode === "missing") params.set("genre", "missing");
+  if (page > 1) params.set("page", String(page));
+  const s = params.toString();
+  return (s ? `/dashboard/admin/books?${s}` : "/dashboard/admin/books") as Route;
+}
+
+/**
+ * 관리자 공유 서지(`books`) 목록 — 검색·페이지네이션·장르 필터.
+ *
+ * @history
+ * - 2026-03-24: 장르 필터(전체·장르 없음만)·전체 목록에서 장르 미지정 행 상단 정렬(`has_genre_slugs`, 마이그레이션 0016)
+ * - 2026-03-24: 장르 `<select>`에 `suppressHydrationWarning`(확장 프로그램이 `data-sharkid` 등 주입 시 하이드레이션 경고 완화)
+ */
 export default async function AdminBooksPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; genre?: string }>;
 }) {
   await requireAdmin();
 
   const sp = await searchParams;
   const q = sp.q?.trim() ?? "";
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
+  const genreMode = sp.genre === "missing" ? "missing" : "all";
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   const supabase = createSupabaseAdminClient();
+  const safeQ = q.replace(/[%_,]/g, "").trim();
+
   let query = supabase
     .from("books")
     .select("id,isbn,title,authors,source,price_krw,genre_slugs,literature_region,original_language,updated_at", {
       count: "exact"
-    })
-    .order("updated_at", { ascending: false })
-    .range(from, to);
+    });
 
-  const safeQ = q.replace(/[%_,]/g, "").trim();
   if (safeQ) {
     query = query.or(`title.ilike.%${safeQ}%,isbn.ilike.%${safeQ}%`);
   }
+
+  if (genreMode === "missing") {
+    query = query.eq("has_genre_slugs", false).order("updated_at", { ascending: false });
+  } else {
+    query = query.order("has_genre_slugs", { ascending: true }).order("updated_at", { ascending: false });
+  }
+
+  query = query.range(from, to);
 
   const { data: rows, error, count } = await query;
 
@@ -106,13 +138,32 @@ export default async function AdminBooksPage({
           </label>
           <Input id="q" name="q" type="search" placeholder="제목 또는 ISBN" defaultValue={q} />
         </div>
+        <div className="min-w-[11rem] space-y-1">
+          <label htmlFor="genre" className="text-xs text-muted-foreground">
+            장르
+          </label>
+          <select
+            id="genre"
+            name="genre"
+            defaultValue={genreMode === "missing" ? "missing" : "all"}
+            suppressHydrationWarning
+            className={cn(
+              "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] md:text-sm dark:bg-input/30",
+              "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            )}
+          >
+            <option value="all">전체 (장르 없음 먼저)</option>
+            <option value="missing">장르 없음만</option>
+          </select>
+        </div>
         <Button type="submit" size="sm">
-          검색
+          적용
         </Button>
       </form>
 
       <p className="text-xs text-muted-foreground">
         총 {total.toLocaleString("ko-KR")}권 · {page} / {totalPages} 페이지
+        {genreMode === "missing" ? " · 장르 없음만 표시" : " · 장르 없음 행이 목록 상단에 옵니다"}
       </p>
 
       <div className="overflow-x-auto rounded-lg border border-border/80">
@@ -185,12 +236,12 @@ export default async function AdminBooksPage({
         <div className="flex flex-wrap gap-2">
           {page > 1 ? (
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/admin/books?q=${encodeURIComponent(q)}&page=${page - 1}`}>이전</Link>
+              <Link href={adminBooksListHref(q, genreMode, page - 1)}>이전</Link>
             </Button>
           ) : null}
           {page < totalPages ? (
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/admin/books?q=${encodeURIComponent(q)}&page=${page + 1}`}>다음</Link>
+              <Link href={adminBooksListHref(q, genreMode, page + 1)}>다음</Link>
             </Button>
           ) : null}
         </div>
