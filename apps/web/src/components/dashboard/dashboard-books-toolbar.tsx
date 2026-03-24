@@ -4,9 +4,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-function dashboardHref(q: string, page: number): Route {
+function dashboardHref(q: string, genre: string | undefined, page: number): Route {
   const sp = new URLSearchParams();
   if (q.trim()) sp.set("q", q.trim());
+  if (genre?.trim()) sp.set("genre", genre.trim());
   if (page > 1) sp.set("page", String(page));
   const s = sp.toString();
   return (s ? `/dashboard?${s}` : "/dashboard") as Route;
@@ -19,12 +20,15 @@ type DashboardBooksToolbarProps = {
   /** 소장 책장 페이지네이션·총 권수 기준 */
   ownedTotal: number;
   readingTotal: number;
+  /** URL `genre` — 페이지 링크에 유지 */
+  genreSlug?: string;
 };
 
 /**
  * 대시보드 검색·권수 요약.
  *
  * @history
+ * - 2026-03-24: 쿼리 `genre` 유지(`dashboardHref`)
  * - 2026-03-24: 소장 페이지 이전/다음은 `DashboardOwnedBooksPagination`으로 분리(책장 바로 아래 배치)
  */
 export function DashboardBooksToolbar({
@@ -32,7 +36,8 @@ export function DashboardBooksToolbar({
   page,
   pageSize,
   ownedTotal,
-  readingTotal
+  readingTotal,
+  genreSlug = ""
 }: DashboardBooksToolbarProps) {
   const totalPages = Math.max(1, Math.ceil(ownedTotal / pageSize));
 
@@ -47,6 +52,9 @@ export function DashboardBooksToolbar({
           className="flex-1"
           autoComplete="off"
         />
+        {genreSlug.trim() ? (
+          <input type="hidden" name="genre" value={genreSlug.trim()} />
+        ) : null}
         <Button type="submit" variant="secondary" className="sm:w-auto">
           검색
         </Button>
@@ -69,19 +77,22 @@ type DashboardOwnedBooksPaginationProps = {
   page: number;
   pageSize: number;
   ownedTotal: number;
+  genreSlug?: string;
 };
 
 /**
  * 소장 책장 전용 이전/다음(책장 아래에 두어 눈에 잘 띄게 함).
  *
  * @history
+ * - 2026-03-24: 쿼리 `genre` 유지(`dashboardHref`)
  * - 2026-03-24: 신규 — 대시보드 소장 구역 하단 페이지네이션
  */
 export function DashboardOwnedBooksPagination({
   searchQuery,
   page,
   pageSize,
-  ownedTotal
+  ownedTotal,
+  genreSlug
 }: DashboardOwnedBooksPaginationProps) {
   const totalPages = Math.max(1, Math.ceil(ownedTotal / pageSize));
   if (totalPages <= 1) {
@@ -101,7 +112,7 @@ export function DashboardOwnedBooksPagination({
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" size="sm" disabled={!hasPrev} asChild={hasPrev}>
           {hasPrev ? (
-            <Link href={dashboardHref(searchQuery, page - 1)} prefetch={false}>
+            <Link href={dashboardHref(searchQuery, genreSlug, page - 1)} prefetch={false}>
               이전
             </Link>
           ) : (
@@ -110,7 +121,7 @@ export function DashboardOwnedBooksPagination({
         </Button>
         <Button variant="outline" size="sm" disabled={!hasNext} asChild={hasNext}>
           {hasNext ? (
-            <Link href={dashboardHref(searchQuery, page + 1)} prefetch={false}>
+            <Link href={dashboardHref(searchQuery, genreSlug, page + 1)} prefetch={false}>
               다음
             </Link>
           ) : (

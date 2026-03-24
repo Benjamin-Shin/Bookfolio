@@ -522,6 +522,12 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
   return out;
 }
 
+/**
+ * `book_id`별 소유자 묶음 → 집계 행.
+ *
+ * @history
+ * - 2026-03-24: 공유 서지 `genre_slugs`를 `genreSlugs`로 노출
+ */
 function buildAggregatedList(
   libraryId: string,
   flat: FlatLinked[],
@@ -558,6 +564,8 @@ function buildAggregatedList(
     });
     owners.sort((a, b) => a.linkedAt.localeCompare(b.linkedAt));
     const updatedAt = owners.reduce((m, o) => (o.linkedAt > m ? o.linkedAt : m), owners[0]?.linkedAt ?? "");
+    const rawGenres = Array.isArray(book.genre_slugs) ? book.genre_slugs : [];
+    const genreSlugs = rawGenres.map((x) => String(x).trim()).filter(Boolean);
     result.push({
       libraryId,
       bookId: bookIdKey,
@@ -565,6 +573,7 @@ function buildAggregatedList(
       title: book.title,
       authors: Array.isArray(book.authors) ? book.authors : [],
       coverUrl: normalizeCoverUrlForClient(book.cover_url),
+      genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined,
       owners,
       updatedAt
     });

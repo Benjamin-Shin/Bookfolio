@@ -31,6 +31,8 @@ type DbUserBook = {
   published_date: string | null;
   description: string | null;
   price_krw: number | null;
+  /** 마이그레이션 0015 이전 RPC는 생략될 수 있음. */
+  genre_slugs?: string[];
   is_owned: boolean;
   location: string | null;
   created_at: string;
@@ -97,6 +99,7 @@ function pickNestedBook(row: DbUserBookNestedSelect): DbCanonicalBook | null {
 }
 
 function mapFlatRow(row: DbUserBook): UserBookDetail {
+  const genreSlugs = Array.isArray(row.genre_slugs) ? row.genre_slugs : [];
   return {
     id: row.id,
     userId: row.user_id,
@@ -116,7 +119,8 @@ function mapFlatRow(row: DbUserBook): UserBookDetail {
     isOwned: row.is_owned,
     location: row.location ?? null,
     createdAt: row.created_at,
-    updatedAt: row.updated_at
+    updatedAt: row.updated_at,
+    genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined
   };
 }
 
@@ -404,6 +408,8 @@ export type ListUserBooksPagedOptions = {
   readingStatus?: BooksQuery["readingStatus"];
   /** true/false로 소장만·비소장만. 생략 시 구분 없음. */
   isOwned?: boolean;
+  /** `books.genre_slugs`에 포함된 슬러그로 한정 (0015 RPC). */
+  genreSlug?: string;
 };
 
 /**
@@ -441,6 +447,7 @@ function parseListUserBooksPagedPayload(data: unknown): { rawItems: unknown[]; t
  * 사용자 도서 목록 페이지(RPC `list_user_books_paged`).
  *
  * @history
+ * - 2026-03-24: `p_genre_slug`·행 `genre_slugs` 반영(마이그레이션 0015)
  * - 2026-03-24: RPC JSON 응답 문자열·키 누락 등 방어적 파싱(`parseListUserBooksPagedPayload`)
  */
 export async function listUserBooksPaged(
@@ -448,7 +455,7 @@ export async function listUserBooksPaged(
   context?: RepositoryContext
 ): Promise<{ items: UserBookSummary[]; total: number }> {
   const { supabase, userId } = await getClientAndUser(context);
-
+  const genreTrim = opts.genreSlug?.trim();
   const { data, error } = await supabase.rpc("list_user_books_paged", {
     p_user_id: userId,
     p_search: opts.search?.trim() ? opts.search.trim() : null,
@@ -458,7 +465,8 @@ export async function listUserBooksPaged(
       opts.format && opts.format !== "all" ? opts.format : null,
     p_reading_status:
       opts.readingStatus && opts.readingStatus !== "all" ? opts.readingStatus : null,
-    p_is_owned: typeof opts.isOwned === "boolean" ? opts.isOwned : null
+    p_is_owned: typeof opts.isOwned === "boolean" ? opts.isOwned : null,
+    p_genre_slug: genreTrim ? genreTrim : null
   });
 
   if (error) throw error;
@@ -720,4 +728,38 @@ export async function getUserOwnedBooksPriceStats(
     pricedOwnedCount: Number(row.pricedOwnedCount ?? 0),
     ownedCount: Number(row.ownedCount ?? 0)
   };
+}
+
+/**
+ * 소장 도서(`is_owned`)에 붙은 `books.genre_slugs` 값을 모아 중복 제거·정렬한 목록.
+ *
+ * @history
+ * - 2026-03-24: RPC `list_user_owned_genre_slugs` 연동(마이그레이션 0015)
+ */
+export async function listUserOwnedGenreSlugs(
+  context?: RepositoryContext
+): Promise<string[]> {
+  const { supabase, userId } = await getClientAndUser(context);
+  const { data, error } = await supabase.rpc("list_user_owned_genre_slugs", {
+    p_user_id: userId
+  });
+  if (error) throw error;
+  let raw: unknown = data;
+  if (typeof raw === "string") {
+    try {
+      raw = JSON.parse(raw) as unknown;
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const out: string[] = [];
+  for (const x of raw) {
+    if (typeof x === "string" && x.trim()) {
+      out.push(x.trim());
+    }
+  }
+  return out;
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { BOOK_FORMAT_LABEL_KO, READING_STATUS_LABEL_KO } from "@bookfolio/shared";
@@ -12,6 +13,12 @@ function isLikelyUrl(s: string) {
   return /^https?:\/\//i.test(s.trim());
 }
 
+/**
+ * 내 서재 도서 상세.
+ *
+ * @history
+ * - 2026-03-24: 헤더 우측 상단에 장르(`genreSlugs`) 배지 표시, 본문 정의 목록 중복 장르 행 제거
+ */
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const row = await getUserBookWithCanonical(id);
@@ -23,21 +30,33 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
   const { userBook } = row;
   const displayTitle = userBook.title;
   const displayAuthors = userBook.authors.join(", ");
+  const genreSlugs = userBook.genreSlugs ?? [];
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 md:py-12">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{displayTitle}</h1>
           <p className="mt-1 text-muted-foreground">{displayAuthors || "저자 미상"}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard">목록으로</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href={`/dashboard/books/${userBook.id}/edit`}>수정</Link>
-          </Button>
+        <div className="flex shrink-0 flex-col items-stretch gap-3 sm:items-end">
+          {genreSlugs.length > 0 ? (
+            <div className="flex flex-wrap justify-end gap-1.5 sm:max-w-[min(100%,20rem)]">
+              {genreSlugs.map((slug) => (
+                <Badge key={slug} variant="secondary" className="font-normal">
+                  {slug}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard">목록으로</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link href={`/dashboard/books/${userBook.id}/edit`}>수정</Link>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -80,12 +99,6 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
                 <>
                   <dt className="text-muted-foreground">출처</dt>
                   <dd className="text-muted-foreground">{userBook.catalogSource}</dd>
-                </>
-              ) : null}
-              {userBook.genreSlugs && userBook.genreSlugs.length > 0 ? (
-                <>
-                  <dt className="text-muted-foreground">장르</dt>
-                  <dd className="text-muted-foreground">{userBook.genreSlugs.join(", ")}</dd>
                 </>
               ) : null}
             </dl>

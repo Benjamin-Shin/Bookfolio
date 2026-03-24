@@ -174,6 +174,8 @@ export interface LibraryAggregatedBookRow {
   title: string;
   authors: string[];
   coverUrl: string | null;
+  /** 공유 서지 `books.genre_slugs` (없으면 생략). */
+  genreSlugs?: string[];
   owners: LibrarySharedOwnerRow[];
   /** 목록 정렬용(소유자 연결 시각 중 최댓값). */
   updatedAt: string;

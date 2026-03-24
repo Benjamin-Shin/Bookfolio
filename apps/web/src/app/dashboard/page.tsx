@@ -8,6 +8,7 @@ import {
   DashboardBooksToolbar,
   DashboardOwnedBooksPagination,
 } from "@/components/dashboard/dashboard-books-toolbar";
+import { DashboardOwnedGenreFilter } from "@/components/dashboard/dashboard-owned-genre-filter";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,19 +20,21 @@ import {
 import {
   getUserOwnedBooksPriceStats,
   listUserBooksPaged,
+  listUserOwnedGenreSlugs,
 } from "@/lib/books/repository";
 
 const PAGE_SIZE = BOOKS_PER_SHELF;
 const READING_SHELF_LIMIT = 50;
 
 type DashboardPageProps = {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; genre?: string }>;
 };
 
 /**
  * 로그인 사용자의 읽는 중·소장 책장.
  *
  * @history
+ * - 2026-03-24: 소장 장르 필터(`genre` 쿼리, `listUserOwnedGenreSlugs`·RPC `p_genre_slug`)
  * - 2026-03-24: `PAGE_SIZE` = `BOOKS_PER_SHELF` import(선반 줄 수·한 줄 권수 상수와 동기)
  * - 2026-03-24: 소장 총권수 보정·소장 하단 페이지네이션(`DashboardOwnedBooksPagination`)
  */
@@ -46,40 +49,45 @@ export default async function DashboardPage({
 
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
+  const genreFilter = (sp.genre ?? "").trim();
   const pageRaw = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const ctx = { userId: session.user.id, useAdmin: true } as const;
   const searchOpt = q ? q : undefined;
+  const genreSlugOpt = genreFilter ? genreFilter : undefined;
 
-  const [libraryProbe, readingRes, ownedRes, priceStats] = await Promise.all([
-    listUserBooksPaged({ limit: 1, offset: 0 }, ctx),
-    listUserBooksPaged(
-      {
-        readingStatus: "reading",
-        search: searchOpt,
-        limit: READING_SHELF_LIMIT,
-        offset: 0,
-      },
-      ctx,
-    ),
-    listUserBooksPaged(
-      {
-        isOwned: true,
-        search: searchOpt,
-        limit: PAGE_SIZE,
-        offset: (pageRaw - 1) * PAGE_SIZE,
-      },
-      ctx,
-    ),
-    getUserOwnedBooksPriceStats(ctx),
-  ]);
+  const [libraryProbe, readingRes, ownedRes, priceStats, ownedGenres] =
+    await Promise.all([
+      listUserBooksPaged({ limit: 1, offset: 0 }, ctx),
+      listUserBooksPaged(
+        {
+          readingStatus: "reading",
+          search: searchOpt,
+          limit: READING_SHELF_LIMIT,
+          offset: 0,
+        },
+        ctx,
+      ),
+      listUserBooksPaged(
+        {
+          isOwned: true,
+          search: searchOpt,
+          genreSlug: genreSlugOpt,
+          limit: PAGE_SIZE,
+          offset: (pageRaw - 1) * PAGE_SIZE,
+        },
+        ctx,
+      ),
+      getUserOwnedBooksPriceStats(ctx),
+      listUserOwnedGenreSlugs(ctx),
+    ]);
 
   const libraryTotal = libraryProbe.total;
   const readingBooks = readingRes.items;
   const readingTotal = readingRes.total;
   const ownedBooks = ownedRes.items;
-  /** 검색 없을 때 RPC total이 실제 소장 권수보다 작게 올 때 페이지네이션이 사라지는 경우 보정 */
+  /** 검색·장르 필터 없을 때 RPC total이 실제 소장 권수보다 작게 올 때 페이지네이션이 사라지는 경우 보정 */
   const ownedTotalForPager =
-    q.length > 0
+    q.length > 0 || genreFilter.length > 0
       ? ownedRes.total
       : Math.max(ownedRes.total, priceStats.ownedCount);
 
@@ -93,6 +101,7 @@ export default async function DashboardPage({
   if (ownedTotalForPager > 0 && pageRaw > ownedTotalPages) {
     const np = new URLSearchParams();
     if (q) np.set("q", q);
+    if (genreFilter) np.set("genre", genreFilter);
     np.set("page", String(ownedTotalPages));
     redirect(`/dashboard?${np.toString()}`);
   }
@@ -151,6 +160,7 @@ export default async function DashboardPage({
               pageSize={PAGE_SIZE}
               ownedTotal={ownedTotalForPager}
               readingTotal={readingTotal}
+              genreSlug={genreFilter}
             />
           ) : null}
 
@@ -263,6 +273,11 @@ export default async function DashboardPage({
                     책만 기준입니다.
                   </p>
                 </div>
+                <DashboardOwnedGenreFilter
+                  genres={ownedGenres}
+                  selectedGenre={genreFilter}
+                  searchQuery={q}
+                />
                 {ownedBooks.length > 0 ? (
                   <>
                     <Bookshelf variant="owned" books={ownedBooks} />
@@ -271,12 +286,14 @@ export default async function DashboardPage({
                       page={ownedPage}
                       pageSize={PAGE_SIZE}
                       ownedTotal={ownedTotalForPager}
+                      genreSlug={genreFilter}
                     />
                   </>
                 ) : (
                   <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
-                    소장으로 표시된 책이 없습니다. 책 수정에서 「소장 중」을 켜
-                    보세요.
+                    {priceStats.ownedCount > 0 && (q.length > 0 || genreFilter.length > 0)
+                      ? "검색·장르 조건에 맞는 소장 도서가 없습니다."
+                      : "소장으로 표시된 책이 없습니다. 책 수정에서 「소장 중」을 켜 보세요."}
                   </div>
                 )}
               </section>

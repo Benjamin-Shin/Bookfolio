@@ -94,6 +94,7 @@ class SharedLibraryBookSummary {
     required this.authors,
     this.isbn,
     this.coverUrl,
+    this.genreSlugs,
     required this.owners,
     required this.updatedAt,
   });
@@ -104,11 +105,14 @@ class SharedLibraryBookSummary {
   final List<String> authors;
   final String? isbn;
   final String? coverUrl;
+  /// 공유 서지 `books.genre_slugs` (웹 API camelCase `genreSlugs`).
+  final List<String>? genreSlugs;
   final List<SharedLibraryOwnerRow> owners;
   final String updatedAt;
 
   factory SharedLibraryBookSummary.fromJson(Map<String, dynamic> json) {
     final ownersRaw = json['owners'] as List<dynamic>? ?? const [];
+    final genresRaw = json['genreSlugs'] as List<dynamic>?;
     return SharedLibraryBookSummary(
       libraryId: json['libraryId'] as String,
       bookId: json['bookId'] as String,
@@ -116,6 +120,9 @@ class SharedLibraryBookSummary {
       authors: (json['authors'] as List<dynamic>? ?? []).map((e) => e.toString()).toList(),
       isbn: json['isbn'] as String?,
       coverUrl: json['coverUrl'] as String?,
+      genreSlugs: genresRaw == null
+          ? null
+          : genresRaw.map((e) => e.toString()).where((s) => s.isNotEmpty).toList(),
       owners: ownersRaw
           .map((e) => SharedLibraryOwnerRow.fromJson(e as Map<String, dynamic>))
           .toList(),
