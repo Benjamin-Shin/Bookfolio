@@ -1,9 +1,16 @@
 "use client";
 
+/**
+ * 이메일·구글 로그인 폼.
+ *
+ * @history
+ * - 2026-03-24: Credentials 로그인 성공 후 `router.push` 대신 `location.assign`으로 이동 — 미들웨어 `auth()`가 클라이언트 전환 직후 쿠키를 못 읽어 `/login`으로 되튕기던 현상 수정
+ */
+
 import type { Route } from "next";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -25,7 +32,6 @@ function toSafeCallbackUrl(raw: string | null): Route {
 }
 
 export function LoginForm({ googleEnabled }: LoginFormProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = toSafeCallbackUrl(searchParams.get("callbackUrl"));
 
@@ -48,12 +54,11 @@ export function LoginForm({ googleEnabled }: LoginFormProps) {
       callbackUrl
     });
     setPending(false);
-    if (result?.error) {
+    if (!result?.ok || result.error) {
       setError("이메일 또는 비밀번호가 올바르지 않습니다.");
       return;
     }
-    router.push(callbackUrl);
-    router.refresh();
+    window.location.assign(callbackUrl);
   }
 
   async function onSignUp(e: React.FormEvent) {
@@ -84,13 +89,12 @@ export function LoginForm({ googleEnabled }: LoginFormProps) {
         redirect: false,
         callbackUrl
       });
-      if (result?.error) {
+      if (!result?.ok || result.error) {
         setError("가입은 완료되었으나 로그인에 실패했습니다. 다시 시도해주세요.");
         setPending(false);
         return;
       }
-      router.push(callbackUrl);
-      router.refresh();
+      window.location.assign(callbackUrl);
     } catch {
       setError("네트워크 오류가 발생했습니다.");
     }
