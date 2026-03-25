@@ -1,7 +1,7 @@
 name: bookfolio_mobile
 description: Bookfolio Flutter mobile app for personal library management.
 publish_to: "none"
-version: 1.0.0+5
+version: 1.0.0+6
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -15,6 +15,7 @@ dependencies:
   mobile_scanner: ^6.0.2
   provider: ^6.1.2
   shared_preferences: ^2.5.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

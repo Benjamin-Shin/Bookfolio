@@ -3,11 +3,22 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { adminBookPrefillFromSearchParams } from "@/lib/aladin/admin-book-prefill";
 
 import { AdminCanonicalBookForm } from "../admin-canonical-book-form";
 
-export default async function AdminNewBookPage() {
+/**
+ * @history
+ * - 2026-03-25: 쿼리스트링으로 폼 프리필(알라딘 빠른 추가 등)
+ */
+export default async function AdminNewBookPage({
+  searchParams
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await requireAdmin();
+  const sp = await searchParams;
+  const defaultValues = adminBookPrefillFromSearchParams(sp);
 
   return (
     <div className="space-y-6">
@@ -27,7 +38,7 @@ export default async function AdminNewBookPage() {
           <CardDescription>ISBN은 고유해야 합니다. 비우면 ISBN 없이 등록할 수 있습니다.</CardDescription>
         </CardHeader>
         <CardContent>
-          <AdminCanonicalBookForm mode="create" />
+          <AdminCanonicalBookForm mode="create" defaultValues={defaultValues} />
         </CardContent>
       </Card>
     </div>

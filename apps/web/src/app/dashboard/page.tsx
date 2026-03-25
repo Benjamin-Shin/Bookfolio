@@ -34,6 +34,9 @@ type DashboardPageProps = {
  * 로그인 사용자의 읽는 중·소장 책장.
  *
  * @history
+ * - 2026-03-25: 사이드 카드에 OAuth 등 `session.user.image` 있으면 아바타 표시
+ * - 2026-03-25: 사이드 카드에 「초이스 신간」 링크(`/dashboard/choice-new`)
+ * - 2026-03-25: 사이드 카드에 「베스트셀러」 링크(`/dashboard/bestsellers`)
  * - 2026-03-24: 소장 장르 필터(`genre` 쿼리, `listUserOwnedGenreSlugs`·RPC `p_genre_slug`)
  * - 2026-03-24: `PAGE_SIZE` = `BOOKS_PER_SHELF` import(선반 줄 수·한 줄 권수 상수와 동기)
  * - 2026-03-24: 소장 총권수 보정·소장 하단 페이지네이션(`DashboardOwnedBooksPagination`)
@@ -110,19 +113,47 @@ export default async function DashboardPage({
   const emptySearch =
     libraryTotal > 0 && q && readingTotal === 0 && ownedRes.total === 0;
 
+  const profileLine =
+    session.user.name ?? session.user.email ?? "로그인됨";
+  const profileImage =
+    typeof session.user.image === "string" &&
+    session.user.image.trim().length > 0
+      ? session.user.image.trim()
+      : null;
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <Card className="h-fit border-border/80 lg:sticky lg:top-20">
           <CardHeader>
             <CardTitle className="text-lg">내 서재</CardTitle>
-            <CardDescription className="break-all">
-              {session.user.email ?? session.user.name ?? "로그인됨"}
-            </CardDescription>
+            {profileImage ? (
+              <div className="flex items-center gap-3">
+                <img
+                  src={profileImage}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="size-10 shrink-0 rounded-full object-cover ring-1 ring-border"
+                  referrerPolicy="no-referrer"
+                />
+                <CardDescription className="min-w-0 flex-1 break-all">
+                  {profileLine}
+                </CardDescription>
+              </div>
+            ) : (
+              <CardDescription className="break-all">{profileLine}</CardDescription>
+            )}
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             <Button variant="outline" asChild>
               <Link href={"/dashboard/libraries" as Route}>공동서재</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href={"/dashboard/bestsellers" as Route}>베스트셀러</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href={"/dashboard/choice-new" as Route}>초이스 신간</Link>
             </Button>
             <Button asChild>
               <Link href="/dashboard/books/new">책 추가하기</Link>
@@ -291,7 +322,8 @@ export default async function DashboardPage({
                   </>
                 ) : (
                   <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
-                    {priceStats.ownedCount > 0 && (q.length > 0 || genreFilter.length > 0)
+                    {priceStats.ownedCount > 0 &&
+                    (q.length > 0 || genreFilter.length > 0)
                       ? "검색·장르 조건에 맞는 소장 도서가 없습니다."
                       : "소장으로 표시된 책이 없습니다. 책 수정에서 「소장 중」을 켜 보세요."}
                   </div>

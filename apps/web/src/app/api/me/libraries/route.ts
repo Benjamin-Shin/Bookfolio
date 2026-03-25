@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
 import { createLibrary, listLibrariesForUser } from "@/lib/libraries/repository";
+import { SharedLibraryCreateLimitReachedError } from "@/lib/libraries/shared-library-policy";
 
 function isLibraryKind(v: unknown): v is (typeof LIBRARY_KINDS)[number] {
   return typeof v === "string" && (LIBRARY_KINDS as readonly string[]).includes(v);
@@ -19,6 +20,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * @history
+ * - 2026-03-25: `SharedLibraryCreateLimitReachedError` → 403
+ */
 export async function POST(request: NextRequest) {
   try {
     const userId = await getRequestUserId(request);
@@ -47,6 +52,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
+    if (error instanceof SharedLibraryCreateLimitReachedError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     const message = error instanceof Error ? error.message : "Failed to create library";
     return NextResponse.json({ error: message }, { status: message === "Unauthorized" ? 401 : 500 });
   }

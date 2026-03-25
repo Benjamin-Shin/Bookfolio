@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { BookCoverUploadFieldState } from "@/components/books/book-cover-upload-field";
 import {
   BookFormatChoiceFieldset,
   RatingChoiceFieldset,
@@ -13,6 +14,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getUserBookWithCanonical } from "@/lib/books/repository";
 
+/**
+ * @history
+ * - 2026-03-25: `BookCoverUploadFieldState` — `variant="edit"`(미리보기·비-Cloudinary 이관)
+ * - 2026-03-25: `BookCoverUploadFieldState` — 표지 Cloudinary 업로드·저장
+ */
 export default async function BookEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const row = await getUserBookWithCanonical(id);
@@ -31,8 +37,8 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
           <div>
             <CardTitle className="text-xl">내 서재 기록 수정</CardTitle>
             <CardDescription className="mt-1">
-              「{displayTitle}」의 내 서재 필드(형식·상태·위치·메모 등)와, 참고 가격을 바꿀 수 있습니다.
-              가격은 공유 도서(`books`)에 저장되어 합계에 반영됩니다.
+              「{displayTitle}」의 내 서재 필드(형식·상태·위치·메모 등), 참고 가격, 표지 이미지 URL을 바꿀 수 있습니다.
+              가격·표지는 공유 도서(`books`)에 저장되어 같은 서지를 쓰는 경우에도 반영될 수 있습니다.
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" asChild>
@@ -41,6 +47,7 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
         </CardHeader>
         <CardContent>
           <form action={`/api/me/books/${userBook.id}`} method="post" className="space-y-6">
+            <BookCoverUploadFieldState initialCoverUrl={userBook.coverUrl ?? ""} variant="edit" />
             <BookFormatChoiceFieldset defaultFormat={userBook.format} />
             <ReadingStatusChoiceFieldset defaultStatus={userBook.readingStatus} />
             <RatingChoiceFieldset defaultRating={userBook.rating ?? null} />

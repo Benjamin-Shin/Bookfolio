@@ -16,6 +16,10 @@ function parsePriceKrwField(raw: string): number | null {
   return Math.round(Math.min(n, 2_000_000_000));
 }
 
+/**
+ * @history
+ * - 2026-03-25: `coverUrl` — 표지 Cloudinary 업로드 후 폼 전송
+ */
 function parseFormDataToUpdate(input: FormData): UpdateUserBookInput {
   const out: UpdateUserBookInput = {};
 
@@ -51,6 +55,10 @@ function parseFormDataToUpdate(input: FormData): UpdateUserBookInput {
   if (input.has("location")) {
     const raw = input.get("location")?.toString().trim() ?? "";
     out.location = raw ? raw : null;
+  }
+  if (input.has("coverUrl")) {
+    const raw = input.get("coverUrl")?.toString().trim() ?? "";
+    out.coverUrl = raw ? raw : null;
   }
 
   const personalOnlyForm = !input.has("title") && !input.has("authorsCsv");

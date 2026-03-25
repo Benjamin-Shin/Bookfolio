@@ -1,10 +1,15 @@
 import type { Route } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { AdminBookDeleteForm } from "./admin-book-delete-form";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { adminNewBookPrefillHrefFromAladinItem } from "@/lib/aladin/admin-book-prefill";
+import { fetchAladinBestsellerFeed } from "@/lib/aladin/bestseller-feed";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { env } from "@/lib/env";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +68,7 @@ function adminBooksListHref(q: string, genreMode: "all" | "missing", page: numbe
  * 관리자 공유 서지(`books`) 목록 — 검색·페이지네이션·장르 필터.
  *
  * @history
+ * - 2026-03-25: 알라딘 목록(`ALADIN_BESTSELLER_API_BASE_URL`)에서 「도서 추가」 폼으로 프리필
  * - 2026-03-24: 장르 필터(전체·장르 없음만)·전체 목록에서 장르 미지정 행 상단 정렬(`has_genre_slugs`, 마이그레이션 0016)
  * - 2026-03-24: 장르 `<select>`에 `suppressHydrationWarning`(확장 프로그램이 `data-sharkid` 등 주입 시 하이드레이션 경고 완화)
  */
@@ -117,6 +123,90 @@ export default async function AdminBooksPage({
     books.map((b) => b.id)
   );
 
+  let aladinQuickAdd: ReactNode = null;
+  const aladinUrl = env.aladinBestsellerApiBaseUrl;
+  if (aladinUrl) {
+    try {
+      const feed = await fetchAladinBestsellerFeed(aladinUrl);
+      if (feed.items.length > 0) {
+        aladinQuickAdd = (
+          <Card className="border-border/80">
+            <CardHeader>
+              <CardTitle className="text-lg">알라딘 목록에서 빠르게 추가</CardTitle>
+              <CardDescription>
+                {feed.feedTitle ? `${feed.feedTitle} — ` : null}
+                아래 「폼에 넣기」를 누르면 도서 추가 화면에 메타가 채워집니다. 저장 전에 ISBN·저자 등을 확인하세요.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <table className="w-full min-w-[720px] text-left text-sm">
+                <thead className="border-b border-border/60 bg-muted/30">
+                  <tr>
+                    <th className="w-14 px-2 py-2 font-medium">#</th>
+                    <th className="w-16 px-2 py-2 font-medium">표지</th>
+                    <th className="px-2 py-2 font-medium">제목</th>
+                    <th className="whitespace-nowrap px-2 py-2 font-medium">ISBN</th>
+                    <th className="whitespace-nowrap px-2 py-2 font-medium">가격</th>
+                    <th className="whitespace-nowrap px-2 py-2 text-right font-medium">작업</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {feed.items.map((item, idx) => {
+                    const isbn = item.isbn13?.trim() || item.isbn?.trim() || "—";
+                    return (
+                      <tr key={item.itemId || `${isbn}-${idx}`} className="border-b border-border/40 last:border-0">
+                        <td className="px-2 py-2 tabular-nums text-muted-foreground">{idx + 1}</td>
+                        <td className="px-2 py-2">
+                          {item.cover ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.cover}
+                              alt=""
+                              className="h-14 w-10 rounded object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="max-w-[16rem] px-2 py-2">
+                          <span className="line-clamp-2 font-medium">{item.title || "—"}</span>
+                          {item.author ? (
+                            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{item.author}</p>
+                          ) : null}
+                        </td>
+                        <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{isbn}</td>
+                        <td className="whitespace-nowrap px-2 py-2 text-muted-foreground">
+                          {item.priceSales != null ? `${item.priceSales.toLocaleString("ko-KR")}원` : "—"}
+                        </td>
+                        <td className="px-2 py-2 text-right">
+                          <Button size="sm" variant="secondary" asChild>
+                            <Link href={adminNewBookPrefillHrefFromAladinItem(item)}>폼에 넣기</Link>
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        );
+      }
+    } catch {
+      aladinQuickAdd = (
+        <Card className="border-destructive/40">
+          <CardHeader>
+            <CardTitle className="text-lg">알라딘 목록</CardTitle>
+            <CardDescription className="text-destructive">
+              알라딘 API를 불러오지 못했습니다. `ALADIN_BESTSELLER_API_BASE_URL` 과 네트워크를 확인해 주세요.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      );
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -130,6 +220,8 @@ export default async function AdminBooksPage({
           <Link href="/dashboard/admin/books/new">도서 추가</Link>
         </Button>
       </div>
+
+      {aladinQuickAdd}
 
       <form className="flex flex-wrap items-end gap-2" method="get" action="/dashboard/admin/books">
         <div className="min-w-[12rem] flex-1 space-y-1">

@@ -16,3 +16,15 @@ String readingStatusLabelKo(ReadingStatus s) {
     ReadingStatus.dropped => '하차',
   };
 }
+
+/// API 문자열(`unread` 등)을 한글 라벨로. 알 수 없으면 원문 반환.
+///
+/// History:
+/// - 2026-03-25: 공동서재 소유자 행용
+String readingStatusLabelFromApi(String raw) {
+  try {
+    return readingStatusLabelKo(ReadingStatus.values.byName(raw));
+  } catch (_) {
+    return raw.isEmpty ? '—' : raw;
+  }
+}

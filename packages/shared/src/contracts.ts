@@ -117,6 +117,38 @@ export interface UpdateUserBookInput {
   location?: string | null;
 }
 
+/** DB `app_users.policies_json`과 맞춘 확장 가능 정책(알 수 없는 키는 무시). */
+export interface AppUserPolicies {
+  /** 내가 소유자로 새로 만든 공동서재(`libraries.created_by`) 최대 개수 */
+  sharedLibraryCreateLimit: number;
+}
+
+export const DEFAULT_APP_USER_POLICIES: AppUserPolicies = {
+  sharedLibraryCreateLimit: 1
+};
+
+/**
+ * DB·API에서 온 JSON과 기본값을 병합합니다.
+ *
+ * @history
+ * - 2026-03-25: `sharedLibraryCreateLimit` (기본 1, 0~10000)
+ */
+export function mergeAppUserPolicies(raw: unknown): AppUserPolicies {
+  const out: AppUserPolicies = { ...DEFAULT_APP_USER_POLICIES };
+  if (raw === null || raw === undefined || typeof raw !== "object" || Array.isArray(raw)) {
+    return out;
+  }
+  const o = raw as Record<string, unknown>;
+  const lim = o.sharedLibraryCreateLimit;
+  if (typeof lim === "number" && Number.isFinite(lim)) {
+    const n = Math.floor(lim);
+    if (n >= 0 && n <= 10_000) {
+      out.sharedLibraryCreateLimit = n;
+    }
+  }
+  return out;
+}
+
 export interface ApiErrorPayload {
   error: string;
   code?: string;

@@ -7,6 +7,10 @@ import 'package:bookfolio_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+/// 내 서재 도서 상세(편집·삭제 포함).
+///
+/// History:
+/// - 2026-03-25: 섹션 제목 「책 정보」→「도서 정보」
 class BookDetailScreen extends StatelessWidget {
   const BookDetailScreen({super.key, required this.book});
 
@@ -120,7 +124,7 @@ class BookDetailScreen extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 24),
-          Text('책 정보', style: sectionTitleStyle),
+          Text('도서 정보', style: sectionTitleStyle),
           const SizedBox(height: 10),
           _InfoCard(
             children: [

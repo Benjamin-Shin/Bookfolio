@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bookfolio_mobile/src/models/aladin_bestseller_models.dart';
 import 'package:bookfolio_mobile/src/models/book_models.dart';
 import 'package:bookfolio_mobile/src/models/shared_library_models.dart';
 import 'package:http/http.dart' as http;
@@ -121,6 +122,32 @@ class BookfolioApi {
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     final list = decoded['results'] as List<dynamic>? ?? const [];
     return list.map((e) => BookLookupResult.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// 알라딘 연동 목록(서버가 `ALADIN_BESTSELLER_API_BASE_URL`로 조회).
+  ///
+  /// History:
+  /// - 2026-03-25: `GET /api/me/aladin-bestseller` 연동
+  Future<AladinBestsellerFeed> fetchAladinBestsellerFeed() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/aladin-bestseller'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    return AladinBestsellerFeed.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// 초이스 신간 등(서버가 `ALADIN_ITEMNEW_API_BASE_URL`로 조회).
+  ///
+  /// History:
+  /// - 2026-03-25: `GET /api/me/aladin-item-new` 연동
+  Future<AladinBestsellerFeed> fetchAladinItemNewFeed() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/aladin-item-new'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    return AladinBestsellerFeed.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   void _throwIfFailed(http.Response response) {

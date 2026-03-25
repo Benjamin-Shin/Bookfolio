@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import type { BookLookupResult, UserBookDetail } from "@bookfolio/shared";
 import { BOOK_FORMATS, READING_STATUSES } from "@bookfolio/shared";
 
+import { BookCoverUploadField } from "@/components/books/book-cover-upload-field";
 import {
   BookFormatChoiceFieldset,
   RatingChoiceFieldset,
@@ -18,13 +19,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+/**
+ * @history
+ * - 2026-03-25: Cloudinary 표지 업로드 필드(`BookCoverUploadField`) 연동
+ */
 export function NewBookForm() {
   const router = useRouter();
   const [lookupIsbn, setLookupIsbn] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [lookupOk, setLookupOk] = useState(false);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   /** ISBN 검색 후 리렌더되어도 POST에 실리도록 hidden은 state로 둡니다(defaultValue + ref만 쓰면 리렌더 시 비워질 수 있음). */
   const [metaFromLookup, setMetaFromLookup] = useState({
     isbn: "",
@@ -66,7 +70,7 @@ export function NewBookForm() {
             ? data.error
             : "도서 정보를 가져오지 못했습니다.";
         setLookupError(message);
-        setCoverPreview(null);
+        setMetaFromLookup((prev) => ({ ...prev, coverUrl: "" }));
         setPriceKrwInput("");
         return;
       }
@@ -87,11 +91,10 @@ export function NewBookForm() {
 
       if (descriptionRef.current) descriptionRef.current.value = book.description ?? "";
 
-      setCoverPreview(book.coverUrl);
       setLookupOk(true);
     } catch {
       setLookupError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
-      setCoverPreview(null);
+      setMetaFromLookup((prev) => ({ ...prev, coverUrl: "" }));
       setPriceKrwInput("");
     } finally {
       setLookupLoading(false);
@@ -218,19 +221,15 @@ export function NewBookForm() {
         {lookupOk ? (
           <p className="text-sm text-muted-foreground">메타데이터를 폼에 반영했습니다. 필요하면 수정한 뒤 등록하세요.</p>
         ) : null}
-        {coverPreview ? (
-          <div className="flex justify-center pt-1">
-            <img
-              src={coverPreview}
-              alt="표지 미리보기"
-              className="max-h-48 max-w-[10rem] rounded-md border border-border object-contain shadow-sm"
-            />
-          </div>
-        ) : null}
       </div>
 
+      <BookCoverUploadField
+        coverUrl={metaFromLookup.coverUrl}
+        onCoverUrlChange={(url) => setMetaFromLookup((prev) => ({ ...prev, coverUrl: url }))}
+        disabled={submitting}
+      />
+
       <input type="hidden" name="isbn" value={metaFromLookup.isbn} />
-      <input type="hidden" name="coverUrl" value={metaFromLookup.coverUrl} />
       <input type="hidden" name="publisher" value={metaFromLookup.publisher} />
       <input type="hidden" name="publishedDate" value={metaFromLookup.publishedDate} />
 

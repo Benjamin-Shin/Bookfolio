@@ -14,3 +14,25 @@ export function normalizeCoverUrlForClient(url: string | null | undefined): stri
   }
   return trimmed;
 }
+
+/**
+ * 배달 URL이 Cloudinary(`res.cloudinary.com`)인지 여부.
+ *
+ * @history
+ * - 2026-03-25: 신규 — 편집 화면에서 외부 표지 URL Cloudinary 이관 UX
+ */
+export function isCloudinaryHostedCoverUrl(url: string | null | undefined): boolean {
+  if (url == null) {
+    return false;
+  }
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return false;
+  }
+  try {
+    const host = new URL(trimmed).hostname.toLowerCase();
+    return host === "res.cloudinary.com" || host.endsWith(".res.cloudinary.com");
+  } catch {
+    return false;
+  }
+}

@@ -1,15 +1,16 @@
-import type {
-  BookFormat,
-  CreateLibraryInput,
-  CreateUserBookInput,
-  LibraryAggregatedBookRow,
-  LibraryMemberRow,
-  LibraryMemberRole,
-  LibrarySharedOwnerRow,
-  LibrarySummary,
-  ReadingStatus,
-  ShareToLibraryInput,
-  UpdateLibraryInput
+import {
+  mergeAppUserPolicies,
+  type BookFormat,
+  type CreateLibraryInput,
+  type CreateUserBookInput,
+  type LibraryAggregatedBookRow,
+  type LibraryMemberRow,
+  type LibraryMemberRole,
+  type LibrarySharedOwnerRow,
+  type LibrarySummary,
+  type ReadingStatus,
+  type ShareToLibraryInput,
+  type UpdateLibraryInput
 } from "@bookfolio/shared";
 
 import {
@@ -21,6 +22,7 @@ import {
 } from "@/lib/books/repository";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { SharedLibraryCreateLimitReachedError } from "@/lib/libraries/shared-library-policy";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 type DbLibraryRow = {
@@ -40,6 +42,31 @@ type DbLibraryMemberRow = {
 
 async function getClient(context?: RepositoryContext) {
   return createSupabaseAdminClient();
+}
+
+async function countLibrariesCreatedBy(supabase: SupabaseClient, userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("libraries")
+    .select("id", { count: "exact", head: true })
+    .eq("created_by", userId);
+  if (error) {
+    throw error;
+  }
+  return count ?? 0;
+}
+
+/**
+ * `libraries.created_by` 기준, 해당 사용자가 소유자로 만든 공동서재 개수.
+ *
+ * @history
+ * - 2026-03-25: `policies_json.sharedLibraryCreateLimit` 검증·UI용
+ */
+export async function countLibrariesCreatedByUser(
+  userId: string,
+  context?: RepositoryContext
+): Promise<number> {
+  const supabase = await getClient(context);
+  return countLibrariesCreatedBy(supabase, userId);
 }
 
 async function getMemberRole(
@@ -134,6 +161,10 @@ export async function listLibrariesForUser(
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
+/**
+ * @history
+ * - 2026-03-25: `app_users.policies_json.sharedLibraryCreateLimit` 만큼만 생성 허용
+ */
 export async function createLibrary(
   input: CreateLibraryInput,
   userId: string,
@@ -143,6 +174,15 @@ export async function createLibrary(
   const name = input.name.trim();
   if (!name) {
     throw new Error("이름을 입력해 주세요.");
+  }
+
+  const [{ data: policyRow }, createdCount] = await Promise.all([
+    supabase.from("app_users").select("policies_json").eq("id", userId).maybeSingle(),
+    countLibrariesCreatedBy(supabase, userId)
+  ]);
+  const policies = mergeAppUserPolicies(policyRow?.policies_json);
+  if (createdCount >= policies.sharedLibraryCreateLimit) {
+    throw new SharedLibraryCreateLimitReachedError(policies.sharedLibraryCreateLimit, createdCount);
   }
 
   const { data: lib, error: libErr } = await supabase

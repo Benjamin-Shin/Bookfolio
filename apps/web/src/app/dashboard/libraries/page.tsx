@@ -6,8 +6,13 @@ import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LIBRARY_KIND_LABELS } from "@/components/libraries/reading-status-labels";
-import { listLibrariesForUser } from "@/lib/libraries/repository";
+import { getMergedAppUserPoliciesForUser } from "@/lib/auth/app-user-policies";
+import { countLibrariesCreatedByUser, listLibrariesForUser } from "@/lib/libraries/repository";
 
+/**
+ * @history
+ * - 2026-03-25: 공동서재 생성 상한 도달 시 「새 공동서재」 버튼 비활성
+ */
 export default async function LibrariesPage() {
   const session = await auth();
   if (!session?.user?.id) {
@@ -15,7 +20,12 @@ export default async function LibrariesPage() {
   }
 
   const ctx = { userId: session.user.id, useAdmin: true } as const;
-  const libraries = await listLibrariesForUser(session.user.id, ctx);
+  const [libraries, policies, createdCount] = await Promise.all([
+    listLibrariesForUser(session.user.id, ctx),
+    getMergedAppUserPoliciesForUser(session.user.id),
+    countLibrariesCreatedByUser(session.user.id, ctx)
+  ]);
+  const canCreateMore = createdCount < policies.sharedLibraryCreateLimit;
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 md:py-12">
@@ -28,9 +38,15 @@ export default async function LibrariesPage() {
           <Button variant="outline" size="sm" asChild>
             <Link href="/dashboard">내 서재</Link>
           </Button>
-          <Button size="sm" asChild>
-            <Link href={"/dashboard/libraries/new" as Route}>새 공동서재</Link>
-          </Button>
+          {canCreateMore ? (
+            <Button size="sm" asChild>
+              <Link href={"/dashboard/libraries/new" as Route}>새 공동서재</Link>
+            </Button>
+          ) : (
+            <Button size="sm" type="button" disabled title="소유 공동서재 개수 상한에 도달했습니다.">
+              새 공동서재
+            </Button>
+          )}
         </div>
       </div>
 
@@ -41,9 +57,15 @@ export default async function LibrariesPage() {
             <CardDescription>첫 서재를 만들고 멤버를 초대해 보세요.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href={"/dashboard/libraries/new" as Route}>공동서재 만들기</Link>
-            </Button>
+            {canCreateMore ? (
+              <Button asChild>
+                <Link href={"/dashboard/libraries/new" as Route}>공동서재 만들기</Link>
+              </Button>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                소유 공동서재는 최대 {policies.sharedLibraryCreateLimit}개까지 만들 수 있습니다.
+              </p>
+            )}
           </CardContent>
         </Card>
       ) : (
