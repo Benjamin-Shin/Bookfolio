@@ -87,7 +87,7 @@ export default async function SharedLibraryBookDetailPage({ params }: PageProps)
                 <tr className="border-b text-muted-foreground">
                   <th className="pb-2 pr-4 font-medium">멤버</th>
                   <th className="pb-2 pr-4 font-medium">상태</th>
-                  <th className="pb-2 font-medium">위치·메모</th>
+                  <th className="pb-2 font-medium">위치·메모 미리보기</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,7 +101,7 @@ export default async function SharedLibraryBookDetailPage({ params }: PageProps)
                     </td>
                     <td className="py-2 pr-4">{READING_STATUS_LABELS[o.readingStatus]}</td>
                     <td className="py-2 text-muted-foreground">
-                      {[o.location, o.memo].filter(Boolean).join(" · ") || "—"}
+                      {[o.location, o.memoPreview].filter(Boolean).join(" · ") || "—"}
                     </td>
                   </tr>
                 ))}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import type { UpdateUserBookInput } from "@bookfolio/shared";
+import { BOOK_FORMATS, type BookFormat, type UpdateUserBookInput } from "@bookfolio/shared";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
 import { deleteUserBook, getUserBook, updateUserBook } from "@/lib/books/repository";
@@ -36,7 +36,10 @@ function parseFormDataToUpdate(input: FormData): UpdateUserBookInput {
         .filter(Boolean) ?? [];
   }
   if (input.has("format")) {
-    out.format = input.get("format")?.toString() as "paper" | "ebook";
+    const raw = input.get("format")?.toString() ?? "";
+    if ((BOOK_FORMATS as readonly string[]).includes(raw)) {
+      out.format = raw as BookFormat;
+    }
   }
   if (input.has("readingStatus")) {
     out.readingStatus = input.get("readingStatus")?.toString() as UpdateUserBookInput["readingStatus"];
@@ -44,9 +47,6 @@ function parseFormDataToUpdate(input: FormData): UpdateUserBookInput {
   if (input.has("rating")) {
     const ratingValue = input.get("rating")?.toString() ?? "";
     out.rating = ratingValue ? Number(ratingValue) : null;
-  }
-  if (input.has("memo")) {
-    out.memo = input.get("memo")?.toString() ?? "";
   }
   if (input.has("priceKrw")) {
     const raw = input.get("priceKrw")?.toString() ?? "";

@@ -20,6 +20,7 @@ import {
   type DbCanonicalBook,
   type RepositoryContext
 } from "@/lib/books/repository";
+import { appendUserBookMemoLine, fetchLatestMemoPreviewsForUserBookIds } from "@/lib/books/user-book-sidecars";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { SharedLibraryCreateLimitReachedError } from "@/lib/libraries/shared-library-policy";
@@ -351,6 +352,62 @@ export async function deleteLibrary(
   if (error) throw error;
 }
 
+/**
+ * 공동서재 소유권을 다른 멤버에게 이전합니다 (`libraries.created_by`, `library_members.role`).
+ *
+ * @history
+ * - 2026-03-26: 회원 탈투 전 소유 공동서재 정리(이전) 지원
+ */
+export async function transferLibraryOwnership(
+  libraryId: string,
+  newOwnerUserId: string,
+  actorUserId: string,
+  context?: RepositoryContext
+): Promise<void> {
+  await assertLibraryOwner(libraryId, actorUserId, context);
+
+  if (newOwnerUserId === actorUserId) {
+    throw new Error("이미 소유자입니다.");
+  }
+
+  const supabase = await getClient(context);
+
+  const { data: newMember, error: nmErr } = await supabase
+    .from("library_members")
+    .select("role")
+    .eq("library_id", libraryId)
+    .eq("user_id", newOwnerUserId)
+    .maybeSingle();
+
+  if (nmErr) throw nmErr;
+  if (!newMember) {
+    throw new Error("선택한 사용자는 이 서재의 멤버가 아닙니다.");
+  }
+
+  const { error: libErr } = await supabase
+    .from("libraries")
+    .update({ created_by: newOwnerUserId })
+    .eq("id", libraryId);
+
+  if (libErr) throw libErr;
+
+  const { error: upNewErr } = await supabase
+    .from("library_members")
+    .update({ role: "owner" })
+    .eq("library_id", libraryId)
+    .eq("user_id", newOwnerUserId);
+
+  if (upNewErr) throw upNewErr;
+
+  const { error: upOldErr } = await supabase
+    .from("library_members")
+    .update({ role: "member" })
+    .eq("library_id", libraryId)
+    .eq("user_id", actorUserId);
+
+  if (upOldErr) throw upOldErr;
+}
+
 export async function listLibraryMembers(
   libraryId: string,
   userId: string,
@@ -514,7 +571,6 @@ type LinkedLibraryRow = {
     user_id: string;
     book_id: string;
     reading_status: string;
-    memo: string | null;
     location: string | null;
     updated_at: string;
     books: DbCanonicalBook | DbCanonicalBook[];
@@ -533,7 +589,6 @@ type FlatLinked = {
   userId: string;
   bookId: string;
   readingStatus: ReadingStatus;
-  memo: string | null;
   location: string | null;
   book: DbCanonicalBook;
 };
@@ -554,7 +609,6 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
       userId: r.user_books.user_id,
       bookId: r.user_books.book_id,
       readingStatus: rs,
-      memo: r.user_books.memo,
       location: r.user_books.location,
       book
     });
@@ -571,7 +625,8 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
 function buildAggregatedList(
   libraryId: string,
   flat: FlatLinked[],
-  profiles: Map<string, { email: string; name: string | null }>
+  profiles: Map<string, { email: string; name: string | null }>,
+  memoPreviewByUserBookId: Map<string, string | null>
 ): LibraryAggregatedBookRow[] {
   const byBook = new Map<string, FlatLinked[]>();
   for (const f of flat) {
@@ -598,7 +653,7 @@ function buildAggregatedList(
         userBookId: g.userBookId,
         readingStatus: g.readingStatus,
         location: g.location,
-        memo: g.memo,
+        memoPreview: memoPreviewByUserBookId.get(g.userBookId) ?? null,
         linkedAt: g.linkedAt
       };
     });
@@ -634,12 +689,11 @@ async function fetchLinkedRowsForLibrary(
       user_book_id,
       linked_at,
       linked_by,
-      user_books!inner (
+        user_books!inner (
         id,
         user_id,
         book_id,
         reading_status,
-        memo,
         location,
         updated_at,
         books!inner (
@@ -695,11 +749,15 @@ export async function listLibraryBooks(
   const supabase = await getClient(context);
   const rows = await fetchLinkedRowsForLibrary(supabase, libraryId);
   const flat = flattenLinkedRows(rows);
+  const previews = await fetchLatestMemoPreviewsForUserBookIds(
+    supabase,
+    flat.map((f) => f.userBookId)
+  );
   const profiles = await loadProfilesForUserIds(
     supabase,
     flat.map((f) => f.userId)
   );
-  return buildAggregatedList(libraryId, flat, profiles);
+  return buildAggregatedList(libraryId, flat, profiles, previews);
 }
 
 export async function getLibraryAggregatedBook(
@@ -715,11 +773,15 @@ export async function getLibraryAggregatedBook(
   if (flat.length === 0) {
     return null;
   }
+  const previews = await fetchLatestMemoPreviewsForUserBookIds(
+    supabase,
+    flat.map((f) => f.userBookId)
+  );
   const profiles = await loadProfilesForUserIds(
     supabase,
     flat.map((f) => f.userId)
   );
-  return buildAggregatedList(libraryId, flat, profiles)[0] ?? null;
+  return buildAggregatedList(libraryId, flat, profiles, previews)[0] ?? null;
 }
 
 export async function shareBookToLibrary(
@@ -761,15 +823,18 @@ export async function shareBookToLibrary(
       throw new Error("개인 서재에 해당 책이 없습니다. 먼저 개인 서재에 추가해 주세요.");
     }
     userBookIdToLink = ub.id as string;
-    if (input.location !== undefined || input.memo !== undefined) {
+    if (input.location !== undefined) {
       await updateUserBook(
         userBookIdToLink,
-        {
-          ...(input.location !== undefined ? { location: input.location } : {}),
-          ...(input.memo !== undefined ? { memo: input.memo } : {})
-        },
+        { location: input.location },
         { userId, useAdmin: true }
       );
+    }
+    if (input.memo !== undefined && String(input.memo).trim()) {
+      await appendUserBookMemoLine(userBookIdToLink, String(input.memo).trim(), {
+        userId,
+        useAdmin: true
+      });
     }
   } else {
     const manual = input as Pick<
@@ -794,29 +859,32 @@ export async function shareBookToLibrary(
           description: manual.description ?? null,
           priceKrw: manual.priceKrw ?? null,
           format: manual.format ?? "paper",
-          location: manual.location?.trim() ? manual.location.trim() : null,
-          memo: manual.memo?.trim() ? manual.memo.trim() : null
+          location: manual.location?.trim() ? manual.location.trim() : null
         },
         { userId, useAdmin: true }
       );
       userBookIdToLink = created.id;
+      if (manual.memo?.trim()) {
+        await appendUserBookMemoLine(created.id, manual.memo.trim(), { userId, useAdmin: true });
+      }
       propagateNewBookToOwnedLibraries = true;
     } catch (e) {
       if (e instanceof UserBookAlreadyInShelfError) {
         userBookIdToLink = e.existingUserBookId;
-        if (manual.location !== undefined || manual.memo !== undefined) {
+        if (manual.location !== undefined) {
           await updateUserBook(
             userBookIdToLink,
             {
-              ...(manual.location !== undefined
-                ? { location: manual.location?.trim() ? manual.location.trim() : null }
-                : {}),
-              ...(manual.memo !== undefined
-                ? { memo: manual.memo?.trim() ? manual.memo.trim() : null }
-                : {})
+              location: manual.location?.trim() ? manual.location.trim() : null
             },
             { userId, useAdmin: true }
           );
+        }
+        if (manual.memo !== undefined && manual.memo?.trim()) {
+          await appendUserBookMemoLine(userBookIdToLink, manual.memo.trim(), {
+            userId,
+            useAdmin: true
+          });
         }
       } else {
         throw e;

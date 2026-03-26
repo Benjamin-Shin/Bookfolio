@@ -43,3 +43,4 @@ alwaysApply: true
 
 - 웹 앱 세부 규칙: `.cursor/rules/web.mdc`
 - 기획·로드맵: `.cursor/rules/project-plan.mdc`
+- Supabase 스키마 문서 유지: `.cursor/rules/db-schema-doc.mdc` — `docs/bookfolio-db-schema.md`

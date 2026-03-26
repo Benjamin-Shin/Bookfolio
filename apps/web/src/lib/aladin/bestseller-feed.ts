@@ -17,6 +17,8 @@ export type AladinFeedItem = {
   priceStandard: number | null;
   categoryName: string;
   salesPoint: number | null;
+  /** 알라딘 `itemPage`·`subInfo` 등에서 추출한 총 페이지(쪽). 없으면 null. */
+  pageCount: number | null;
 };
 
 /**
@@ -80,6 +82,32 @@ function optInt(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+const MAX_PAGE_COUNT = 50_000;
+
+/**
+ * 알라딘 ItemList 항목에서 쪽수를 뽑습니다 (`itemPage`, `subInfo`의 `NNN쪽` 패턴).
+ *
+ * @history
+ * - 2026-03-26: 관리자 프리필·일괄 등록용 `pageCount`
+ */
+function pageCountFromAladinRaw(raw: Record<string, unknown>): number | null {
+  const direct = optInt(raw.itemPage);
+  if (direct != null && direct >= 1) {
+    return Math.min(direct, MAX_PAGE_COUNT);
+  }
+  const sub = str(raw.subInfo);
+  if (sub) {
+    const m = sub.match(/(\d{1,5})\s*쪽/);
+    if (m) {
+      const n = parseInt(m[1]!, 10);
+      if (n >= 1) {
+        return Math.min(n, MAX_PAGE_COUNT);
+      }
+    }
+  }
+  return null;
+}
+
 function ensureItemArray(raw: unknown): Record<string, unknown>[] {
   if (raw === undefined || raw === null) {
     return [];
@@ -123,7 +151,8 @@ function mapRawItem(raw: Record<string, unknown>): AladinFeedItem {
     priceSales: optInt(raw.priceSales),
     priceStandard: optInt(raw.priceStandard),
     categoryName: str(raw.categoryName),
-    salesPoint: optInt(raw.salesPoint)
+    salesPoint: optInt(raw.salesPoint),
+    pageCount: pageCountFromAladinRaw(raw)
   };
 }
 

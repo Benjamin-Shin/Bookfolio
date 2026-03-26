@@ -1,6 +1,10 @@
 "use client";
 
-import { BookMarkedIcon, ShieldIcon, UsersIcon } from "lucide-react";
+/**
+ * @history
+ * - 2026-03-26: 포인트·정책 관리 링크 추가
+ */
+import { BookMarkedIcon, CoinsIcon, ShieldIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +38,12 @@ export function AdminHeaderMenu() {
           <Link href="/dashboard/admin/books" className="flex cursor-pointer items-center gap-2">
             <BookMarkedIcon className="size-4 opacity-70" />
             도서 관리
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard/admin/points" className="flex cursor-pointer items-center gap-2">
+            <CoinsIcon className="size-4 opacity-70" />
+            포인트 · 정책
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

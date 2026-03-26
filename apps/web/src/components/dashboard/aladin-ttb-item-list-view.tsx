@@ -40,7 +40,7 @@ export function AladinTtbItemListView({
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{pageDescription}</p>
         </div>
         <Button variant="outline" asChild>
-          <Link href={"/dashboard" as Route}>내 책장으로</Link>
+          <Link href={"/dashboard" as Route}>내 서재로</Link>
         </Button>
       </div>
 

@@ -42,7 +42,7 @@ export async function setUserRoleFromForm(formData: FormData): Promise<void> {
 
   const userId = formData.get("userId")?.toString().trim();
   const roleRaw = formData.get("role")?.toString().trim();
-  if (!userId || (roleRaw !== "ADMIN" && roleRaw !== "USER")) {
+  if (!userId || (roleRaw !== "ADMIN" && roleRaw !== "STAFF" && roleRaw !== "USER")) {
     return;
   }
 

@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>책 페이지의 글귀를 촬영해 메모에 넣기 위해 카메라를 사용합니다.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>이미지에서 글귀를 읽을 때 사진 보관함 접근이 필요할 수 있습니다.</string>
 </dict>
 </plist>

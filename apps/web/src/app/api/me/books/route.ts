@@ -46,7 +46,6 @@ function parseFormDataToCreate(input: FormData) {
       | "paused"
       | "dropped",
     rating: ratingValue ? Number(ratingValue) : null,
-    memo: input.get("memo")?.toString() ?? null,
     isbn: optionalString(input, "isbn"),
     coverUrl: optionalString(input, "coverUrl"),
     publisher: optionalString(input, "publisher"),

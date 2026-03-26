@@ -29,7 +29,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
   late final TextEditingController _isbnController;
   late final TextEditingController _titleController;
   late final TextEditingController _authorsController;
-  late final TextEditingController _memoController;
   late final TextEditingController _locationController;
   int? _rating;
   BookFormat _format = BookFormat.paper;
@@ -50,7 +49,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
       _isbnController = TextEditingController(text: ex.isbn ?? '');
       _titleController = TextEditingController(text: ex.title);
       _authorsController = TextEditingController(text: ex.authors.join(', '));
-      _memoController = TextEditingController(text: ex.memo ?? '');
       _rating = ex.rating;
       _locationController = TextEditingController(text: ex.location ?? '');
       _format = ex.format;
@@ -64,7 +62,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
       _isbnController = TextEditingController(text: p?.isbn ?? '');
       _titleController = TextEditingController(text: p?.title ?? '');
       _authorsController = TextEditingController(text: p?.authors.join(', ') ?? '');
-      _memoController = TextEditingController();
       _locationController = TextEditingController();
       _coverUrl = p?.coverUrl;
       _publisher = p?.publisher;
@@ -79,7 +76,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
     _isbnController.dispose();
     _titleController.dispose();
     _authorsController.dispose();
-    _memoController.dispose();
     _locationController.dispose();
     super.dispose();
   }
@@ -154,7 +150,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
   }
 
   Map<String, dynamic> _buildUpdatePayload() {
-    final memo = _memoController.text.trim();
     final loc = _locationController.text.trim();
     return {
       'title': _titleController.text.trim(),
@@ -162,7 +157,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
       'format': _format.name,
       'readingStatus': _status.name,
       'rating': _rating,
-      'memo': memo.isEmpty ? null : memo,
       'coverUrl': _coverUrl,
       'publisher': _publisher,
       'publishedDate': _publishedDate,
@@ -311,15 +305,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _memoController,
-            decoration: const InputDecoration(
-              labelText: '메모',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 5,
-          ),
-          const SizedBox(height: 12),
           Text(
             '위치',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -372,7 +357,6 @@ class _BookFormScreenState extends State<BookFormScreen> {
                     format: _format,
                     readingStatus: _status,
                     rating: _rating,
-                    memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
                     coverUrl: _coverUrl,
                     publisher: _publisher,
                     publishedDate: _publishedDate,

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { BOOK_FORMAT_LABEL_KO, READING_STATUS_LABEL_KO } from "@bookfolio/shared";
 
+import { BookDetailSidecars } from "@/components/books/book-detail-sidecars.client";
 import { getUserBookWithCanonical } from "@/lib/books/repository";
 
 function isLikelyUrl(s: string) {
@@ -17,6 +18,7 @@ function isLikelyUrl(s: string) {
  * 내 서재 도서 상세.
  *
  * @history
+ * - 2026-03-26: 한줄평·마크다운 메모·독서 이벤트(`BookDetailSidecars`); `user_books.memo` 제거 반영
  * - 2026-03-24: 헤더 우측 상단에 장르(`genreSlugs`) 배지 표시, 본문 정의 목록 중복 장르 행 제거
  */
 export default async function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -126,7 +128,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
         <Card className="border-border/80">
           <CardHeader>
             <CardTitle className="text-lg">내 서재 기록</CardTitle>
-            <CardDescription>이 책에 대해 나만 가진 읽기 상태·메모 등입니다.</CardDescription>
+            <CardDescription>이 책에 대해 나만 가진 읽기 상태·평점 등입니다. 긴 메모는 아래 섹션에서 관리합니다.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <dl className="grid gap-3 text-sm sm:grid-cols-[8rem_1fr] sm:gap-x-4">
@@ -141,15 +143,10 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
               <dt className="text-muted-foreground">위치</dt>
               <dd className="whitespace-pre-wrap">{userBook.location?.trim() ? userBook.location : "—"}</dd>
             </dl>
-            <Separator />
-            <div className="space-y-2">
-              <p className="text-sm font-medium">메모</p>
-              <p className="min-h-[4rem] whitespace-pre-wrap rounded-md border border-border/60 bg-muted/20 p-3 text-sm text-muted-foreground">
-                {userBook.memo?.trim() ? userBook.memo : "메모가 없습니다."}
-              </p>
-            </div>
           </CardContent>
         </Card>
+
+        <BookDetailSidecars userBookId={userBook.id} bookId={userBook.bookId} />
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border/60 pt-6">
           <p className="text-xs text-muted-foreground">삭제하면 내 서재에서만 제거됩니다.</p>

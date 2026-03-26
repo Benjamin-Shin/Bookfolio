@@ -1,4 +1,10 @@
-export const BOOK_FORMATS = ["paper", "ebook"] as const;
+/**
+ * 카탈로그(`books`)·서재 표시용 매체 구분. 캐논 서지 1행(ISBN)당 하나.
+ *
+ * @history
+ * - 2026-03-26: `audiobook`, `unknown` 추가 — DB `0021`·캐논 포맷 정렬
+ */
+export const BOOK_FORMATS = ["paper", "ebook", "audiobook", "unknown"] as const;
 export type BookFormat = (typeof BOOK_FORMATS)[number];
 
 export const READING_STATUSES = [
@@ -13,7 +19,9 @@ export type ReadingStatus = (typeof READING_STATUSES)[number];
 /** 웹·앱 UI용 한글 표기 (값은 그대로 `paper` 등 영문). */
 export const BOOK_FORMAT_LABEL_KO = {
   paper: "종이책",
-  ebook: "전자책"
+  ebook: "전자책",
+  audiobook: "오디오북",
+  unknown: "형식 미상"
 } as const satisfies Record<BookFormat, string>;
 
 export const READING_STATUS_LABEL_KO = {
@@ -34,6 +42,12 @@ export interface Profile {
   createdAt: string;
 }
 
+/**
+ * ISBN·제목 등으로 외부/로컬에서 가져온 도서 메타 스냅샷.
+ *
+ * @history
+ * - 2026-03-26: `pageCount`(총 페이지) 선택 필드
+ */
 export interface BookLookupResult {
   isbn: string;
   title: string;
@@ -49,6 +63,8 @@ export interface BookLookupResult {
   genreSlugs?: string[];
   literatureRegion?: string | null;
   originalLanguage?: string | null;
+  /** 제공자가 알려준 총 페이지(쪽). Google Books·국립 등 일부만 제공. */
+  pageCount?: number | null;
 }
 
 export interface UserBookSummary {
@@ -61,7 +77,6 @@ export interface UserBookSummary {
   format: BookFormat;
   readingStatus: ReadingStatus;
   rating: number | null;
-  memo: string | null;
   coverUrl: string | null;
   /** 참고·집계용 가격(원). */
   priceKrw: number | null;
@@ -90,7 +105,6 @@ export interface CreateUserBookInput {
   format: BookFormat;
   readingStatus?: ReadingStatus;
   rating?: number | null;
-  memo?: string | null;
   coverUrl?: string | null;
   publisher?: string | null;
   publishedDate?: string | null;
@@ -112,9 +126,56 @@ export interface UpdateUserBookInput {
   format?: BookFormat;
   readingStatus?: ReadingStatus;
   rating?: number | null;
-  memo?: string | null;
   isOwned?: boolean;
   location?: string | null;
+}
+
+export const READING_EVENT_TYPES = [
+  "read_start",
+  "progress",
+  "read_pause",
+  "read_complete",
+  "dropped",
+] as const;
+export type ReadingEventType = (typeof READING_EVENT_TYPES)[number];
+
+export interface UserBookMemoRow {
+  id: string;
+  userBookId: string;
+  bodyMd: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BookOneLinerRow {
+  userId: string;
+  displayName: string | null;
+  body: string;
+  updatedAt: string;
+}
+
+export interface ReadingEventRow {
+  id: string;
+  userBookId: string;
+  eventType: ReadingEventType;
+  payload: Record<string, unknown>;
+  occurredAt: string;
+  createdAt: string;
+}
+
+export interface ReadingLeaderboardEntry {
+  userId: string;
+  displayName: string | null;
+  count: number;
+}
+
+export interface ReadingLeaderboardResponse {
+  top: ReadingLeaderboardEntry[];
+  me: {
+    rank: number | null;
+    count: number;
+    totalRankedUsers: number;
+  };
 }
 
 /** DB `app_users.policies_json`과 맞춘 확장 가능 정책(알 수 없는 키는 무시). */
@@ -194,7 +255,8 @@ export interface LibrarySharedOwnerRow {
   userBookId: string;
   readingStatus: ReadingStatus;
   location: string | null;
-  memo: string | null;
+  /** 최신 개인 메모(`user_book_memos`) 앞부분(서고 목록용). */
+  memoPreview: string | null;
   linkedAt: string;
 }
 

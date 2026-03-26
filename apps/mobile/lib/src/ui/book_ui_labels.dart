@@ -4,6 +4,8 @@ String bookFormatLabelKo(BookFormat f) {
   return switch (f) {
     BookFormat.paper => '종이책',
     BookFormat.ebook => '전자책',
+    BookFormat.audiobook => '오디오북',
+    BookFormat.unknown => '형식 미상',
   };
 }
 

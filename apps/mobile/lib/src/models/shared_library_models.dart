@@ -52,7 +52,7 @@ class SharedLibraryOwnerRow {
     required this.userBookId,
     required this.readingStatus,
     this.location,
-    this.memo,
+    this.memoPreview,
     required this.linkedAt,
   });
 
@@ -62,7 +62,7 @@ class SharedLibraryOwnerRow {
   final String userBookId;
   final String readingStatus;
   final String? location;
-  final String? memo;
+  final String? memoPreview;
   final String linkedAt;
 
   factory SharedLibraryOwnerRow.fromJson(Map<String, dynamic> json) {
@@ -73,7 +73,7 @@ class SharedLibraryOwnerRow {
       userBookId: json['userBookId'] as String,
       readingStatus: json['readingStatus'] as String? ?? 'unread',
       location: json['location'] as String?,
-      memo: json['memo'] as String?,
+      memoPreview: json['memoPreview'] as String?,
       linkedAt: json['linkedAt'] as String,
     );
   }

@@ -3,6 +3,7 @@ import 'package:bookfolio_mobile/src/services/bookfolio_api.dart';
 import 'package:bookfolio_mobile/src/state/auth_controller.dart';
 import 'package:bookfolio_mobile/src/ui/screens/shared_library_books_screen.dart';
 import 'package:bookfolio_mobile/src/ui/widgets/book_grid_card.dart';
+import 'package:bookfolio_mobile/src/ui/widgets/main_hub_top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import 'package:provider/provider.dart';
 /// 참여 중인 공동서재 목록(내 서재와 같은 그리드·그라데이션 배경).
 ///
 /// History:
+/// - 2026-03-26: `MainHubTopNavBar` 추가
 /// - 2026-03-25: 앱바·그리드 카드를 `LibraryScreen` 스타일에 맞춤
 class SharedLibrariesScreen extends StatefulWidget {
   const SharedLibrariesScreen({super.key});
@@ -103,21 +105,26 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF5EDE2),
-              Color(0xFFE8DCC8),
-            ],
-          ),
-        ),
-        child: RefreshIndicator(
-          onRefresh: _load,
-          color: colorScheme.primary,
-          child: _loading
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const MainHubTopNavBar(current: MainHubTab.shared),
+          Expanded(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFF5EDE2),
+                    Color(0xFFE8DCC8),
+                  ],
+                ),
+              ),
+              child: RefreshIndicator(
+                onRefresh: _load,
+                color: colorScheme.primary,
+                child: _loading
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: const [
@@ -242,7 +249,10 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                             ),
                           ],
                         ),
-        ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

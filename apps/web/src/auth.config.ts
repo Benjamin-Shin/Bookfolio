@@ -1,3 +1,7 @@
+/**
+ * @history
+ * - 2026-03-26: JWT/세션에 `STAFF` 역할 유지(0021)
+ */
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -88,7 +92,12 @@ export const authConfig = {
         return token;
       }
 
-      if (typeof token.sub === "string" && (token.role !== "ADMIN" && token.role !== "USER")) {
+      if (
+        typeof token.sub === "string" &&
+        token.role !== "ADMIN" &&
+        token.role !== "STAFF" &&
+        token.role !== "USER"
+      ) {
         token.role = await getAppUserRole(token.sub);
       }
 
@@ -100,7 +109,8 @@ export const authConfig = {
         if (typeof token.email === "string") session.user.email = token.email;
         if (typeof token.name === "string") session.user.name = token.name;
         if (typeof token.picture === "string") session.user.image = token.picture;
-        session.user.role = token.role === "ADMIN" ? "ADMIN" : "USER";
+        const r = token.role;
+        session.user.role = r === "ADMIN" ? "ADMIN" : r === "STAFF" ? "STAFF" : "USER";
       }
       return session;
     }

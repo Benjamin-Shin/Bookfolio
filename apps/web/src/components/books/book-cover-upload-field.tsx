@@ -4,6 +4,7 @@
  * 도서 표지: 파일·클립보드·원격 URL을 `/api/upload`로 Cloudinary에 올리고 `coverUrl` hidden을 갱신합니다.
  *
  * @history
+ * - 2026-03-26: 붙여넣기 — 클립보드에 http(s) URL 텍스트가 있으면 원격 업로드와 동일하게 Cloudinary 반영
  * - 2026-03-25: `variant="edit"` — 미리보기 강조·비-Cloudinary 시 현재 URL로 이관 버튼
  * - 2026-03-25: 신규 — 신규/수정 폼 공통 필드
  */
@@ -124,13 +125,25 @@ export function BookCoverUploadField({
 
   function onPaste(e: React.ClipboardEvent) {
     const files = e.clipboardData?.files;
-    if (!files?.length) {
-      return;
+    if (files?.length) {
+      const img = Array.from(files).find((f) => f.type.startsWith("image/"));
+      if (img) {
+        e.preventDefault();
+        void uploadFile(img);
+        return;
+      }
     }
-    const img = Array.from(files).find((f) => f.type.startsWith("image/"));
-    if (img) {
-      e.preventDefault();
-      void uploadFile(img);
+    const text = e.clipboardData?.getData("text/plain")?.trim() ?? "";
+    if (!text) return;
+    try {
+      const u = new URL(text);
+      if (u.protocol === "http:" || u.protocol === "https:") {
+        e.preventDefault();
+        setRemoteUrl(text);
+        void uploadFromImageUrl(text);
+      }
+    } catch {
+      /* not a URL */
     }
   }
 
@@ -205,8 +218,9 @@ export function BookCoverUploadField({
           onPaste={onPaste}
           className="rounded-md border border-dashed border-border/60 bg-muted/30 p-4 text-sm text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          이 영역을 선택한 뒤 <span className="font-medium text-foreground">이미지 붙여넣기</span>(Ctrl+V)를 사용할 수
-          있습니다.
+          이 영역을 선택한 뒤 붙여넣기(Ctrl+V):{" "}
+          <span className="font-medium text-foreground">클립보드 이미지</span> 또는{" "}
+          <span className="font-medium text-foreground">http(s) 이미지 URL 문자열</span>을 넣을 수 있습니다.
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

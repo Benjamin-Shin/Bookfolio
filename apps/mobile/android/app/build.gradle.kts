@@ -42,3 +42,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // ML Kit 한국어 OCR (TextRecognizer(script: korean))
+    implementation("com.google.mlkit:text-recognition-korean:16.0.1")
+}

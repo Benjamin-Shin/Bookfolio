@@ -17,7 +17,7 @@ function SubmitButton() {
 
 type UserRoleFormProps = {
   userId: string;
-  currentRole: "ADMIN" | "USER";
+  currentRole: "ADMIN" | "STAFF" | "USER";
 };
 
 export function UserRoleForm({ userId, currentRole }: UserRoleFormProps) {
@@ -26,6 +26,7 @@ export function UserRoleForm({ userId, currentRole }: UserRoleFormProps) {
       <input type="hidden" name="userId" value={userId} />
       <FormSelect name="role" defaultValue={currentRole} className="h-8 w-[7.5rem] text-xs" aria-label="권한">
         <option value="USER">USER</option>
+        <option value="STAFF">STAFF</option>
         <option value="ADMIN">ADMIN</option>
       </FormSelect>
       <SubmitButton />

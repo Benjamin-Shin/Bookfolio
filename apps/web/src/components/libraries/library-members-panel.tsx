@@ -14,6 +14,12 @@ type Props = {
   isOwner: boolean;
 };
 
+/**
+ * 공동서재 멤버 목록·초대·제거·소유권 이전.
+ *
+ * @history
+ * - 2026-03-26: 소유자용 소유권 이전(멤버 선택 → `POST .../transfer-ownership`)
+ */
 export function LibraryMembersPanel({ libraryId, initialMembers, currentUserId, isOwner }: Props) {
   const router = useRouter();
   const [members, setMembers] = useState(initialMembers);
@@ -21,6 +27,8 @@ export function LibraryMembersPanel({ libraryId, initialMembers, currentUserId, 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inviteFormMounted, setInviteFormMounted] = useState(false);
+  const [transferTargetId, setTransferTargetId] = useState("");
+  const [transferLoading, setTransferLoading] = useState(false);
 
   useEffect(() => {
     setInviteFormMounted(true);
@@ -77,6 +85,40 @@ export function LibraryMembersPanel({ libraryId, initialMembers, currentUserId, 
     }
   }
 
+  async function handleTransferOwnership(e: React.FormEvent) {
+    e.preventDefault();
+    if (!transferTargetId) return;
+    if (
+      !confirm(
+        "소유권을 이전하면 더 이상 이 서재의 소유자가 아닙니다(멤버로 남습니다). 계속할까요?"
+      )
+    ) {
+      return;
+    }
+    setError(null);
+    setTransferLoading(true);
+    try {
+      const res = await fetch(`/api/me/libraries/${libraryId}/transfer-ownership`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newOwnerUserId: transferTargetId })
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "소유권을 이전하지 못했습니다.");
+        return;
+      }
+      setTransferTargetId("");
+      await refresh();
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setTransferLoading(false);
+    }
+  }
+
+  const transferCandidates = members.filter((m) => m.role === "member");
+
   return (
     <div className="space-y-4">
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -105,6 +147,38 @@ export function LibraryMembersPanel({ libraryId, initialMembers, currentUserId, 
           </li>
         ))}
       </ul>
+      {isOwner && transferCandidates.length > 0 ? (
+        <form
+          className="space-y-2 rounded-md border border-border/80 p-3"
+          onSubmit={(e) => void handleTransferOwnership(e)}
+        >
+          <p className="text-sm font-medium">소유권 이전</p>
+          <p className="text-xs text-muted-foreground">
+            다른 멤버에게 소유자 권한을 넘깁니다. 회원 탈퇴 전에는 반드시 처리해야 할 수 있습니다.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="min-w-0 flex-1 space-y-1">
+              <Label htmlFor="transfer-owner">새 소유자</Label>
+              <select
+                id="transfer-owner"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                value={transferTargetId}
+                onChange={(ev) => setTransferTargetId(ev.target.value)}
+              >
+                <option value="">멤버 선택…</option>
+                {transferCandidates.map((m) => (
+                  <option key={m.userId} value={m.userId}>
+                    {m.name?.trim() || m.email}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button type="submit" variant="secondary" disabled={transferLoading || !transferTargetId}>
+              {transferLoading ? "처리 중…" : "이전"}
+            </Button>
+          </div>
+        </form>
+      ) : null}
       {isOwner ? (
         inviteFormMounted ? (
           <form className="flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={(e) => void handleAdd(e)}>

@@ -1,5 +1,13 @@
 import type { Route } from "next";
 import Link from "next/link";
+import {
+  FlameIcon,
+  LibraryBigIcon,
+  LogInIcon,
+  LogOutIcon,
+  SparklesIcon,
+  UsersRoundIcon,
+} from "lucide-react";
 
 import { auth } from "@/auth";
 import { AdminHeaderMenu } from "@/components/layout/admin-header-menu";
@@ -16,6 +24,13 @@ function AndroidApkIcon({ className }: { className?: string }) {
   );
 }
 
+/**
+ * 전역 상단 헤더(브랜드·로그인 시 대시보드 바로가기).
+ *
+ * @history
+ * - 2026-03-26: 대시보드·로그아웃 등 네비에 lucide 아이콘 추가
+ * - 2026-03-26: 로그인 네비에 베스트셀러·초이스 시간 링크 추가(`dashboard/bestsellers`, `dashboard/choice-new`)
+ */
 export async function SiteHeader() {
   const session = await auth();
   const user = session?.user;
@@ -60,13 +75,32 @@ export async function SiteHeader() {
               {user.role === "ADMIN" ? <AdminHeaderMenu /> : null}
               <HeaderAccount email={user.email} displayLabel={displayLabel} initialProfile={profile} />
               <Button variant="ghost" size="sm" asChild>
-                <Link href={"/dashboard/libraries" as Route}>공동서재</Link>
+                <Link href={"/dashboard/libraries" as Route} className="inline-flex items-center gap-2">
+                  <UsersRoundIcon className="size-4 opacity-80" />
+                  공동서재
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={"/dashboard/bestsellers" as Route} className="inline-flex items-center gap-2">
+                  <FlameIcon className="size-4 opacity-80" />
+                  베스트셀러
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={"/dashboard/choice-new" as Route} className="inline-flex items-center gap-2">
+                  <SparklesIcon className="size-4 opacity-80" />
+                  초이스 시간
+                </Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/dashboard">내 서재</Link>
+                <Link href="/dashboard" className="inline-flex items-center gap-2">
+                  <LibraryBigIcon className="size-4 opacity-90" />
+                  내 서재
+                </Link>
               </Button>
               <form action="/auth/signout" method="post">
-                <Button type="submit" variant="ghost" size="sm">
+                <Button type="submit" variant="ghost" size="sm" className="inline-flex items-center gap-2">
+                  <LogOutIcon className="size-4 opacity-80" />
                   로그아웃
                 </Button>
               </form>
@@ -74,10 +108,16 @@ export async function SiteHeader() {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">로그인</Link>
+                <Link href="/login" className="inline-flex items-center gap-2">
+                  <LogInIcon className="size-4 opacity-80" />
+                  로그인
+                </Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/dashboard">내 서재</Link>
+                <Link href="/dashboard" className="inline-flex items-center gap-2">
+                  <LibraryBigIcon className="size-4 opacity-90" />
+                  내 서재
+                </Link>
               </Button>
             </>
           )}

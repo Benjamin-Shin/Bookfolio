@@ -1,3 +1,7 @@
+/**
+ * @history
+ * - 2026-03-26: 포인트·정책 카드 추가
+ */
 import Link from "next/link";
 import type { Route } from "next";
 
@@ -44,6 +48,23 @@ export default function AdminHomePage() {
               className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
               저자 목록 열기
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="border-border/80">
+          <CardHeader>
+            <CardTitle className="text-lg">포인트 · 정책</CardTitle>
+            <CardDescription>
+              정책 버전·이벤트 규칙(`point_rule_versions` / `point_rules`)과 원장(`user_points_ledger`)을
+              조회합니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/dashboard/admin/points"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              포인트 화면 열기
             </Link>
           </CardContent>
         </Card>

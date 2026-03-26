@@ -116,16 +116,16 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
                     _InfoRow(label: '읽기 상태', value: readingStatusLabelFromApi(o.readingStatus)),
                     if (o.location != null && o.location!.trim().isNotEmpty)
                       _InfoRow(label: '위치', value: o.location!.trim()),
-                    if (o.memo != null && o.memo!.trim().isNotEmpty)
+                    if (o.memoPreview != null && o.memoPreview!.trim().isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('메모', style: theme.textTheme.labelLarge?.copyWith(color: metaColor)),
+                            Text('메모 미리보기', style: theme.textTheme.labelLarge?.copyWith(color: metaColor)),
                             const SizedBox(height: 6),
                             Text(
-                              o.memo!.trim(),
+                              o.memoPreview!.trim(),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 height: 1.45,
                                 color: const Color(0xFF3E342C),

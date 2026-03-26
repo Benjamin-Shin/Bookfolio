@@ -6,6 +6,12 @@ import 'package:flutter/foundation.dart';
 class LibraryController extends ChangeNotifier {
   final BookfolioApi _api = BookfolioApi();
 
+  /// 상세 화면 등에서 토큰이 붙은 API 클라이언트가 필요할 때 사용합니다.
+  ///
+  /// History:
+  /// - 2026-03-26: 메모·이벤트·한줄평 API 연동용 노출
+  BookfolioApi get api => _api;
+
   AuthController? _auth;
   List<UserBook> _books = const [];
   bool _isLoading = false;

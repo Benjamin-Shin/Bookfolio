@@ -6,12 +6,18 @@ import 'package:bookfolio_mobile/src/ui/screens/book_detail_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/bestseller_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/choice_new_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/book_form_screen.dart';
+import 'package:bookfolio_mobile/src/ui/screens/my_stats_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/shared_libraries_screen.dart';
 import 'package:bookfolio_mobile/src/ui/widgets/book_grid_card.dart';
+import 'package:bookfolio_mobile/src/ui/widgets/main_hub_top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
+/// 내 서재 그리드.
+///
+/// History:
+/// - 2026-03-26: 상단 `MainHubTopNavBar` 추가
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
 
@@ -41,6 +47,68 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: colorScheme.primaryContainer.withValues(alpha: 0.4)),
+              child: Text(
+                '메뉴',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: const Color(0xFF4E4034),
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.collections_bookmark_outlined),
+              title: const Text('내 서재'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bar_chart_outlined),
+              title: const Text('내 통계'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(builder: (_) => const MyStatsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.local_fire_department_outlined),
+              title: const Text('베스트셀러'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(builder: (_) => const BestsellerScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.new_releases_outlined),
+              title: const Text('초이스 시간'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(builder: (_) => const ChoiceNewScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.groups_2_outlined),
+              title: const Text('공동서재'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(builder: (_) => const SharedLibrariesScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -80,33 +148,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: '초이스 신간',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ChoiceNewScreen()),
-              );
-            },
-            icon: const Icon(Icons.new_releases_outlined),
-          ),
-          IconButton(
-            tooltip: '베스트셀러',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const BestsellerScreen()),
-              );
-            },
-            icon: const Icon(Icons.local_fire_department_outlined),
-          ),
-          IconButton(
-            tooltip: '공동서재',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SharedLibrariesScreen()),
-              );
-            },
-            icon: const Icon(Icons.groups_2_outlined),
-          ),
-          IconButton(
             onPressed: () => context.read<AuthController>().signOut(),
             icon: const Icon(Icons.logout),
           ),
@@ -121,108 +162,116 @@ class _LibraryScreenState extends State<LibraryScreen> {
         icon: const Icon(Icons.add),
         label: const Text('책 추가'),
       ),
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF5EDE2),
-              Color(0xFFE8DCC8),
-            ],
-          ),
-        ),
-        child: RefreshIndicator(
-          onRefresh: library.loadBooks,
-          color: colorScheme.primary,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              if (library.error != null)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: Material(
-                      color: colorScheme.errorContainer.withValues(alpha: 0.85),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        child: Text(
-                          library.error!,
-                          style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 13),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const MainHubTopNavBar(current: MainHubTab.library),
+          Expanded(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFF5EDE2),
+                    Color(0xFFE8DCC8),
+                  ],
+                ),
+              ),
+              child: RefreshIndicator(
+                onRefresh: library.loadBooks,
+                color: colorScheme.primary,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    if (library.error != null)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                          child: Material(
+                            color: colorScheme.errorContainer.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                              child: Text(
+                                library.error!,
+                                style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 13),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              if (library.isLoading)
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                )
-              else if (library.books.isEmpty)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: _EmptyLibrary(onAddTap: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const BookFormScreen()),
-                    );
-                  }),
-                )
-              else ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                    child: Text(
-                      '총 ${library.books.length}권',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: const Color(0xFF5C4A3A),
-                            fontWeight: FontWeight.w600,
+                    if (library.isLoading)
+                      const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: CircularProgressIndicator(),
                           ),
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, kBookfolioFabClearancePadding),
-                  sliver: SliverLayoutBuilder(
-                    builder: (context, constraints) {
-                      final width = constraints.crossAxisExtent;
-                      final columns = width >= 520 ? 3 : 2;
-                      return SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: columns,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: bookGridCardAspectRatio(columns),
                         ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final book = library.books[index];
-                            return BookGridCard(
-                              title: book.title,
-                              authorsLine: book.authors.join(', '),
-                              coverUrl: book.coverUrl,
-                              gradientSeedA: book.title,
-                              gradientSeedB: book.id,
-                              coverBadge: ReadingStatusCoverBadge(status: book.readingStatus),
-                              onTap: () => _openBook(book),
+                      )
+                    else if (library.books.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _EmptyLibrary(onAddTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const BookFormScreen()),
+                          );
+                        }),
+                      )
+                    else ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                          child: Text(
+                            '총 ${library.books.length}권',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  color: const Color(0xFF5C4A3A),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, kBookfolioFabClearancePadding),
+                        sliver: SliverLayoutBuilder(
+                          builder: (context, constraints) {
+                            final width = constraints.crossAxisExtent;
+                            final columns = width >= 520 ? 3 : 2;
+                            return SliverGrid(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columns,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: bookGridCardAspectRatio(columns),
+                              ),
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final book = library.books[index];
+                                  return BookGridCard(
+                                    title: book.title,
+                                    authorsLine: book.authors.join(', '),
+                                    coverUrl: book.coverUrl,
+                                    gradientSeedA: book.title,
+                                    gradientSeedB: book.id,
+                                    coverBadge: ReadingStatusCoverBadge(status: book.readingStatus),
+                                    onTap: () => _openBook(book),
+                                  );
+                                },
+                                childCount: library.books.length,
+                              ),
                             );
                           },
-                          childCount: library.books.length,
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

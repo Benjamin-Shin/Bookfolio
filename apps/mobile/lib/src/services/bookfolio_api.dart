@@ -1,7 +1,13 @@
 import 'dart:convert';
 
 import 'package:bookfolio_mobile/src/models/aladin_bestseller_models.dart';
-import 'package:bookfolio_mobile/src/models/book_models.dart';
+import 'package:bookfolio_mobile/src/models/book_models.dart'
+    show
+        BookLookupResult,
+        BookOneLinerItem,
+        ReadingEventItem,
+        UserBook,
+        UserBookMemo;
 import 'package:bookfolio_mobile/src/models/shared_library_models.dart';
 import 'package:http/http.dart' as http;
 
@@ -148,6 +154,114 @@ class BookfolioApi {
     );
     _throwIfFailed(response);
     return AladinBestsellerFeed.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// `GET /api/me/books/:id/memos`
+  ///
+  /// History:
+  /// - 2026-03-26: 마크다운 메모 다건 API
+  Future<List<UserBookMemo>> fetchUserBookMemos(String userBookId) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/books/$userBookId/memos'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as List<dynamic>;
+    return decoded.map((e) => UserBookMemo.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<UserBookMemo> createUserBookMemo(String userBookId, String bodyMd) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/me/books/$userBookId/memos'),
+      headers: await _headers(),
+      body: jsonEncode({'action': 'create', 'bodyMd': bodyMd}),
+    );
+    _throwIfFailed(response);
+    return UserBookMemo.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  Future<void> upsertOneLiner(String userBookId, String body) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/me/books/$userBookId/one-liner'),
+      headers: await _headers(),
+      body: jsonEncode({'action': 'upsert', 'body': body}),
+    );
+    _throwIfFailed(response);
+  }
+
+  Future<void> clearOneLiner(String userBookId) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/me/books/$userBookId/one-liner'),
+      headers: await _headers(),
+      body: jsonEncode({'action': 'clear'}),
+    );
+    _throwIfFailed(response);
+  }
+
+  Future<List<BookOneLinerItem>> fetchBookOneLiners(String bookId) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/books/$bookId/one-liners'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as List<dynamic>;
+    return decoded.map((e) => BookOneLinerItem.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<List<ReadingEventItem>> fetchReadingEvents(String userBookId) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/books/$userBookId/reading-events'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as List<dynamic>;
+    return decoded.map((e) => ReadingEventItem.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<ReadingEventItem> appendReadingEvent(
+    String userBookId,
+    String eventType, {
+    Map<String, dynamic>? payload,
+    String? setReadingStatus,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/me/books/$userBookId/reading-events'),
+      headers: await _headers(),
+      body: jsonEncode({
+        'action': 'append',
+        'eventType': eventType,
+        'payload': payload ?? <String, dynamic>{},
+        if (setReadingStatus != null) 'setReadingStatus': setReadingStatus,
+      }),
+    );
+    _throwIfFailed(response);
+    return ReadingEventItem.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// `GET /api/me/stats/reading-leaderboard?kind=completed|owned`
+  Future<Map<String, dynamic>> fetchReadingLeaderboard(String kind) async {
+    final uri = Uri.parse('$_baseUrl/api/me/stats/reading-leaderboard').replace(
+      queryParameters: {'kind': kind, 'top': '20'},
+    );
+    final response = await _client.get(uri, headers: await _headers());
+    _throwIfFailed(response);
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// `GET /api/me/reading-events/calendar?from=&to=` (YYYY-MM-DD)
+  Future<Map<String, int>> fetchReadingEventsCalendar(String from, String to) async {
+    final uri = Uri.parse('$_baseUrl/api/me/reading-events/calendar').replace(
+      queryParameters: {'from': from, 'to': to},
+    );
+    final response = await _client.get(uri, headers: await _headers());
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final out = <String, int>{};
+    for (final e in decoded.entries) {
+      final n = (e.value as num?)?.toInt();
+      if (n != null) out[e.key] = n;
+    }
+    return out;
   }
 
   void _throwIfFailed(http.Response response) {

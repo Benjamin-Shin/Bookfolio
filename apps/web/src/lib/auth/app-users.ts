@@ -1,4 +1,5 @@
 import { upsertAppProfileRow } from "@/lib/auth/app-profiles";
+import { awardPointsJoinMembership } from "@/lib/points/award-points";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 function normalizeEmail(email: string) {
@@ -7,6 +8,9 @@ function normalizeEmail(email: string) {
 
 /**
  * Google OAuth 등에서 동일 이메일이면 기존 app_users id를 재사용합니다.
+ *
+ * @history
+ * - 2026-03-26: 신규 OAuth `app_users` 행에 대해 `user_signup` 포인트 시도
  */
 export async function ensureOAuthAppUser(params: {
   email: string;
@@ -55,6 +59,12 @@ export async function ensureOAuthAppUser(params: {
     displayName: params.name != null ? params.name : null,
     avatarUrl: params.image != null ? params.image : null
   });
+
+  try {
+    await awardPointsJoinMembership(created.id as string);
+  } catch (e) {
+    console.error("awardPointsJoinMembership", e);
+  }
 
   return created.id;
 }

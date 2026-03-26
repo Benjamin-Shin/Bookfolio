@@ -4,15 +4,19 @@
  * 관리자 공유 서지(`books`) 등록·수정 폼.
  *
  * @history
+ * - 2026-03-26: 총 페이지(`pageCount`) 입력·ISBN 조회 시 API `pageCount` 반영
+ * - 2026-03-26: `formHtmlId`·`onSubmitPendingChange` — 수정 페이지 상·하단 `form` 연동 저장 버튼
+ * - 2026-03-26: 표지 — `BookCoverUploadField`(파일·클립보드·URL→Cloudinary)로 통합(신규·수정 공통)
  * - 2026-03-24: ISBN 조회를 국립중앙도서관·네이버 버튼으로 분리(API `provider`); 안내 문구를 실제 폴백 순서(네이버→국립→Google)에 맞춤
  * - 2026-03-24: 옮긴이(`translatorsCsv`), API소스(`apiSource`) 입력; ISBN 조회 시 API소스 칸이 비어 있으면 조회 `source`로 채움
  */
 
 import type { BookLookupResult } from "@bookfolio/shared";
 import type { RefObject } from "react";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { BookCoverUploadField } from "@/components/books/book-cover-upload-field";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,15 +54,16 @@ function applyLookupToFormFields(
     isbn: RefObject<HTMLInputElement | null>;
     publisher: RefObject<HTMLInputElement | null>;
     publishedDate: RefObject<HTMLInputElement | null>;
-    coverUrl: RefObject<HTMLInputElement | null>;
     priceKrw: RefObject<HTMLInputElement | null>;
     genreSlugs: RefObject<HTMLInputElement | null>;
     literatureRegion: RefObject<HTMLInputElement | null>;
     originalLanguage: RefObject<HTMLInputElement | null>;
     description: RefObject<HTMLTextAreaElement | null>;
     apiSource: RefObject<HTMLInputElement | null>;
+    pageCount: RefObject<HTMLInputElement | null>;
   },
-  mode: "create" | "edit"
+  mode: "create" | "edit",
+  cover?: { getCurrent: () => string; set: (url: string) => void }
 ) {
   const fillEmptyOnly = mode === "edit";
 
@@ -81,7 +86,16 @@ function applyLookupToFormFields(
   }
   assign(refs.publisher.current, book.publisher ?? "");
   assign(refs.publishedDate.current, book.publishedDate ?? "");
-  assign(refs.coverUrl.current, book.coverUrl ?? "");
+  if (cover) {
+    const value = book.coverUrl ?? "";
+    if (fillEmptyOnly) {
+      if (cover.getCurrent().trim() === "" && value !== "") {
+        cover.set(value);
+      }
+    } else {
+      cover.set(value);
+    }
+  }
   assign(refs.description.current, book.description ?? "");
   if (book.priceKrw != null) {
     assign(refs.priceKrw.current, String(book.priceKrw));
@@ -91,6 +105,9 @@ function applyLookupToFormFields(
   assign(refs.literatureRegion.current, book.literatureRegion ?? "");
   assign(refs.originalLanguage.current, book.originalLanguage ?? "");
   assign(refs.apiSource.current, book.source ?? "");
+  if (book.pageCount != null && Number.isFinite(book.pageCount)) {
+    assign(refs.pageCount.current, String(book.pageCount));
+  }
 }
 
 export type AdminCanonicalBookFormValues = {
@@ -107,6 +124,8 @@ export type AdminCanonicalBookFormValues = {
   literatureRegion: string;
   originalLanguage: string;
   apiSource: string;
+  /** 총 페이지(쪽). 비우면 저장 시 NULL. */
+  pageCount: string;
 };
 
 const emptyValues: AdminCanonicalBookFormValues = {
@@ -122,13 +141,18 @@ const emptyValues: AdminCanonicalBookFormValues = {
   genreSlugs: "",
   literatureRegion: "",
   originalLanguage: "",
-  apiSource: ""
+  apiSource: "",
+  pageCount: ""
 };
 
 type AdminCanonicalBookFormProps = {
   mode: "create" | "edit";
   bookId?: string;
   defaultValues?: Partial<AdminCanonicalBookFormValues>;
+  /** 수정 폼 DOM `id` — 외부 `<button type="submit" form={id}>`와 연결할 때 사용 */
+  formHtmlId?: string;
+  /** `useActionState` 제출 pending — 외부 저장 버튼 비활성화 등 */
+  onSubmitPendingChange?: (pending: boolean) => void;
 };
 
 function kyoboSearchUrl(keyword: string) {
@@ -138,10 +162,20 @@ function kyoboSearchUrl(keyword: string) {
   return `https://search.kyobobook.co.kr/search?${params.toString()}`;
 }
 
-export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCanonicalBookFormProps) {
+export function AdminCanonicalBookForm({
+  mode,
+  bookId,
+  defaultValues,
+  formHtmlId,
+  onSubmitPendingChange
+}: AdminCanonicalBookFormProps) {
   const initial = { ...emptyValues, ...defaultValues };
   const action = mode === "create" ? createAdminCanonicalBook : updateAdminCanonicalBook;
-  const [state, formAction] = useActionState(action, null as AdminBookActionState | null);
+  const [state, formAction, isPending] = useActionState(action, null as AdminBookActionState | null);
+
+  useEffect(() => {
+    onSubmitPendingChange?.(isPending);
+  }, [isPending, onSubmitPendingChange]);
 
   const [lookupIsbn, setLookupIsbn] = useState(() =>
     mode === "edit" ? (defaultValues?.isbn ?? "").trim() : ""
@@ -149,19 +183,19 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
   const [lookupLoading, setLookupLoading] = useState<null | "naver" | "nl">(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [lookupOk, setLookupOk] = useState(false);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [adminCoverUrl, setAdminCoverUrl] = useState(initial.coverUrl);
 
   const titleRef = useRef<HTMLInputElement>(null);
   const authorsCsvRef = useRef<HTMLInputElement>(null);
   const isbnRef = useRef<HTMLInputElement>(null);
   const publisherRef = useRef<HTMLInputElement>(null);
   const publishedDateRef = useRef<HTMLInputElement>(null);
-  const coverUrlRef = useRef<HTMLInputElement>(null);
   const priceKrwRef = useRef<HTMLInputElement>(null);
   const genreSlugsRef = useRef<HTMLInputElement>(null);
   const literatureRegionRef = useRef<HTMLInputElement>(null);
   const originalLanguageRef = useRef<HTMLInputElement>(null);
   const apiSourceRef = useRef<HTMLInputElement>(null);
+  const pageCountRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
 
@@ -200,7 +234,6 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
     const raw = lookupIsbn.trim();
     setLookupError(null);
     setLookupOk(false);
-    setCoverPreview(null);
 
     if (!raw) {
       setLookupError("ISBN을 입력해 주세요.");
@@ -235,17 +268,17 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
           isbn: isbnRef,
           publisher: publisherRef,
           publishedDate: publishedDateRef,
-          coverUrl: coverUrlRef,
           priceKrw: priceKrwRef,
           genreSlugs: genreSlugsRef,
           literatureRegion: literatureRegionRef,
           originalLanguage: originalLanguageRef,
           description: descriptionRef,
-          apiSource: apiSourceRef
+          apiSource: apiSourceRef,
+          pageCount: pageCountRef
         },
-        mode
+        mode,
+        { getCurrent: () => adminCoverUrl, set: setAdminCoverUrl }
       );
-      setCoverPreview(book.coverUrl ?? null);
       setLookupOk(true);
     } catch {
       setLookupError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
@@ -255,7 +288,7 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form id={formHtmlId} action={formAction} className="space-y-6">
       {bookId ? <input type="hidden" name="bookId" value={bookId} /> : null}
 
       {state?.error ? (
@@ -334,10 +367,10 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
             {mode === "edit" ? "비어 있던 항목을 채웠습니다." : "폼에 반영했습니다."} 필요하면 수정한 뒤 저장하세요.
           </p>
         ) : null}
-        {coverPreview ? (
+        {lookupOk && adminCoverUrl.trim() ? (
           <div className="flex justify-center pt-1">
             <img
-              src={coverPreview}
+              src={adminCoverUrl}
               alt="표지 미리보기"
               className="max-h-48 max-w-[10rem] rounded-md border border-border object-contain shadow-sm"
             />
@@ -422,17 +455,11 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="coverUrl">표지 URL</Label>
-        <Input
-          ref={coverUrlRef}
-          id="coverUrl"
-          name="coverUrl"
-          type="url"
-          placeholder="https://…"
-          defaultValue={initial.coverUrl}
-        />
-      </div>
+      <BookCoverUploadField
+        coverUrl={adminCoverUrl}
+        onCoverUrlChange={setAdminCoverUrl}
+        variant={mode === "edit" ? "edit" : "create"}
+      />
 
       <div className="space-y-2">
         <Label htmlFor="priceKrw">가격 (원)</Label>
@@ -445,6 +472,24 @@ export function AdminCanonicalBookForm({ mode, bookId, defaultValues }: AdminCan
           step={1}
           placeholder="비우면 없음"
           defaultValue={initial.priceKrw}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="pageCount">총 페이지 (쪽)</Label>
+        <p className="text-xs text-muted-foreground">
+          ISBN 검색(국립·Google 등)·알라딘 프리필에 값이 있으면 채웁니다. 비우면 저장 시 비움입니다. 1~50000.
+        </p>
+        <Input
+          ref={pageCountRef}
+          id="pageCount"
+          name="pageCount"
+          type="number"
+          min={1}
+          max={50000}
+          step={1}
+          placeholder="비우면 없음"
+          defaultValue={initial.pageCount}
         />
       </div>
 

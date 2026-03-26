@@ -1,14 +1,18 @@
 import 'package:bookfolio_mobile/src/models/aladin_bestseller_models.dart';
 import 'package:bookfolio_mobile/src/services/bookfolio_api.dart';
 import 'package:bookfolio_mobile/src/state/auth_controller.dart';
+import 'package:bookfolio_mobile/src/ui/widgets/main_hub_top_nav.dart';
 import 'package:bookfolio_mobile/src/util/cover_image_url.dart';
+import 'package:bookfolio_mobile/src/util/today_list_caption.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// 알라딘 연동 초이스 신간(서버 `ALADIN_ITEMNEW_API_BASE_URL` ItemList) 화면.
+/// 초이스 시간(알라딘 신간·피드) 목록 화면.
 ///
 /// History:
+/// - 2026-03-26: 화면·앱바 제목 표기 「초이스 시간」
+/// - 2026-03-26: API·쿼리 노출 제거, 오늘 일자 기준 안내 문구·`MainHubTopNavBar`
 /// - 2026-03-25: 웹 `GET /api/me/aladin-item-new` 와 동일 데이터 표시
 class ChoiceNewScreen extends StatefulWidget {
   const ChoiceNewScreen({super.key});
@@ -70,7 +74,7 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '초이스 신간',
+          '초이스 시간',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             color: const Color(0xFF3E342C),
@@ -80,42 +84,50 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF5EDE2),
-              Color(0xFFE8DCC8),
-            ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const MainHubTopNavBar(current: MainHubTab.choice),
+          Expanded(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFF5EDE2),
+                    Color(0xFFE8DCC8),
+                  ],
+                ),
+              ),
+              child: RefreshIndicator(
+                onRefresh: _load,
+                color: colorScheme.primary,
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _error != null
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(24),
+                            children: [
+                              Material(
+                                color: colorScheme.errorContainer.withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(
+                                    _error!,
+                                    style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 14),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : _buildList(context, _feed!),
+              ),
+            ),
           ),
-        ),
-        child: RefreshIndicator(
-          onRefresh: _load,
-          color: colorScheme.primary,
-          child: _loading
-              ? const Center(child: CircularProgressIndicator())
-              : _error != null
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(24),
-                      children: [
-                        Material(
-                          color: colorScheme.errorContainer.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              _error!,
-                              style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 14),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : _buildList(context, _feed!),
-        ),
+        ],
       ),
     );
   }
@@ -126,9 +138,11 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(24),
         children: [
+          Text(todayChoiceNewListCaption(), style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 12),
           Text(
-            feed.feedTitle.isNotEmpty ? feed.feedTitle : '표시할 도서가 없습니다.',
-            style: Theme.of(context).textTheme.titleMedium,
+            '표시할 도서가 없습니다.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF6B5B4D)),
           ),
         ],
       );
@@ -143,25 +157,14 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (feed.feedTitle.isNotEmpty)
-                  Text(
-                    feed.feedTitle,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: const Color(0xFF5C4A3A),
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                if (feed.query.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    feed.query,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
-                          color: const Color(0xFF6B5B4D),
-                          fontSize: 11,
-                        ),
-                  ),
-                ],
+                Text(
+                  todayChoiceNewListCaption(),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: const Color(0xFF5C4A3A),
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
+                      ),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   '${feed.items.length}권',
@@ -295,7 +298,7 @@ class _ChoiceNewRow extends StatelessWidget {
                       if (onOpenAladin != null) ...[
                         const SizedBox(height: 6),
                         Text(
-                          '알라딘에서 보기',
+                          '자세히 보기',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w600,

@@ -1,19 +1,15 @@
-import type { Route } from "next";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { buildDashboardHref } from "@/lib/dashboard/dashboard-href";
 
 /**
  * @history
+ * - 2026-03-26: 소장 탭 고정(`tab=owned`)으로 링크
  * - 2026-03-24: 소장 구역 장르 슬러그 필터(링크·쿼리 `genre`)
  */
-function dashboardHref(q: string, genre: string | undefined, page: number): Route {
-  const sp = new URLSearchParams();
-  if (q.trim()) sp.set("q", q.trim());
-  if (genre?.trim()) sp.set("genre", genre.trim());
-  if (page > 1) sp.set("page", String(page));
-  const s = sp.toString();
-  return (s ? `/dashboard?${s}` : "/dashboard") as Route;
+function ownedDashboardHref(q: string, genre: string | undefined, page: number) {
+  return buildDashboardHref({ q, genre, page, tab: "owned" });
 }
 
 type DashboardOwnedGenreFilterProps = {
@@ -42,7 +38,7 @@ export function DashboardOwnedGenreFilter({
       <span className="text-xs font-medium text-muted-foreground">장르</span>
       <div className="flex flex-wrap gap-1.5">
         <Badge variant={active ? "default" : "outline"} asChild>
-          <Link href={dashboardHref(q, undefined, 1)} prefetch={false}>
+          <Link href={ownedDashboardHref(q, undefined, 1)} prefetch={false}>
             전체
           </Link>
         </Badge>
@@ -50,7 +46,7 @@ export function DashboardOwnedGenreFilter({
           const on = selectedGenre === slug;
           return (
             <Badge key={slug} variant={on ? "default" : "outline"} asChild>
-              <Link href={dashboardHref(q, slug, 1)} prefetch={false}>
+              <Link href={ownedDashboardHref(q, slug, 1)} prefetch={false}>
                 {slug}
               </Link>
             </Badge>

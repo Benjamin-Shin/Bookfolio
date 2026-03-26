@@ -1,4 +1,5 @@
 import type {
+  BookFormat,
   BookLookupResult,
   BooksQuery,
   CreateUserBookInput,
@@ -11,6 +12,7 @@ import { auth } from "@/auth";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
 import { normalizeIsbn } from "@/lib/books/lookup";
 import { replaceBookAuthorLinks } from "@/lib/books/replace-book-author-links";
+import { awardPointsUserBookRegister } from "@/lib/points/award-points";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -25,7 +27,6 @@ type DbUserBook = {
   format: UserBookSummary["format"];
   reading_status: UserBookSummary["readingStatus"];
   rating: number | null;
-  memo: string | null;
   cover_url: string | null;
   publisher: string | null;
   published_date: string | null;
@@ -43,10 +44,8 @@ type DbUserBookOwner = {
   id: string;
   user_id: string;
   book_id: string;
-  format: string;
   reading_status: string;
   rating: number | null;
-  memo: string | null;
   is_owned: boolean;
   location: string | null;
   created_at: string;
@@ -61,6 +60,7 @@ type DbUserBookNestedSelect = DbUserBookOwner & {
  * `books` 테이블 행 (조회·조인용).
  *
  * @history
+ * - 2026-03-26: `format` — 캐논 서지(`books`) 소유; `user_books.format` 제거(0021)
  * - 2026-03-24: `translators`, `api_source` 필드 추가 (0013 마이그레이션)
  */
 export type DbCanonicalBook = {
@@ -68,6 +68,8 @@ export type DbCanonicalBook = {
   isbn: string | null;
   title: string;
   authors: string[];
+  /** 매체 구분. 0021 이전 DB에는 없을 수 있음(기본 `paper`로 취급). */
+  format?: BookFormat;
   /** 옮긴이 (서지). 마이그레이션 0013 이전 DB는 없을 수 있음. */
   translators?: string[];
   publisher: string | null;
@@ -98,19 +100,24 @@ function pickNestedBook(row: DbUserBookNestedSelect): DbCanonicalBook | null {
   return Array.isArray(b) ? b[0] ?? null : b;
 }
 
+/**
+ * RPC/조인 행을 클라이언트용 요약으로 변환합니다.
+ *
+ * @history
+ * - 2026-03-26: `bookId`를 항상 문자열로 직렬화(누락 시 빈 문자열) — 모바일에서 키 생략 시 잘못된 API URL 방지
+ */
 function mapFlatRow(row: DbUserBook): UserBookDetail {
   const genreSlugs = Array.isArray(row.genre_slugs) ? row.genre_slugs : [];
   return {
     id: row.id,
     userId: row.user_id,
-    bookId: row.book_id,
+    bookId: row.book_id ?? "",
     isbn: row.isbn,
     title: row.title,
     authors: Array.isArray(row.authors) ? row.authors : [],
     format: row.format,
     readingStatus: row.reading_status,
     rating: row.rating,
-    memo: row.memo,
     coverUrl: normalizeCoverUrlForClient(row.cover_url),
     publisher: row.publisher,
     publishedDate: row.published_date,
@@ -136,10 +143,9 @@ function mapJoinedRow(row: DbUserBookNestedSelect): UserBookDetail {
     isbn: book.isbn,
     title: book.title,
     authors: book.authors,
-    format: row.format as DbUserBook["format"],
+    format: (book.format ?? "paper") as DbUserBook["format"],
     reading_status: row.reading_status as DbUserBook["reading_status"],
     rating: row.rating,
-    memo: row.memo,
     cover_url: book.cover_url,
     publisher: book.publisher,
     published_date: book.published_date,
@@ -184,10 +190,8 @@ const USER_BOOK_WITH_BOOKS_SELECT = `
   id,
   user_id,
   book_id,
-  format,
   reading_status,
   rating,
-  memo,
   is_owned,
   location,
   created_at,
@@ -197,6 +201,7 @@ const USER_BOOK_WITH_BOOKS_SELECT = `
     isbn,
     title,
     authors,
+    format,
     publisher,
     published_date,
     cover_url,
@@ -311,6 +316,7 @@ async function insertCanonicalBook(
     description: string | null;
     price_krw: number | null;
     source: string;
+    format?: BookFormat;
   }
 ): Promise<DbCanonicalBook> {
   const { data, error } = await supabase
@@ -323,7 +329,8 @@ async function insertCanonicalBook(
       cover_url: row.cover_url,
       description: row.description,
       price_krw: row.price_krw,
-      source: row.source
+      source: row.source,
+      format: row.format ?? "paper"
     })
     .select("*")
     .single();
@@ -348,7 +355,15 @@ export async function resolveCanonicalBookForSharedLibrary(
   supabase: SupabaseClient,
   input: Pick<
     CreateUserBookInput,
-    "isbn" | "title" | "authors" | "publisher" | "publishedDate" | "coverUrl" | "description" | "priceKrw"
+    | "isbn"
+    | "title"
+    | "authors"
+    | "publisher"
+    | "publishedDate"
+    | "coverUrl"
+    | "description"
+    | "priceKrw"
+    | "format"
   >
 ): Promise<DbCanonicalBook> {
   const normalized = input.isbn ? normalizeIsbn(input.isbn) : "";
@@ -365,7 +380,8 @@ export async function resolveCanonicalBookForSharedLibrary(
           published_date: input.publishedDate ?? null,
           cover_url: input.coverUrl ?? found.cover_url,
           description: input.description ?? null,
-          price_krw: input.priceKrw ?? found.price_krw
+          price_krw: input.priceKrw ?? found.price_krw,
+          format: input.format ?? "paper"
         })
         .eq("id", found.id);
       if (upErr) throw upErr;
@@ -383,7 +399,8 @@ export async function resolveCanonicalBookForSharedLibrary(
       cover_url: input.coverUrl ?? null,
       description: input.description ?? null,
       price_krw: input.priceKrw ?? null,
-      source: "manual"
+      source: "manual",
+      format: input.format ?? "paper"
     });
   }
 
@@ -396,7 +413,8 @@ export async function resolveCanonicalBookForSharedLibrary(
     cover_url: input.coverUrl ?? null,
     description: input.description ?? null,
     price_krw: input.priceKrw ?? null,
-    source: "manual"
+    source: "manual",
+    format: input.format ?? "paper"
   });
 }
 
@@ -546,6 +564,12 @@ export class UserBookAlreadyInShelfError extends Error {
   }
 }
 
+/**
+ * 개인 서재에 도서를 등록합니다. 성공 시 `user_book_register` 포인트 규칙이 있으면 원장에 반영합니다.
+ *
+ * @history
+ * - 2026-03-26: `user_book_register` 포인트 지급 연동
+ */
 export async function createUserBook(
   input: CreateUserBookInput,
   context?: RepositoryContext
@@ -568,7 +592,8 @@ export async function createUserBook(
           published_date: input.publishedDate ?? null,
           cover_url: input.coverUrl ?? found.cover_url,
           description: input.description ?? null,
-          price_krw: input.priceKrw ?? found.price_krw
+          price_krw: input.priceKrw ?? found.price_krw,
+          format: input.format
         })
         .eq("id", found.id);
       if (upErr) throw upErr;
@@ -586,7 +611,8 @@ export async function createUserBook(
         cover_url: input.coverUrl ?? null,
         description: input.description ?? null,
         price_krw: input.priceKrw ?? null,
-        source: "manual"
+        source: "manual",
+        format: input.format
       });
     }
   } else {
@@ -599,7 +625,8 @@ export async function createUserBook(
       cover_url: input.coverUrl ?? null,
       description: input.description ?? null,
       price_krw: input.priceKrw ?? null,
-      source: "manual"
+      source: "manual",
+      format: input.format
     });
   }
 
@@ -619,10 +646,8 @@ export async function createUserBook(
   const payload = {
     user_id: userId,
     book_id: canonical.id,
-    format: input.format,
     reading_status: input.readingStatus ?? "unread",
     rating: input.rating ?? null,
-    memo: input.memo ?? null,
     is_owned: input.isOwned ?? true,
     location: loc ? loc : null
   };
@@ -635,11 +660,19 @@ export async function createUserBook(
   if (!detail) {
     throw new Error("등록한 책을 다시 불러오지 못했습니다.");
   }
+
+  try {
+    await awardPointsUserBookRegister(userId, inserted.id as string);
+  } catch (e) {
+    console.error("awardPointsUserBookRegister", e);
+  }
+
   return detail;
 }
 
 /**
  * @history
+ * - 2026-03-26: `user_books.memo` 제거 — 메모는 `user_book_memos`·API로 이관
  * - 2026-03-24: 공유 서지 저자 변경 시 `replaceBookAuthorLinks` 로 `book_authors` 동기화
  */
 export async function updateUserBook(
@@ -668,6 +701,7 @@ export async function updateUserBook(
   if (input.publishedDate !== undefined) catalogPatch.published_date = input.publishedDate;
   if (input.description !== undefined) catalogPatch.description = input.description;
   if (input.priceKrw !== undefined) catalogPatch.price_krw = input.priceKrw;
+  if (input.format !== undefined) catalogPatch.format = input.format;
 
   if (Object.keys(catalogPatch).length > 0) {
     const { error: cErr } = await supabase.from("books").update(catalogPatch).eq("id", existing.book_id);
@@ -679,10 +713,8 @@ export async function updateUserBook(
   }
 
   const userPatch: Record<string, unknown> = {};
-  if (input.format !== undefined) userPatch.format = input.format;
   if (input.readingStatus !== undefined) userPatch.reading_status = input.readingStatus;
   if (input.rating !== undefined) userPatch.rating = input.rating;
-  if (input.memo !== undefined) userPatch.memo = input.memo;
   if (input.isOwned !== undefined) userPatch.is_owned = input.isOwned;
   if (input.location !== undefined) userPatch.location = input.location;
 

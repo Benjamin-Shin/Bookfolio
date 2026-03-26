@@ -1,12 +1,17 @@
 import { hash } from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
+import { awardPointsJoinMembership } from "@/lib/points/award-points";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
+/**
+ * @history
+ * - 2026-03-26: 가입 완료 후 `join_membership` 포인트 시도
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
@@ -56,6 +61,14 @@ export async function POST(request: NextRequest) {
       });
       if (profileError) {
         console.error(profileError);
+      }
+    }
+
+    if (created?.id) {
+      try {
+        await awardPointsJoinMembership(created.id as string);
+      } catch (e) {
+        console.error("awardPointsJoinMembership", e);
       }
     }
 

@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { getUserBookWithCanonical } from "@/lib/books/repository";
 
 /**
@@ -37,7 +36,8 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
           <div>
             <CardTitle className="text-xl">내 서재 기록 수정</CardTitle>
             <CardDescription className="mt-1">
-              「{displayTitle}」의 내 서재 필드(형식·상태·위치·메모 등), 참고 가격, 표지 이미지 URL을 바꿀 수 있습니다.
+              「{displayTitle}」의 내 서재 필드(형식·상태·위치·소장 여부), 참고 가격, 표지 이미지 URL을 바꿀 수 있습니다.
+              긴 메모는 상세 화면의 마크다운 메모에서 관리합니다.
               가격·표지는 공유 도서(`books`)에 저장되어 같은 서지를 쓰는 경우에도 반영될 수 있습니다.
             </CardDescription>
           </div>
@@ -90,10 +90,6 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
               <Label htmlFor="isOwned" className="font-normal">
                 소장 중
               </Label>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="memo">메모</Label>
-              <Textarea id="memo" name="memo" rows={8} defaultValue={userBook.memo ?? ""} />
             </div>
             <div className="flex flex-wrap gap-3">
               <Button type="submit">저장</Button>

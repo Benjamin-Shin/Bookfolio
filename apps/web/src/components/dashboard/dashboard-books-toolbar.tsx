@@ -1,49 +1,61 @@
-import type { Route } from "next";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-function dashboardHref(q: string, genre: string | undefined, page: number): Route {
-  const sp = new URLSearchParams();
-  if (q.trim()) sp.set("q", q.trim());
-  if (genre?.trim()) sp.set("genre", genre.trim());
-  if (page > 1) sp.set("page", String(page));
-  const s = sp.toString();
-  return (s ? `/dashboard?${s}` : "/dashboard") as Route;
-}
+import {
+  buildDashboardHref,
+  type DashboardTab,
+} from "@/lib/dashboard/dashboard-href";
 
 type DashboardBooksToolbarProps = {
   searchQuery: string;
   page: number;
   pageSize: number;
-  /** 소장 책장 페이지네이션·총 권수 기준 */
-  ownedTotal: number;
-  readingTotal: number;
-  /** URL `genre` — 페이지 링크에 유지 */
+  /** 소장·읽기 전·완독 탭 페이지네이션 총 권수 */
+  listTotal: number;
+  currentTab: DashboardTab;
+  /** URL `genre` — 페이지 링크·폼에 유지(소장 탭) */
   genreSlug?: string;
+  /**
+   * 실제 렌더된 권수(읽는 중 탭처럼 API total은 더 큰데 화면에 일부만 둘 때).
+   * 생략 시 `listTotal`·페이지로 범위 계산.
+   */
+  renderedCount?: number;
 };
 
 /**
- * 대시보드 검색·권수 요약.
+ * 대시보드 검색.
  *
  * @history
+ * - 2026-03-26: 탭(`tab`)·통계 요약 제거 — 상단 통계 카드·탭 네비로 이전
  * - 2026-03-24: 쿼리 `genre` 유지(`dashboardHref`)
- * - 2026-03-24: 소장 페이지 이전/다음은 `DashboardOwnedBooksPagination`으로 분리(책장 바로 아래 배치)
+ * - 2026-03-24: 소장 페이지 이전/다음은 `DashboardBooksPagination`으로 분리(책장 바로 아래 배치)
  */
 export function DashboardBooksToolbar({
   searchQuery,
   page,
   pageSize,
-  ownedTotal,
-  readingTotal,
-  genreSlug = ""
+  listTotal,
+  currentTab,
+  genreSlug = "",
+  renderedCount: renderedCountProp,
 }: DashboardBooksToolbarProps) {
-  const totalPages = Math.max(1, Math.ceil(ownedTotal / pageSize));
+  const totalPages = Math.max(1, Math.ceil(listTotal / pageSize));
+  const start = listTotal > 0 ? (page - 1) * pageSize + 1 : 0;
+  const renderedCount =
+    renderedCountProp ??
+    (listTotal > 0
+      ? Math.max(0, Math.min(pageSize, listTotal - start + 1))
+      : 0);
+  const end = listTotal > 0 ? start + renderedCount - 1 : 0;
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-      <form action="/dashboard" method="get" className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center">
+      <form
+        action="/dashboard"
+        method="get"
+        className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center"
+      >
         <Input
           name="q"
           type="search"
@@ -55,46 +67,71 @@ export function DashboardBooksToolbar({
         {genreSlug.trim() ? (
           <input type="hidden" name="genre" value={genreSlug.trim()} />
         ) : null}
+        {currentTab !== "reading" ? (
+          <input type="hidden" name="tab" value={currentTab} />
+        ) : null}
         <Button type="submit" variant="secondary" className="sm:w-auto">
           검색
         </Button>
       </form>
       <div className="text-sm text-muted-foreground">
         <p>
-          읽는 중 {readingTotal.toLocaleString("ko-KR")}권 · 소장 {ownedTotal.toLocaleString("ko-KR")}권
+          이 탭{" "}
+          {listTotal > 0 ? (
+            end < listTotal ? (
+              <>
+                {start.toLocaleString("ko-KR")}–{end.toLocaleString("ko-KR")}권
+                표시 · 전체 {listTotal.toLocaleString("ko-KR")}권
+              </>
+            ) : totalPages > 1 ? (
+              <>
+                {start.toLocaleString("ko-KR")}–{end.toLocaleString("ko-KR")}권 ·
+                총 {listTotal.toLocaleString("ko-KR")}권
+              </>
+            ) : (
+              <>총 {listTotal.toLocaleString("ko-KR")}권</>
+            )
+          ) : (
+            <>표시할 책 0권</>
+          )}
         </p>
-        <p className="mt-0.5 text-xs">
-          페이지는 소장 책장 기준
-          {totalPages > 1 ? ` · ${page}/${totalPages}쪽` : null}
-        </p>
+        {totalPages > 1 ? (
+          <p className="mt-0.5 text-xs">{page}/{totalPages}쪽</p>
+        ) : null}
       </div>
     </div>
   );
 }
 
-type DashboardOwnedBooksPaginationProps = {
+type DashboardBooksPaginationProps = {
   searchQuery: string;
   page: number;
   pageSize: number;
-  ownedTotal: number;
+  total: number;
   genreSlug?: string;
+  tab: DashboardTab;
+  /** 접근성·라벨용, 예: 「소장」 */
+  sectionLabel: string;
 };
 
 /**
- * 소장 책장 전용 이전/다음(책장 아래에 두어 눈에 잘 띄게 함).
+ * 읽기 전·완독·소장 탭용 이전/다음(읽는 중은 한 페이지 고정).
  *
  * @history
+ * - 2026-03-26: `tab`·`sectionLabel`로 일반화(읽기 전·완독 포함)
  * - 2026-03-24: 쿼리 `genre` 유지(`dashboardHref`)
  * - 2026-03-24: 신규 — 대시보드 소장 구역 하단 페이지네이션
  */
-export function DashboardOwnedBooksPagination({
+export function DashboardBooksPagination({
   searchQuery,
   page,
   pageSize,
-  ownedTotal,
-  genreSlug
-}: DashboardOwnedBooksPaginationProps) {
-  const totalPages = Math.max(1, Math.ceil(ownedTotal / pageSize));
+  total,
+  genreSlug,
+  tab,
+  sectionLabel,
+}: DashboardBooksPaginationProps) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
   if (totalPages <= 1) {
     return null;
   }
@@ -104,15 +141,23 @@ export function DashboardOwnedBooksPagination({
   return (
     <div
       className="flex flex-col gap-2 rounded-lg border border-border/80 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-      aria-label="소장 책 페이지 이동"
+      aria-label={`${sectionLabel} 책 페이지 이동`}
     >
       <p className="text-sm text-muted-foreground">
-        소장 {ownedTotal.toLocaleString("ko-KR")}권 · {page}/{totalPages}쪽
+        {sectionLabel} {total.toLocaleString("ko-KR")}권 · {page}/{totalPages}쪽
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" size="sm" disabled={!hasPrev} asChild={hasPrev}>
           {hasPrev ? (
-            <Link href={dashboardHref(searchQuery, genreSlug, page - 1)} prefetch={false}>
+            <Link
+              href={buildDashboardHref({
+                q: searchQuery,
+                genre: genreSlug,
+                page: page - 1,
+                tab,
+              })}
+              prefetch={false}
+            >
               이전
             </Link>
           ) : (
@@ -121,7 +166,15 @@ export function DashboardOwnedBooksPagination({
         </Button>
         <Button variant="outline" size="sm" disabled={!hasNext} asChild={hasNext}>
           {hasNext ? (
-            <Link href={dashboardHref(searchQuery, genreSlug, page + 1)} prefetch={false}>
+            <Link
+              href={buildDashboardHref({
+                q: searchQuery,
+                genre: genreSlug,
+                page: page + 1,
+                tab,
+              })}
+              prefetch={false}
+            >
               다음
             </Link>
           ) : (

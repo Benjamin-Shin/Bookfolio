@@ -9,6 +9,67 @@ export function normalizeIsbn(isbn: string): string {
 }
 
 /**
+ * ISBN-10(마지막 자리 X 가능)을 ISBN-13(EAN-13)으로 바꿉니다. 잘못된 길이면 빈 문자열.
+ *
+ * @history
+ * - 2026-03-26: 관리자 알라딘 목록과 `books.isbn` 매칭(10·13 혼용 대비)
+ */
+export function isbn10ToIsbn13(isbn10: string): string {
+  const n = normalizeIsbn(isbn10).replace(/x/gi, "X");
+  if (n.length !== 10) return "";
+  const core = n.slice(0, 9);
+  if (!/^\d{9}$/.test(core)) return "";
+  const last = n[9]!;
+  if (last !== "X" && !/^\d$/.test(last)) return "";
+  const prefix = `978${core}`;
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(prefix[i]!, 10) * (i % 2 === 0 ? 1 : 3);
+  }
+  const check = (10 - (sum % 10)) % 10;
+  return `${prefix}${check}`;
+}
+
+/**
+ * `978` 접두 EAN-13을 ISBN-10으로 바꿉니다. `979` 등은 미지원 → 빈 문자열.
+ *
+ * @history
+ * - 2026-03-26: DB에 ISBN-10만 있는 행과 알라딘 ISBN-13 매칭
+ */
+export function isbn13ToIsbn10(isbn13: string): string {
+  const n = normalizeIsbn(isbn13);
+  if (n.length !== 13 || !n.startsWith("978") || !/^\d{13}$/.test(n)) return "";
+  const nine = n.slice(3, 12);
+  if (!/^\d{9}$/.test(nine)) return "";
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(nine[i]!, 10) * (10 - i);
+  }
+  const check = (11 - (sum % 11)) % 11;
+  return nine + (check === 10 ? "X" : String(check));
+}
+
+/**
+ * `books.isbn`에 저장될 수 있는 표기(10·13·상호 변환) 후보를 모읍니다.
+ *
+ * @history
+ * - 2026-03-26: 알라딘 피드 항목 vs 기등록 서지 중복 제거
+ */
+export function expandNormalizedIsbnForDbLookup(normalized: string): string[] {
+  const n = normalizeIsbn(normalized).replace(/x/gi, "X");
+  if (!n) return [];
+  const out = new Set<string>([n]);
+  if (n.length === 10) {
+    const u = isbn10ToIsbn13(n);
+    if (u) out.add(u);
+  } else if (n.length === 13 && n.startsWith("978")) {
+    const t = isbn13ToIsbn10(n);
+    if (t) out.add(t);
+  }
+  return [...out];
+}
+
+/**
  * 제목(또는 키워드)으로 외부 메타만 검색합니다. 네이버 책검색 후 국립중앙도서관 `SearchApi.do`의 `title` 조건을 시도합니다.
  * `books` 테이블은 호출 측(예: API 라우트)에서 먼저 조회한 뒤, 이 결과와 합치면 됩니다.
  *
@@ -67,6 +128,7 @@ export async function searchBooksByTitleFromExternalApis(rawQuery: string): Prom
  * - 2026-03-24: `provider` 옵션으로 단일 제공자(네이버·국립·Google)만 조회 가능 (관리자 UI 분리용)
  * - 2026-03-24: 외부 제공자 순서를 네이버 → 국립중앙도서관 → Google 로 변경
  * - 2026-03-24: 네이버 ISBN 조회를 공통 매핑·원시 검색 헬퍼로 정리 (동작 동일)
+ * - 2026-03-26: 국립·Google 응답에서 `pageCount` 매핑 (`BookLookupResult`)
  */
 export async function lookupBookByIsbn(
   isbn: string,
@@ -228,34 +290,6 @@ async function fetchNationalLibraryJson(searchParams: URLSearchParams): Promise<
   return (await response.json()) as Record<string, unknown>;
 }
 
-function nlBookRecordToLookup(record: NlBookRecord, isbnExplicit?: string): BookLookupResult | null {
-  const title = readString(record.TITLE) ?? readString(record.title);
-  if (!title?.trim()) {
-    return null;
-  }
-
-  let isbn = (isbnExplicit ?? "").trim();
-  if (!isbn) {
-    const rawIsbn =
-      readString(record.EA_ISBN) ?? readString(record.ISBN) ?? readString(record.ea_isbn) ?? readString(record.isbn);
-    isbn = rawIsbn ? normalizeIsbn(rawIsbn) : "";
-  }
-
-  const authors = splitAuthors(record.AUTHOR);
-
-  return {
-    isbn,
-    title,
-    authors,
-    publisher: readString(record.PUBLISHER),
-    publishedDate: readString(record.PUBLISH_PREDATE),
-    coverUrl: ensureHttpsUrl(readString(record.TITLE_URL)),
-    description: readString(record.BOOK_SUMMARY_URL) ?? readString(record.BOOK_INTRODUCTION_URL),
-    priceKrw: nlPriceKrwFromRecord(record),
-    source: "nl.go.kr"
-  };
-}
-
 type NlBookRecord = {
   TITLE?: unknown;
   title?: unknown;
@@ -270,6 +304,82 @@ type NlBookRecord = {
   ea_isbn?: unknown;
   isbn?: unknown;
 };
+
+function clampPageCount(n: number): number | null {
+  if (!Number.isFinite(n) || n < 1) {
+    return null;
+  }
+  return Math.min(Math.floor(n), 50_000);
+}
+
+function parsePositivePageCountScalar(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return clampPageCount(value);
+  }
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  if (/^\d{1,5}$/.test(trimmed)) {
+    return clampPageCount(parseInt(trimmed, 10));
+  }
+  const m = trimmed.match(/(\d{1,5})\s*쪽/);
+  if (m) {
+    return clampPageCount(parseInt(m[1]!, 10));
+  }
+  return null;
+}
+
+/**
+ * 국립 서지 레코드에서 총 페이지(쪽) 후보를 뽑습니다.
+ *
+ * @history
+ * - 2026-03-26: `BookLookupResult.pageCount`·관리자 ISBN 조회용
+ */
+function nlPageCountFromRecord(record: NlBookRecord): number | null {
+  const wide = record as Record<string, unknown>;
+  const keys = ["PAGES", "PAGE", "BOOK_PAGE", "PAGE_CNT", "TOTAL_PAGE", "VOL", "BOOK_VOL"] as const;
+  for (const k of keys) {
+    const n = parsePositivePageCountScalar(wide[k]);
+    if (n != null) {
+      return n;
+    }
+  }
+  return parsePositivePageCountScalar(wide["BOOK_SIZE"]);
+}
+
+function nlBookRecordToLookup(record: NlBookRecord, isbnExplicit?: string): BookLookupResult | null {
+  const title = readString(record.TITLE) ?? readString(record.title);
+  if (!title?.trim()) {
+    return null;
+  }
+
+  let isbn = (isbnExplicit ?? "").trim();
+  if (!isbn) {
+    const rawIsbn =
+      readString(record.EA_ISBN) ?? readString(record.ISBN) ?? readString(record.ea_isbn) ?? readString(record.isbn);
+    isbn = rawIsbn ? normalizeIsbn(rawIsbn) : "";
+  }
+
+  const authors = splitAuthors(record.AUTHOR);
+  const pageCount = nlPageCountFromRecord(record);
+
+  return {
+    isbn,
+    title,
+    authors,
+    publisher: readString(record.PUBLISHER),
+    publishedDate: readString(record.PUBLISH_PREDATE),
+    coverUrl: ensureHttpsUrl(readString(record.TITLE_URL)),
+    description: readString(record.BOOK_SUMMARY_URL) ?? readString(record.BOOK_INTRODUCTION_URL),
+    priceKrw: nlPriceKrwFromRecord(record),
+    source: "nl.go.kr",
+    ...(pageCount != null ? { pageCount } : {})
+  };
+}
 
 function getNlDocRecords(payload: Record<string, unknown>): NlBookRecord[] {
   const out: NlBookRecord[] = [];
@@ -453,12 +563,18 @@ type GoogleVolume = {
     publisher?: string;
     publishedDate?: string;
     description?: string;
+    /** Google Books Volume. 총 페이지. */
+    pageCount?: number;
     industryIdentifiers?: { type?: string; identifier?: string }[];
     imageLinks?: { smallThumbnail?: string; thumbnail?: string };
   };
   saleInfo?: GoogleSaleInfo;
 };
 
+/**
+ * @history
+ * - 2026-03-26: `volumeInfo.pageCount` → `BookLookupResult.pageCount`
+ */
 async function lookupGoogleBooks(normalized: string, apiKey: string): Promise<BookLookupResult> {
   const url = new URL("https://www.googleapis.com/books/v1/volumes");
   url.searchParams.set("q", `isbn:${normalized}`);
@@ -489,6 +605,11 @@ async function lookupGoogleBooks(normalized: string, apiKey: string): Promise<Bo
   const thumb =
     volumeInfo.imageLinks?.thumbnail ?? volumeInfo.imageLinks?.smallThumbnail ?? null;
 
+  const pageCount =
+    typeof volumeInfo.pageCount === "number" && Number.isFinite(volumeInfo.pageCount)
+      ? clampPageCount(volumeInfo.pageCount)
+      : null;
+
   return {
     isbn: normalized,
     title,
@@ -498,7 +619,8 @@ async function lookupGoogleBooks(normalized: string, apiKey: string): Promise<Bo
     coverUrl: ensureHttpsUrl(thumb),
     description: volumeInfo.description?.trim() || null,
     priceKrw: googleBooksPriceKrw(picked?.saleInfo),
-    source: "googlebooks"
+    source: "googlebooks",
+    ...(pageCount != null ? { pageCount } : {})
   };
 }
 

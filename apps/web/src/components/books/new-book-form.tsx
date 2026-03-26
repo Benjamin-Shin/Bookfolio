@@ -136,10 +136,6 @@ export function NewBookForm() {
         | "paused"
         | "dropped",
       rating: ratingRaw ? Number(ratingRaw) : null,
-      memo: (() => {
-        const m = String(fd.get("memo") ?? "").trim();
-        return m ? m : null;
-      })(),
       isbn: String(fd.get("isbn") ?? "").trim() || null,
       coverUrl: String(fd.get("coverUrl") ?? "").trim() || null,
       publisher: String(fd.get("publisher") ?? "").trim() || null,
@@ -262,10 +258,6 @@ export function NewBookForm() {
       <BookFormatChoiceFieldset defaultFormat={BOOK_FORMATS[0]} />
       <ReadingStatusChoiceFieldset defaultStatus={READING_STATUSES[0]} />
       <RatingChoiceFieldset defaultRating={null} />
-      <div className="space-y-2">
-        <Label htmlFor="memo">메모</Label>
-        <Textarea id="memo" name="memo" rows={5} placeholder="나중에 다시 보고 싶은 포인트" />
-      </div>
       <div className="space-y-2">
         <Label htmlFor="location">위치 (선택)</Label>
         <p className="text-xs text-muted-foreground">집·회사·빌려준 곳 등 이 권이 있는 곳을 적어 두면 나중에 찾기 쉽습니다.</p>

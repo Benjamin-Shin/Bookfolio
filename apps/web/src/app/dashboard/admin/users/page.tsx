@@ -67,7 +67,8 @@ export default async function AdminUsersPage() {
           </thead>
           <tbody>
             {users.map((u) => {
-              const role = u.role === "ADMIN" ? "ADMIN" : "USER";
+              const role =
+                u.role === "ADMIN" ? "ADMIN" : u.role === "STAFF" ? "STAFF" : "USER";
               return (
                 <tr key={u.id} className="border-b border-border/40 last:border-0">
                   <td className="px-3 py-2 font-mono text-xs">{u.email}</td>
