@@ -43,7 +43,16 @@ flutter {
     source = "../.."
 }
 
+/**
+ * ML Kit: `google_mlkit_text_recognition`은 일부 스크립트 팩을 compileOnly로 두어,
+ * 앱 쪽에서 implementation으로 넣지 않으면 R8이 Missing class로 릴리스 빌드를 실패시킬 수 있음.
+ *
+ * @history
+ * - 2026-03-27: chinese/devanagari/japanese implementation 추가 (minifyReleaseWithR8)
+ */
 dependencies {
-    // ML Kit 한국어 OCR (TextRecognizer(script: korean))
+    implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
+    implementation("com.google.mlkit:text-recognition-devanagari:16.0.1")
+    implementation("com.google.mlkit:text-recognition-japanese:16.0.1")
     implementation("com.google.mlkit:text-recognition-korean:16.0.1")
 }
