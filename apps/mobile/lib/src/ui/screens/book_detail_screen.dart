@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 /// 내 서재 도서 상세 — 읽기 상태·이벤트·메모·한줄평.
 ///
 /// History:
+/// - 2026-03-29: 다크 모드 — 메타·섹션·플레이스홀더·도서 소개·정보 행·메모 마크다운 `ColorScheme`·`MarkdownStyleSheet.fromTheme` 연동
 /// - 2026-03-27: 메모 `MarkdownBody(softLineBreak: true)` — 엔터(단일 줄바꿈)가 표시에 유지됨
 /// - 2026-03-26: 메모 입력 — 카메라 촬영 후 OCR로 글귀를 필드에 채우기
 /// - 2026-03-26: 빈 `id`/`bookId`일 때 사이드카 API URL이 잘못 매칭되어 404 나는 문제 방지
@@ -216,11 +217,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     final library = context.watch<LibraryController>();
     final b = _resolvedBook(library);
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final onSurface = colorScheme.onSurface;
+    final onSurfaceVar = colorScheme.onSurfaceVariant;
     final cover = resolveCoverImageUrl(b.coverUrl);
-    final metaColor = const Color(0xFF6B5B4D);
     final sectionTitleStyle = theme.textTheme.titleSmall?.copyWith(
       fontWeight: FontWeight.w700,
-      color: const Color(0xFF4E4034),
+      color: onSurface,
     );
 
     return Scaffold(
@@ -230,6 +233,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
             tooltip: '수정',
@@ -270,7 +275,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               height: 180,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: const Color(0xFFE8E0D8),
+                color: colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -278,7 +283,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF5C4A3A),
+                  color: onSurface,
                 ),
               ),
             ),
@@ -288,7 +293,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             const SizedBox(height: 8),
             Text(
               b.authors.join(', '),
-              style: theme.textTheme.titleMedium?.copyWith(color: metaColor),
+              style: theme.textTheme.titleMedium?.copyWith(color: onSurfaceVar),
             ),
           ],
           const SizedBox(height: 24),
@@ -382,11 +387,11 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('소개', style: theme.textTheme.labelLarge?.copyWith(color: metaColor)),
+                      Text('소개', style: theme.textTheme.labelLarge?.copyWith(color: onSurfaceVar)),
                       const SizedBox(height: 6),
                       Text(
                         b.description!.trim(),
-                        style: theme.textTheme.bodyMedium?.copyWith(height: 1.45, color: const Color(0xFF3E342C)),
+                        style: theme.textTheme.bodyMedium?.copyWith(height: 1.45, color: onSurface),
                       ),
                     ],
                   ),
@@ -443,7 +448,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           ),
           const SizedBox(height: 12),
           if (_oneLiners.isEmpty)
-            Text('한줄평이 없습니다.', style: theme.textTheme.bodyMedium?.copyWith(color: metaColor))
+            Text('한줄평이 없습니다.', style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar))
           else
             ..._oneLiners.map((o) => Card(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -510,7 +515,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           ),
           const SizedBox(height: 12),
           if (_memos.isEmpty)
-            Text('메모가 없습니다.', style: theme.textTheme.bodyMedium?.copyWith(color: metaColor))
+            Text('메모가 없습니다.', style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar))
           else
             ..._memos.map((m) => Card(
                   margin: const EdgeInsets.only(bottom: 10),
@@ -520,6 +525,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       data: m.bodyMd,
                       selectable: true,
                       softLineBreak: true,
+                      styleSheet: MarkdownStyleSheet.fromTheme(theme),
                     ),
                   ),
                 )),
@@ -533,7 +539,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           else if (_events.isEmpty)
             Text(
               '기록이 없습니다.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: metaColor),
+              style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar),
             )
           else
             ..._events.take(30).map((e) => ListTile(
@@ -541,7 +547,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   title: Text(_eventLabel(e.eventType)),
                   subtitle: Text(
                     '${e.occurredAt}${e.payload.isEmpty ? '' : ' · ${e.payload}'}',
-                    style: const TextStyle(fontSize: 12),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: onSurfaceVar,
+                    ),
                   ),
                 )),
           const SizedBox(height: 16),
@@ -617,6 +626,7 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -624,13 +634,13 @@ class _InfoRow extends StatelessWidget {
           width: 88,
           child: Text(
             label,
-            style: theme.textTheme.labelLarge?.copyWith(color: const Color(0xFF6B5B4D)),
+            style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(color: const Color(0xFF3E342C), height: 1.35),
+            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurface, height: 1.35),
           ),
         ),
       ],

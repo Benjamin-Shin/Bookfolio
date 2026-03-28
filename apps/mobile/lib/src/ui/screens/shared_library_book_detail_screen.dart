@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 /// 공동서재 한 권의 공유 서지·소유자별 상태(읽기 전용).
 ///
 /// History:
+/// - 2026-03-29: 다크 모드 — 앱바·메타/섹션/플레이스홀더·정보 카드 색을 `ColorScheme` 기준으로 통일
 /// - 2026-03-25: 신규
 class SharedLibraryBookDetailScreen extends StatelessWidget {
   const SharedLibraryBookDetailScreen({
@@ -21,11 +22,13 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final onSurface = colorScheme.onSurface;
+    final onSurfaceVar = colorScheme.onSurfaceVariant;
     final cover = resolveCoverImageUrl(book.coverUrl);
-    final metaColor = const Color(0xFF6B5B4D);
     final sectionTitleStyle = theme.textTheme.titleSmall?.copyWith(
       fontWeight: FontWeight.w700,
-      color: const Color(0xFF4E4034),
+      color: onSurface,
     );
     final authors = book.authors.join(', ');
 
@@ -36,7 +39,6 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        backgroundColor: const Color(0xFFEDE4D8),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
@@ -45,7 +47,7 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
         children: [
           Text(
             libraryName,
-            style: theme.textTheme.labelLarge?.copyWith(color: metaColor),
+            style: theme.textTheme.labelLarge?.copyWith(color: onSurfaceVar),
           ),
           const SizedBox(height: 12),
           if (cover != null)
@@ -66,7 +68,7 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
               height: 180,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: const Color(0xFFE8E0D8),
+                color: colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -74,7 +76,7 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF5C4A3A),
+                  color: onSurface,
                 ),
               ),
             ),
@@ -85,7 +87,7 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
           ),
           if (authors.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(authors, style: theme.textTheme.titleMedium?.copyWith(color: metaColor)),
+            Text(authors, style: theme.textTheme.titleMedium?.copyWith(color: onSurfaceVar)),
           ],
           const SizedBox(height: 24),
           Text('도서 정보', style: sectionTitleStyle),
@@ -104,7 +106,7 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
           if (book.owners.isEmpty)
             Text(
               '연결된 소유자 정보가 없습니다.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: metaColor),
+              style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar),
             )
           else
             ...book.owners.map((o) {
@@ -122,13 +124,13 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('메모 미리보기', style: theme.textTheme.labelLarge?.copyWith(color: metaColor)),
+                            Text('메모 미리보기', style: theme.textTheme.labelLarge?.copyWith(color: onSurfaceVar)),
                             const SizedBox(height: 6),
                             Text(
                               o.memoPreview!.trim(),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 height: 1.45,
-                                color: const Color(0xFF3E342C),
+                                color: onSurface,
                               ),
                             ),
                           ],
@@ -153,7 +155,7 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       '책 추가·읽기 상태 변경은 웹의 공동서재 화면에서 할 수 있어요.',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: metaColor, height: 1.4),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar, height: 1.4),
                     ),
                   ),
                 ],
@@ -208,6 +210,7 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -215,13 +218,13 @@ class _InfoRow extends StatelessWidget {
           width: 88,
           child: Text(
             label,
-            style: theme.textTheme.labelLarge?.copyWith(color: const Color(0xFF6B5B4D)),
+            style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(color: const Color(0xFF3E342C), height: 1.35),
+            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurface, height: 1.35),
           ),
         ),
       ],
