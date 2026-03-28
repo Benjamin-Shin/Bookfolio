@@ -125,12 +125,15 @@ class BookfolioApi {
       throw BookfolioApiException(500, '도서 목록 응답 형식이 올바르지 않습니다.');
     }
     final items = listRaw.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList();
-    final totalRaw = decoded['total'];
-    final total = totalRaw is int
-        ? totalRaw
-        : totalRaw is num
-            ? totalRaw.toInt()
-            : items.length;
+    final totalRaw = decoded['total'] ?? decoded['Total'];
+    int total = 0;
+    if (totalRaw is int) {
+      total = totalRaw;
+    } else if (totalRaw is num) {
+      total = totalRaw.toInt();
+    } else if (totalRaw is String) {
+      total = int.tryParse(totalRaw) ?? 0;
+    }
     final pageRaw = decoded['page'];
     final outPage = pageRaw is int
         ? pageRaw

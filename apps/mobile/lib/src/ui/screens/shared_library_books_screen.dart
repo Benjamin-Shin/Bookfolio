@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 /// 공동서재 한 곳의 도서 목록(표지 그리드·소유자 뱃지·검색·분류·페이지).
 ///
 /// History:
+/// - 2026-03-29: 페이지 바 하단 — `viewPadding`·추가 여백으로 제스처 내비바에 가리지 않음
 /// - 2026-03-29: 웹과 유사한 소유자 칩·장르·소유자 필터·검색·페이지네이션·다크 테마
 /// - 2026-03-25: 그리드·탭 시 `SharedLibraryBookDetailScreen`으로 이동
 class SharedLibraryBooksScreen extends StatefulWidget {
@@ -169,6 +170,9 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    // 제스처·3버튼 내비 바 높이 + 살짝 여유
+    final pagerBottomPad =
+        24 + MediaQuery.viewPaddingOf(context).bottom + 16;
     final filtered = _filtered();
     final totalPages = math.max(1, (filtered.length + _pageSize - 1) ~/ _pageSize);
     final page = math.min(_page, totalPages);
@@ -389,7 +393,7 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                           if (totalPages > 1)
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                                padding: EdgeInsets.fromLTRB(16, 0, 16, pagerBottomPad),
                                 child: Material(
                                   color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
                                   borderRadius: BorderRadius.circular(12),

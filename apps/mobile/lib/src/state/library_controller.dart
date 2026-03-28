@@ -36,8 +36,26 @@ class LibraryController extends ChangeNotifier {
   int get booksPageSize => _pageSize;
 
   int get booksTotalPages {
+    if (_pageSize <= 0) return 1;
     if (_total <= 0) return 1;
-    return math.max(1, (_total + _pageSize - 1) ~/ _pageSize);
+    var tp = math.max(1, (_total + _pageSize - 1) ~/ _pageSize);
+    // 서버 total이 실제보다 작을 때: 현재 쪽이 가득 찬 마지막 쪽처럼 보이면 다음 쪽 가능
+    if (_books.isNotEmpty && _books.length >= _pageSize && _page >= tp) {
+      return _page + 1;
+    }
+    return tp;
+  }
+
+  /// History:
+  /// - 2026-03-29: total 과소 시에도 `booksTotalPages`와 함께 사용
+  bool get canGoToPrevBooksPage => !_isLoading && _page > 1;
+
+  /// History:
+  /// - 2026-03-29: 마지막 쪽이 `pageSize`만큼 찬 경우 다음 쪽 시도 가능
+  bool get canGoToNextBooksPage {
+    if (_isLoading || _books.isEmpty) return false;
+    if (_page < booksTotalPages) return true;
+    return _books.length >= _pageSize;
   }
 
   String get booksSearchQuery => _searchQuery;
@@ -73,14 +91,25 @@ class LibraryController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _api.fetchBooksPaged(
-        page: page,
+      var requestPage = math.max(1, page);
+      var result = await _api.fetchBooksPaged(
+        page: requestPage,
         pageSize: _pageSize,
         search: _searchQuery.isEmpty ? null : _searchQuery,
         readingStatus: _readingStatusFilter,
       );
+      if (result.items.isEmpty && requestPage > 1) {
+        requestPage -= 1;
+        result = await _api.fetchBooksPaged(
+          page: requestPage,
+          pageSize: _pageSize,
+          search: _searchQuery.isEmpty ? null : _searchQuery,
+          readingStatus: _readingStatusFilter,
+        );
+      }
       _books = result.items;
-      _total = result.total;
+      final observedMin = (result.page - 1) * result.pageSize + result.items.length;
+      _total = math.max(result.total, observedMin);
       _page = result.page;
       _pageSize = result.pageSize;
     } catch (error) {

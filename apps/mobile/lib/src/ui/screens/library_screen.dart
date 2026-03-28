@@ -2,7 +2,6 @@ import 'package:bookfolio_mobile/src/models/book_models.dart';
 import 'package:bookfolio_mobile/src/state/auth_controller.dart';
 import 'package:bookfolio_mobile/src/state/library_controller.dart';
 import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
-import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:bookfolio_mobile/src/ui/screens/book_detail_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/bestseller_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/choice_new_screen.dart';
@@ -20,6 +19,7 @@ import 'package:provider/provider.dart';
 /// 내 서재 그리드.
 ///
 /// History:
+/// - 2026-03-29: 페이지 바를 스크롤 밖 하단 고정·`canGoToNext` 휴리스틱(항상 조작 가능)
 /// - 2026-03-29: API 페이지네이션·검색·읽기상태 필터·테마 연동
 /// - 2026-03-26: 상단 `MainHubTopNavBar` 추가
 class LibraryScreen extends StatefulWidget {
@@ -305,12 +305,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   ],
                 ),
               ),
-              child: RefreshIndicator(
-                onRefresh: library.loadBooks,
-                color: colorScheme.primary,
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: library.loadBooks,
+                      color: colorScheme.primary,
+                      child: CustomScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
                     if (library.error != null)
                       SliverToBoxAdapter(
                         child: Padding(
@@ -374,8 +378,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         ),
                       ),
                       SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(
-                            16, 0, 16, kBookfolioFabClearancePadding),
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                         sliver: SliverLayoutBuilder(
                           builder: (context, constraints) {
                             final width = constraints.crossAxisExtent;
@@ -409,25 +412,33 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           },
                         ),
                       ),
-                      if (library.booksTotalPages > 1)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                            child: _BooksPagerBar(
-                              page: library.booksPage,
-                              totalPages: library.booksTotalPages,
-                              onPrev: library.booksPage > 1
-                                  ? () => library.goToBooksPage(library.booksPage - 1)
-                                  : null,
-                              onNext: library.booksPage < library.booksTotalPages
-                                  ? () => library.goToBooksPage(library.booksPage + 1)
-                                  : null,
-                            ),
-                          ),
-                        ),
                     ],
                   ],
-                ),
+                      ),
+                    ),
+                  ),
+                  if (!library.isLoading &&
+                      library.books.isNotEmpty &&
+                      library.error == null)
+                    SafeArea(
+                      top: false,
+                      minimum: EdgeInsets.only(
+                        left: 12,
+                        right: 12,
+                        bottom: MediaQuery.viewPaddingOf(context).bottom + 72,
+                      ),
+                      child: _BooksPagerBar(
+                        page: library.booksPage,
+                        totalPages: library.booksTotalPages,
+                        onPrev: library.canGoToPrevBooksPage
+                            ? () => library.goToBooksPage(library.booksPage - 1)
+                            : null,
+                        onNext: library.canGoToNextBooksPage
+                            ? () => library.goToBooksPage(library.booksPage + 1)
+                            : null,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
