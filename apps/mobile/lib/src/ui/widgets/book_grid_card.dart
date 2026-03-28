@@ -17,6 +17,7 @@ double bookGridCardAspectRatio(int columns) {
 /// 내 서재·공동서재 공통 표지 카드.
 ///
 /// History:
+/// - 2026-03-29: `ownerBadgeLabels`·테마 기반 카드·본문 색
 /// - 2026-03-25: 신규 (`UserBook` 전용 카드에서 일반화)
 class BookGridCard extends StatelessWidget {
   const BookGridCard({
@@ -26,6 +27,7 @@ class BookGridCard extends StatelessWidget {
     this.coverUrl,
     required this.onTap,
     this.coverBadge,
+    this.ownerBadgeLabels,
     required this.gradientSeedA,
     required this.gradientSeedB,
   });
@@ -35,6 +37,8 @@ class BookGridCard extends StatelessWidget {
   final String? coverUrl;
   final VoidCallback onTap;
   final Widget? coverBadge;
+  /// 공동서재 등 — 표지 아래 웹 `Badge`와 유사한 소유자 이름 칩.
+  final List<String>? ownerBadgeLabels;
   final String gradientSeedA;
   final String gradientSeedB;
 
@@ -43,15 +47,18 @@ class BookGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final cover = resolveCoverImageUrl(coverUrl);
     final hasCover = cover != null;
+    final cardBg = scheme.surfaceContainerLow;
+    final placeholder = scheme.surfaceContainerHighest;
 
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 1.5,
       shadowColor: Colors.black26,
       surfaceTintColor: Colors.transparent,
-      color: const Color(0xFFFFFBF7),
+      color: cardBg,
       child: InkWell(
         onTap: onTap,
         child: Column(
@@ -73,7 +80,7 @@ class BookGridCard extends StatelessWidget {
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return ColoredBox(
-                                color: const Color(0xFFE8E0D8),
+                                color: placeholder,
                                 child: Center(
                                   child: SizedBox(
                                     width: 28,
@@ -107,6 +114,35 @@ class BookGridCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (ownerBadgeLabels != null && ownerBadgeLabels!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 8, 0),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  alignment: WrapAlignment.center,
+                  children: ownerBadgeLabels!
+                      .map(
+                        (name) => Chip(
+                          visualDensity: VisualDensity.compact,
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          padding: EdgeInsets.zero,
+                          labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+                          label: Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          side: BorderSide(color: scheme.outlineVariant),
+                          backgroundColor: scheme.secondaryContainer.withValues(alpha: 0.65),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
@@ -120,17 +156,17 @@ class BookGridCard extends StatelessWidget {
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         height: 1.25,
-                        color: const Color(0xFF3E342C),
+                        color: scheme.onSurface,
                       ),
                     ),
                   if (hasCover && authorsLine.isNotEmpty) const SizedBox(height: 4),
                   if (authorsLine.isNotEmpty)
                     Text(
                       authorsLine,
-                      maxLines: 1,
+                      maxLines: ownerBadgeLabels != null && ownerBadgeLabels!.isNotEmpty ? 2 : 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF6B5B4D),
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                 ],

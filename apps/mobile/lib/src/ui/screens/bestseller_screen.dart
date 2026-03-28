@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// 베스트셀러 목록 화면.
 ///
 /// History:
+/// - 2026-03-29: 다크 모드·테마 색 적용
 /// - 2026-03-26: API·쿼리 노출 제거, 오늘 일자 기준 안내 문구·`MainHubTopNavBar`
 /// - 2026-03-25: 웹 `GET /api/me/aladin-bestseller` 와 동일 데이터 표시
 class BestsellerScreen extends StatefulWidget {
@@ -76,10 +77,9 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
           '베스트셀러',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF3E342C),
+            color: colorScheme.onSurface,
           ),
         ),
-        backgroundColor: const Color(0xFFEDE4D8),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
@@ -89,13 +89,13 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
           const MainHubTopNavBar(current: MainHubTab.bestseller),
           Expanded(
             child: DecoratedBox(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFF5EDE2),
-                    Color(0xFFE8DCC8),
+                    Color.lerp(colorScheme.surface, colorScheme.primaryContainer, 0.12)!,
+                    colorScheme.surfaceContainerLow,
                   ],
                 ),
               ),
@@ -141,7 +141,7 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
           const SizedBox(height: 12),
           Text(
             '표시할 도서가 없습니다.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF6B5B4D)),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
       );
@@ -159,7 +159,7 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
                 Text(
                   todayBestsellerListCaption(),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: const Color(0xFF5C4A3A),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         height: 1.35,
                       ),
@@ -168,7 +168,7 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
                 Text(
                   '${feed.items.length}권',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: const Color(0xFF7A6A5C),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],
@@ -210,12 +210,14 @@ class _BestsellerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final cover = resolveCoverImageUrl(item.cover);
+    final placeholder = scheme.surfaceContainerHighest;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: const Color(0xFFFFFBF7),
+        color: scheme.surfaceContainerLow,
         elevation: 1,
         shadowColor: Colors.black26,
         borderRadius: BorderRadius.circular(12),
@@ -233,7 +235,7 @@ class _BestsellerRow extends StatelessWidget {
                     '$rank',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: const Color(0xFFB3582F),
+                      color: scheme.primary,
                     ),
                   ),
                 ),
@@ -247,9 +249,9 @@ class _BestsellerRow extends StatelessWidget {
                             cover,
                             fit: BoxFit.cover,
                             headers: kCoverImageRequestHeaders,
-                            errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFFE8E0D8)),
+                            errorBuilder: (_, __, ___) => ColoredBox(color: placeholder),
                           )
-                        : const ColoredBox(color: Color(0xFFE8E0D8)),
+                        : ColoredBox(color: placeholder),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -262,7 +264,7 @@ class _BestsellerRow extends StatelessWidget {
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           height: 1.25,
-                          color: const Color(0xFF3E342C),
+                          color: scheme.onSurface,
                         ),
                       ),
                       if (item.author.isNotEmpty) ...[
@@ -271,7 +273,7 @@ class _BestsellerRow extends StatelessWidget {
                           item.author,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFF6B5B4D)),
+                          style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                         ),
                       ],
                       if (item.publisher.isNotEmpty || item.pubDate.isNotEmpty) ...[
@@ -279,7 +281,7 @@ class _BestsellerRow extends StatelessWidget {
                         Text(
                           [item.publisher, item.pubDate].where((s) => s.isNotEmpty).join(' · '),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF8A7B6E),
+                            color: scheme.onSurfaceVariant,
                             fontSize: 12,
                           ),
                         ),
@@ -290,7 +292,7 @@ class _BestsellerRow extends StatelessWidget {
                           '${item.priceSales!.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',')}원',
                           style: theme.textTheme.labelLarge?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF3E342C),
+                            color: scheme.onSurface,
                           ),
                         ),
                       ],

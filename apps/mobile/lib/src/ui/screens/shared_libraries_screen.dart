@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 /// 참여 중인 공동서재 목록(내 서재와 같은 그리드·그라데이션 배경).
 ///
 /// History:
+/// - 2026-03-29: 앱바·배경·빈 상태 `ColorScheme` 연동(다크 모드)
 /// - 2026-03-26: `MainHubTopNavBar` 추가
 /// - 2026-03-25: 앱바·그리드 카드를 `LibraryScreen` 스타일에 맞춤
 class SharedLibrariesScreen extends StatefulWidget {
@@ -65,6 +66,8 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final onSurface = colorScheme.onSurface;
+    final onSurfaceVar = colorScheme.onSurfaceVariant;
 
     return Scaffold(
       appBar: AppBar(
@@ -82,18 +85,18 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                 TextSpan(
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF3E342C),
+                        color: onSurface,
                       ),
-                  children: const [
-                    TextSpan(text: '북폴리오'),
+                  children: [
+                    const TextSpan(text: '북폴리오'),
                     TextSpan(
                       text: ' - ',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF7A6A5C),
+                        color: onSurfaceVar,
                       ),
                     ),
-                    TextSpan(text: '공동서재'),
+                    const TextSpan(text: '공동서재'),
                   ],
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -101,7 +104,6 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
             ),
           ],
         ),
-        backgroundColor: const Color(0xFFEDE4D8),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
@@ -111,13 +113,13 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
           const MainHubTopNavBar(current: MainHubTab.shared),
           Expanded(
             child: DecoratedBox(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFF5EDE2),
-                    Color(0xFFE8DCC8),
+                    Color.lerp(colorScheme.surface, colorScheme.primaryContainer, 0.12)!,
+                    colorScheme.surfaceContainerLow,
                   ],
                 ),
               ),
@@ -158,9 +160,9 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                             Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF0E6DA),
+                                color: colorScheme.surfaceContainerHigh,
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: const Color(0xFFD9CBB8)),
+                                border: Border.all(color: colorScheme.outlineVariant),
                               ),
                               child: Column(
                                 children: [
@@ -174,7 +176,7 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                                     '참여 중인 공동서재가 없어요',
                                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.w700,
-                                          color: const Color(0xFF4E4034),
+                                          color: colorScheme.onSurface,
                                         ),
                                   ),
                                   const SizedBox(height: 8),
@@ -182,7 +184,7 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                                     '웹에서 서재를 만든 뒤 아래로 당겨 새로고침하세요.',
                                     textAlign: TextAlign.center,
                                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: const Color(0xFF6B5B4D),
+                                          color: colorScheme.onSurfaceVariant,
                                           height: 1.35,
                                         ),
                                   ),
@@ -200,7 +202,7 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                                 child: Text(
                                   '총 ${_items.length}곳',
                                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: const Color(0xFF5C4A3A),
+                                        color: colorScheme.onSurfaceVariant,
                                         fontWeight: FontWeight.w600,
                                       ),
                                 ),

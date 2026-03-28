@@ -42,6 +42,24 @@ class PointsBalanceResult {
   }
 }
 
+/// `GET /api/me/books?page=&pageSize=` 응답.
+///
+/// History:
+/// - 2026-03-29: 내 서재 목록 페이지네이션용
+class UserBooksPageResult {
+  const UserBooksPageResult({
+    required this.items,
+    required this.total,
+    required this.page,
+    required this.pageSize,
+  });
+
+  final List<UserBook> items;
+  final int total;
+  final int page;
+  final int pageSize;
+}
+
 class BookfolioApi {
   BookfolioApi({http.Client? client}) : _client = client ?? http.Client();
 
@@ -59,13 +77,96 @@ class BookfolioApi {
     };
   }
 
+  /// 페이지 단위 목록 (`page` 쿼리가 있을 때 서버는 `{ items, total, page, pageSize }` 반환).
+  ///
+  /// History:
+  /// - 2026-03-29: 모바일 내 서재 그리드 페이지네이션
+  Future<UserBooksPageResult> fetchBooksPaged({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+    String? readingStatus,
+    String? format,
+  }) async {
+    final qp = <String, String>{
+      'page': '${page.clamp(1, 1 << 20)}',
+      'pageSize': '${pageSize.clamp(1, 100)}',
+    };
+    final q = search?.trim();
+    if (q != null && q.isNotEmpty) {
+      qp['q'] = q;
+    }
+    final rs = readingStatus?.trim();
+    if (rs != null && rs.isNotEmpty && rs != 'all') {
+      qp['readingStatus'] = rs;
+    }
+    final fmt = format?.trim();
+    if (fmt != null && fmt.isNotEmpty && fmt != 'all') {
+      qp['format'] = fmt;
+    }
+    final uri = Uri.parse('$_baseUrl/api/me/books').replace(queryParameters: qp);
+    final response = await _client.get(uri, headers: await _headers());
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body);
+    if (decoded is List<dynamic>) {
+      final items = decoded.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList();
+      return UserBooksPageResult(
+        items: items,
+        total: items.length,
+        page: 1,
+        pageSize: items.length,
+      );
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw BookfolioApiException(500, '도서 목록 응답 형식이 올바르지 않습니다.');
+    }
+    final listRaw = decoded['items'];
+    if (listRaw is! List<dynamic>) {
+      throw BookfolioApiException(500, '도서 목록 응답 형식이 올바르지 않습니다.');
+    }
+    final items = listRaw.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList();
+    final totalRaw = decoded['total'];
+    final total = totalRaw is int
+        ? totalRaw
+        : totalRaw is num
+            ? totalRaw.toInt()
+            : items.length;
+    final pageRaw = decoded['page'];
+    final outPage = pageRaw is int
+        ? pageRaw
+        : pageRaw is num
+            ? pageRaw.toInt()
+            : page;
+    final psRaw = decoded['pageSize'];
+    final outPs = psRaw is int
+        ? psRaw
+        : psRaw is num
+            ? psRaw.toInt()
+            : pageSize;
+    return UserBooksPageResult(
+      items: items,
+      total: total,
+      page: outPage,
+      pageSize: outPs,
+    );
+  }
+
   Future<List<UserBook>> fetchBooks() async {
     final response = await _client.get(
       Uri.parse('$_baseUrl/api/me/books'),
       headers: await _headers(),
     );
     _throwIfFailed(response);
-    final decoded = jsonDecode(response.body) as List<dynamic>;
+    final decoded = jsonDecode(response.body);
+    if (decoded is Map<String, dynamic>) {
+      final list = decoded['items'];
+      if (list is List<dynamic>) {
+        return list.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList();
+      }
+    }
+    if (decoded is! List<dynamic>) {
+      throw BookfolioApiException(500, '도서 목록 응답 형식이 올바르지 않습니다.');
+    }
     return decoded
         .map((item) => UserBook.fromJson(item as Map<String, dynamic>))
         .toList();

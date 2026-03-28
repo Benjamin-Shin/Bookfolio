@@ -1,6 +1,7 @@
 import 'package:bookfolio_mobile/src/models/book_models.dart';
 import 'package:bookfolio_mobile/src/state/auth_controller.dart';
 import 'package:bookfolio_mobile/src/state/library_controller.dart';
+import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
 import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:bookfolio_mobile/src/ui/screens/book_detail_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/bestseller_screen.dart';
@@ -19,6 +20,7 @@ import 'package:provider/provider.dart';
 /// 내 서재 그리드.
 ///
 /// History:
+/// - 2026-03-29: API 페이지네이션·검색·읽기상태 필터·테마 연동
 /// - 2026-03-26: 상단 `MainHubTopNavBar` 추가
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -28,13 +30,23 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
+  final _searchCtrl = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       if (!mounted) return;
-      context.read<LibraryController>().loadBooks();
+      final lib = context.read<LibraryController>();
+      _searchCtrl.text = lib.booksSearchQuery;
+      lib.loadBooks();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _openBook(UserBook book) async {
@@ -43,10 +55,75 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
+  Widget _emptyOrFilteredPlaceholder(
+    LibraryController library,
+    Future<void> Function() onAddTap,
+  ) {
+    final hasFilters = library.booksSearchQuery.isNotEmpty ||
+        library.booksReadingStatusFilter != null;
+    if (library.booksTotal == 0 && !hasFilters) {
+      return _EmptyLibrary(onAddTap: onAddTap);
+    }
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          hasFilters
+              ? '조건에 맞는 책이 없습니다. 검색어나 필터를 바꿔 보세요.'
+              : '이 페이지에 표시할 책이 없습니다.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _readingStatusFilterChips(
+    LibraryController library,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    String? selected = library.booksReadingStatusFilter;
+    Widget chip(String label, String? apiValue) {
+      final on = apiValue == null ? selected == null : selected == apiValue;
+      return Padding(
+        padding: const EdgeInsets.only(right: 6),
+        child: FilterChip(
+          label: Text(label, style: textTheme.labelMedium),
+          selected: on,
+          onSelected: (v) async {
+            if (!v) return;
+            if (apiValue == null) {
+              await library.setBooksListFilters(readingStatusAll: true);
+            } else {
+              await library.setBooksListFilters(readingStatus: apiValue);
+            }
+          },
+          selectedColor: colorScheme.secondaryContainer,
+          checkmarkColor: colorScheme.onSecondaryContainer,
+        ),
+      );
+    }
+
+    return [
+      chip('전체', null),
+      chip(readingStatusLabelKo(ReadingStatus.unread), 'unread'),
+      chip(readingStatusLabelKo(ReadingStatus.reading), 'reading'),
+      chip(readingStatusLabelKo(ReadingStatus.completed), 'completed'),
+      chip(readingStatusLabelKo(ReadingStatus.paused), 'paused'),
+      chip(readingStatusLabelKo(ReadingStatus.dropped), 'dropped'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final library = context.watch<LibraryController>();
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final onSurface = colorScheme.onSurface;
+    final onSurfaceVar = colorScheme.onSurfaceVariant;
 
     return Scaffold(
       drawer: Drawer(
@@ -59,7 +136,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: Text(
                 '메뉴',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: const Color(0xFF4E4034),
+                      color: colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.w700,
                     ),
               ),
@@ -149,18 +226,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 TextSpan(
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF3E342C),
+                        color: onSurface,
                       ),
-                  children: const [
-                    TextSpan(text: '북폴리오'),
+                  children: [
+                    const TextSpan(text: '북폴리오'),
                     TextSpan(
                       text: ' - ',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF7A6A5C),
+                        color: onSurfaceVar,
                       ),
                     ),
-                    TextSpan(text: '내 서재'),
+                    const TextSpan(text: '내 서재'),
                   ],
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -168,7 +245,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
           ],
         ),
-        backgroundColor: const Color(0xFFEDE4D8),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -191,15 +267,41 @@ class _LibraryScreenState extends State<LibraryScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const MainHubTopNavBar(current: MainHubTab.library),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: SearchBar(
+              controller: _searchCtrl,
+              hintText: '제목·저자·ISBN 검색',
+              leading: const Icon(Icons.search),
+              trailing: [
+                IconButton(
+                  onPressed: () async {
+                    await library.setBooksListFilters(search: _searchCtrl.text);
+                    if (context.mounted) FocusScope.of(context).unfocus();
+                  },
+                  icon: const Icon(Icons.check_circle_outline),
+                  tooltip: '검색 적용',
+                ),
+              ],
+              onSubmitted: (v) => library.setBooksListFilters(search: v),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 12, right: 12, bottom: 6),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: _readingStatusFilterChips(library, colorScheme, textTheme)),
+            ),
+          ),
           Expanded(
             child: DecoratedBox(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFF5EDE2),
-                    Color(0xFFE8DCC8),
+                    Color.lerp(colorScheme.surface, colorScheme.primaryContainer, 0.12)!,
+                    colorScheme.surfaceContainerLow,
                   ],
                 ),
               ),
@@ -243,24 +345,29 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     else if (library.books.isEmpty)
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: _EmptyLibrary(onAddTap: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => const BookFormScreen()),
-                          );
-                        }),
+                        child: _emptyOrFilteredPlaceholder(
+                          library,
+                          () async {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (_) => const BookFormScreen()),
+                            );
+                          },
+                        ),
                       )
                     else ...[
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                           child: Text(
-                            '총 ${library.books.length}권',
+                            library.booksTotal > 0
+                                ? '총 ${library.booksTotal}권 · ${library.booksPage}/${library.booksTotalPages}쪽 (이쪽 ${library.books.length}권)'
+                                : '총 0권',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleSmall
                                 ?.copyWith(
-                                  color: const Color(0xFF5C4A3A),
+                                  color: colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
@@ -302,6 +409,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           },
                         ),
                       ),
+                      if (library.booksTotalPages > 1)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                            child: _BooksPagerBar(
+                              page: library.booksPage,
+                              totalPages: library.booksTotalPages,
+                              onPrev: library.booksPage > 1
+                                  ? () => library.goToBooksPage(library.booksPage - 1)
+                                  : null,
+                              onNext: library.booksPage < library.booksTotalPages
+                                  ? () => library.goToBooksPage(library.booksPage + 1)
+                                  : null,
+                            ),
+                          ),
+                        ),
                     ],
                   ],
                 ),
@@ -316,6 +439,48 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
 /// History:
 /// - 2026-03-25: 표지 카드는 `BookGridCard` 위젯으로 분리
+class _BooksPagerBar extends StatelessWidget {
+  const _BooksPagerBar({
+    required this.page,
+    required this.totalPages,
+    required this.onPrev,
+    required this.onNext,
+  });
+
+  final int page;
+  final int totalPages;
+  final VoidCallback? onPrev;
+  final VoidCallback? onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.surfaceContainerHighest.withValues(alpha: 0.9),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: onPrev,
+              icon: const Icon(Icons.chevron_left),
+              tooltip: '이전 쪽',
+            ),
+            Text('$page / $totalPages', style: Theme.of(context).textTheme.titleSmall),
+            IconButton(
+              onPressed: onNext,
+              icon: const Icon(Icons.chevron_right),
+              tooltip: '다음 쪽',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _EmptyLibrary extends StatelessWidget {
   const _EmptyLibrary({required this.onAddTap});
 
@@ -323,6 +488,7 @@ class _EmptyLibrary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -331,9 +497,9 @@ class _EmptyLibrary extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0E6DA),
+              color: scheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFD9CBB8)),
+              border: Border.all(color: scheme.outlineVariant),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.06),
@@ -357,7 +523,7 @@ class _EmptyLibrary extends StatelessWidget {
                   '아직 등록한 책이 없어요',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF4E4034),
+                        color: scheme.onSurface,
                       ),
                 ),
                 const SizedBox(height: 8),
@@ -365,7 +531,7 @@ class _EmptyLibrary extends StatelessWidget {
                   '바코드 스캔이나 직접 입력으로 첫 권을 추가해보세요.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF6B5B4D),
+                        color: scheme.onSurfaceVariant,
                         height: 1.35,
                       ),
                 ),

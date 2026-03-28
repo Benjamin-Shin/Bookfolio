@@ -40,6 +40,9 @@ void openMainHubTab(BuildContext context, MainHubTab tab) {
 }
 
 /// 허브 화면 상단 가로 메뉴.
+///
+/// History:
+/// - 2026-03-29: 다크 모드 대응 (`ColorScheme` 기반)
 class MainHubTopNavBar extends StatelessWidget {
   const MainHubTopNavBar({super.key, required this.current});
 
@@ -47,9 +50,10 @@ class MainHubTopNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     Widget link(String label, MainHubTab tab, IconData icon) {
       final selected = tab == current;
-      final fg = selected ? const Color(0xFFB3582F) : const Color(0xFF5C4A3A);
+      final fg = selected ? scheme.primary : scheme.onSurfaceVariant;
       return Padding(
         padding: const EdgeInsets.only(right: 2),
         child: TextButton(
@@ -82,7 +86,7 @@ class MainHubTopNavBar extends StatelessWidget {
 
     return Material(
       elevation: 0,
-      color: const Color(0xFFE5DCD0),
+      color: scheme.surfaceContainerHigh,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
