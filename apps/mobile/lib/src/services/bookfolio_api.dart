@@ -22,6 +22,26 @@ class BookfolioApiException implements Exception {
   String toString() => message;
 }
 
+/// `GET /api/me/points/balance` 응답.
+///
+/// History:
+/// - 2026-03-28: 모바일 프로필용 포인트·VIP
+class PointsBalanceResult {
+  PointsBalanceResult({required this.balance, required this.vipActive});
+
+  final int balance;
+  final bool vipActive;
+
+  factory PointsBalanceResult.fromJson(Map<String, dynamic> json) {
+    final b = json['balance'];
+    final v = json['vipActive'];
+    return PointsBalanceResult(
+      balance: b is int ? b : (b is num ? b.toInt() : 0),
+      vipActive: v == true,
+    );
+  }
+}
+
 class BookfolioApi {
   BookfolioApi({http.Client? client}) : _client = client ?? http.Client();
 
@@ -238,6 +258,19 @@ class BookfolioApi {
     return ReadingEventItem.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
+  /// `GET /api/me/stats/bookfolio-aggregate?top=10`
+  ///
+  /// History:
+  /// - 2026-03-28: 북폴리오 집계(소장·완독·포인트·인기 도서)
+  Future<Map<String, dynamic>> fetchBookfolioAggregate({int top = 10}) async {
+    final uri = Uri.parse('$_baseUrl/api/me/stats/bookfolio-aggregate').replace(
+      queryParameters: {'top': '$top'},
+    );
+    final response = await _client.get(uri, headers: await _headers());
+    _throwIfFailed(response);
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
   /// `GET /api/me/stats/reading-leaderboard?kind=completed|owned`
   Future<Map<String, dynamic>> fetchReadingLeaderboard(String kind) async {
     final uri = Uri.parse('$_baseUrl/api/me/stats/reading-leaderboard').replace(
@@ -249,6 +282,39 @@ class BookfolioApi {
   }
 
   /// `GET /api/me/reading-events/calendar?from=&to=` (YYYY-MM-DD)
+  /// `GET /api/me/points/balance`
+  Future<PointsBalanceResult> fetchPointsBalance() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/points/balance'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    return PointsBalanceResult.fromJson(decoded);
+  }
+
+  /// 테마·유료 기능용 — `POST /api/me/points/apply-event`
+  Future<Map<String, dynamic>> applyPointsEvent({
+    required String eventCode,
+    required String idempotencyKey,
+    String? refType,
+    String? refId,
+  }) async {
+    final payload = <String, dynamic>{
+      'eventCode': eventCode,
+      'idempotencyKey': idempotencyKey,
+      if (refType != null && refType.isNotEmpty) 'refType': refType,
+      if (refId != null && refId.isNotEmpty) 'refId': refId,
+    };
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/me/points/apply-event'),
+      headers: await _headers(),
+      body: jsonEncode(payload),
+    );
+    _throwIfFailed(response);
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
   Future<Map<String, int>> fetchReadingEventsCalendar(String from, String to) async {
     final uri = Uri.parse('$_baseUrl/api/me/reading-events/calendar').replace(
       queryParameters: {'from': from, 'to': to},

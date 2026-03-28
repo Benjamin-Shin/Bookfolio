@@ -22,6 +22,16 @@ class AuthController extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _session != null;
 
+  /// 로그인 화면 등에서 검증 오류 배너를 닫을 때 사용합니다.
+  ///
+  /// History:
+  /// - 2026-03-28: 회원가입/로그인 전환 시 메시지 초기화용
+  void clearError() {
+    if (_error == null) return;
+    _error = null;
+    notifyListeners();
+  }
+
   static const _apiBase = String.fromEnvironment('BOOKFOLIO_API_BASE_URL');
   /// 서버 `AUTH_GOOGLE_ID`(웹 클라이언트 ID)와 같게 두면 ID 토큰 aud 검증이 맞습니다.
   /// 비우면 네이티브 클라이언트 aud 만 쓰게 되므로 서버에 `AUTH_GOOGLE_MOBILE_AUDIENCES` 로 해당 ID를 추가해야 합니다.

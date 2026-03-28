@@ -23,7 +23,7 @@ const KNOWN_CODES = new Set<string>(Object.values(POINT_EVENT_CODES));
 
 function eventHint(code: string): string | null {
   if (KNOWN_CODES.has(code)) {
-    return POINT_EVENT_CODE_DESCRIPTION_KO[code as keyof typeof POINT_EVENT_CODE_DESCRIPTION_KO] ?? null;
+    return POINT_EVENT_CODE_DESCRIPTION_KO[code] ?? null;
   }
   return null;
 }
@@ -36,6 +36,7 @@ type Props = {
 
 /**
  * @history
+ * - 2026-03-28: 규칙 점수 음수(차감) 입력·안내
  * - 2026-03-26: 규칙 행 편집·신규 이벤트 추가 폼
  */
 export function AdminPointRulesEditor({ versions, rules, versionLabel }: Props) {
@@ -55,6 +56,10 @@ export function AdminPointRulesEditor({ versions, rules, versionLabel }: Props) 
             {POINT_EVENT_CODE_DESCRIPTION_KO.user_book_register}
           </li>
           <li>새 정책은 아래 폼에서 코드·점수·한도를 정한 뒤, 앱 코드에서 동일 코드로 지급을 호출합니다.</li>
+          <li>
+            점수는 <strong>양수=적립</strong>, <strong>음수=차감</strong>(0은 불가). 차감은 사용자 잔액이 부족하면 API에서
+            거부됩니다. VIP는 차감 원장이 생기지 않습니다.
+          </li>
         </ul>
       </div>
 
@@ -86,11 +91,10 @@ export function AdminPointRulesEditor({ versions, rules, versionLabel }: Props) 
                     <form action={updatePointRuleFromForm} className="flex flex-wrap items-end gap-2">
                       <input type="hidden" name="ruleId" value={r.id} />
                       <label className="flex flex-col gap-0.5 text-xs">
-                        <span className="text-muted-foreground">점수</span>
+                        <span className="text-muted-foreground">점수(±)</span>
                         <Input
                           name="points"
                           type="number"
-                          min={0}
                           step={1}
                           defaultValue={r.points}
                           className="h-8 w-24"
@@ -159,8 +163,8 @@ export function AdminPointRulesEditor({ versions, rules, versionLabel }: Props) 
             <Input name="eventCode" className="h-8 font-mono text-xs" placeholder="my_event_code" required />
           </label>
           <label className="flex flex-col gap-0.5 text-xs">
-            <span className="text-muted-foreground">점수</span>
-            <Input name="points" type="number" min={0} step={1} defaultValue={0} className="h-8 w-24" required />
+            <span className="text-muted-foreground">점수(±)</span>
+            <Input name="points" type="number" step={1} defaultValue={10} className="h-8 w-24" required />
           </label>
           <label className="flex flex-col gap-0.5 text-xs">
             <span className="text-muted-foreground">일 한도(건)</span>

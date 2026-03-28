@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
 import { addLibraryMemberByEmail, listLibraryMembers } from "@/lib/libraries/repository";
+import {
+  SharedLibraryMemberCapError,
+  SharedLibraryPointsRequiredError
+} from "@/lib/libraries/shared-library-policy";
 
 function statusForMessage(message: string): number {
   if (message === "Unauthorized") return 401;
@@ -34,6 +38,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const row = await addLibraryMemberByEmail(libraryId, body.email, userId, { userId, useAdmin: true });
     return NextResponse.json(row, { status: 201 });
   } catch (error) {
+    if (error instanceof SharedLibraryPointsRequiredError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    if (error instanceof SharedLibraryMemberCapError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     const message = error instanceof Error ? error.message : "Failed";
     const status =
       message === "Unauthorized"

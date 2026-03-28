@@ -1,17 +1,18 @@
 import 'package:bookfolio_mobile/src/ui/screens/bestseller_screen.dart';
+import 'package:bookfolio_mobile/src/ui/screens/bookfolio_aggregate_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/choice_new_screen.dart';
-import 'package:bookfolio_mobile/src/ui/screens/my_stats_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/shared_libraries_screen.dart';
 import 'package:flutter/material.dart';
 
 /// 5개 허브 화면 간 이동용 탭 식별자.
-enum MainHubTab { library, stats, shared, bestseller, choice }
+enum MainHubTab { shared, aggregate, bestseller, choice, library }
 
 /// 루트(내 서재)까지 돌아간 뒤 선택한 허브로 이동합니다.
 ///
 /// History:
+/// - 2026-03-28: 순서 — 공동서재·북폴리오 집계·베스트셀러·초이스 신간·내 서재; `aggregate` 추가
 /// - 2026-03-26: 허브 탭에 Material 아이콘(서재·통계·공동·불꽃·신규)
-/// - 2026-03-26: 「초이스신간」 표기 → 「초이스 시간」
+/// - 2026-03-26: 「초이스신간」 표기 → 「초이스 신간」
 /// - 2026-03-26: 신규 — 내서재·통계·공동서재·베스트셀러·초이스 상단 바
 void openMainHubTab(BuildContext context, MainHubTab tab) {
   final nav = Navigator.of(context);
@@ -19,17 +20,21 @@ void openMainHubTab(BuildContext context, MainHubTab tab) {
   switch (tab) {
     case MainHubTab.library:
       break;
-    case MainHubTab.stats:
-      nav.push(MaterialPageRoute<void>(builder: (_) => const MyStatsScreen()));
-      break;
     case MainHubTab.shared:
-      nav.push(MaterialPageRoute<void>(builder: (_) => const SharedLibrariesScreen()));
+      nav.push(MaterialPageRoute<void>(
+          builder: (_) => const SharedLibrariesScreen()));
+      break;
+    case MainHubTab.aggregate:
+      nav.push(MaterialPageRoute<void>(
+          builder: (_) => const BookfolioAggregateScreen()));
       break;
     case MainHubTab.bestseller:
-      nav.push(MaterialPageRoute<void>(builder: (_) => const BestsellerScreen()));
+      nav.push(
+          MaterialPageRoute<void>(builder: (_) => const BestsellerScreen()));
       break;
     case MainHubTab.choice:
-      nav.push(MaterialPageRoute<void>(builder: (_) => const ChoiceNewScreen()));
+      nav.push(
+          MaterialPageRoute<void>(builder: (_) => const ChoiceNewScreen()));
       break;
   }
 }
@@ -83,11 +88,13 @@ class MainHubTopNavBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         child: Row(
           children: [
-            link('내서재', MainHubTab.library, Icons.collections_bookmark_outlined),
-            link('내 통계', MainHubTab.stats, Icons.bar_chart_outlined),
             link('공동서재', MainHubTab.shared, Icons.groups_2_outlined),
-            link('베스트셀러', MainHubTab.bestseller, Icons.local_fire_department_outlined),
-            link('초이스 시간', MainHubTab.choice, Icons.new_releases_outlined),
+            link('북폴리오 집계', MainHubTab.aggregate, Icons.leaderboard_outlined),
+            link('베스트셀러', MainHubTab.bestseller,
+                Icons.local_fire_department_outlined),
+            link('초이스 신간', MainHubTab.choice, Icons.new_releases_outlined),
+            link('내 서재', MainHubTab.library,
+                Icons.collections_bookmark_outlined),
           ],
         ),
       ),

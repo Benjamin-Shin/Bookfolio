@@ -6,7 +6,9 @@ import 'package:bookfolio_mobile/src/ui/screens/book_detail_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/bestseller_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/choice_new_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/book_form_screen.dart';
+import 'package:bookfolio_mobile/src/ui/screens/bookfolio_aggregate_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/my_stats_screen.dart';
+import 'package:bookfolio_mobile/src/ui/screens/profile_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/shared_libraries_screen.dart';
 import 'package:bookfolio_mobile/src/ui/widgets/book_grid_card.dart';
 import 'package:bookfolio_mobile/src/ui/widgets/main_hub_top_nav.dart';
@@ -52,7 +54,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: colorScheme.primaryContainer.withValues(alpha: 0.4)),
+              decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.4)),
               child: Text(
                 '메뉴',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -67,12 +70,33 @@ class _LibraryScreenState extends State<LibraryScreen> {
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('프로필'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.bar_chart_outlined),
               title: const Text('내 통계'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push<void>(
                   MaterialPageRoute(builder: (_) => const MyStatsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.leaderboard_outlined),
+              title: const Text('북폴리오 집계'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                      builder: (_) => const BookfolioAggregateScreen()),
                 );
               },
             ),
@@ -88,7 +112,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.new_releases_outlined),
-              title: const Text('초이스 시간'),
+              title: const Text('초이스 신간'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push<void>(
@@ -102,7 +126,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push<void>(
-                  MaterialPageRoute(builder: (_) => const SharedLibrariesScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const SharedLibrariesScreen()),
                 );
               },
             ),
@@ -189,13 +214,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                           child: Material(
-                            color: colorScheme.errorContainer.withValues(alpha: 0.85),
+                            color: colorScheme.errorContainer
+                                .withValues(alpha: 0.85),
                             borderRadius: BorderRadius.circular(12),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 12),
                               child: Text(
                                 library.error!,
-                                style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 13),
+                                style: TextStyle(
+                                    color: colorScheme.onErrorContainer,
+                                    fontSize: 13),
                               ),
                             ),
                           ),
@@ -216,7 +245,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         hasScrollBody: false,
                         child: _EmptyLibrary(onAddTap: () async {
                           await Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const BookFormScreen()),
+                            MaterialPageRoute(
+                                builder: (_) => const BookFormScreen()),
                           );
                         }),
                       )
@@ -226,7 +256,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                           child: Text(
                             '총 ${library.books.length}권',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
                                   color: const Color(0xFF5C4A3A),
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -234,17 +267,20 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         ),
                       ),
                       SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, kBookfolioFabClearancePadding),
+                        padding: const EdgeInsets.fromLTRB(
+                            16, 0, 16, kBookfolioFabClearancePadding),
                         sliver: SliverLayoutBuilder(
                           builder: (context, constraints) {
                             final width = constraints.crossAxisExtent;
                             final columns = width >= 520 ? 3 : 2;
                             return SliverGrid(
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: columns,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: bookGridCardAspectRatio(columns),
+                                childAspectRatio:
+                                    bookGridCardAspectRatio(columns),
                               ),
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) {
@@ -255,7 +291,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                     coverUrl: book.coverUrl,
                                     gradientSeedA: book.title,
                                     gradientSeedB: book.id,
-                                    coverBadge: ReadingStatusCoverBadge(status: book.readingStatus),
+                                    coverBadge: ReadingStatusCoverBadge(
+                                        status: book.readingStatus),
                                     onTap: () => _openBook(book),
                                   );
                                 },
@@ -310,7 +347,10 @@ class _EmptyLibrary extends StatelessWidget {
                 Icon(
                   Icons.collections_bookmark_rounded,
                   size: 52,
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.85),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.85),
                 ),
                 const SizedBox(height: 16),
                 Text(

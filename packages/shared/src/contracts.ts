@@ -46,6 +46,7 @@ export interface Profile {
  * ISBN·제목 등으로 외부/로컬에서 가져온 도서 메타 스냅샷.
  *
  * @history
+ * - 2026-03-28: `pageCount` 주석에서 Google Books 언급 제거.
  * - 2026-03-26: `pageCount`(총 페이지) 선택 필드
  */
 export interface BookLookupResult {
@@ -63,7 +64,7 @@ export interface BookLookupResult {
   genreSlugs?: string[];
   literatureRegion?: string | null;
   originalLanguage?: string | null;
-  /** 제공자가 알려준 총 페이지(쪽). Google Books·국립 등 일부만 제공. */
+  /** 제공자가 알려준 총 페이지(쪽). 네이버·국립 등 일부만 제공. */
   pageCount?: number | null;
 }
 

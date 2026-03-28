@@ -136,6 +136,12 @@ apps/web/public/
 - 다크 모드: `globals.css`에 `.dark` 토큰 정의됨, 필요 시 루트에 클래스 토글로 활성화
 - 색상은 shadcn/ui CSS 변수 시스템 활용
 
+### React 하이드레이션 (Next.js App Router)
+
+- 개발 중 콘솔에 **“A tree hydrated but some attributes of the server rendered HTML didn't match”**가 뜨면, 먼저 **앱 코드**에서 `Date.now()`·`Math.random()`·`typeof window` 분기·잘못된 HTML 중첩·서버/클라이언트 **로케일·타임존**만 다른 포맷 등을 의심한다.
+- 그런데 diff에 **`data-sharkid`**처럼 **서버 HTML에는 없고 클라이언트에만 생기는 속성**이면, 브라우저 **확장 프로그램**(자동완성·비밀번호·보안 등)이 하이드레이션 전에 DOM을 수정한 경우가 많다. 앱 버그가 아닐 수 있다.
+- 재현을 줄이려면: 확장 끄기·시크릿 창·또는 해당 폼 컨트롤에 **`suppressHydrationWarning`**(해당 노드에서 **속성** 불일치 경고만 무시)을 쓸 수 있다. **남용하지 말고**, 네이티브 `<input>` / `<select>` 등 확장이 자주 건드리는 노드에만 한정한다. 근본 원인이 로케일/시간/분기 코드면 그쪽을 고친다.
+
 ## 핵심 도메인 모델 참조
 
 ```typescript

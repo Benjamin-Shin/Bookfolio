@@ -7,6 +7,7 @@ import type {
   UserBookMemoRow
 } from "@bookfolio/shared";
 
+import { tryRecordDailyActivityCheckIn } from "@/lib/points/daily-check-in";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 import type { RepositoryContext } from "./repository";
@@ -19,6 +20,8 @@ function getAdminContext(ctx: RepositoryContext) {
  * 개인 메모·한줄평·독서 이벤트·리더보드(0018 마이그레이션).
  *
  * @history
+ * - 2026-03-28: `parseLeaderboardPayload` export — 집계 API에서 재사용
+ * - 2026-03-28: 독서 이벤트 추가 시 일일 출석(`tryRecordDailyActivityCheckIn`) 시도
  * - 2026-03-26: `listReadingEventsForUtcDayWithBooks` — 일별 이벤트+도서 메타(대시보드 캘린더)
  * - 2026-03-26: 신규 — memo 분리·한줄평·이벤트·집계 RPC 연동
  */
@@ -387,6 +390,11 @@ export async function appendUserBookReadingEvent(
     .single();
   if (error) throw error;
   const r = data as Record<string, unknown>;
+  try {
+    await tryRecordDailyActivityCheckIn(supabase, userId);
+  } catch (e) {
+    console.error("tryRecordDailyActivityCheckIn", e);
+  }
   return {
     id: r.id as string,
     userBookId: r.user_book_id as string,
@@ -397,7 +405,7 @@ export async function appendUserBookReadingEvent(
   };
 }
 
-function parseLeaderboardPayload(raw: unknown): ReadingLeaderboardResponse {
+export function parseLeaderboardPayload(raw: unknown): ReadingLeaderboardResponse {
   let o = raw;
   if (typeof o === "string") {
     try {

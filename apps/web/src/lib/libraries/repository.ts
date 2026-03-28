@@ -23,7 +23,15 @@ import {
 import { appendUserBookMemoLine, fetchLatestMemoPreviewsForUserBookIds } from "@/lib/books/user-book-sidecars";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
-import { SharedLibraryCreateLimitReachedError } from "@/lib/libraries/shared-library-policy";
+import { tryAwardPointsForEvent } from "@/lib/points/award-points";
+import { POINT_EVENT_CODES } from "@/lib/points/event-codes";
+import { getActiveSubscriptionCaps } from "@/lib/subscription/plan-caps";
+import { hasActiveVipSubscription } from "@/lib/subscription/vip";
+import {
+  SharedLibraryMemberCapError,
+  SharedLibraryPointsRequiredError,
+  SharedLibraryVipOwnedCapError
+} from "@/lib/libraries/shared-library-policy";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 type DbLibraryRow = {
@@ -54,6 +62,32 @@ async function countLibrariesCreatedBy(supabase: SupabaseClient, userId: string)
     throw error;
   }
   return count ?? 0;
+}
+
+async function countLibraryMembersForLibrary(
+  supabase: SupabaseClient,
+  libraryId: string,
+  role?: LibraryMemberRole
+): Promise<number> {
+  let q = supabase
+    .from("library_members")
+    .select("*", { count: "exact", head: true })
+    .eq("library_id", libraryId);
+  if (role) {
+    q = q.eq("role", role);
+  }
+  const { count, error } = await q;
+  if (error) {
+    throw error;
+  }
+  return count ?? 0;
+}
+
+async function deleteLibraryCascade(supabase: SupabaseClient, libraryId: string): Promise<void> {
+  const { error } = await supabase.from("libraries").delete().eq("id", libraryId);
+  if (error) {
+    throw error;
+  }
 }
 
 /**
@@ -164,6 +198,7 @@ export async function listLibrariesForUser(
 
 /**
  * @history
+ * - 2026-03-28: 기본 한도 초과 시 포인트 차감 또는 VIP `caps`; 실패 시 생성 롤백
  * - 2026-03-25: `app_users.policies_json.sharedLibraryCreateLimit` 만큼만 생성 허용
  */
 export async function createLibrary(
@@ -177,13 +212,18 @@ export async function createLibrary(
     throw new Error("이름을 입력해 주세요.");
   }
 
-  const [{ data: policyRow }, createdCount] = await Promise.all([
+  const [{ data: policyRow }, createdCount, subCaps, vipActive] = await Promise.all([
     supabase.from("app_users").select("policies_json").eq("id", userId).maybeSingle(),
-    countLibrariesCreatedBy(supabase, userId)
+    countLibrariesCreatedBy(supabase, userId),
+    getActiveSubscriptionCaps(supabase, userId),
+    hasActiveVipSubscription(supabase, userId)
   ]);
   const policies = mergeAppUserPolicies(policyRow?.policies_json);
-  if (createdCount >= policies.sharedLibraryCreateLimit) {
-    throw new SharedLibraryCreateLimitReachedError(policies.sharedLibraryCreateLimit, createdCount);
+  const baseLimit = policies.sharedLibraryCreateLimit;
+  const vipOwnedMax = subCaps?.caps.shared_libraries_owned_max;
+
+  if (vipOwnedMax != null && vipOwnedMax >= 0 && createdCount >= vipOwnedMax) {
+    throw new SharedLibraryVipOwnedCapError(vipOwnedMax, createdCount);
   }
 
   const { data: lib, error: libErr } = await supabase
@@ -200,18 +240,53 @@ export async function createLibrary(
   if (libErr) throw libErr;
   const row = lib as DbLibraryRow;
 
-  const { error: memErr } = await supabase.from("library_members").insert({
-    library_id: row.id,
-    user_id: userId,
-    role: "owner",
-    joined_at: new Date().toISOString()
+  try {
+    const { error: memErr } = await supabase.from("library_members").insert({
+      library_id: row.id,
+      user_id: userId,
+      role: "owner",
+      joined_at: new Date().toISOString()
+    });
+
+    if (memErr) throw memErr;
+
+    await linkAllUserBooksToLibrary(supabase, row.id, userId);
+  } catch (e) {
+    await deleteLibraryCascade(supabase, row.id);
+    throw e;
+  }
+
+  const newCount = createdCount + 1;
+
+  if (newCount <= baseLimit) {
+    return mapLibraryRow(row, "owner");
+  }
+
+  if (vipActive && (vipOwnedMax == null || newCount <= vipOwnedMax)) {
+    return mapLibraryRow(row, "owner");
+  }
+
+  const pt = await tryAwardPointsForEvent(supabase, {
+    userId,
+    eventCode: POINT_EVENT_CODES.shared_library_create_extra,
+    idempotencyKey: `${POINT_EVENT_CODES.shared_library_create_extra}:${row.id}`,
+    refType: "library",
+    refId: row.id
   });
 
-  if (memErr) throw memErr;
+  if (pt.ok && (pt.kind === "posted" || pt.kind === "vip_spend_exempt")) {
+    return mapLibraryRow(row, "owner");
+  }
 
-  await linkAllUserBooksToLibrary(supabase, row.id, userId);
+  await deleteLibraryCascade(supabase, row.id);
 
-  return mapLibraryRow(row, "owner");
+  if (!pt.ok && pt.kind === "insufficient_balance") {
+    throw new SharedLibraryPointsRequiredError();
+  }
+  if (!pt.ok && pt.kind === "no_rule_or_zero") {
+    throw new SharedLibraryPointsRequiredError("추가 공동서재에 필요한 포인트 규칙이 없습니다. 관리자에게 문의하세요.");
+  }
+  throw new SharedLibraryPointsRequiredError("추가 공동서재를 만들 수 없습니다. 포인트 또는 정책을 확인해 주세요.");
 }
 
 /** 공동서재 목록은 매핑된 user_books만 보이므로, 소유자 개인 서재 전체를 서재 생성 시 자동 연결한다. */
@@ -476,6 +551,42 @@ export async function addLibraryMemberByEmail(
   const targetId = userRow.id as string;
   if (targetId === actorUserId) {
     throw new Error("이미 이 서재의 멤버입니다.");
+  }
+
+  const [totalMembers, memberRoleCount, actorSub, actorVip] = await Promise.all([
+    countLibraryMembersForLibrary(supabase, libraryId),
+    countLibraryMembersForLibrary(supabase, libraryId, "member"),
+    getActiveSubscriptionCaps(supabase, actorUserId),
+    hasActiveVipSubscription(supabase, actorUserId)
+  ]);
+
+  const maxMembersRaw = actorSub?.caps.shared_library_members_total_max;
+  const maxM =
+    typeof maxMembersRaw === "number" && Number.isFinite(maxMembersRaw) && maxMembersRaw >= 0
+      ? Math.floor(maxMembersRaw)
+      : null;
+  if (maxM != null && totalMembers >= maxM) {
+    throw new SharedLibraryMemberCapError(maxM);
+  }
+
+  if (!actorVip && memberRoleCount >= 1) {
+    const pt = await tryAwardPointsForEvent(supabase, {
+      userId: actorUserId,
+      eventCode: POINT_EVENT_CODES.shared_library_invite_extra,
+      idempotencyKey: `${POINT_EVENT_CODES.shared_library_invite_extra}:${libraryId}:${targetId}`,
+      refType: "library",
+      refId: libraryId
+    });
+
+    if (!pt.ok || !(pt.ok && (pt.kind === "posted" || pt.kind === "vip_spend_exempt"))) {
+      if (!pt.ok && pt.kind === "insufficient_balance") {
+        throw new SharedLibraryPointsRequiredError();
+      }
+      if (!pt.ok && pt.kind === "no_rule_or_zero") {
+        throw new SharedLibraryPointsRequiredError("초대에 필요한 포인트 규칙이 없습니다. 관리자에게 문의하세요.");
+      }
+      throw new SharedLibraryPointsRequiredError("멤버를 추가할 수 없습니다. 포인트를 확인해 주세요.");
+    }
   }
 
   const { error: insErr } = await supabase.from("library_members").insert({

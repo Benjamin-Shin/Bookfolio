@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// 초이스 시간(알라딘 신간·피드) 목록 화면.
+/// 초이스 신간(알라딘 신간·피드) 목록 화면.
 ///
 /// History:
 /// - 2026-03-26: 화면·앱바 제목 표기 「초이스 시간」
@@ -74,7 +74,7 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '초이스 시간',
+          '초이스 신간',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             color: const Color(0xFF3E342C),
@@ -111,13 +111,16 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
                             padding: const EdgeInsets.all(24),
                             children: [
                               Material(
-                                color: colorScheme.errorContainer.withValues(alpha: 0.9),
+                                color: colorScheme.errorContainer
+                                    .withValues(alpha: 0.9),
                                 borderRadius: BorderRadius.circular(12),
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Text(
                                     _error!,
-                                    style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 14),
+                                    style: TextStyle(
+                                        color: colorScheme.onErrorContainer,
+                                        fontSize: 14),
                                   ),
                                 ),
                               ),
@@ -138,11 +141,15 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(24),
         children: [
-          Text(todayChoiceNewListCaption(), style: Theme.of(context).textTheme.titleSmall),
+          Text(todayChoiceNewListCaption(),
+              style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 12),
           Text(
             '표시할 도서가 없습니다.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF6B5B4D)),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: const Color(0xFF6B5B4D)),
           ),
         ],
       );
@@ -185,7 +192,9 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
                 return _ChoiceNewRow(
                   rank: index + 1,
                   item: item,
-                  onOpenAladin: item.link.isNotEmpty ? () => _openAladin(item.link) : null,
+                  onOpenAladin: item.link.isNotEmpty
+                      ? () => _openAladin(item.link)
+                      : null,
                 );
               },
               childCount: feed.items.length,
@@ -248,7 +257,8 @@ class _ChoiceNewRow extends StatelessWidget {
                             cover,
                             fit: BoxFit.cover,
                             headers: kCoverImageRequestHeaders,
-                            errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFFE8E0D8)),
+                            errorBuilder: (_, __, ___) =>
+                                const ColoredBox(color: Color(0xFFE8E0D8)),
                           )
                         : const ColoredBox(color: Color(0xFFE8E0D8)),
                   ),
@@ -272,13 +282,17 @@ class _ChoiceNewRow extends StatelessWidget {
                           item.author,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFF6B5B4D)),
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: const Color(0xFF6B5B4D)),
                         ),
                       ],
-                      if (item.publisher.isNotEmpty || item.pubDate.isNotEmpty) ...[
+                      if (item.publisher.isNotEmpty ||
+                          item.pubDate.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
-                          [item.publisher, item.pubDate].where((s) => s.isNotEmpty).join(' · '),
+                          [item.publisher, item.pubDate]
+                              .where((s) => s.isNotEmpty)
+                              .join(' · '),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: const Color(0xFF8A7B6E),
                             fontSize: 12,

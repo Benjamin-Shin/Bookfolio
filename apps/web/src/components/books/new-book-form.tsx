@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 /**
  * @history
+ * - 2026-03-28: ISBN 조회 안내 문구에서 Google Books 제거(네이버→국립 순).
  * - 2026-03-25: Cloudinary 표지 업로드 필드(`BookCoverUploadField`) 연동
  */
 export function NewBookForm() {
@@ -181,7 +182,7 @@ export function NewBookForm() {
         <div className="space-y-1">
           <Label htmlFor="isbn-lookup">ISBN으로 검색</Label>
           <p className="text-xs text-muted-foreground">
-            국립중앙도서관 → 네이버 → Google Books 순으로 시도합니다. 환경 변수로 켜 둔 제공자만 사용됩니다.
+            네이버 책검색 → 국립중앙도서관 순으로 시도합니다. 환경 변수로 켜 둔 제공자만 사용됩니다.
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">

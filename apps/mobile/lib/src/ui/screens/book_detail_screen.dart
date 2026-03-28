@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 /// 내 서재 도서 상세 — 읽기 상태·이벤트·메모·한줄평.
 ///
 /// History:
+/// - 2026-03-27: 메모 `MarkdownBody(softLineBreak: true)` — 엔터(단일 줄바꿈)가 표시에 유지됨
 /// - 2026-03-26: 메모 입력 — 카메라 촬영 후 OCR로 글귀를 필드에 채우기
 /// - 2026-03-26: 빈 `id`/`bookId`일 때 사이드카 API URL이 잘못 매칭되어 404 나는 문제 방지
 /// - 2026-03-26: 상태/이벤트/마크다운 메모·한줄평 API 연동, `user_books.memo` 제거
@@ -518,6 +519,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     child: MarkdownBody(
                       data: m.bodyMd,
                       selectable: true,
+                      softLineBreak: true,
                     ),
                   ),
                 )),

@@ -9,6 +9,7 @@ import type {
 } from "@bookfolio/shared";
 import { useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,7 @@ const EVENT_LABEL_KO: Record<ReadingEventType, string> = {
  * 도서 상세 — 한줄평·메모(마크다운)·독서 이벤트 UI.
  *
  * @history
+ * - 2026-03-27: 메모 마크다운에 `remark-breaks` 적용 — 엔터(단일 줄바꿈)가 표시에 반영됨
  * - 2026-03-26: 빈 `userBookId`/`bookId`면 잘못된 fetch URL로 404 나는 문제 방지
  * - 2026-03-26: 신규
  */
@@ -396,7 +398,7 @@ function MemoRow(props: {
       ) : (
         <>
           <div className="max-w-none text-sm leading-relaxed [&_a]:text-primary [&_a]:underline [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5">
-            <ReactMarkdown>{memo.bodyMd}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkBreaks]}>{memo.bodyMd}</ReactMarkdown>
           </div>
           <div className="mt-2 flex gap-2">
             <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => setEditing(true)}>

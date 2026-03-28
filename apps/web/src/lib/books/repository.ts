@@ -12,6 +12,7 @@ import { auth } from "@/auth";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
 import { normalizeIsbn } from "@/lib/books/lookup";
 import { replaceBookAuthorLinks } from "@/lib/books/replace-book-author-links";
+import { tryRecordDailyActivityCheckIn } from "@/lib/points/daily-check-in";
 import { awardPointsUserBookRegister } from "@/lib/points/award-points";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -665,6 +666,12 @@ export async function createUserBook(
     await awardPointsUserBookRegister(userId, inserted.id as string);
   } catch (e) {
     console.error("awardPointsUserBookRegister", e);
+  }
+
+  try {
+    await tryRecordDailyActivityCheckIn(supabase, userId);
+  } catch (e) {
+    console.error("tryRecordDailyActivityCheckIn", e);
   }
 
   return detail;

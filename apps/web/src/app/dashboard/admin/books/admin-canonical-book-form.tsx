@@ -7,7 +7,8 @@
  * - 2026-03-26: 총 페이지(`pageCount`) 입력·ISBN 조회 시 API `pageCount` 반영
  * - 2026-03-26: `formHtmlId`·`onSubmitPendingChange` — 수정 페이지 상·하단 `form` 연동 저장 버튼
  * - 2026-03-26: 표지 — `BookCoverUploadField`(파일·클립보드·URL→Cloudinary)로 통합(신규·수정 공통)
- * - 2026-03-24: ISBN 조회를 국립중앙도서관·네이버 버튼으로 분리(API `provider`); 안내 문구를 실제 폴백 순서(네이버→국립→Google)에 맞춤
+ * - 2026-03-28: ISBN 폴백 안내에서 Google Books 제거.
+ * - 2026-03-24: ISBN 조회를 국립중앙도서관·네이버 버튼으로 분리(API `provider`); 안내 문구를 실제 폴백 순서(네이버→국립)에 맞춤
  * - 2026-03-24: 옮긴이(`translatorsCsv`), API소스(`apiSource`) 입력; ISBN 조회 시 API소스 칸이 비어 있으면 조회 `source`로 채움
  */
 
@@ -302,8 +303,8 @@ export function AdminCanonicalBookForm({
         <div className="space-y-1">
           <Label htmlFor="admin-isbn-lookup">ISBN으로 검색</Label>
           <p className="text-xs text-muted-foreground">
-            아래 버튼은 각각 해당 API만 호출합니다(로컬 카탈로그 우회). 일반 사용자·다른 화면의 ISBN 조회는 네이버 → 국립중앙도서관 →
-            Google Books 순 폴백입니다.{" "}
+            아래 버튼은 각각 해당 API만 호출합니다(로컬 카탈로그 우회). 일반 사용자·다른 화면의 ISBN 조회는 네이버 책검색 →
+            국립중앙도서관 순 폴백입니다.{" "}
             {mode === "edit"
               ? "수정 모드에서는 비어 있는 필드만 채웁니다. 조회한 ISBN은 항상 ISBN 칸에 반영됩니다."
               : "신규 등록 시에는 조회 결과로 폼을 채웁니다."}
@@ -414,7 +415,7 @@ export function AdminCanonicalBookForm({
       <div className="space-y-2">
         <Label htmlFor="apiSource">API소스</Label>
         <p className="text-xs text-muted-foreground">
-          외부 메타 조회 출처 식별자(예: nl.go.kr, naver, googlebooks). ISBN 검색으로 채울 때 비어 있는 칸만 갱신됩니다.
+          외부 메타 조회 출처 식별자(예: nl.go.kr, naver). ISBN 검색으로 채울 때 비어 있는 칸만 갱신됩니다.
         </p>
         <Input
           ref={apiSourceRef}
@@ -478,7 +479,7 @@ export function AdminCanonicalBookForm({
       <div className="space-y-2">
         <Label htmlFor="pageCount">총 페이지 (쪽)</Label>
         <p className="text-xs text-muted-foreground">
-          ISBN 검색(국립·Google 등)·알라딘 프리필에 값이 있으면 채웁니다. 비우면 저장 시 비움입니다. 1~50000.
+          ISBN 검색(국립·네이버 등)·알라딘 프리필에 값이 있으면 채웁니다. 비우면 저장 시 비움입니다. 1~50000.
         </p>
         <Input
           ref={pageCountRef}

@@ -1,7 +1,9 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { POINT_EVENT_CODES, type PointEventCode } from "@/lib/points/event-codes";
+import { hasActiveVipSubscription } from "@/lib/subscription/vip";
+
+import { POINT_EVENT_CODES } from "@/lib/points/event-codes";
 
 function startOfUtcDay(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
@@ -11,23 +13,39 @@ function startOfUtcMonth(d: Date): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
 }
 
+export type TryAwardPointsResult =
+  | { ok: true; kind: "posted"; delta: number; balanceAfter: number }
+  | { ok: true; kind: "vip_spend_exempt"; balanceAfter: number }
+  | { ok: false; kind: "duplicate" }
+  | { ok: false; kind: "no_rule_or_zero" }
+  | { ok: false; kind: "insufficient_balance"; balanceAfter: number }
+  | { ok: false; kind: "cap_reached" };
+
 /**
- * 활성 정책 버전(`point_rule_versions.version` 최댓값)에 대해 이벤트 규칙을 조회·한도 검사 후 원장에 1행 적립합니다.
- * `idempotency_key`가 이미 있으면 아무 것도 하지 않습니다.
+ * 활성 정책 버전에 대해 이벤트 규칙을 조회·한도 검사 후 원장에 1행 반영합니다.
+ * 양수=적립, 음수=차감. `points=0`이면 처리하지 않습니다.
+ * 적립(`points>0`)일 때만 일·월 한도(UTC)를 적용합니다.
+ * 차감(`points<0`)은 잔액이 부족하면 거부합니다.
+ * VIP이면 차감을 원장에 올리지 않고 `vip_spend_exempt`로 성공 처리합니다(기본).
  *
  * @history
+ * - 2026-03-28: 음수 차감·잔액 검사·VIP 소비 면제·적립 한도만 유지
  * - 2026-03-26: 신규 — 가입·도서 등록 연동
  */
 export async function tryAwardPointsForEvent(
   supabase: SupabaseClient,
   params: {
     userId: string;
-    eventCode: PointEventCode;
+    eventCode: string;
     idempotencyKey: string;
     refType?: string | null;
     refId?: string | null;
+    /** false면 VIP여도 차감 원장을 시도(관리자·백필용). 기본 true */
+    treatVipSpendExempt?: boolean;
   }
-): Promise<{ awarded: boolean; delta?: number; balanceAfter?: number }> {
+): Promise<TryAwardPointsResult> {
+  const treatVip = params.treatVipSpendExempt !== false;
+
   const { data: dup } = await supabase
     .from("user_points_ledger")
     .select("id")
@@ -35,7 +53,7 @@ export async function tryAwardPointsForEvent(
     .maybeSingle();
 
   if (dup?.id) {
-    return { awarded: false };
+    return { ok: false, kind: "duplicate" };
   }
 
   const { data: ver, error: vErr } = await supabase
@@ -49,7 +67,7 @@ export async function tryAwardPointsForEvent(
     throw vErr;
   }
   if (!ver?.id) {
-    return { awarded: false };
+    return { ok: false, kind: "no_rule_or_zero" };
   }
 
   const { data: rule, error: rErr } = await supabase
@@ -64,44 +82,12 @@ export async function tryAwardPointsForEvent(
   }
 
   const points = rule?.points != null ? Number(rule.points) : 0;
-  if (!rule || points <= 0) {
-    return { awarded: false };
+  if (!rule || points === 0 || Number.isNaN(points)) {
+    return { ok: false, kind: "no_rule_or_zero" };
   }
 
   const ruleVersionId = rule.rule_version_id as string;
-
   const now = new Date();
-  if (rule.daily_cap_per_user != null && rule.daily_cap_per_user >= 0) {
-    const from = startOfUtcDay(now).toISOString();
-    const { count, error: cErr } = await supabase
-      .from("user_points_ledger")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", params.userId)
-      .eq("reason", params.eventCode)
-      .gte("created_at", from);
-    if (cErr) {
-      throw cErr;
-    }
-    if ((count ?? 0) >= rule.daily_cap_per_user) {
-      return { awarded: false };
-    }
-  }
-
-  if (rule.monthly_cap_per_user != null && rule.monthly_cap_per_user >= 0) {
-    const from = startOfUtcMonth(now).toISOString();
-    const { count, error: cErr } = await supabase
-      .from("user_points_ledger")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", params.userId)
-      .eq("reason", params.eventCode)
-      .gte("created_at", from);
-    if (cErr) {
-      throw cErr;
-    }
-    if ((count ?? 0) >= rule.monthly_cap_per_user) {
-      return { awarded: false };
-    }
-  }
 
   const { data: last, error: lErr } = await supabase
     .from("user_points_ledger")
@@ -116,8 +102,51 @@ export async function tryAwardPointsForEvent(
   }
 
   const prev = last?.balance_after != null ? Number(last.balance_after) : 0;
+
+  if (points < 0 && treatVip && (await hasActiveVipSubscription(supabase, params.userId))) {
+    return { ok: true, kind: "vip_spend_exempt", balanceAfter: prev };
+  }
+
+  if (points > 0) {
+    if (rule.daily_cap_per_user != null && rule.daily_cap_per_user >= 0) {
+      const from = startOfUtcDay(now).toISOString();
+      const { count, error: cErr } = await supabase
+        .from("user_points_ledger")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", params.userId)
+        .eq("reason", params.eventCode)
+        .gte("created_at", from);
+      if (cErr) {
+        throw cErr;
+      }
+      if ((count ?? 0) >= rule.daily_cap_per_user) {
+        return { ok: false, kind: "cap_reached" };
+      }
+    }
+
+    if (rule.monthly_cap_per_user != null && rule.monthly_cap_per_user >= 0) {
+      const from = startOfUtcMonth(now).toISOString();
+      const { count, error: cErr } = await supabase
+        .from("user_points_ledger")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", params.userId)
+        .eq("reason", params.eventCode)
+        .gte("created_at", from);
+      if (cErr) {
+        throw cErr;
+      }
+      if ((count ?? 0) >= rule.monthly_cap_per_user) {
+        return { ok: false, kind: "cap_reached" };
+      }
+    }
+  }
+
   const delta = points;
   const balanceAfter = prev + delta;
+
+  if (balanceAfter < 0) {
+    return { ok: false, kind: "insufficient_balance", balanceAfter: prev };
+  }
 
   const { error: insErr } = await supabase.from("user_points_ledger").insert({
     user_id: params.userId,
@@ -132,12 +161,12 @@ export async function tryAwardPointsForEvent(
 
   if (insErr) {
     if (insErr.code === "23505") {
-      return { awarded: false };
+      return { ok: false, kind: "duplicate" };
     }
     throw insErr;
   }
 
-  return { awarded: true, delta, balanceAfter };
+  return { ok: true, kind: "posted", delta, balanceAfter };
 }
 
 /**

@@ -26,10 +26,20 @@ function parseRequiredNonNegInt(raw: string | undefined): number {
   return n;
 }
 
+/** 포인트 규칙 점수: 양수(적립)·음수(차감), 0 불가 */
+function parseRequiredPointsInt(raw: string | undefined): number {
+  const n = Number(raw ?? "");
+  if (!Number.isFinite(n) || n === 0 || !Number.isInteger(n)) {
+    return NaN;
+  }
+  return n;
+}
+
 /**
  * 관리자: 기존 `point_rules` 행의 점수·한도만 갱신합니다.
  *
  * @history
+ * - 2026-03-28: 점수 음수(차감) 허용
  * - 2026-03-26: 신규
  */
 export async function updatePointRuleFromForm(formData: FormData): Promise<void> {
@@ -40,7 +50,7 @@ export async function updatePointRuleFromForm(formData: FormData): Promise<void>
     return;
   }
 
-  const points = parseRequiredNonNegInt(formData.get("points")?.toString());
+  const points = parseRequiredPointsInt(formData.get("points")?.toString());
   if (Number.isNaN(points)) {
     return;
   }
@@ -76,6 +86,7 @@ export async function updatePointRuleFromForm(formData: FormData): Promise<void>
  * 관리자: 특정 정책 버전에 새 이벤트 코드 행을 추가합니다.
  *
  * @history
+ * - 2026-03-28: 점수 음수(차감) 허용
  * - 2026-03-26: 신규
  */
 export async function createPointRuleFromForm(formData: FormData): Promise<void> {
@@ -91,7 +102,7 @@ export async function createPointRuleFromForm(formData: FormData): Promise<void>
     return;
   }
 
-  const points = parseRequiredNonNegInt(formData.get("points")?.toString());
+  const points = parseRequiredPointsInt(formData.get("points")?.toString());
   if (Number.isNaN(points)) {
     return;
   }

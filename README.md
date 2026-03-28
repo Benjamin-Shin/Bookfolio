@@ -127,6 +127,12 @@ Open the service toward shared experiences.
 4. Install workspace dependencies with your preferred package manager.
 5. Configure Flutter SDK locally before running `apps/mobile`.
 
+## Documentation
+
+- **Design (KO):** [docs/bookfolio-points-themes-i18n-vip-design.md](docs/bookfolio-points-themes-i18n-vip-design.md) — 포인트(음수)·VIP·플랜 cap·모바일 테마·i18n·공동서재·출석·UTC/로컬 시각 통합 요약.
+- **DB schema:** [docs/bookfolio-db-schema.md](docs/bookfolio-db-schema.md)
+- **Daily change log / approval workflow:** [docs/todo/](docs/todo/)
+
 ## Notes
 
 - The repo is scaffolded to be generator-free because the current environment does not have Flutter or a working Node package runtime available.

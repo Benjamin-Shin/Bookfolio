@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
 import { createLibrary, listLibrariesForUser } from "@/lib/libraries/repository";
-import { SharedLibraryCreateLimitReachedError } from "@/lib/libraries/shared-library-policy";
+import {
+  SharedLibraryCreateLimitReachedError,
+  SharedLibraryPointsRequiredError,
+  SharedLibraryVipOwnedCapError
+} from "@/lib/libraries/shared-library-policy";
 
 function isLibraryKind(v: unknown): v is (typeof LIBRARY_KINDS)[number] {
   return typeof v === "string" && (LIBRARY_KINDS as readonly string[]).includes(v);
@@ -22,6 +26,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * @history
+ * - 2026-03-28: VIP 상한·포인트 부족 → 403/400
  * - 2026-03-25: `SharedLibraryCreateLimitReachedError` → 403
  */
 export async function POST(request: NextRequest) {
@@ -54,6 +59,12 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof SharedLibraryCreateLimitReachedError) {
       return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+    if (error instanceof SharedLibraryVipOwnedCapError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+    if (error instanceof SharedLibraryPointsRequiredError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     const message = error instanceof Error ? error.message : "Failed to create library";
     return NextResponse.json({ error: message }, { status: message === "Unauthorized" ? 401 : 500 });
