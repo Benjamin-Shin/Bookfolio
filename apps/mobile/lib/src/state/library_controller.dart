@@ -26,6 +26,7 @@ class LibraryController extends ChangeNotifier {
   int _total = 0;
   String _searchQuery = '';
   String? _readingStatusFilter;
+  UserOwnedBooksPriceStats? _ownedBooksPriceStats;
 
   List<UserBook> get books => _books;
   bool get isLoading => _isLoading;
@@ -62,6 +63,12 @@ class LibraryController extends ChangeNotifier {
 
   String? get booksReadingStatusFilter => _readingStatusFilter;
 
+  /// 웹 대시보드와 동일한 소장 가격 집계. 로드 실패 시 null.
+  ///
+  /// History:
+  /// - 2026-03-29: `fetchOwnedBooksPriceStats` 연동
+  UserOwnedBooksPriceStats? get ownedBooksPriceStats => _ownedBooksPriceStats;
+
   void attach(AuthController auth) {
     _api.accessToken = () => auth.session?.accessToken;
     final sessionChanged = _auth?.session?.accessToken != auth.session?.accessToken;
@@ -77,6 +84,7 @@ class LibraryController extends ChangeNotifier {
       _error = null;
       _total = 0;
       _page = 1;
+      _ownedBooksPriceStats = null;
     }
   }
 
@@ -89,6 +97,16 @@ class LibraryController extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     notifyListeners();
+
+    Future<UserOwnedBooksPriceStats?> safePriceStats() async {
+      try {
+        return await _api.fetchOwnedBooksPriceStats();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    final statsFuture = safePriceStats();
 
     try {
       var requestPage = math.max(1, page);
@@ -112,8 +130,10 @@ class LibraryController extends ChangeNotifier {
       _total = math.max(result.total, observedMin);
       _page = result.page;
       _pageSize = result.pageSize;
+      _ownedBooksPriceStats = await statsFuture;
     } catch (error) {
       _error = error.toString();
+      _ownedBooksPriceStats = await statsFuture;
     } finally {
       _isLoading = false;
       notifyListeners();

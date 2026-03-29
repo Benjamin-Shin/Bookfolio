@@ -50,6 +50,8 @@ type SiteHeaderMobileNavProps = {
   user: { id: string; email: string; role?: string | null } | null;
   displayLabel: string;
   initialProfile: AppProfileView | null;
+  /** 소유 공동서재에 다른 멤버가 있어 탈퇴가 막히는 서재 이름(서버 `assertAccountDeleteAllowed`와 동일) */
+  sharedLibrariesBlockingWithdrawal: string[];
 };
 
 function MobileNavLink({
@@ -82,12 +84,14 @@ function MobileNavLink({
  *
  * @history
  * - 2026-03-29: 신규 — 햄버거 메뉴·개인정보·약관·쿠키(푸터 동일 경로)
+ * - 2026-03-29: `sharedLibrariesBlockingWithdrawal`을 프로필(탈퇴)로 전달
  */
 export function SiteHeaderMobileNav({
   apkUrl,
   user,
   displayLabel,
   initialProfile,
+  sharedLibrariesBlockingWithdrawal,
 }: SiteHeaderMobileNavProps) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -135,6 +139,7 @@ export function SiteHeaderMobileNav({
                     email={user.email}
                     displayLabel={displayLabel}
                     initialProfile={initialProfile}
+                    sharedLibrariesBlockingWithdrawal={sharedLibrariesBlockingWithdrawal}
                   />
                 </div>
                 <Separator className="my-2" />

@@ -16,6 +16,7 @@ import { HeaderAccount } from "@/components/layout/header-account";
 import { SiteHeaderMobileNav } from "@/components/layout/site-header-mobile-nav.client";
 import { Button } from "@/components/ui/button";
 import { getAppProfile } from "@/lib/auth/app-profiles";
+import { listOwnedSharedLibrariesBlockingWithdrawal } from "@/lib/auth/delete-app-user";
 import { env } from "@/lib/env";
 
 function AndroidApkIcon({ className }: { className?: string }) {
@@ -39,6 +40,7 @@ function AndroidApkIcon({ className }: { className?: string }) {
  * - 2026-03-28: 네비 순서 — 공동서재 → 북폴리오 집계 → 베스트셀러 → 초이스 신간 → 내 서재
  * - 2026-03-29: `md` 미만 Sheet 햄버거 — 전역 내비·푸터와 동일 법적 고지 링크(개인정보·약관·쿠키)
  * - 2026-03-26: 로그인 네비에 베스트셀러·초이스 신간 링크 추가(`dashboard/bestsellers`, `dashboard/choice-new`)
+ * - 2026-03-29: 소유 공동서재(타 멤버 있음) 시 탈퇴 막힘 목록을 헤더·모바일 메뉴에 전달
  */
 export async function SiteHeader() {
   const session = await auth();
@@ -46,6 +48,9 @@ export async function SiteHeader() {
   const apkUrl = env.appDownloadUrl;
 
   const profile = user?.id ? await getAppProfile(user.id) : null;
+  const sharedLibrariesBlockingWithdrawal = user?.id
+    ? await listOwnedSharedLibrariesBlockingWithdrawal(user.id)
+    : [];
   const displayLabel =
     profile?.displayName?.trim() ||
     user?.name?.trim() ||
@@ -90,6 +95,7 @@ export async function SiteHeader() {
                   email={user.email}
                   displayLabel={displayLabel}
                   initialProfile={profile}
+                  sharedLibrariesBlockingWithdrawal={sharedLibrariesBlockingWithdrawal}
                 />
                 <Button variant="ghost" size="sm" asChild>
                   <Link
@@ -175,6 +181,7 @@ export async function SiteHeader() {
             }
             displayLabel={displayLabel}
             initialProfile={profile}
+            sharedLibrariesBlockingWithdrawal={sharedLibrariesBlockingWithdrawal}
           />
         </nav>
       </div>

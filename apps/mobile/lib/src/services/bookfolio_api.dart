@@ -42,6 +42,37 @@ class PointsBalanceResult {
   }
 }
 
+/// `GET /api/me/stats/owned-books-price` 응답 (웹 대시보드·동일 RPC).
+///
+/// History:
+/// - 2026-03-29: 소장 책 가격 합계(모바일 내 서재)
+class UserOwnedBooksPriceStats {
+  const UserOwnedBooksPriceStats({
+    required this.totalKrw,
+    required this.pricedOwnedCount,
+    required this.ownedCount,
+  });
+
+  final int totalKrw;
+  final int pricedOwnedCount;
+  final int ownedCount;
+
+  factory UserOwnedBooksPriceStats.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v) ?? 0;
+      return 0;
+    }
+
+    return UserOwnedBooksPriceStats(
+      totalKrw: asInt(json['totalKrw']),
+      pricedOwnedCount: asInt(json['pricedOwnedCount']),
+      ownedCount: asInt(json['ownedCount']),
+    );
+  }
+}
+
 /// `GET /api/me/books?page=&pageSize=` 응답.
 ///
 /// History:
@@ -151,6 +182,19 @@ class BookfolioApi {
       total: total,
       page: outPage,
       pageSize: outPs,
+    );
+  }
+
+  /// History:
+  /// - 2026-03-29: `user_owned_books_price_stats`와 동기
+  Future<UserOwnedBooksPriceStats> fetchOwnedBooksPriceStats() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/stats/owned-books-price'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    return UserOwnedBooksPriceStats.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
     );
   }
 
@@ -386,6 +430,18 @@ class BookfolioApi {
   }
 
   /// `GET /api/me/reading-events/calendar?from=&to=` (YYYY-MM-DD)
+  /// 회원 탈퇴 — 웹 헤더 계정과 동일 (`DELETE /api/me/account`).
+  ///
+  /// History:
+  /// - 2026-03-29: 모바일 프로필 탈퇴 연동
+  Future<void> deleteAccount() async {
+    final response = await _client.delete(
+      Uri.parse('$_baseUrl/api/me/account'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+  }
+
   /// `GET /api/me/points/balance`
   Future<PointsBalanceResult> fetchPointsBalance() async {
     final response = await _client.get(

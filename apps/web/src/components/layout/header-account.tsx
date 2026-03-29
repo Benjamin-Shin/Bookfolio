@@ -25,6 +25,8 @@ type HeaderAccountProps = {
   email: string;
   displayLabel: string;
   initialProfile: AppProfileView | null;
+  /** 소유 공동서재에 다른 멤버가 있어 서버 탈퇴가 거절되는 서재 이름 (`listOwnedSharedLibrariesBlockingWithdrawal`) */
+  sharedLibrariesBlockingWithdrawal?: string[];
 };
 
 /**
@@ -36,8 +38,15 @@ type HeaderAccountProps = {
  * - 2026-03-26: 표시 이름 왼쪽에 아바타 썸네일·저장 응답·서버 props 동기화
  * - 2026-03-26: 아바타 — `ProfileAvatarUploadField`(Cloudinary `/api/upload` kind `avatar`)
  * - 2026-03-26: 회원 탈퇴 확인 후 `DELETE /api/me/account`·`signOut`
+ * - 2026-03-29: 프로필 하단 푸터 한 줄에 탈퇴(좌·destructive)·취소·저장, 안내 문구는 그 아래
+ * - 2026-03-29: 소유 공동·모임 서재에 타 멤버 있으면 탈퇴 버튼 비활성·안내
  */
-export function HeaderAccount({ email, displayLabel, initialProfile }: HeaderAccountProps) {
+export function HeaderAccount({
+  email,
+  displayLabel,
+  initialProfile,
+  sharedLibrariesBlockingWithdrawal = []
+}: HeaderAccountProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -62,6 +71,7 @@ export function HeaderAccount({ email, displayLabel, initialProfile }: HeaderAcc
   }, [initialProfile?.avatarUrl, initialProfile?.displayName, displayLabel]);
 
   const headerAvatarSrc = normalizeCoverUrlForClient(avatarUrl || null);
+  const withdrawalBlockedByOwnedSharedLibs = sharedLibrariesBlockingWithdrawal.length > 0;
 
   return (
     <div className="flex min-w-0 items-center gap-2">
@@ -155,30 +165,55 @@ export function HeaderAccount({ email, displayLabel, initialProfile }: HeaderAcc
             {error ? (
               <p className="text-sm text-destructive sm:col-span-2">{error}</p>
             ) : null}
-            <DialogFooter className="sm:col-span-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                취소
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? "저장 중…" : "저장"}
-              </Button>
-            </DialogFooter>
+            <div className="flex flex-col gap-2 border-t border-border/60 pt-4 sm:col-span-2">
+              <div className="flex flex-row flex-wrap items-center justify-between gap-2">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="shrink-0"
+                  disabled={withdrawalBlockedByOwnedSharedLibs}
+                  title={
+                    withdrawalBlockedByOwnedSharedLibs
+                      ? "소유 중인 공동·모임 서재를 정리한 뒤 탈퇴할 수 있습니다."
+                      : undefined
+                  }
+                  onClick={() => {
+                    if (withdrawalBlockedByOwnedSharedLibs) return;
+                    setDeleteError(null);
+                    setDeleteOpen(true);
+                  }}
+                >
+                  회원 탈퇴
+                </Button>
+                <div className="flex shrink-0 flex-row gap-2">
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                    취소
+                  </Button>
+                  <Button type="submit" disabled={saving}>
+                    {saving ? "저장 중…" : "저장"}
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">계정을 삭제하면 데이터가 모두 사라집니다.</p>
+              {withdrawalBlockedByOwnedSharedLibs ? (
+                <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-foreground">
+                  <span className="font-medium">소유 중인 공동·모임 서재</span>에 다른 멤버가 있어 지금은 탈퇴할 수
+                  없습니다.{" "}
+                  <span className="whitespace-normal break-words">
+                    해당 서재 설정에서 소유권을 다른 멤버에게 이전한 뒤 다시 시도해 주세요.
+                    {sharedLibrariesBlockingWithdrawal.length > 0 ? (
+                      <>
+                        {" "}
+                        <span className="text-muted-foreground">(해당 서재: </span>
+                        {sharedLibrariesBlockingWithdrawal.join(", ")}
+                        <span className="text-muted-foreground">)</span>
+                      </>
+                    ) : null}
+                  </span>
+                </p>
+              ) : null}
+            </div>
           </form>
-          <div className="mt-6 border-t border-border/60 pt-4">
-            <p className="text-xs text-muted-foreground">계정을 삭제하면 데이터가 모두 사라집니다.</p>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="mt-2 h-auto px-0 text-xs text-destructive hover:bg-transparent hover:text-destructive"
-              onClick={() => {
-                setDeleteError(null);
-                setDeleteOpen(true);
-              }}
-            >
-              회원 탈퇴…
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
 

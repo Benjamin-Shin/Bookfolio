@@ -1,4 +1,5 @@
 import 'package:bookfolio_mobile/src/models/book_models.dart';
+import 'package:bookfolio_mobile/src/services/bookfolio_api.dart';
 import 'package:bookfolio_mobile/src/state/auth_controller.dart';
 import 'package:bookfolio_mobile/src/state/library_controller.dart';
 import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
@@ -23,6 +24,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// History:
 /// - 2026-03-29: 드로어 하단 법적 고지 — 웹 `/privacy`·`/terms`·`/cookies` 외부 브라우저
 /// - 2026-03-29: 페이지 바를 스크롤 밖 하단 고정·`canGoToNext` 휴리스틱(항상 조작 가능)
+/// - 2026-03-29: 소장 책 가격 합계 배너(웹 대시보드 동일 API)
 /// - 2026-03-29: API 페이지네이션·검색·읽기상태 필터·테마 연동
 /// - 2026-03-26: 상단 `MainHubTopNavBar` 추가
 class LibraryScreen extends StatefulWidget {
@@ -368,6 +370,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: Row(children: _readingStatusFilterChips(library, colorScheme, textTheme)),
             ),
           ),
+          if (library.ownedBooksPriceStats != null &&
+              library.ownedBooksPriceStats!.ownedCount > 0)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: _OwnedBooksPriceCard(
+                stats: library.ownedBooksPriceStats!,
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+              ),
+            ),
           Expanded(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -515,6 +527,98 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _formatKoGroupedInt(int n) {
+  final s = n.toString();
+  final buf = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
+    buf.write(s[i]);
+  }
+  return buf.toString();
+}
+
+/// History:
+/// - 2026-03-29: 웹 대시보드와 동일 문구·의미
+class _OwnedBooksPriceCard extends StatelessWidget {
+  const _OwnedBooksPriceCard({
+    required this.stats,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final UserOwnedBooksPriceStats stats;
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext _) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.38),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '소장 책 가격 합계',
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 6),
+          if (stats.pricedOwnedCount > 0)
+            Text.rich(
+              TextSpan(
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.35,
+                ),
+                children: [
+                  TextSpan(
+                    text: '소장 ${_formatKoGroupedInt(stats.ownedCount)}권 중 '
+                        '${_formatKoGroupedInt(stats.pricedOwnedCount)}권에 가격이 있어요. ',
+                  ),
+                  TextSpan(
+                    text: '${_formatKoGroupedInt(stats.totalKrw)}원',
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Text(
+              '소장 ${_formatKoGroupedInt(stats.ownedCount)}권 — 책 등록·수정에서 가격(원)을 넣으면 '
+              '여기에 합계가 표시됩니다.',
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.35,
+              ),
+            ),
+          const SizedBox(height: 4),
+          Text(
+            '제공처·시점에 따라 실제 구매가와 다를 수 있는 참고 값입니다.',
+            style: textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
+              height: 1.3,
             ),
           ),
         ],

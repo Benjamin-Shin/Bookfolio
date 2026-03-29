@@ -14,14 +14,14 @@ export class AccountDeleteBlockedError extends Error {
 }
 
 /**
- * `created_by`인 공동서재에 본인 외 멤버가 있으면 탈퇴 불가(소유권 이전 필요).
- * 본인만 남은 소유 서재는 탈투 시 서버에서 자동 삭제합니다.
+ * `created_by`인 공동서재에 본인 외 멤버가 있는 서재 이름 목록(탈퇴 UI 비활성화·안내용).
+ * 빈 배열이면 해당 사유로 탈퇴가 막히지 않습니다.
  *
  * @history
- * - 2026-03-26: 본인만 남은 서재는 자동 삭제, 타 멤버 있으면 소유권 이전 안내
- * - 2026-03-26: 신규
+ * - 2026-03-29: 프로필 탈퇴 버튼 비활성화와 동일 조건 노출
+ * - 2026-03-26: 신규 — `assertAccountDeleteAllowed`와 동일 쿼리
  */
-export async function assertAccountDeleteAllowed(userId: string): Promise<void> {
+export async function listOwnedSharedLibrariesBlockingWithdrawal(userId: string): Promise<string[]> {
   const supabase = createSupabaseAdminClient();
   const { data: owned, error } = await supabase.from("libraries").select("id, name").eq("created_by", userId);
 
@@ -31,7 +31,7 @@ export async function assertAccountDeleteAllowed(userId: string): Promise<void> 
 
   const libs = owned ?? [];
   if (libs.length === 0) {
-    return;
+    return [];
   }
 
   const namesWithOtherMembers: string[] = [];
@@ -51,6 +51,21 @@ export async function assertAccountDeleteAllowed(userId: string): Promise<void> 
       namesWithOtherMembers.push((lib.name as string)?.trim() || "이름 없는 서재");
     }
   }
+
+  return namesWithOtherMembers;
+}
+
+/**
+ * `created_by`인 공동서재에 본인 외 멤버가 있으면 탈퇴 불가(소유권 이전 필요).
+ * 본인만 남은 소유 서재는 탈투 시 서버에서 자동 삭제합니다.
+ *
+ * @history
+ * - 2026-03-29: `listOwnedSharedLibrariesBlockingWithdrawal` 위임
+ * - 2026-03-26: 본인만 남은 서재는 자동 삭제, 타 멤버 있으면 소유권 이전 안내
+ * - 2026-03-26: 신규
+ */
+export async function assertAccountDeleteAllowed(userId: string): Promise<void> {
+  const namesWithOtherMembers = await listOwnedSharedLibrariesBlockingWithdrawal(userId);
 
   if (namesWithOtherMembers.length > 0) {
     throw new AccountDeleteBlockedError(
