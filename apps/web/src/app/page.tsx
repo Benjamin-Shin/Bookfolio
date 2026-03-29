@@ -36,8 +36,7 @@ const implementedFeatures: ImplementedFeatureCard[] = [
   },
   {
     title: "로그인",
-    description:
-      "이메일·비밀번호와 Google 계정으로 가입·로그인할 수 있습니다.",
+    description: "이메일·비밀번호와 Google 계정으로 가입·로그인할 수 있습니다.",
   },
   {
     title: "공동서재",
@@ -45,10 +44,13 @@ const implementedFeatures: ImplementedFeatureCard[] = [
       "다른 회원을 초대해 함께 도서 목록을 관리하는 공용 서재를 만들 수 있습니다. 초대·한도·정책은 서비스 규칙을 따릅니다.",
   },
   {
-    title: "북폴리오 집계",
+    title: "Bookfolio 집계",
     description:
       "소장·완독·포인트 순위와 서비스 전반에서 많이 소장된 책 요약을 웹·앱에서 볼 수 있습니다. 앱에서는 목록을 당겨 새로 고침할 수 있습니다.",
-    footerLink: { href: "/dashboard/bookfolio-aggregate", label: "웹에서 집계 화면 열기" },
+    footerLink: {
+      href: "/dashboard/bookfolio-aggregate",
+      label: "웹에서 집계 화면 열기",
+    },
   },
   {
     title: "포인트·VIP",
@@ -58,7 +60,7 @@ const implementedFeatures: ImplementedFeatureCard[] = [
   {
     title: "휴대폰 앱 허브·설정",
     description:
-      "상단 메뉴에서 공동서재, 북폴리오 집계, 베스트셀러, 초이스 신간, 내 서재로 이동합니다. 프로필에서 화면 모드(시스템·밝게·어둡게)와 색 톤(웜·세이지)을 고르면 기기에 저장됩니다.",
+      "상단 메뉴에서 공동서재, Bookfolio 집계, 베스트셀러, 초이스 신간, 내 서재로 이동합니다. 프로필에서 화면 모드(시스템·밝게·어둡게)와 색 톤(웜·세이지)을 고르면 기기에 저장됩니다.",
   },
   {
     title: "웹 대시보드",
@@ -92,7 +94,7 @@ const upcomingFeatures = [
   {
     title: "통계·인사이트 강화",
     description:
-      "연·월별 완독, 평점 추이, 장르·형식 비율, 패턴 분석 등 개인 대시보드와 기록 뷰를 북폴리오 집계와 함께 확장합니다.",
+      "연·월별 완독, 평점 추이, 장르·형식 비율, 패턴 분석 등 개인 대시보드와 기록 뷰를 Bookfolio 집계와 함께 확장합니다.",
   },
   {
     title: "커뮤니티·소셜",
@@ -144,11 +146,43 @@ const steps = [
  * - 2026-03-28: iOS 앱 순서 안내 패널 추가; 랜딩문구에서 스택·개발자용 표현 제거.
  * - 2026-03-28: 「왜 Bookfolio인가」 이후 최근 기능(모바일·웹) 소개 패널 추가.
  * - 2026-03-28: 포인트·혜택 정책 요약 패널 추가(비회원·회원 안내, 이용약관 링크).
+ * - 2026-03-29: 상단 서비스 소개 패널 추가(Book+Portfolio); 미니 3카드 제거; 상표는 영문 Bookfolio만 사용.
  */
 export default function HomePage() {
   return (
     <main>
-      <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+      <section
+        className="mx-auto max-w-6xl px-4 pt-16 pb-8 md:pt-24 md:pb-10"
+        aria-labelledby="bookfolio-intro-heading"
+      >
+        <Card className="border-border/80 bg-muted/25 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle
+              id="bookfolio-intro-heading"
+              className="text-xl md:text-2xl"
+            >
+              Bookfolio를 소개합니다
+            </CardTitle>
+            <CardDescription className="text-pretty text-base">
+              서비스 이름은{" "}
+              <strong className="font-medium text-foreground">Bookfolio</strong>{" "}
+              <span className="font-medium text-foreground">Book</span>과{" "}
+              <span className="font-medium text-foreground">Portfolio</span>를
+              잇는 말로, 내가 소장한 책과 읽기·감상 기록을 한곳에 모아 두는{" "}
+              <strong className="font-medium text-foreground">
+                나만의 서재 창고
+              </strong>
+              같은 역할을 합니다. 동시에 기록과 목록을{" "}
+              <strong className="font-medium text-foreground">
+                공유하고 다른 사람과 나누는
+              </strong>{" "}
+              경험까지 이어 가도록 설계된 플랫폼입니다.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-16 md:pb-24">
         <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8 lg:items-center">
@@ -180,26 +214,6 @@ export default function HomePage() {
               <Button size="lg" variant="outline" asChild>
                 <Link href="/login">로그인 · 가입</Link>
               </Button>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Card className="border-border/70">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">핵심</CardTitle>
-                  <CardDescription>소장 관리 · 검색</CardDescription>
-                </CardHeader>
-              </Card>
-              <Card className="border-border/70">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">화면</CardTitle>
-                  <CardDescription>보기 좋은 레이아웃</CardDescription>
-                </CardHeader>
-              </Card>
-              <Card className="border-border/70">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">로그인</CardTitle>
-                  <CardDescription>이메일 · Google</CardDescription>
-                </CardHeader>
-              </Card>
             </div>
           </div>
 
@@ -369,17 +383,21 @@ export default function HomePage() {
             </CardTitle>
             <CardDescription className="text-pretty text-base">
               안드로이드 앱 서비스를 어느 정도 다듬고 안정시킨 뒤,{" "}
-              <strong className="font-medium text-foreground">아이폰 앱</strong>도
-              순서대로 준비할 예정입니다. 늦어지는 부분은 너그럽게 양해해 주시면
-              감사하겠습니다.
+              <strong className="font-medium text-foreground">아이폰 앱</strong>
+              도 순서대로 준비할 예정입니다. 늦어지는 부분은 너그럽게 양해해
+              주시면 감사하겠습니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0 text-sm text-muted-foreground text-pretty">
             <p>
               그동안 같은 서재는{" "}
-              <strong className="font-medium text-foreground">웹 브라우저</strong>
+              <strong className="font-medium text-foreground">
+                웹 브라우저
+              </strong>
               와{" "}
-              <strong className="font-medium text-foreground">안드로이드</strong>
+              <strong className="font-medium text-foreground">
+                안드로이드
+              </strong>
               기기에서 동일한 계정으로 이용하실 수 있습니다.
             </p>
           </CardContent>

@@ -1,5 +1,6 @@
 /**
  * @history
+ * - 2026-03-29: 공동서재 관리 내비 링크 추가
  * - 2026-03-26: 상단 내비에 포인트·정책 링크 추가
  */
 import Link from "next/link";
@@ -36,6 +37,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           className="rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           포인트 · 정책
+        </Link>
+        <Link
+          href={"/dashboard/admin/shared-libraries" as Route}
+          className="rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          공동서재
         </Link>
         <Link
           href={"/dashboard/admin/authors" as Route}

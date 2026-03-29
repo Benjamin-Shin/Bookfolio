@@ -12,9 +12,57 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
+List<Widget> _detailSectionSpacedWidgets(List<Widget> items) {
+  if (items.isEmpty) return items;
+  final out = <Widget>[items.first];
+  for (var i = 1; i < items.length; i++) {
+    out.add(const SizedBox(height: 10));
+    out.add(items[i]);
+  }
+  return out;
+}
+
+/// 상세 화면 본문 구역 — 제목 + 내용을 한 카드로 묶음.
+class _DetailSection extends StatelessWidget {
+  const _DetailSection({required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card(
+      elevation: 0,
+      color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// 내 서재 도서 상세 — 읽기 상태·이벤트·메모·한줄평.
 ///
 /// History:
+/// - 2026-03-29: 본문 블록을 `_DetailSection` 카드로 구역화(읽기 상태·이벤트·도서 정보·한줄평·메모·타임라인)
 /// - 2026-03-29: 다크 모드 — 메타·섹션·플레이스홀더·도서 소개·정보 행·메모 마크다운 `ColorScheme`·`MarkdownStyleSheet.fromTheme` 연동
 /// - 2026-03-27: 메모 `MarkdownBody(softLineBreak: true)` — 엔터(단일 줄바꿈)가 표시에 유지됨
 /// - 2026-03-26: 메모 입력 — 카메라 촬영 후 OCR로 글귀를 필드에 채우기
@@ -221,10 +269,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     final onSurface = colorScheme.onSurface;
     final onSurfaceVar = colorScheme.onSurfaceVariant;
     final cover = resolveCoverImageUrl(b.coverUrl);
-    final sectionTitleStyle = theme.textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w700,
-      color: onSurface,
-    );
 
     return Scaffold(
       appBar: AppBar(
@@ -297,262 +341,289 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             ),
           ],
           const SizedBox(height: 24),
-          Text('읽기 상태', style: sectionTitleStyle),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: ReadingStatus.values.map((s) {
-              final selected = b.readingStatus == s;
-              return FilterChip(
-                label: Text(readingStatusLabelKo(s)),
-                selected: selected,
-                showCheckmark: false,
-                onSelected: (_) => _setReadingStatus(context, b, s),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 20),
-          Text('독서 이벤트', style: sectionTitleStyle),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.tonal(
-                onPressed: () => _appendEvent(context, b, 'read_start', setReadingStatus: 'reading'),
-                child: const Text('읽기 시작'),
-              ),
-              FilledButton.tonal(
-                onPressed: () => _appendEvent(context, b, 'read_pause', setReadingStatus: 'paused'),
-                child: const Text('읽기 중지'),
-              ),
-              FilledButton.tonal(
-                onPressed: () => _appendEvent(context, b, 'read_complete', setReadingStatus: 'completed'),
-                child: const Text('완독'),
-              ),
-              FilledButton.tonal(
-                onPressed: () => _appendEvent(context, b, 'dropped', setReadingStatus: 'dropped'),
-                child: const Text('하차'),
-              ),
-            ],
-          ),
-          if (b.readingStatus == ReadingStatus.reading) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _pageCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '현재 페이지',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                FilledButton(
-                  onPressed: () {
-                    final n = int.tryParse(_pageCtrl.text.trim());
-                    if (n == null || n < 1) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('페이지 번호를 입력해 주세요.')),
-                      );
-                      return;
-                    }
-                    _appendEvent(context, b, 'progress', payload: {'currentPage': n});
-                    _pageCtrl.clear();
-                  },
-                  child: const Text('저장'),
-                ),
-              ],
+          _DetailSection(
+            title: '읽기 상태',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: ReadingStatus.values.map((s) {
+                final selected = b.readingStatus == s;
+                return FilterChip(
+                  label: Text(readingStatusLabelKo(s)),
+                  selected: selected,
+                  showCheckmark: false,
+                  onSelected: (_) => _setReadingStatus(context, b, s),
+                );
+              }).toList(),
             ),
-          ],
-          const SizedBox(height: 20),
-          Text('도서 정보', style: sectionTitleStyle),
-          const SizedBox(height: 10),
-          _InfoCard(
-            children: [
-              if (b.isbn != null && b.isbn!.isNotEmpty) _InfoRow(label: 'ISBN', value: b.isbn!),
-              _InfoRow(label: '형식', value: bookFormatLabelKo(b.format)),
-              if (b.publisher != null && b.publisher!.isNotEmpty)
-                _InfoRow(label: '출판사', value: b.publisher!),
-              if (b.publishedDate != null && b.publishedDate!.isNotEmpty)
-                _InfoRow(label: '출간일', value: b.publishedDate!),
-              if (b.priceKrw != null) _InfoRow(label: '가격', value: '₩${b.priceKrw}'),
-              if (b.description != null && b.description!.trim().isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          const SizedBox(height: 16),
+          _DetailSection(
+            title: '독서 이벤트',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilledButton.tonal(
+                      onPressed: () => _appendEvent(context, b, 'read_start', setReadingStatus: 'reading'),
+                      child: const Text('읽기 시작'),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: () => _appendEvent(context, b, 'read_pause', setReadingStatus: 'paused'),
+                      child: const Text('읽기 중지'),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: () => _appendEvent(context, b, 'read_complete', setReadingStatus: 'completed'),
+                      child: const Text('완독'),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: () => _appendEvent(context, b, 'dropped', setReadingStatus: 'dropped'),
+                      child: const Text('하차'),
+                    ),
+                  ],
+                ),
+                if (b.readingStatus == ReadingStatus.reading) ...[
+                  const SizedBox(height: 12),
+                  Row(
                     children: [
-                      Text('소개', style: theme.textTheme.labelLarge?.copyWith(color: onSurfaceVar)),
-                      const SizedBox(height: 6),
-                      Text(
-                        b.description!.trim(),
-                        style: theme.textTheme.bodyMedium?.copyWith(height: 1.45, color: onSurface),
+                      Expanded(
+                        child: TextField(
+                          controller: _pageCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: '현재 페이지',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: () {
+                          final n = int.tryParse(_pageCtrl.text.trim());
+                          if (n == null || n < 1) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('페이지 번호를 입력해 주세요.')),
+                            );
+                            return;
+                          }
+                          _appendEvent(context, b, 'progress', payload: {'currentPage': n});
+                          _pageCtrl.clear();
+                        },
+                        child: const Text('저장'),
                       ),
                     ],
                   ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text('한줄평 (공개)', style: sectionTitleStyle),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _oneLinerCtrl,
-            maxLines: 2,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: '다른 사용자도 볼 수 있는 한줄평',
+                ],
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              FilledButton(
-                onPressed: () async {
-                  final t = _oneLinerCtrl.text.trim();
-                  if (t.isEmpty) return;
-                  final api = _api(context);
-                  try {
-                    await api.upsertOneLiner(b.id, t);
-                    _oneLinerCtrl.clear();
-                    if (!context.mounted) return;
-                    await _loadSidecars(api, b);
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                  }
-                },
-                child: const Text('저장'),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: () async {
-                  final api = _api(context);
-                  try {
-                    await api.clearOneLiner(b.id);
-                    if (!context.mounted) return;
-                    await _loadSidecars(api, b);
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                  }
-                },
-                child: const Text('삭제'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (_oneLiners.isEmpty)
-            Text('한줄평이 없습니다.', style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar))
-          else
-            ..._oneLiners.map((o) => Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(o.displayName ?? '사용자'),
-                    subtitle: Text(o.body),
+          const SizedBox(height: 16),
+          _DetailSection(
+            title: '도서 정보',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: _detailSectionSpacedWidgets([
+                if (b.isbn != null && b.isbn!.isNotEmpty) _InfoRow(label: 'ISBN', value: b.isbn!),
+                _InfoRow(label: '형식', value: bookFormatLabelKo(b.format)),
+                if (b.publisher != null && b.publisher!.isNotEmpty)
+                  _InfoRow(label: '출판사', value: b.publisher!),
+                if (b.publishedDate != null && b.publishedDate!.isNotEmpty)
+                  _InfoRow(label: '출간일', value: b.publishedDate!),
+                if (b.priceKrw != null) _InfoRow(label: '가격', value: '₩${b.priceKrw}'),
+                if (b.description != null && b.description!.trim().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('소개', style: theme.textTheme.labelLarge?.copyWith(color: onSurfaceVar)),
+                        const SizedBox(height: 6),
+                        Text(
+                          b.description!.trim(),
+                          style: theme.textTheme.bodyMedium?.copyWith(height: 1.45, color: onSurface),
+                        ),
+                      ],
+                    ),
                   ),
-                )),
-          const SizedBox(height: 20),
-          Text('메모 (마크다운)', style: sectionTitleStyle),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _newMemoCtrl,
-                  maxLines: 4,
+              ]),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _DetailSection(
+            title: '한줄평 (공개)',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _oneLinerCtrl,
+                  maxLines: 2,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: '인상 깊은 문장·느낌',
+                    hintText: '다른 사용자도 볼 수 있는 한줄평',
                   ),
                 ),
-              ),
-              if (_quoteOcrAvailable) ...[
-                const SizedBox(width: 4),
-                _ocrBusy
-                    ? Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: theme.colorScheme.primary,
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    FilledButton(
+                      onPressed: () async {
+                        final t = _oneLinerCtrl.text.trim();
+                        if (t.isEmpty) return;
+                        final api = _api(context);
+                        try {
+                          await api.upsertOneLiner(b.id, t);
+                          _oneLinerCtrl.clear();
+                          if (!context.mounted) return;
+                          await _loadSidecars(api, b);
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                        }
+                      },
+                      child: const Text('저장'),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton(
+                      onPressed: () async {
+                        final api = _api(context);
+                        try {
+                          await api.clearOneLiner(b.id);
+                          if (!context.mounted) return;
+                          await _loadSidecars(api, b);
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                        }
+                      },
+                      child: const Text('삭제'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (_oneLiners.isEmpty)
+                  Text('한줄평이 없습니다.', style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar))
+                else
+                  ..._oneLiners.map((o) => Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          title: Text(o.displayName ?? '사용자'),
+                          subtitle: Text(o.body),
+                        ),
+                      )),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          _DetailSection(
+            title: '메모 (마크다운)',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _newMemoCtrl,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: '인상 깊은 문장·느낌',
+                        ),
+                      ),
+                    ),
+                    if (_quoteOcrAvailable) ...[
+                      const SizedBox(width: 4),
+                      _ocrBusy
+                          ? Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              tooltip: '페이지 촬영·글귀 인식',
+                              onPressed: () => _captureQuoteForMemo(context),
+                              icon: const Icon(Icons.photo_camera_outlined),
+                            ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 8),
+                FilledButton.tonal(
+                  onPressed: () async {
+                    final md = _newMemoCtrl.text.trim();
+                    if (md.isEmpty) return;
+                    final api = _api(context);
+                    try {
+                      await api.createUserBookMemo(b.id, md);
+                      _newMemoCtrl.clear();
+                      if (!context.mounted) return;
+                      await _loadSidecars(api, b);
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  },
+                  child: const Text('메모 추가'),
+                ),
+                const SizedBox(height: 12),
+                if (_memos.isEmpty)
+                  Text('메모가 없습니다.', style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar))
+                else
+                  ..._memos.map((m) => Card(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: MarkdownBody(
+                            data: m.bodyMd,
+                            selectable: true,
+                            softLineBreak: true,
+                            styleSheet: MarkdownStyleSheet.fromTheme(theme),
                           ),
                         ),
-                      )
-                    : IconButton(
-                        tooltip: '페이지 촬영·글귀 인식',
-                        onPressed: () => _captureQuoteForMemo(context),
-                        icon: const Icon(Icons.photo_camera_outlined),
-                      ),
+                      )),
               ],
-            ],
+            ),
           ),
-          const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed: () async {
-              final md = _newMemoCtrl.text.trim();
-              if (md.isEmpty) return;
-              final api = _api(context);
-              try {
-                await api.createUserBookMemo(b.id, md);
-                _newMemoCtrl.clear();
-                if (!context.mounted) return;
-                await _loadSidecars(api, b);
-              } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-              }
-            },
-            child: const Text('메모 추가'),
+          const SizedBox(height: 16),
+          _DetailSection(
+            title: '이벤트 타임라인 (나만)',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_sidecarError != null)
+                  Text(_sidecarError!, style: TextStyle(color: theme.colorScheme.error, fontSize: 13)),
+                if (_loadingSidecars)
+                  const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
+                else if (_events.isEmpty)
+                  Text(
+                    '기록이 없습니다.',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar),
+                  )
+                else
+                  ..._events.take(30).map((e) => ListTile(
+                        dense: true,
+                        title: Text(_eventLabel(e.eventType)),
+                        subtitle: Text(
+                          '${e.occurredAt}${e.payload.isEmpty ? '' : ' · ${e.payload}'}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 12,
+                            color: onSurfaceVar,
+                          ),
+                        ),
+                      )),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          if (_memos.isEmpty)
-            Text('메모가 없습니다.', style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar))
-          else
-            ..._memos.map((m) => Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: MarkdownBody(
-                      data: m.bodyMd,
-                      selectable: true,
-                      softLineBreak: true,
-                      styleSheet: MarkdownStyleSheet.fromTheme(theme),
-                    ),
-                  ),
-                )),
-          const SizedBox(height: 20),
-          Text('이벤트 타임라인 (나만)', style: sectionTitleStyle),
-          const SizedBox(height: 8),
-          if (_sidecarError != null)
-            Text(_sidecarError!, style: TextStyle(color: theme.colorScheme.error, fontSize: 13)),
-          if (_loadingSidecars)
-            const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
-          else if (_events.isEmpty)
-            Text(
-              '기록이 없습니다.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar),
-            )
-          else
-            ..._events.take(30).map((e) => ListTile(
-                  dense: true,
-                  title: Text(_eventLabel(e.eventType)),
-                  subtitle: Text(
-                    '${e.occurredAt}${e.payload.isEmpty ? '' : ' · ${e.payload}'}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: onSurfaceVar,
-                    ),
-                  ),
-                )),
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () async {
@@ -581,39 +652,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       if (!mounted) return;
       _loadSidecars(context.read<LibraryController>().api, b);
     });
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: _spaced(children),
-        ),
-      ),
-    );
-  }
-
-  static List<Widget> _spaced(List<Widget> items) {
-    if (items.isEmpty) return items;
-    final out = <Widget>[items.first];
-    for (var i = 1; i < items.length; i++) {
-      out.add(const SizedBox(height: 10));
-      out.add(items[i]);
-    }
-    return out;
   }
 }
 

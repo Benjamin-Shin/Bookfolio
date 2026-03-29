@@ -12,13 +12,16 @@ import 'package:bookfolio_mobile/src/ui/screens/profile_screen.dart';
 import 'package:bookfolio_mobile/src/ui/screens/shared_libraries_screen.dart';
 import 'package:bookfolio_mobile/src/ui/widgets/book_grid_card.dart';
 import 'package:bookfolio_mobile/src/ui/widgets/main_hub_top_nav.dart';
+import 'package:bookfolio_mobile/src/util/bookfolio_web_urls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// 내 서재 그리드.
 ///
 /// History:
+/// - 2026-03-29: 드로어 하단 법적 고지 — 웹 `/privacy`·`/terms`·`/cookies` 외부 브라우저
 /// - 2026-03-29: 페이지 바를 스크롤 밖 하단 고정·`canGoToNext` 휴리스틱(항상 조작 가능)
 /// - 2026-03-29: API 페이지네이션·검색·읽기상태 필터·테마 연동
 /// - 2026-03-26: 상단 `MainHubTopNavBar` 추가
@@ -53,6 +56,24 @@ class _LibraryScreenState extends State<LibraryScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => BookDetailScreen(book: book)),
     );
+  }
+
+  Future<void> _openBookfolioWebPath(BuildContext context, String path) async {
+    final uri = bookfolioWebPageUri(path);
+    if (!uri.hasScheme || uri.host.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          const SnackBar(content: Text('웹 주소(BOOKFOLIO_API_BASE_URL)가 설정되지 않았습니다.')),
+        );
+      }
+      return;
+    }
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('브라우저를 열 수 없습니다.')),
+      );
+    }
   }
 
   Widget _emptyOrFilteredPlaceholder(
@@ -206,6 +227,60 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   MaterialPageRoute(
                       builder: (_) => const SharedLibrariesScreen()),
                 );
+              },
+            ),
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '법적 고지',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: onSurfaceVar,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              leading: Icon(Icons.privacy_tip_outlined, size: 20, color: onSurfaceVar),
+              title: Text(
+                '개인정보처리방침',
+                style: textTheme.bodySmall?.copyWith(fontSize: 13),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _openBookfolioWebPath(context, '/privacy');
+              },
+            ),
+            ListTile(
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              leading: Icon(Icons.article_outlined, size: 20, color: onSurfaceVar),
+              title: Text(
+                '서비스 약관',
+                style: textTheme.bodySmall?.copyWith(fontSize: 13),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _openBookfolioWebPath(context, '/terms');
+              },
+            ),
+            ListTile(
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              leading: Icon(Icons.cookie_outlined, size: 20, color: onSurfaceVar),
+              title: Text(
+                '쿠키 정책',
+                style: textTheme.bodySmall?.copyWith(fontSize: 13),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _openBookfolioWebPath(context, '/cookies');
               },
             ),
           ],

@@ -8,6 +8,8 @@ export const metadata: Metadata = {
 
 /**
  * @history
+ * - 2026-03-29: 「캐논·투표」를 공통 도서 정보·수정 제안·투표 참여로 풀어 설명.
+ * - 2026-03-29: 트레바리 등 유사 서비스 방침을 참고해 도입부·필수·선택·자동 수집, 법정 보존·파기, 제3자 예외, 쿠키·개정 공지(7일·30일), 외부 링크 적용 범위, 피해 구제 기관, 향후 결제(PG) 수집 안내 보강.
  * - 2026-03-28: Google 항목을 소셜 로그인만 명시(Google Books 조회 미사용).
  * - 2026-03-28: 현재 웹·모바일·DB 스키마 기준 개인정보처리방침 본문 정리(인증, 서재, 공동서재, 포인트·출석, VIP·구독, 캐논 편집·투표, ISBN 조회·Cloudinary 등 반영)
  * - 2026-03-26: 법률 검토 전 안내용 더미 본문
@@ -17,14 +19,19 @@ export default function PrivacyPolicyPage() {
     <div className="mx-auto max-w-3xl px-4 py-10 md:py-14">
       <h1 className="text-2xl font-bold tracking-tight">개인정보처리방침</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        시행일: 2026년 3월 28일
+        공고일: 2026년 3월 29일 · 시행일: 2026년 3월 29일
       </p>
-      <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
-        Bookfolio(이하 &quot;서비스&quot;)는 「개인정보 보호법」 등 관련 법령을
-        준수하며, 이용자의 개인정보가 어떤 목적으로 어떻게 처리되는지를 투명하게
-        안내합니다. 본 방침은 <strong>현재 제공되는 기능과 시스템 구성</strong>
-        을 바탕으로 작성되었습니다. 실제 사업자 명칭·대표자·주소·고객센터 등은
-        서비스 랜딩·공지 또는 별도 약관과 함께 확정·게시하시기 바랍니다.{" "}
+      <p className="mt-4 text-sm leading-relaxed text-foreground/90">
+        Bookfolio(이하 &quot;서비스&quot;)는 이용자의 동의를 바탕으로
+        개인정보를 수집·이용하며, 정보주체의 권리를 존중합니다. 서비스는
+        「개인정보 보호법」 등 대한민국 관계 법령과 가이드라인을 준수합니다.
+      </p>
+      <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+        &quot;개인정보 처리방침&quot;은 이용자가 안심하고 서비스를 이용할 수
+        있도록, 개인정보 처리에 관한 기준과 절차를 알리기 위한 문서입니다. 본
+        방침은 <strong>현재 제공되는 기능과 시스템 구성</strong>을 바탕으로
+        작성되었습니다. 실제 사업자 명칭·대표자·주소 등은 서비스 랜딩·공지 또는
+        별도 약관과 함께 확정·게시하시기 바랍니다.{" "}
         <strong>최종 법적 검토는 변호사 등 전문가에게 위탁</strong>하는 것을
         권장합니다.
       </p>
@@ -34,6 +41,11 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-base font-semibold text-foreground">
             1. 처리 목적
           </h2>
+          <p>
+            서비스의 주요 기능은 <strong>회원 가입 후</strong> 제공되는 경우가
+            많습니다. 비회원에게 제공되는 기능이 있는 경우 해당 화면 또는 안내에
+            따릅니다.
+          </p>
           <p>서비스는 다음 목적 범위에서만 개인정보를 처리합니다.</p>
           <ul className="list-disc space-y-1 pl-5">
             <li>회원 가입·로그인·본인 식별, 계정 및 세션 관리</li>
@@ -42,8 +54,9 @@ export default function PrivacyPolicyPage() {
               이벤트 기록
             </li>
             <li>
-              ISBN·제목 기반 외부 서지 조회를 통한 도서 메타데이터 제공 및 내부
-              서지(캐논) 보강
+              ISBN·제목 기반 외부 서지 조회를 통한 도서 메타데이터 제공 및, 여러
+              이용자에게 같은 내용으로 보이도록 모아 둔{" "}
+              <strong>공통 도서 정보(내부 용어: 캐논)</strong> 보강
             </li>
             <li>공동서재 생성·초대·멤버 관리 및 공유 소장 정보 표시</li>
             <li>
@@ -54,7 +67,7 @@ export default function PrivacyPolicyPage() {
               없이 운영 정책·관리자 처리에 따를 수 있음)
             </li>
             <li>
-              도서 메타데이터 수정 제안·검토·사용자 투표 등 커뮤니티형 기능 운영
+              공통 도서 정보에 대한 수정 제안·검토·투표 등 참여형 기능 운영
             </li>
             <li>부정 이용 방지, 보안·품질 개선, 분쟁 대응, 법령상 의무 이행</li>
           </ul>
@@ -67,19 +80,25 @@ export default function PrivacyPolicyPage() {
           <p>
             항목은 회원 가입·이용 과정에서{" "}
             <strong>이용자가 입력하거나, 연동·자동 생성되는 정보</strong>로
-            나뉩니다.
+            나뉩니다.{" "}
+            <strong>필수 항목</strong>은 해당 기능의 본질적 제공에 필요한
+            정보이고, <strong>선택 항목</strong>은 없어도 기본 이용이 가능하나
+            편의·개인화를 위해 추가로 제공받는 정보입니다(실제 화면의 입력·동의
+            문구가 우선합니다).
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              <strong>계정·인증:</strong> 이메일 주소, 비밀번호(이메일 가입 시
-              단방향 해시로 저장), 표시 이름, 프로필 이미지 URL, 이메일 인증
-              시각(해당하는 경우), 내부 이용을 위한 역할·정책 값(예: 관리자/일반
-              등)
+              <strong>회원 가입(이메일)·로그인(일반):</strong> 필수 — 이메일
+              주소, 비밀번호(서버에는 단방향 해시로 저장). 선택 — 표시 이름,
+              프로필 이미지 URL 등 프로필에 기재하는 항목
             </li>
             <li>
-              <strong>소셜 로그인(Google):</strong> Google이 OAuth 절차에서
-              제공하는 식별·프로필 정보(이메일, 이름, 사진 등, Google 정책 및
-              동의 화면에 따름)
+              <strong>소셜 로그인(Google):</strong> Google이 OAuth 과정에서
+              제공하는 식별·프로필 정보(필수·선택은 Google 동의 화면에 따름)
+            </li>
+            <li>
+              <strong>계정·인증(상세):</strong> 이메일 인증 시각(해당하는 경우),
+              내부 이용을 위한 역할·정책 값(예: 관리자/일반 등)
             </li>
             <li>
               <strong>프로필·환경:</strong> 표시명·아바타, 출석 일자 산정을 위한
@@ -101,22 +120,38 @@ export default function PrivacyPolicyPage() {
               플랜 식별자·상태·이용 기간 등
             </li>
             <li>
-              <strong>캐논·투표:</strong> 서지 수정 제안 내용, 검토 결과, 투표
-              기록, 기여·순위 산출에 필요한 식별 정보(설계 상 집계·기록으로 남을
-              수 있음)
+              <strong>공통 도서 정보 수정·투표(캐논):</strong> &quot;캐논&quot;은
+              ISBN 등으로 묶인 <strong>서비스 공통 도서 정보</strong>(제목·저자
+              등 표시용 데이터)를 가리키는 내부 이름입니다. 회원이 이 정보의{" "}
+              <strong>오류를 고치자는 제안</strong>을 올리거나, 반영 여부를
+              정하는 <strong>투표에 참여</strong>할 때 제안·검토·투표 내역, 기여
+              점수·순위 계산에 필요한 식별 정보가 기록될 수 있습니다.
             </li>
             <li>
-              <strong>기술 정보:</strong> 모바일 앱 등에서 API 접근 시
-              발급·사용하는 액세스 토큰, 웹 브라우저의 세션·쿠키, 접속·로그에
-              해당하는 정보(보유 기간·항목 세부는 내부 보안 정책에 따름)
+              <strong>기술·자동 생성 정보:</strong> 단말기·브라우저 환경에 따른
+              일부 정보, 접속 IP 주소, 쿠키·세션·로그인 유지에 필요한 식별자,
+              방문·이용 시각, 서비스 이용 기록, 부정 이용 방지를 위한 기록, 모바일
+              앱 등에서 API 접근 시 발급·사용하는 액세스 토큰(보유 기간·항목
+              세부는 내부 보안 정책에 따름)
             </li>
           </ul>
+          <p className="text-muted-foreground">
+            <strong>유료 서비스·결제가 도입되는 경우,</strong> 결제대행사(PG) 등
+            수탁자가 결제 과정에서 이름, 연락처, 카드·계좌 관련 정보 등 결제에
+            필요한 정보를 별도로 수집할 수 있습니다. 그때는 해당 사업자의
+            개인정보 처리방침과 이용 약관이 함께 적용됩니다.
+          </p>
           <p className="text-muted-foreground">
             ISBN 조회 과정에서 외부 API로 전송되는 값은 주로 ISBN·검색어 등{" "}
             <strong>서지 식별 정보</strong>이며, 이용자 본인을 직접 특정하는
             목적이 아닐 수 있습니다. 다만 외부 사업자의 정책에 따라 처리 대상이
             될 수 있으므로 아래 &quot;제3자 제공·연동&quot;을 함께 참고하시기
             바랍니다.
+          </p>
+          <p className="text-muted-foreground">
+            이 밖에 새로운 기능 등으로 <strong>추가 개인정보를 수집</strong>하는
+            경우에는 수집 시점에 항목·이용 목적·보유 기간 등을 안내하고, 법령상
+            필요한 경우 동의를 받습니다.
           </p>
         </section>
 
@@ -125,27 +160,51 @@ export default function PrivacyPolicyPage() {
             3. 수집 방법
           </h2>
           <ul className="list-disc space-y-1 pl-5">
-            <li>회원 가입·로그인, 프로필·서재 화면에서의 직접 입력</li>
+            <li>
+              회원 가입·로그인, 프로필·서재 화면에서 이용자가 입력·동의하는 경우
+            </li>
             <li>Google 등 소셜 로그인 연동 시 인증 서버로부터의 수신·매핑</li>
             <li>
-              서비스 이용 과정에서의 자동 생성·기록(포인트 원장, 출석, 접속·세션
-              등)
+              서비스 이용 과정에서의 자동 생성·기록(포인트 원장, 출석, 접속·로그,
+              세션·쿠키 등)
+            </li>
+            <li>
+              고객 문의·민원 대응 과정에서 이메일 등을 통해 이용자가 제공하는
+              정보(문의에 포함된 범위 내)
             </li>
           </ul>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-base font-semibold text-foreground">
-            4. 보유 및 이용 기간
+            4. 보유·이용 기간 및 파기
           </h2>
           <p>
             원칙적으로 <strong>회원 탈퇴 시 또는 처리 목적 달성 시</strong> 지체
-            없이 파기합니다. 다만 관계 법령에 따라 보존할 의무가 있는 경우에는
-            해당 기간 동안 별도 분리 보관 후 파기할 수 있습니다. 공동서재·캐논
-            등 타 이용자 또는 공개 영역과 연계된 정보는 서비스 무결성·분쟁
-            대응을 위해 일정 기간 제한 보관될 수 있으며, 세부는 내부 정책에
-            따릅니다.
+            없이 파기합니다. 공동서재·공통 도서 정보(캐논) 참여 기록 등 타
+            이용자 또는 공개 영역과 연계된
+            정보는 서비스 무결성·분쟁 대응을 위해 일정 기간 제한 보관될 수
+            있으며, 세부는 내부 정책에 따릅니다.
           </p>
+          <p>
+            전자적 파일 형태의 개인정보는 복구·재생이 불가능한 방법으로
+            삭제하고, 출력물·서면 등은 분쇄·소각 등 안전한 방법으로 파기합니다.
+          </p>
+          <p className="font-medium text-foreground">
+            관계 법령에 따른 보존 의무가 있는 경우의 예시(해당 법령·판례에
+            따름):
+          </p>
+          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+            <li>표시·광고에 관한 기록: 6개월</li>
+            <li>계약 또는 청약철회 등에 관한 기록: 5년</li>
+            <li>대금결제 및 재화 등의 공급에 관한 기록: 5년</li>
+            <li>소비자의 불만 또는 분쟁처리에 관한 기록: 3년</li>
+            <li>통신비밀보호법 등에 따른 로그인 기록 등: 3개월</li>
+            <li>전자금융거래법 등에 따른 전자금융 거래 기록: 5년</li>
+            <li>
+              신용정보의 수집·처리 및 이용 등에 관한 기록: 3년(해당되는 경우)
+            </li>
+          </ul>
         </section>
 
         <section className="space-y-3">
@@ -160,6 +219,14 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc space-y-1 pl-5">
             <li>이용자가 사전에 동의한 경우</li>
             <li>법령에 근거하거나 수사·재판 등 정당한 요청이 있는 경우</li>
+            <li>
+              통계 작성·학술 연구·시장 조사 등을 위해 필요한 경우, 특정
+              개인을 알아볼 수 없는 형태로 가공하여 제공하는 경우
+            </li>
+            <li>
+              정보주체 또는 제3자의 생명·신체·재산에 급박한 위험이 있어 이를
+              해소하기 위해 필요한 경우 등 법령이 정한 예외에 해당하는 경우
+            </li>
           </ul>
         </section>
 
@@ -205,13 +272,26 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3">
           <h2 className="text-base font-semibold text-foreground">
-            7. 이용자의 권리
+            7. 이용자의 권리와 행사 방법
           </h2>
           <p>
-            이용자는 언제든지 개인정보 열람·정정·삭제·처리 정지 등을 요청할 수
-            있으며, 서비스 내 설정·고객 지원 절차에 따라 처리합니다. 요청이
-            법령상 제한되는 경우에는 그 사유를 안내할 수 있습니다. 회원 탈퇴는
-            설정 또는 안내된 절차로 신청할 수 있습니다.
+            회원 및 법정대리인은 언제든지 개인정보 열람·정정·삭제·처리 정지,
+            동의 철회를 요청할 수 있습니다. 다만 동의 철회·삭제 시 법령상 보존
+            대상이거나, 서비스 제공에 필수인 정보에 대해서는 이용이 제한되거나
+            일부 기능을 쓰지 못할 수 있습니다.
+          </p>
+          <p>
+            서비스 내 프로필·설정 화면에서 직접 확인·수정이 가능한 항목은 해당
+            화면을 이용해 주시고, 그 외에는 아래 &quot;개인정보 보호 책임자·문의&quot;를 통해
+            요청하실 수 있습니다. 요청이 법령상 제한되는 경우 그 사유를
+            안내합니다.
+          </p>
+          <p>
+            <strong>회원 탈퇴</strong>를 하시면 관련 법령과 내부 정책 범위에서
+            개인정보 수집·이용에 대한 동의를 철회하는 효과가 있습니다. 탈퇴
+            절차는 서비스 내 안내에 따릅니다. 이미 제3자 제공 또는 위탁 처리된
+            정보에 대해서는 합리적 범위에서 정정·삭제·처리 정지를 요구하도록
+            조치합니다.
           </p>
         </section>
 
@@ -220,9 +300,16 @@ export default function PrivacyPolicyPage() {
             8. 쿠키 및 유사 기술
           </h2>
           <p>
-            웹 서비스는 로그인 유지·보안을 위해 쿠키 등을 사용할 수 있습니다.
-            브라우저 설정에서 쿠키를 거부할 수 있으나, 그 경우 일부 기능이
-            제한될 수 있습니다.
+            서비스는 로그인 유지·보안·이용 편의를 위해 쿠키 등 정보를 저장·조회할
+            수 있습니다. 쿠키는 이용자 개인을 직접 식별하지 않는 경우가 많으나,
+            브라우저 설정에 따라 모든 쿠키 저장을 거부하거나 저장 시 확인을
+            받도록 할 수 있습니다. 쿠키를 거부하면 로그인 등 일부 기능 이용에
+            불편이 있을 수 있습니다.
+          </p>
+          <p className="text-muted-foreground">
+            설정 예: Microsoft Edge — 설정 &gt; 쿠키 및 사이트 권한 &gt; 쿠키 및
+            사이트 데이터. Google Chrome — 설정 &gt; 개인정보 및 보안 &gt; 서드
+            파티 쿠키(또는 쿠키 및 기타 사이트 데이터).
           </p>
         </section>
 
@@ -231,14 +318,22 @@ export default function PrivacyPolicyPage() {
             9. 안전성 확보 조치
           </h2>
           <p>
-            서비스는 개인정보 보호를 위해 다음과 같은 조치를 취합니다(실제 운영
-            수준에 맞게 보완·기재하세요).
+            서비스는 개인정보 안전성 확보를 위해 다음과 같은 조치를 취합니다(실제
+            운영 수준에 맞게 보완·기재하세요).
           </p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>비밀번호 등 주요 정보의 암호화 저장</li>
-            <li>API·데이터베이스 접근에 대한 인가·서버측 검증</li>
-            <li>클라우드·SaaS 제공자와의 보안 설정 및 키 관리</li>
-            <li>필요 시 접근 기록·모니터링</li>
+            <li>
+              <strong>관리적 조치:</strong> 개인정보 취급자 최소화, 내부 교육 등
+            </li>
+            <li>
+              <strong>기술적 조치:</strong> 비밀번호 등 주요 정보의 암호화 저장,
+              API·데이터베이스 접근에 대한 인가·서버측 검증, 클라우드·SaaS 보안
+              설정 및 키 관리, 필요 시 접근 기록·모니터링
+            </li>
+            <li>
+              <strong>물리적 조치:</strong> 서버·자료 보관에 대한 접근 통제 등
+              (클라우드 이용 시 제공자 정책·계약에 따름)
+            </li>
           </ul>
         </section>
 
@@ -255,17 +350,32 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3">
           <h2 className="text-base font-semibold text-foreground">
-            11. 방침 변경
+            11. 본 방침의 적용 범위
           </h2>
           <p>
-            법령·서비스 변경 시 본 방침을 개정할 수 있습니다. 중요한 변경은
-            시행일·개정 사유와 함께 서비스 내 공지 등으로 안내합니다.
+            본 개인정보 처리방침은 서비스가 제공하는 웹·앱 등 제반 서비스에
+            적용됩니다. 서비스가 외부 사이트·서비스로 연결되는 링크를 제공할 수
+            있으며, 이를 통해 이동한 사이트의 개인정보 처리는 해당 사이트 정책에
+            따르므로 별도로 확인하시기 바랍니다.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-base font-semibold text-foreground">
-            12. 개인정보 보호 책임자·문의
+            12. 방침 변경 및 공지
+          </h2>
+          <p>
+            법령 또는 서비스 변경에 따라 본 방침을 개정할 수 있습니다. 내용
+            추가·삭제·변경이 있는 경우, 시행일 최소{" "}
+            <strong>7일 전</strong>부터 서비스 내 공지 등을 통해 안내하는 것을
+            원칙으로 합니다. 다만 이용자의 권리·의무에 중대한 변경이 있는 경우에는
+            최소 <strong>30일 전</strong>에 공지할 수 있습니다.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-base font-semibold text-foreground">
+            13. 개인정보 보호 책임자·문의
           </h2>
           <p>
             개인정보 처리에 관한 문의·불만·피해 구제 요청은 아래 연락처로 접수할
@@ -276,18 +386,67 @@ export default function PrivacyPolicyPage() {
             <li>이메일: bookfolio.app@gmail.com</li>
           </ul>
           <p className="text-xs text-muted-foreground">
-            위 대괄호 항목은 실제 운영 주체 정보로 교체하세요. 기타 권익 침해
-            신고는 개인정보보호위원회(
-            <a
-              className="underline underline-offset-2 hover:text-foreground"
-              href="https://www.pipc.go.kr"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              www.pipc.go.kr
-            </a>
-            ) 등 관계 기관 안내를 참고할 수 있습니다.
+            운영 주체·담당 부서명 등은 실제 사업 현황에 맞게 보완하시기 바랍니다.
+            개인정보 침해에 대한 상담·신고는 아래 기관에도 문의하실 수 있습니다.
           </p>
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+            <li>
+              개인정보 침해신고센터: 국번 없이 118 ·{" "}
+              <a
+                className="underline underline-offset-2 hover:text-foreground"
+                href="https://privacy.kisa.or.kr"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                privacy.kisa.or.kr
+              </a>
+            </li>
+            <li>
+              개인정보 분쟁조정위원회:{" "}
+              <a
+                className="underline underline-offset-2 hover:text-foreground"
+                href="https://www.kopico.go.kr"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                kopico.go.kr
+              </a>{" "}
+              (대표번호 등은 해당 사이트 안내 참고)
+            </li>
+            <li>
+              대검찰청 사이버범죄수사단: 국번 없이 1301 ·{" "}
+              <a
+                className="underline underline-offset-2 hover:text-foreground"
+                href="https://www.spo.go.kr"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                spo.go.kr
+              </a>
+            </li>
+            <li>
+              경찰청 사이버수사국: 국번 없이 182 ·{" "}
+              <a
+                className="underline underline-offset-2 hover:text-foreground"
+                href="https://ecrm.police.go.kr"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                ecrm.police.go.kr
+              </a>
+            </li>
+            <li>
+              개인정보 보호위원회:{" "}
+              <a
+                className="underline underline-offset-2 hover:text-foreground"
+                href="https://www.pipc.go.kr"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                pipc.go.kr
+              </a>
+            </li>
+          </ul>
         </section>
       </div>
     </div>

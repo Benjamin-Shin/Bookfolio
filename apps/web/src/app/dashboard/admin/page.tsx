@@ -1,5 +1,6 @@
 /**
  * @history
+ * - 2026-03-29: 공동서재 관리 카드 추가
  * - 2026-03-26: 포인트·정책 카드 추가
  */
 import Link from "next/link";
@@ -65,6 +66,20 @@ export default function AdminHomePage() {
               className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
               포인트 화면 열기
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="border-border/80">
+          <CardHeader>
+            <CardTitle className="text-lg">공동서재</CardTitle>
+            <CardDescription>공동서재 목록, 참여 회원, 연결 도서 권수를 확인합니다.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={"/dashboard/admin/shared-libraries" as Route}
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              공동서재 목록 열기
             </Link>
           </CardContent>
         </Card>
