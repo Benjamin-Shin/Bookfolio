@@ -1,5 +1,8 @@
 import Link from "next/link";
+import type { Route } from "next";
+import { SmartphoneIcon } from "lucide-react";
 
+import { auth } from "@/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -147,8 +150,12 @@ const steps = [
  * - 2026-03-28: 「왜 Bookfolio인가」 이후 최근 기능(모바일·웹) 소개 패널 추가.
  * - 2026-03-28: 포인트·혜택 정책 요약 패널 추가(비회원·회원 안내, 이용약관 링크).
  * - 2026-03-29: 상단 서비스 소개 패널 추가(Book+Portfolio); 미니 3카드 제거; 상표는 영문 Bookfolio만 사용.
+ * - 2026-03-29: 이미 로그인된 경우 메인 CTA에서 「로그인 · 가입」 버튼 숨김.
+ * - 2026-03-29: 모바일 웹 미리보기(`/mobile-preview`) CTA 추가.
  */
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth();
+
   return (
     <main>
       <section
@@ -211,8 +218,16 @@ export default function HomePage() {
               <Button size="lg" asChild>
                 <Link href="/dashboard">내 서재 열기</Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/login">로그인 · 가입</Link>
+              {session ? null : (
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/login">로그인 · 가입</Link>
+                </Button>
+              )}
+              <Button size="lg" variant="outline" asChild className="gap-2">
+                <Link href={"/mobile-preview" as Route}>
+                  <SmartphoneIcon className="size-4" aria-hidden />
+                  모바일 웹 미리보기
+                </Link>
               </Button>
             </div>
           </div>
