@@ -80,7 +80,7 @@ interface MobileDevicePreviewProps {
  * 휴대폰 형태 프레임 안에 동일 출처 웹을 iframe으로 띄워 모바일 뷰포트를 흉내 냅니다.
  *
  * @history
- * - 2026-03-29: 햄버거 메뉴와 동일한 프리셋·법적 고지·상세 경로(ID) 입력.
+ * - 2026-03-29: 햄버거(`SiteHeaderMobileNav`)와 동일 프리셋·법적 고지·내/공동 상세·공동서재 서재 홈(UUID).
  * - 2026-03-29: 초기 구현(프리셋 경로·갱신·안내 카드).
  */
 export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
@@ -117,6 +117,21 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
     setPath(`/dashboard/books/${id}`);
     setIframeNonce((n) => n + 1);
   }, [myBookId]);
+
+  const openSharedLibraryHome = useCallback(() => {
+    const lib = trimId(sharedLibraryId);
+    if (!lib) {
+      setDetailError("공동서재 ID를 입력하세요.");
+      return;
+    }
+    if (!isUuidLike(lib)) {
+      setDetailError("공동서재 ID는 UUID 형식이어야 합니다.");
+      return;
+    }
+    setDetailError(null);
+    setPath(`/dashboard/libraries/${lib}`);
+    setIframeNonce((n) => n + 1);
+  }, [sharedLibraryId]);
 
   const openSharedBookDetail = useCallback(() => {
     const lib = trimId(sharedLibraryId);
@@ -199,9 +214,13 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                 <code className="rounded bg-muted px-1 py-0.5 text-[11px]">
                   /dashboard/books/…
                 </code>
-                , 공동서재는{" "}
+                , 공동서재 서재 홈은{" "}
                 <code className="rounded bg-muted px-1 py-0.5 text-[11px]">
-                  /dashboard/libraries/…/books/…
+                  /dashboard/libraries/…
+                </code>
+                , 그 안 도서 상세는{" "}
+                <code className="rounded bg-muted px-1 py-0.5 text-[11px]">
+                  …/books/…
                 </code>
                 입니다.
               </p>
@@ -232,33 +251,44 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">공동서재 — 서재 ID · 도서 ID</Label>
-                  <div className="flex flex-col gap-2">
+                  <Label className="text-xs">공동서재 — 서재 ID</Label>
+                  <Input
+                    value={sharedLibraryId}
+                    onChange={(e) => setSharedLibraryId(e.target.value)}
+                    placeholder="library UUID"
+                    className="font-mono text-xs"
+                    autoComplete="off"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={openSharedLibraryHome}
+                    >
+                      서재 홈
+                    </Button>
+                  </div>
+                  <Label className="text-xs text-muted-foreground">
+                    공동서재 도서 상세 — 캐논 도서 ID
+                  </Label>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                     <Input
-                      value={sharedLibraryId}
-                      onChange={(e) => setSharedLibraryId(e.target.value)}
-                      placeholder="library UUID"
-                      className="font-mono text-xs"
+                      value={sharedBookId}
+                      onChange={(e) => setSharedBookId(e.target.value)}
+                      placeholder="book UUID"
+                      className="font-mono text-xs sm:flex-1"
                       autoComplete="off"
                     />
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-                      <Input
-                        value={sharedBookId}
-                        onChange={(e) => setSharedBookId(e.target.value)}
-                        placeholder="book UUID"
-                        className="font-mono text-xs sm:flex-1"
-                        autoComplete="off"
-                      />
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        className="shrink-0"
-                        onClick={openSharedBookDetail}
-                      >
-                        열기
-                      </Button>
-                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      className="shrink-0"
+                      onClick={openSharedBookDetail}
+                    >
+                      도서 상세
+                    </Button>
                   </div>
                 </div>
               </div>
