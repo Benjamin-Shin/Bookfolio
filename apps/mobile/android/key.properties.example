@@ -1,0 +1,13 @@
+# 이 파일을 복사해 `android/key.properties` 로 저장한 뒤 값을 채웁니다.
+# `key.properties` 와 `*.jks` 는 git 에 올리지 마세요 (.gitignore 됨).
+#
+# keystore 생성 예 (앱 모듈 폴더에 저장할 때):
+#   cd apps/mobile/android/app
+#   keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# SHA-1/256 은 저장소 루트의 android-signing-fingerprints.bat 또는 keytool -list -v 로 확인합니다.
+
+storePassword=변경할_스토어_비밀번호
+keyPassword=변경할_키_비밀번호
+keyAlias=upload
+storeFile=upload-keystore.jks
