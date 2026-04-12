@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 /**
  * @history
+ * - 2026-04-13: 제20조에 회원 탈퇴 절차(웹·앱)·삭제 범위·공동서재 제한·문의처 상세 보강 및 앵커 `article-20-withdrawal`
  * - 2026-04-05: 메타·정의 조 문구의 서비스 명칭을 서가담으로 정렬
  * - 2026-03-29: 트레바리 등 유사 서비스 약관을 참고해 게시·개정(7일·30일), 개별약관 우선, 이용자·게시물 정의, 이용계약·회원정보 변경, 통지, 운영자 의무, 서비스 제공·변경·무료 서비스, 정보·광고, 게시물 관리·권리 귀속, 환불·이용제한, 강행법규·분쟁 조항을 보강하고 공고·시행일을 명시.
  * - 2026-03-28: 서지 조회 제공자 문구에서 Google Books 제거(미사용).
@@ -535,27 +536,99 @@ export default function TermsOfServicePage() {
           </ul>
         </section>
 
-        <section className="space-y-3">
+        <section id="article-20-withdrawal" className="space-y-3 scroll-mt-24">
           <h2 className="text-base font-semibold text-foreground">제20조 (계약 해지·탈퇴)</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              회원은 언제든지 서비스 내 탈퇴 절차 또는 운영자가 안내하는 고객
-              채널을 통해 이용 계약을 해지할 수 있습니다.
+              회원은 언제든지 아래 <strong>서비스 내 탈퇴 절차</strong>를 통해 이용 계약을 해지할 수
+              있습니다. 탈퇴는 <strong>로그인한 상태</strong>에서만 진행할 수 있습니다. 앱·웹 이용이
+              어려운 경우에는 운영자가 안내하는 고객 채널(개인정보처리방침의 문의처 등)을 통해 삭제(탈퇴)를 요청할 수
+              있습니다.
             </li>
             <li>
-              탈퇴 후 개인정보 및 계정 데이터의 보유·삭제는 「개인정보 보호법」
-              등 관계 법령 및 개인정보처리방침에 따릅니다. 공동서재·캐논 등 타인의
-              권익과 얽힌 정보는 분리·비식별 처리 등의 형태로 처리될 수 있습니다.
-            </li>
-            <li>
-              회원이 작성한 일부 게시물은 자동으로 삭제되지 않을 수 있으니 탈퇴
-              전 필요한 조치를 하시기 바랍니다.
-            </li>
-            <li>
-              운영자는 본 약관 위반 등 중대한 사유가 있는 경우 계약을 해지하거나
-              이용을 제한할 수 있습니다.
+              운영자는 본 약관 위반 등 중대한 사유가 있는 경우 계약을 해지하거나 이용을 제한할 수 있습니다.
             </li>
           </ul>
+
+          <div className="space-y-4 border-l-2 border-muted pl-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">가. 웹 브라우저에서 탈퇴</h3>
+              <ol className="list-decimal space-y-1 pl-5">
+                <li>
+                  <a className="underline underline-offset-2 hover:text-foreground" href="/login">
+                    로그인
+                  </a>
+                  합니다.
+                </li>
+                <li>
+                  화면 상단 오른쪽의 <strong>프로필 설정</strong>(톱니바퀴 아이콘)을 눌러{" "}
+                  <strong>프로필</strong> 창을 엽니다.
+                </li>
+                <li>
+                  창 하단의 <strong>회원 탈퇴</strong>를 누르고, 안내를 확인한 뒤 <strong>탈퇴 확인</strong>으로
+                  완료합니다.
+                </li>
+              </ol>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">나. 모바일 앱에서 탈퇴</h3>
+              <ol className="list-decimal space-y-1 pl-5">
+                <li>앱 하단 탭에서 <strong>프로필</strong>을 선택합니다.</li>
+                <li>
+                  <strong>계정 설정</strong>에서 <strong>프로필 편집</strong>으로 이동합니다.
+                </li>
+                <li>
+                  화면 하단의 <strong>회원 탈퇴…</strong>를 누르고, 대화 상자 안내에 따라 확인합니다.
+                </li>
+              </ol>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">다. 탈퇴 시 삭제되는 정보(요약)</h3>
+              <p>
+                탈퇴를 확인하면 복구할 수 없는 범위에서 아래에 해당하는 정보가 삭제되거나, 이용 계약 종료에 따라
+                처리됩니다.
+              </p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li>보유 포인트 및 포인트 원장 전체</li>
+                <li>내 서재(소장 도서), 메모, 독서 이벤트 기록, 한줄평</li>
+                <li>
+                  내가 만든 공동서재 — 다른 멤버가 없으면 탈퇴와 함께 삭제되고, 다른 멤버가 있으면 탈퇴 전 소유권 이전이
+                  필요합니다
+                </li>
+                <li>다른 사람 서재에 참여 중이던 멤버십</li>
+                <li>프로필·계정(로그인) 정보</li>
+              </ul>
+              <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-foreground">
+                <strong>소유한 공동·모임 서재</strong>에 다른 멤버가 있으면 탈퇴할 수 없습니다. 해당 서재 화면에서{" "}
+                <strong>소유권을 다른 멤버에게 이전</strong>한 뒤 탈퇴해 주세요. 본인만 남은 공동서재는 별도 삭제 없이
+                탈퇴 시 함께 정리됩니다.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                여러 이용자가 공유하는 서지 데이터(
+                <code className="rounded bg-muted px-1">books</code> 등)는 서비스 운영을 위해 그대로 둘 수 있습니다.
+                회원이 서비스에 남긴 일부 정보·게시물은 자동으로 삭제되지 않거나, 타인의 권익과 얽혀 분리·비식별 처리
+                등의 형태로 남을 수 있으니 탈퇴 전 필요한 조치를 하시기 바랍니다.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">라. 보유·문의</h3>
+              <p>
+                탈퇴 후 개인정보 및 계정 데이터의 보유·삭제는 「개인정보 보호법」 등 관계 법령 및{" "}
+                <a className="underline underline-offset-2 hover:text-foreground" href="/privacy">
+                  개인정보처리방침
+                </a>
+                에 따릅니다. 로그인이 불가능하거나 위 절차 진행이 어려운 경우에도 동일 방침의{" "}
+                <strong>개인정보 보호 책임자·문의</strong>로 삭제(탈퇴) 요청을 보내실 수 있으며, 본인 확인에 필요한
+                정보를 요청할 수 있습니다.
+              </p>
+              <ul className="list-none space-y-1 border-l-2 border-muted pl-4 text-foreground/90">
+                <li>이메일: bookfolio.app@gmail.com</li>
+              </ul>
+            </div>
+          </div>
         </section>
 
         <section className="space-y-3">

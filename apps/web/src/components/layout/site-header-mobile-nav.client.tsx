@@ -83,6 +83,7 @@ function MobileNavLink({
  * 좁은 화면에서 Sheet로 전역 헤더 내비·법적 고지 링크를 띄웁니다.
  *
  * @history
+ * - 2026-04-13: 계정·데이터 삭제 → `/terms#article-20-withdrawal`
  * - 2026-03-29: 신규 — 햄버거 메뉴·개인정보·약관·쿠키(푸터 동일 경로)
  * - 2026-03-29: `sharedLibrariesBlockingWithdrawal`을 프로필(탈퇴)로 전달
  * - 2026-04-05: 「서가담 집계」 표기
@@ -256,6 +257,13 @@ export function SiteHeaderMobileNav({
                 className="rounded-sm px-1 py-1 hover:text-foreground"
               >
                 쿠키 정책
+              </Link>
+              <Link
+                href={"/terms#article-20-withdrawal" as Route}
+                onClick={close}
+                className="rounded-sm px-1 py-1 hover:text-foreground"
+              >
+                계정·데이터 삭제
               </Link>
             </nav>
           </SheetFooter>

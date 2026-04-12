@@ -15,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// 포인트·역할·설정 메뉴·법적 고지·로그아웃 (에디토리얼 프로필 허브).
 ///
 /// History:
+/// - 2026-04-13: 법적 고지 — 이용약관 제20조(탈퇴) 웹 앵커 링크
 /// - 2026-04-06: 「온보딩 가이드」 — [OnboardingScreen] 재보기
 /// - 2026-04-05: HTML 목업(Bibliotheca Archive) 정렬 — 카드형 포인트·섹션 메뉴·[ProfileEditScreen] 분리
 /// - 2026-04-02: 성별·생년월일·통계 공개 동의 (`/api/me/profile`)
@@ -368,6 +369,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _LegalMenuTile(
             label: '쿠키정책',
             onTap: () => _openWebPath('/cookies'),
+          ),
+          _LegalMenuTile(
+            label: '계정·데이터 삭제 안내',
+            onTap: () => _openWebPath('/terms#article-20-withdrawal'),
           ),
           const SizedBox(height: 40),
           Center(

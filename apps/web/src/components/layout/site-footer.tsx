@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 const sep = <span className="text-muted-foreground/70" aria-hidden>|</span>;
@@ -6,6 +7,7 @@ const sep = <span className="text-muted-foreground/70" aria-hidden>|</span>;
  * 전역 하단 푸터 — 저작권(중앙)·정책 링크(우측, 큰 화면 기준).
  *
  * @history
+ * - 2026-04-13: 계정·데이터 삭제 → 이용약관 제20조 앵커 링크
  * - 2026-03-26: 신규
  * - 2026-04-05: 서가담 표기·구역은 배경 톤만(솔리드 상단 보더 제거)
  */
@@ -33,6 +35,13 @@ export function SiteFooter() {
           {sep}
           <Link href="/cookies" className="text-foreground/90 underline-offset-4 hover:text-foreground hover:underline">
             쿠키 정책
+          </Link>
+          {sep}
+          <Link
+            href={"/terms#article-20-withdrawal" as Route}
+            className="text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"
+          >
+            계정·데이터 삭제
           </Link>
         </nav>
       </div>

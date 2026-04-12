@@ -54,6 +54,7 @@ const PRESET_GROUPS: PresetGroup[] = [
       { label: "개인정보", path: "/privacy" },
       { label: "약관", path: "/terms" },
       { label: "쿠키", path: "/cookies" },
+      { label: "계정·데이터 삭제", path: "/terms#article-20-withdrawal" },
     ],
   },
 ];
@@ -80,6 +81,7 @@ interface MobileDevicePreviewProps {
  * 휴대폰 형태 프레임 안에 동일 출처 웹을 iframe으로 띄워 모바일 뷰포트를 흉내 냅니다.
  *
  * @history
+ * - 2026-04-13: 계정·데이터 삭제 프리셋 → `/terms#article-20-withdrawal`
  * - 2026-04-05: 프리셋·툴팁 서가담 표기
  * - 2026-03-29: 햄버거(`SiteHeaderMobileNav`)와 동일 프리셋·법적 고지·내/공동 상세·공동서재 서재 홈(UUID).
  * - 2026-03-29: 초기 구현(프리셋 경로·갱신·안내 카드).
