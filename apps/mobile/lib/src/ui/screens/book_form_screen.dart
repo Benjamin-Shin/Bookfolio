@@ -4,6 +4,7 @@ import 'package:seogadam_mobile/src/state/library_controller.dart';
 import 'package:seogadam_mobile/src/ui/book_ui_labels.dart';
 import 'package:seogadam_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:seogadam_mobile/src/ui/screens/barcode_scan_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/camera_permission_rationale_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/title_keyword_lookup_screen.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:seogadam_mobile/src/util/isbn.dart';
@@ -13,6 +14,7 @@ import 'package:provider/provider.dart';
 /// 도서 등록·수정 폼.
 ///
 /// History:
+/// - 2026-04-12: 바코드 스캔 전 [CameraPermissionRationaleScreen] 안내
 /// - 2026-04-12: `DropdownButtonFormField` — `value` → `initialValue`(Flutter 3.33+)
 /// - 2026-04-02: 제목 메타 검색 진입을 `TitleKeywordLookupScreen`으로 분리
 /// - 2026-04-02: 모바일은 종이책만 — 형식 선택을 `종이책` 고정
@@ -102,6 +104,15 @@ class _BookFormScreenState extends State<BookFormScreen> {
   }
 
   Future<void> _openBarcodeScan() async {
+    final proceed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => const CameraPermissionRationaleScreen(
+          purpose: CameraPermissionPurpose.isbnBarcodeScan,
+        ),
+      ),
+    );
+    if (proceed != true || !mounted) return;
+
     final lookup = await Navigator.of(context).push<BookLookupResult>(
       MaterialPageRoute(builder: (_) => const BarcodeScanScreen()),
     );

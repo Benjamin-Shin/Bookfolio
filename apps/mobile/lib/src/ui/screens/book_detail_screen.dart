@@ -5,6 +5,7 @@ import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
 import 'package:seogadam_mobile/src/state/library_controller.dart';
 import 'package:seogadam_mobile/src/ui/book_ui_labels.dart';
 import 'package:seogadam_mobile/src/ui/mobile_scroll_padding.dart';
+import 'package:seogadam_mobile/src/ui/screens/camera_permission_rationale_screen.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:seogadam_mobile/src/util/quote_ocr.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
@@ -65,6 +66,7 @@ class _DetailSection extends StatelessWidget {
 /// 내 서재 도서 상세 — 읽기 상태·이벤트·메모·한줄평.
 ///
 /// History:
+/// - 2026-04-12: 메모용 카메라·OCR 전 [CameraPermissionRationaleScreen] 안내
 /// - 2026-04-06: `user_books` 현재/총 쪽 저장·타임라인 진행 입력 분리
 /// - 2026-04-03: 웹·비모바일 — `speech_to_text` 초기화 생략(`MissingPluginException` 방지)
 /// - 2026-04-02: 커버 축소·제목/저자 우측, 내 평점·위치 편집, 회원 평균 표시, 메모 시각·STT, 이벤트 로케일, 메타 편집 제거, `LibraryController.bookForDetail`
@@ -288,6 +290,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   Future<void> _captureQuoteForMemo(BuildContext context) async {
     if (!_quoteOcrAvailable || _ocrBusy) return;
+    final proceed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => const CameraPermissionRationaleScreen(
+          purpose: CameraPermissionPurpose.bookQuoteOcr,
+        ),
+      ),
+    );
+    if (proceed != true || !context.mounted) return;
+
     final picker = ImagePicker();
     final shot = await picker.pickImage(
       source: ImageSource.camera,

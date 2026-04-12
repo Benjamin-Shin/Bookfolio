@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 /**
  * @history
+ * - 2026-04-12: 모바일 앱 카메라(ISBN 바코드 스캔·메모용 촬영·기기 내 OCR) 수집·처리 안내 보강
  * - 2026-04-05: 메타·도입부·책임자 표기 서가담 정렬
  * - 2026-03-29: 「캐논·투표」를 공통 도서 정보·수정 제안·투표 참여로 풀어 설명.
  * - 2026-03-29: 트레바리 등 유사 서비스 방침을 참고해 도입부·필수·선택·자동 수집, 법정 보존·파기, 제3자 예외, 쿠키·개정 공지(7일·30일), 외부 링크 적용 범위, 피해 구제 기관, 향후 결제(PG) 수집 안내 보강.
@@ -135,7 +136,47 @@ export default function PrivacyPolicyPage() {
               앱 등에서 API 접근 시 발급·사용하는 액세스 토큰(보유 기간·항목
               세부는 내부 보안 정책에 따름)
             </li>
+            <li>
+              <strong>모바일 앱 카메라(안드로이드·iOS):</strong> 앱에서{" "}
+              <strong>도서 ISBN 바코드를 스캔</strong>하거나, 메모 작성 시{" "}
+              <strong>책 페이지를 촬영해 글자로 변환(OCR)</strong>하는 기능을
+              쓸 때 단말의 카메라(또는 이에 상응하는 영상 입력)에 접근할 수
+              있습니다. 운영체제는 이 과정에서 카메라 권한 허용을 요청할 수
+              있습니다.
+            </li>
           </ul>
+          <div className="space-y-2 rounded-md border border-border/60 bg-muted/30 px-4 py-3">
+            <p className="font-medium text-foreground">
+              모바일 앱에서 카메라로 처리하는 정보
+            </p>
+            <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+              <li>
+                <strong>바코드 스캔:</strong> 카메라로 비추는 화면은 기기 안에서
+                처리되어 바코드에 담긴 숫자(주로 ISBN)를 읽는 데 사용됩니다.{" "}
+                <strong>
+                  카메라 영상 전체를 서비스 서버에 저장하거나 전송하는 기능은
+                  제공하지 않습니다.
+                </strong>{" "}
+                읽은 ISBN 등 식별값은 기존과 같이 외부 서지 API 조회·내 서재
+                등록 등 서비스 제공 목적에 한해 처리될 수 있습니다.
+              </li>
+              <li>
+                <strong>촬영 후 글 인식(OCR):</strong> 이용자가 촬영한 이미지는{" "}
+                <strong>기기에서 텍스트를 추출하는 데만</strong> 사용되며,{" "}
+                <strong>
+                  촬영 파일 자체를 서비스에 업로드·보관하는 흐름은 제공하지
+                  않습니다
+                </strong>
+                (단, 이용자가 메모 등에 넣은 <strong>인식된 텍스트</strong>를
+                저장하는 경우에는 회원 콘텐츠로 서비스에 기록될 수 있습니다).
+              </li>
+            </ul>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              카메라를 쓰지 않아도 ISBN·제목 입력 등 다른 방법으로 동일 기능을
+              대체할 수 있는 경우가 많습니다. 권한을 거부하면 해당 기능만 제한될
+              수 있습니다.
+            </p>
+          </div>
           <p className="text-muted-foreground">
             <strong>유료 서비스·결제가 도입되는 경우,</strong> 결제대행사(PG) 등
             수탁자가 결제 과정에서 이름, 연락처, 카드·계좌 관련 정보 등 결제에
