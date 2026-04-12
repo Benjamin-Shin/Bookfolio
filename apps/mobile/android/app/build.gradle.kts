@@ -19,7 +19,9 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     // Dart 패키지명 `seogadam_mobile`과 정렬(앱 표시명은 strings.xml `서가담`).
-    // @history 2026-04-12: `app.seogadam.mobile` — 기존 `com.example.bookfolio_mobile` 대체
+    // @history
+    // - 2026-04-12: `applicationId` → `app.bookfolio.seogadam` (Play Console 등록 패키지명 정렬)
+    // - 2026-04-12: `namespace` `app.seogadam.mobile` — 기존 `com.example.bookfolio_mobile` 대체
     namespace = "app.seogadam.mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -34,8 +36,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "app.bookfolio.android"
+        // Play Console 앱 패키지명과 동일해야 스토어 업로드·앱 업데이트가 매칭됨.
+        applicationId = "app.bookfolio.seogadam"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
