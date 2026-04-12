@@ -1,4 +1,4 @@
-import 'package:bookfolio_mobile/src/models/book_models.dart';
+import 'package:seogadam_mobile/src/models/book_models.dart';
 
 String bookFormatLabelKo(BookFormat f) {
   return switch (f) {

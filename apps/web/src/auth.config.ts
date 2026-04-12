@@ -1,5 +1,6 @@
 /**
  * @history
+ * - 2026-04-05: Credentials 식별자 필드를 `text`로 — 이메일 또는 @ 앞 로컬 부분 로그인
  * - 2026-03-26: JWT/세션에 `STAFF` 역할 유지(0021)
  */
 import type { NextAuthConfig } from "next-auth";
@@ -32,7 +33,7 @@ providers.push(
   Credentials({
     name: "credentials",
     credentials: {
-      email: { label: "이메일", type: "email" },
+      email: { label: "이메일 또는 아이디", type: "text" },
       password: { label: "비밀번호", type: "password" }
     },
     async authorize(credentials) {

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Seogadam | Admin Sanctuary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffdadb",
+                    "on-background": "#1c1c18",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#a9cfb7",
+                    "surface-container": "#f0eee8",
+                    "on-tertiary-container": "#ff9aa1",
+                    "on-secondary-fixed": "#211a13",
+                    "on-primary-container": "#9ac0a7",
+                    "outline-variant": "#c1c8c1",
+                    "tertiary-fixed-dim": "#ffb2b6",
+                    "surface-tint": "#436651",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#2d4f3c",
+                    "primary": "#163826",
+                    "inverse-surface": "#31312d",
+                    "secondary-fixed-dim": "#d2c4b9",
+                    "on-secondary-fixed-variant": "#4e453c",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#67081d",
+                    "surface-dim": "#dcdad4",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-surface": "#1c1c18",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#2c4e3b",
+                    "background": "#fcf9f3",
+                    "surface-container-high": "#ebe8e2",
+                    "surface-container-low": "#f6f3ed",
+                    "on-secondary-container": "#6d6259",
+                    "secondary-fixed": "#efe0d4",
+                    "primary-fixed": "#c5ecd2",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#002112",
+                    "surface-variant": "#e5e2dc",
+                    "secondary": "#675d53",
+                    "on-surface-variant": "#424843",
+                    "secondary-container": "#efe0d4",
+                    "inverse-on-surface": "#f3f0ea",
+                    "tertiary-container": "#862232",
+                    "primary-fixed-dim": "#a9cfb7",
+                    "on-tertiary-fixed": "#40000d",
+                    "outline": "#727973",
+                    "on-tertiary-fixed-variant": "#842131",
+                    "surface-container-highest": "#e5e2dc",
+                    "surface-bright": "#fcf9f3",
+                    "surface": "#fcf9f3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, .serif { font-family: 'Newsreader', serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- Side Navigation Bar -->
+<nav class="fixed left-0 top-0 h-full w-72 border-r border-[#163826]/5 bg-[#fcf9f3] flex flex-col gap-2 pt-20">
+<div class="px-8 mb-10">
+<h1 class="font-serif text-lg font-black text-[#2D4F3C]">Admin Panel</h1>
+<p class="font-sans uppercase text-[11px] tracking-widest font-semibold text-secondary opacity-70">System Control</p>
+</div>
+<div class="flex flex-col gap-1">
+<a class="bg-[#2D4F3C] text-white rounded-sm mx-4 px-4 py-3 flex items-center gap-3 active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">Dashboard</span>
+</a>
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 hover:bg-[#efe0d4] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">User Management</span>
+</a>
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 hover:bg-[#efe0d4] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">Book Catalog</span>
+</a>
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 hover:bg-[#efe0d4] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">Curation Settings</span>
+</a>
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 hover:bg-[#efe0d4] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">Point Policy</span>
+</a>
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 hover:bg-[#efe0d4] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">System Logs</span>
+</a>
+</div>
+<div class="mt-auto border-t border-[#163826]/5 py-6">
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 hover:bg-[#efe0d4] transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">System Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-72 p-12">
+<!-- Header -->
+<header class="flex justify-between items-end mb-12">
+<div>
+<h2 class="text-4xl font-light italic text-primary">Executive Summary</h2>
+<p class="text-secondary mt-2 font-body">Overview of the digital sanctuary's vital signs for October 2023.</p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-2 border border-outline/20 rounded-sm font-sans uppercase text-[10px] tracking-widest font-bold text-primary hover:bg-surface-container transition-colors">
+                    Export Report
+                </button>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-sm font-sans uppercase text-[10px] tracking-widest font-bold hover:opacity-90 transition-opacity">
+                    Refresh Data
+                </button>
+</div>
+</header>
+<!-- Metrics Grid (Asymmetric Bento) -->
+<div class="grid grid-cols-12 gap-6 mb-12">
+<!-- Main Revenue Card -->
+<div class="col-span-8 bg-surface-container-low p-8 rounded-sm flex flex-col justify-between border-l-4 border-primary">
+<div>
+<p class="font-sans uppercase text-[11px] tracking-widest font-semibold text-secondary mb-1">Revenue from Points</p>
+<h3 class="text-5xl font-headline font-bold text-primary">₩14,280,000</h3>
+</div>
+<div class="mt-8 h-32 w-full flex items-end gap-2">
+<!-- Simple CSS Chart Bars -->
+<div class="w-full bg-primary/10 h-[40%] rounded-t-sm"></div>
+<div class="w-full bg-primary/10 h-[60%] rounded-t-sm"></div>
+<div class="w-full bg-primary/10 h-[55%] rounded-t-sm"></div>
+<div class="w-full bg-primary/10 h-[75%] rounded-t-sm"></div>
+<div class="w-full bg-primary/10 h-[90%] rounded-t-sm"></div>
+<div class="w-full bg-primary/10 h-[85%] rounded-t-sm"></div>
+<div class="w-full bg-primary h-[100%] rounded-t-sm"></div>
+</div>
+</div>
+<!-- Total Users -->
+<div class="col-span-4 bg-primary text-on-primary p-8 rounded-sm relative overflow-hidden">
+<p class="font-sans uppercase text-[11px] tracking-widest font-semibold opacity-70 mb-1">Total Archivists</p>
+<h3 class="text-4xl font-headline font-bold">12,842</h3>
+<p class="mt-4 text-sm font-body opacity-80">+12% growth this month</p>
+<span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10" data-icon="group">group</span>
+</div>
+<!-- Active Users -->
+<div class="col-span-4 bg-surface-container-lowest border border-outline-variant/30 p-8 rounded-sm">
+<p class="font-sans uppercase text-[11px] tracking-widest font-semibold text-secondary mb-1">Monthly Active</p>
+<h3 class="text-3xl font-headline font-bold text-primary">8,201</h3>
+<div class="mt-4 flex items-center gap-2 text-error">
+<span class="material-symbols-outlined text-sm" data-icon="trending_down">trending_down</span>
+<span class="text-xs font-bold">-2.4% vs last month</span>
+</div>
+</div>
+<!-- Total Books -->
+<div class="col-span-4 bg-surface-container-lowest border border-outline-variant/30 p-8 rounded-sm">
+<p class="font-sans uppercase text-[11px] tracking-widest font-semibold text-secondary mb-1">Library Catalog</p>
+<h3 class="text-3xl font-headline font-bold text-primary">45,920</h3>
+<div class="mt-4 flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span class="text-xs font-bold">+1,204 new additions</span>
+</div>
+</div>
+<!-- Average Session -->
+<div class="col-span-4 bg-secondary-container p-8 rounded-sm border-r-4 border-tertiary">
+<p class="font-sans uppercase text-[11px] tracking-widest font-semibold text-on-secondary-container mb-1">Avg. Reading Time</p>
+<h3 class="text-3xl font-headline font-bold text-primary">42m 15s</h3>
+<p class="mt-4 text-xs font-body text-secondary italic">Editorial engagement is high</p>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-12">
+<!-- Recent User Activities Table -->
+<section class="col-span-7">
+<div class="flex items-center justify-between mb-6">
+<h4 class="text-2xl font-headline font-bold text-primary">Recent Archivist Activities</h4>
+<a class="text-[10px] font-sans font-bold uppercase tracking-widest text-secondary hover:text-primary" href="#">View All Logs</a>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-primary/10">
+<th class="pb-4 font-sans uppercase text-[10px] tracking-widest font-bold text-secondary">User</th>
+<th class="pb-4 font-sans uppercase text-[10px] tracking-widest font-bold text-secondary">Action</th>
+<th class="pb-4 font-sans uppercase text-[10px] tracking-widest font-bold text-secondary text-right">Timestamp</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-primary/5">
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="py-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-[10px] font-bold text-primary">EK</div>
+<div>
+<p class="text-sm font-bold text-primary">Eun-ji Kim</p>
+<p class="text-[10px] text-secondary">Premium Member</p>
+</div>
+</td>
+<td class="py-4 text-sm text-secondary">Purchased "Modern Hanok Aesthetics"</td>
+<td class="py-4 text-xs text-secondary/60 text-right">2 mins ago</td>
+</tr>
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="py-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center text-[10px] font-bold text-secondary">JP</div>
+<div>
+<p class="text-sm font-bold text-primary">Ji-hoon Park</p>
+<p class="text-[10px] text-secondary">Standard Member</p>
+</div>
+</td>
+<td class="py-4 text-sm text-secondary">Created curation: "Seoul Tea Houses"</td>
+<td class="py-4 text-xs text-secondary/60 text-right">14 mins ago</td>
+</tr>
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="py-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-tertiary/10 rounded-full flex items-center justify-center text-[10px] font-bold text-tertiary">SL</div>
+<div>
+<p class="text-sm font-bold text-primary">Soo-min Lee</p>
+<p class="text-[10px] text-secondary">Archivist Emeritus</p>
+</div>
+</td>
+<td class="py-4 text-sm text-secondary">Logged in from Tokyo, JP</td>
+<td class="py-4 text-xs text-secondary/60 text-right">1 hr ago</td>
+</tr>
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="py-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-[10px] font-bold text-primary">DH</div>
+<div>
+<p class="text-sm font-bold text-primary">Do-hyeon Choi</p>
+<p class="text-[10px] text-secondary">New Member</p>
+</div>
+</td>
+<td class="py-4 text-sm text-secondary">Added 5 books to "Reading Wishlist"</td>
+<td class="py-4 text-xs text-secondary/60 text-right">3 hrs ago</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Trending Curations Sidebar -->
+<section class="col-span-5">
+<div class="flex items-center justify-between mb-6">
+<h4 class="text-2xl font-headline font-bold text-primary">Trending Curations</h4>
+</div>
+<div class="space-y-4">
+<!-- Curation Card 1 -->
+<div class="flex gap-4 p-4 bg-surface-container-low rounded-sm hover:translate-x-1 transition-transform cursor-pointer group">
+<div class="w-16 h-20 bg-primary/10 flex-shrink-0 relative">
+<img alt="Book Cover" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Close-up of a vintage hardcover book with gold foil lettering on a minimalist wooden desk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyNVXzzRih8pVUI-xBgEBQK1dLQXe5h5jYbSZiAU9U1UjNHHQb5qbmdVtKyvS0ufbUve4mYtoYoESNRoCYuIDMcBk-SW-fKaSPcaWUBvfB6VqydIAX9ZLhNMyp5y9eZB6ux4A_P52GWytl7C0cHtMKFK8l--_AoPd6p3ga3z8yvLKWnUnWWlFnAfGIsXAxHLfK6905lomLoRWW9rpH0p0QVmrOgcioNWua_gj6zPA12ThGO9_A7DhRJvN4k_FOpyx0YXpUEb8dnaY"/>
+<div class="absolute inset-0 border border-primary/5"></div>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-xs font-sans font-bold uppercase tracking-widest text-primary">Autumn Echoes</p>
+<h5 class="font-headline italic text-lg leading-tight">Poetry of the Joseon Dynasty</h5>
+<p class="text-[10px] text-secondary mt-1">Curated by <span class="font-bold">Master Archivist</span> • 1.2k Saves</p>
+</div>
+</div>
+<!-- Curation Card 2 -->
+<div class="flex gap-4 p-4 bg-surface-container-low rounded-sm hover:translate-x-1 transition-transform cursor-pointer group">
+<div class="w-16 h-20 bg-primary/10 flex-shrink-0 relative">
+<img alt="Library Scene" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Atmospheric shot of a minimalist library with soft natural light hitting floor-to-ceiling bookshelves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZVya8RnhE7fvVryQf_Bob6PbQyiVPXAMTC81eUqmmQriZBmahSCXa3M8Hr1tdP09dl_FYfIMQsFtuoXofw5vkFgSm2j0gu3Gp6JUN2POjIPH7PnBOZELJQyrsuYpfs6w84uvxHnZgb59LWqRB6S5CD8Zif8pvoT9h68IzNWi8mCJLlj36cVoCk-9b4EmUwyO4Ng2cBuLGVYXUPUdv8EfxwkCqtCTwtcNxYdO2luQaDqNht9qb3rppH1eBXAa60nmnxIthyJCTf8U"/>
+<div class="absolute inset-0 border border-primary/5"></div>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-xs font-sans font-bold uppercase tracking-widest text-primary">The Modernist</p>
+<h5 class="font-headline italic text-lg leading-tight">Post-War Architecture &amp; Space</h5>
+<p class="text-[10px] text-secondary mt-1">Curated by <span class="font-bold">H. J. Kim</span> • 840 Saves</p>
+</div>
+</div>
+<!-- Curation Card 3 -->
+<div class="flex gap-4 p-4 bg-surface-container-low rounded-sm hover:translate-x-1 transition-transform cursor-pointer group">
+<div class="w-16 h-20 bg-primary/10 flex-shrink-0 relative">
+<img alt="Ink &amp; Paper" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Artistic macro shot of high-quality textured paper and a fine fountain pen tip with deep green ink" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGGVcOvLyLou88y4FnQWF0QX9UDuWxDY2NRKTwZvnpBL9SrZeEmeZnwb33k_K9A7NLlx9WS8KGT2p19xpl-wmCrRrPK6F6ihS20l-fqJ8aIjgLilkmE9S60JZCsKjPBBdbh9-ULSbb_fFSSLcG1ZdM92mbv4qcszAZxMPvr95ThtWgMeQPm9vj3QA_rYX_PWvDRUTCKLKhs-1lEwjLbrr6YMBC6ic8PC-fahyPAwPtD7yWcqDY-G-L5zmNO36PVvdlz3JYGo-0zhc"/>
+<div class="absolute inset-0 border border-primary/5"></div>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-xs font-sans font-bold uppercase tracking-widest text-primary">Art of Ink</p>
+<h5 class="font-headline italic text-lg leading-tight">Contemporary Calligraphy Trends</h5>
+<p class="text-[10px] text-secondary mt-1">Curated by <span class="font-bold">InkMaster</span> • 3.5k Saves</p>
+</div>
+</div>
+</div>
+<!-- Quick System Alert -->
+<div class="mt-8 p-6 bg-tertiary-container text-white rounded-sm">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined mt-0.5" data-icon="warning">warning</span>
+<div>
+<h6 class="font-sans font-bold uppercase text-[10px] tracking-widest">System Alert</h6>
+<p class="text-sm font-headline italic mt-1 leading-snug">Point redemption server latency detected in Asia-East-1. Monitor logs.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Floating Quick Action (Suppressed on Admin Detail screens but active on Dashboard) -->
+<div class="fixed bottom-10 right-10">
+<button class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</body></html>

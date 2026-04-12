@@ -37,6 +37,7 @@ type HeaderAccountProps = {
  * - 2026-03-26: 프로필 다이얼로그 1행에 이메일·표시 이름(2열), 2행에 `ProfileAvatarUploadField`(내부 2열)
  * - 2026-03-26: 표시 이름 왼쪽에 아바타 썸네일·저장 응답·서버 props 동기화
  * - 2026-03-26: 아바타 — `ProfileAvatarUploadField`(Cloudinary `/api/upload` kind `avatar`)
+ * - 2026-04-02: 인구통계(성별·생년월일·공개 동의), 프로필 저장 `POST /api/me/profile`
  * - 2026-03-26: 회원 탈퇴 확인 후 `DELETE /api/me/account`·`signOut`
  * - 2026-03-29: 프로필 하단 푸터 한 줄에 탈퇴(좌·destructive)·취소·저장, 안내 문구는 그 아래
  * - 2026-03-29: 소유 공동·모임 서재에 타 멤버 있으면 탈퇴 버튼 비활성·안내
@@ -56,19 +57,41 @@ export function HeaderAccount({
     initialProfile?.displayName ?? displayLabel ?? ""
   );
   const [avatarUrl, setAvatarUrl] = useState(initialProfile?.avatarUrl ?? "");
+  const [gender, setGender] = useState(initialProfile?.gender ?? "");
+  const [birthDate, setBirthDate] = useState(
+    initialProfile?.birthDate ? initialProfile.birthDate.slice(0, 10) : ""
+  );
+  const [genderPublic, setGenderPublic] = useState(initialProfile?.genderPublic ?? false);
+  const [birthDatePublic, setBirthDatePublic] = useState(initialProfile?.birthDatePublic ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function resetFromProps() {
     setDisplayName(initialProfile?.displayName ?? displayLabel ?? "");
     setAvatarUrl(initialProfile?.avatarUrl ?? "");
+    setGender(initialProfile?.gender ?? "");
+    setBirthDate(initialProfile?.birthDate ? initialProfile.birthDate.slice(0, 10) : "");
+    setGenderPublic(initialProfile?.genderPublic ?? false);
+    setBirthDatePublic(initialProfile?.birthDatePublic ?? false);
     setError(null);
   }
 
   useEffect(() => {
     setDisplayName(initialProfile?.displayName ?? displayLabel ?? "");
     setAvatarUrl(initialProfile?.avatarUrl ?? "");
-  }, [initialProfile?.avatarUrl, initialProfile?.displayName, displayLabel]);
+    setGender(initialProfile?.gender ?? "");
+    setBirthDate(initialProfile?.birthDate ? initialProfile.birthDate.slice(0, 10) : "");
+    setGenderPublic(initialProfile?.genderPublic ?? false);
+    setBirthDatePublic(initialProfile?.birthDatePublic ?? false);
+  }, [
+    initialProfile?.avatarUrl,
+    initialProfile?.birthDate,
+    initialProfile?.birthDatePublic,
+    initialProfile?.displayName,
+    initialProfile?.gender,
+    initialProfile?.genderPublic,
+    displayLabel
+  ]);
 
   const headerAvatarSrc = normalizeCoverUrlForClient(avatarUrl || null);
   const withdrawalBlockedByOwnedSharedLibs = sharedLibrariesBlockingWithdrawal.length > 0;
@@ -118,11 +141,16 @@ export function HeaderAccount({
               setError(null);
               try {
                 const res = await fetch("/api/me/profile", {
-                  method: "PATCH",
+                  method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
+                    action: "update",
                     displayName: displayName.trim() || null,
-                    avatarUrl: avatarUrl.trim() || null
+                    avatarUrl: avatarUrl.trim() || null,
+                    gender: gender.trim() || null,
+                    birthDate: birthDate.trim() || null,
+                    genderPublic,
+                    birthDatePublic
                   })
                 });
                 const data = (await res.json()) as AppProfileView & { error?: string };
@@ -133,6 +161,10 @@ export function HeaderAccount({
                 }
                 setAvatarUrl(data.avatarUrl ?? "");
                 setDisplayName(data.displayName ?? displayLabel ?? "");
+                setGender(data.gender ?? "");
+                setBirthDate(data.birthDate ? data.birthDate.slice(0, 10) : "");
+                setGenderPublic(data.genderPublic ?? false);
+                setBirthDatePublic(data.birthDatePublic ?? false);
                 setOpen(false);
                 router.refresh();
               } catch {
@@ -162,6 +194,52 @@ export function HeaderAccount({
                 disabled={saving}
               />
             </div>
+            <div className="min-w-0 space-y-2 sm:col-span-2">
+              <Label htmlFor="profile-gender">성별 (선택)</Label>
+              <select
+                id="profile-gender"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                value={gender}
+                onChange={(ev) => setGender(ev.target.value)}
+                disabled={saving}
+              >
+                <option value="">선택 안 함</option>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+                <option value="other">기타</option>
+                <option value="unknown">비공개</option>
+              </select>
+            </div>
+            <div className="min-w-0 space-y-2 sm:col-span-2">
+              <Label htmlFor="profile-birth">생년월일 (선택)</Label>
+              <Input
+                id="profile-birth"
+                type="date"
+                value={birthDate}
+                onChange={(ev) => setBirthDate(ev.target.value)}
+                disabled={saving}
+              />
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
+              <input
+                type="checkbox"
+                className="size-4 accent-primary"
+                checked={genderPublic}
+                onChange={(ev) => setGenderPublic(ev.target.checked)}
+                disabled={saving}
+              />
+              성별을 익명 통계에 포함
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
+              <input
+                type="checkbox"
+                className="size-4 accent-primary"
+                checked={birthDatePublic}
+                onChange={(ev) => setBirthDatePublic(ev.target.checked)}
+                disabled={saving}
+              />
+              생년(출생 연도)을 익명 통계에 포함
+            </label>
             {error ? (
               <p className="text-sm text-destructive sm:col-span-2">{error}</p>
             ) : null}

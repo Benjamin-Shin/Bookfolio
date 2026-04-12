@@ -1,5 +1,6 @@
 /**
  * @history
+ * - 2026-04-10: 클라이언트 오류 수집 카드
  * - 2026-03-29: 상단 플랫폼 통계 카드(`fetchAdminDashboardStats`) 추가
  * - 2026-03-29: 공동서재 관리 카드 추가
  * - 2026-03-26: 포인트·정책 카드 추가
@@ -131,6 +132,20 @@ export default async function AdminHomePage() {
               className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
               포인트 화면 열기
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="border-border/80">
+          <CardHeader>
+            <CardTitle className="text-lg">클라이언트 오류</CardTitle>
+            <CardDescription>앱·웹이 전송한 오류 로그를 최신순으로 봅니다.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/dashboard/admin/client-errors"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              오류 목록 열기
             </Link>
           </CardContent>
         </Card>

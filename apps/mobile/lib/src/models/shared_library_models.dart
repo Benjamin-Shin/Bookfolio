@@ -86,6 +86,9 @@ class SharedLibraryOwnerRow {
 }
 
 /// API: `LibraryAggregatedBookRow` — `book_id` 기준 합친 한 줄.
+///
+/// History:
+/// - 2026-04-12: `fromJson` — `genreSlugs`에 null-aware 체이닝(`?.`) 적용 (lint)
 class SharedLibraryBookSummary {
   const SharedLibraryBookSummary({
     required this.libraryId,
@@ -120,9 +123,10 @@ class SharedLibraryBookSummary {
       authors: (json['authors'] as List<dynamic>? ?? []).map((e) => e.toString()).toList(),
       isbn: json['isbn'] as String?,
       coverUrl: json['coverUrl'] as String?,
-      genreSlugs: genresRaw == null
-          ? null
-          : genresRaw.map((e) => e.toString()).where((s) => s.isNotEmpty).toList(),
+      genreSlugs: genresRaw
+          ?.map((e) => e.toString())
+          .where((s) => s.isNotEmpty)
+          .toList(),
       owners: ownersRaw
           .map((e) => SharedLibraryOwnerRow.fromJson(e as Map<String, dynamic>))
           .toList(),

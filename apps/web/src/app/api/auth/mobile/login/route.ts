@@ -1,3 +1,9 @@
+/**
+ * 모바일 비밀번호 로그인 → Bearer JWT.
+ *
+ * @history
+ * - 2026-04-05: 식별자 본문 필드는 그대로 `email` 키 — 값은 전체 이메일 또는 @ 앞 로컬(`verifyAppUserCredentials`)
+ */
 import { NextRequest, NextResponse } from "next/server";
 
 import { signMobileAccessToken } from "@/lib/auth/mobile-jwt";

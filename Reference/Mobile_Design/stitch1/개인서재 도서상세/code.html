@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed-variant": "#842131",
+                    "error-container": "#ffdad6",
+                    "on-surface-variant": "#424843",
+                    "secondary-fixed": "#efe0d4",
+                    "surface-tint": "#436651",
+                    "secondary": "#675d53",
+                    "outline-variant": "#c1c8c1",
+                    "tertiary": "#67081d",
+                    "surface-dim": "#dcdad4",
+                    "surface-container-highest": "#e5e2dc",
+                    "inverse-primary": "#a9cfb7",
+                    "on-secondary-container": "#6d6259",
+                    "tertiary-fixed-dim": "#ffb2b6",
+                    "inverse-surface": "#31312d",
+                    "surface-container-low": "#f6f3ed",
+                    "tertiary-fixed": "#ffdadb",
+                    "on-secondary-fixed": "#211a13",
+                    "primary-container": "#2d4f3c",
+                    "on-primary-fixed-variant": "#2c4e3b",
+                    "on-secondary-fixed-variant": "#4e453c",
+                    "surface-bright": "#fcf9f3",
+                    "surface-container-high": "#ebe8e2",
+                    "secondary-container": "#efe0d4",
+                    "on-tertiary-fixed": "#40000d",
+                    "on-primary-fixed": "#002112",
+                    "surface-variant": "#e5e2dc",
+                    "outline": "#727973",
+                    "on-tertiary-container": "#ff9aa1",
+                    "error": "#ba1a1a",
+                    "on-background": "#1c1c18",
+                    "surface-container-lowest": "#ffffff",
+                    "primary": "#163826",
+                    "surface-container": "#f0eee8",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface": "#fcf9f3",
+                    "on-surface": "#1c1c18",
+                    "secondary-fixed-dim": "#d2c4b9",
+                    "tertiary-container": "#862232",
+                    "on-primary-container": "#9ac0a7",
+                    "primary-fixed-dim": "#a9cfb7",
+                    "inverse-on-surface": "#f3f0ea",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#c5ecd2",
+                    "background": "#fcf9f3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader", "serif"],
+                    "body": ["Manrope", "sans-serif"],
+                    "label": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24
+    }
+.editorial-shadow {
+    box-shadow: 0 20px 40px -15px rgba(22, 56, 38, 0.08)
+    }
+.book-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCHR1olZVDtOgZ1He-9A37F0LGjWnfyN-3gmIvvaRJIxL_vA05L_uZTJ3kJJOYlII3sGRMVXheKPQK_Uj6bT4e7Q3A9eF3e-ys3n_Lk5simgllBVANpkYF4Yp3WYQEzGdwbiRtREgq4yZZXR8NE_Op6EXK06lwcxJcInX9amrXRi8IJ4Vz1MaqaCW2qZP2TAj0m2-gRcyuJmV55sohyaHBUJiwrbgxgSXHt25PFjN4CbMOx_UKD0wGbIn0y-afzhsbYCrf-QG7KIN8)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen pb-32">
+<!-- Top AppBar (Generated from JSON guidance - context: Detail view, back allowed) -->
+<header class="sticky top-0 z-40 bg-surface/80 backdrop-blur-md">
+<nav class="flex justify-between items-center w-full px-6 py-4">
+<button class="hover:bg-surface-container-low rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline text-lg font-medium text-primary">서가담</h1>
+<div class="flex gap-2">
+<button class="hover:bg-surface-container-low rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined text-primary">share</span>
+</button>
+<button class="hover:bg-surface-container-low rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined text-primary">more_vert</span>
+</button>
+</div>
+</nav>
+</header>
+<main class="max-w-md mx-auto px-6">
+<!-- Book Identity Section -->
+<section class="flex flex-col items-center mt-4 mb-10">
+<div class="relative w-56 aspect-[2/3] group">
+<img class="w-full h-full object-cover rounded-sm editorial-shadow border-[0.5px] border-outline-variant/10" data-alt="Premium minimalist book cover for Philosophy title with elegant typography and deep forest green accents on off-white textured paper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4yPVtUUGPmkZoD7eHQe4cgSa1Ta01cPQDibt8M8HsThWk1gEar6DyQMtxbafoKChEgTiqURPfNryVme2NggtAA7AZZmMP5StdXfEh28JPlBErzf6Ns17IhDaSBc23b07D_z7wjr-JymVUaAftamnBnIflU_vuT3xhiJYvvk9C_d3qBsXevzRHotwA265YiEzE19fu6cZF8NjDHvngQ4r2_w4Q2Hrwh7yaoW7tzadxdPb5xUj9T6k1a9GPdil8MCa_rLY9cAM6Abs"/>
+<div class="absolute inset-y-0 left-0 w-1 bg-tertiary opacity-80 rounded-l-sm" title="Archivist's Ribbon"></div>
+</div>
+<div class="text-center mt-8 space-y-2">
+<h2 class="font-headline text-3xl font-bold tracking-tight text-primary">삶의 격</h2>
+<p class="font-headline text-lg italic text-secondary">페터 비에리</p>
+<div class="flex items-center justify-center gap-2 mt-2">
+<span class="text-[10px] font-label tracking-widest text-secondary-fixed-variant bg-secondary-container px-2 py-0.5 rounded-sm">은행나무 출판사</span>
+<span class="text-[10px] font-label tracking-widest text-secondary-fixed-variant bg-surface-container-high px-2 py-0.5 rounded-sm">인문/철학</span>
+</div>
+</div>
+</section>
+<!-- Status & Progress -->
+<section class="space-y-8 mb-12">
+<!-- Status Tabs -->
+<div class="bg-surface-container-low p-1 rounded-lg flex items-center justify-between gap-1">
+<button class="flex-1 py-2 text-sm font-medium rounded-md bg-primary text-on-primary shadow-sm">읽는 중</button>
+<button class="flex-1 py-2 text-sm font-medium rounded-md text-secondary hover:bg-surface-container transition-colors">완독</button>
+<button class="flex-1 py-2 text-sm font-medium rounded-md text-secondary hover:bg-surface-container transition-colors">중단</button>
+</div>
+<!-- Progress Control -->
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<div class="space-y-1">
+<span class="text-[11px] font-label text-outline uppercase tracking-wider">Reading Progress</span>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-headline font-bold text-primary">182</span>
+<span class="text-sm text-secondary">/ 312 페이지</span>
+</div>
+</div>
+<span class="text-xl font-headline italic font-medium text-primary">58%</span>
+</div>
+<div class="relative w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full w-[58%]"></div>
+</div>
+</div>
+</section>
+<!-- Memories & Highlights -->
+<section class="space-y-6">
+<div class="flex justify-between items-center">
+<h3 class="font-headline text-xl font-bold text-primary">기록과 문장들</h3>
+<span class="text-xs text-outline font-label">3개의 기록</span>
+</div>
+<div class="space-y-4">
+<!-- Quote Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-sm border-l-2 border-primary-fixed editorial-shadow space-y-4 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-5">
+<span class="material-symbols-outlined text-4xl">format_quote</span>
+</div>
+<p class="font-headline text-lg leading-relaxed text-on-surface-variant">
+                        "자존감이란 자신이 누구인지, 무엇을 할 수 있는지에 대해 스스로 내리는 판결이다."
+                    </p>
+<div class="flex justify-between items-center text-[11px] text-outline font-label border-t border-outline-variant/15 pt-4">
+<span>p. 42</span>
+<span>2024. 05. 12</span>
+</div>
+</div>
+<!-- Quote Card 2 -->
+<div class="bg-surface-container-low p-6 rounded-sm space-y-4 border-[0.5px] border-outline-variant/20">
+<p class="font-headline text-lg leading-relaxed text-on-surface-variant">
+                        "진정한 존엄은 타인의 시선에서 자유로워질 때 비로소 시작된다."
+                    </p>
+<div class="flex justify-between items-center text-[11px] text-outline font-label">
+<span>p. 108</span>
+<span>2024. 05. 15</span>
+</div>
+</div>
+</div>
+<!-- Add Note Button -->
+<button class="w-full mt-4 flex items-center justify-center gap-2 py-4 bg-primary text-on-primary rounded-md font-medium shadow-lg shadow-primary/10 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+<span class="font-label tracking-wide">기록하기</span>
+</button>
+</section>
+<!-- Extra Info Grid (Asymmetric Bento) -->
+<section class="mt-16 grid grid-cols-2 gap-4 mb-20">
+<div class="col-span-1 bg-secondary-container/30 p-5 rounded-lg flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-secondary">calendar_today</span>
+<div>
+<p class="text-[10px] text-secondary-fixed-variant font-label uppercase tracking-tighter">Start Date</p>
+<p class="font-headline font-bold text-primary">24. 05. 01</p>
+</div>
+</div>
+<div class="col-span-1 space-y-4">
+<div class="bg-surface-container-high p-4 rounded-lg flex flex-col justify-between h-[calc(50%-8px)]">
+<span class="text-[10px] text-outline font-label uppercase">Rating</span>
+<div class="flex text-primary">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs">star</span>
+</div>
+</div>
+<div class="bg-tertiary/5 p-4 rounded-lg flex flex-col justify-between h-[calc(50%-8px)]">
+<span class="text-[10px] text-tertiary font-label uppercase">Note</span>
+<p class="text-xs font-medium text-tertiary-fixed-variant truncate">매우 인상적인 철학서</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Suppressed as per "Task-Focused" exclusion rule for Detail screens) -->
+<!-- Not rendering global nav to focus on the content canvas and "Back" action -->
+</body></html>

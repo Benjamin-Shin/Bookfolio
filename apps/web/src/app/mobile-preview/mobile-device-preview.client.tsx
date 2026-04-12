@@ -42,7 +42,7 @@ const PRESET_GROUPS: PresetGroup[] = [
       "iframe 너비가 모바일이라 상단 오른쪽 햄버거(≡)도 실제와 같이 보입니다. 아래 버튼은 그 메뉴·항목과 같은 주소입니다.",
     items: [
       { label: "공동서재", path: "/dashboard/libraries" },
-      { label: "북폴리오 집계", path: "/dashboard/bookfolio-aggregate" },
+      { label: "서가담 집계", path: "/dashboard/bookfolio-aggregate" },
       { label: "베스트셀러", path: "/dashboard/bestsellers" },
       { label: "초이스 신간", path: "/dashboard/choice-new" },
       { label: "내 서재", path: "/dashboard" },
@@ -80,6 +80,7 @@ interface MobileDevicePreviewProps {
  * 휴대폰 형태 프레임 안에 동일 출처 웹을 iframe으로 띄워 모바일 뷰포트를 흉내 냅니다.
  *
  * @history
+ * - 2026-04-05: 프리셋·툴팁 서가담 표기
  * - 2026-03-29: 햄버거(`SiteHeaderMobileNav`)와 동일 프리셋·법적 고지·내/공동 상세·공동서재 서재 홈(UUID).
  * - 2026-03-29: 초기 구현(프리셋 경로·갱신·안내 카드).
  */
@@ -336,7 +337,7 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                   <span className="tabular-nums">100%</span>
                 </div>
                 <iframe
-                  title="Bookfolio 모바일 뷰포트 미리보기"
+                  title="서가담 모바일 뷰포트 미리보기"
                   src={iframeSrc}
                   className="block bg-background"
                   style={{

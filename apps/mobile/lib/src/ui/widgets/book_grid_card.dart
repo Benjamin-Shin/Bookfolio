@@ -1,24 +1,56 @@
-import 'package:bookfolio_mobile/src/models/book_models.dart';
-import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
-import 'package:bookfolio_mobile/src/util/cover_image_url.dart';
+import 'dart:math' as math;
+
+import 'package:seogadam_mobile/src/models/book_models.dart';
+import 'package:seogadam_mobile/src/theme/bookfolio_design_tokens.dart';
+import 'package:seogadam_mobile/src/ui/book_ui_labels.dart';
+import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
 
 /// 그리드 열 수에 따른 카드 가로세로 비율 (표지 2:3 + 하단 메타).
 ///
 /// History:
+/// - 2026-04-12: 읽는 중 상태색 — `DESIGN.md` tertiary(Archivist's Ribbon)
+/// - 2026-04-05: 4열(넓은 폰·폴드) 대응 비율
 /// - 2026-03-25: `library_screen`에서 분리해 공동서재 그리드와 공유
 double bookGridCardAspectRatio(int columns) {
   return switch (columns) {
+    4 => 0.53,
     3 => 0.50,
     _ => 0.46,
   };
 }
 
+/// 가용 가로 폭(좌우 패딩 제외)에 따라 그리드 열 수를 정한다.
+///
+/// `minTileWidth`·`crossAxisSpacing`을 만족하도록 [minColumns]~[maxColumns]로 클램프한다.
+///
+/// History:
+/// - 2026-04-05: 폰·태블릿 폭 가변 그리드(내 서재·공동서재 공통)
+int bookfolioGridCrossAxisCount(
+  double crossAxisExtent, {
+  double crossAxisSpacing = 10,
+  double minTileWidth = 124,
+  int minColumns = 2,
+  int maxColumns = 4,
+}) {
+  if (crossAxisExtent.isNaN || !crossAxisExtent.isFinite || crossAxisExtent <= 0) {
+    return minColumns;
+  }
+  final unit = minTileWidth + crossAxisSpacing;
+  final raw = ((crossAxisExtent + crossAxisSpacing) / unit).floor();
+  return math.min(maxColumns, math.max(minColumns, raw));
+}
+
 /// 내 서재·공동서재 공통 표지 카드.
 ///
 /// History:
+/// - 2026-04-03: 그리드 셀 높이 한계에서 표지 높이 상한 — 하단 메타 `Column` bottom overflow 방지
+/// - 2026-04-02: `Align`+`Column`(min)으로 본문을 상단 정렬·메타 패딩·줄간격 소폭 축소
+/// - 2026-04-02: 표지 아래 메타 영역 패딩 축소(그리드 셀 하단 빈 여백 완화와 함께 조정)
+/// - 2026-04-02: `coverScale` — 표지 가로 비율 축소(그리드에서 표지만 작게)
 /// - 2026-03-29: `ownerBadgeLabels`·테마 기반 카드·본문 색
 /// - 2026-03-25: 신규 (`UserBook` 전용 카드에서 일반화)
+/// - 2026-04-05: `DESIGN.md` — `surfaceContainerLowest`·`radiusSm`·무(無) 엘리베이션(톤 레이어링)
 class BookGridCard extends StatelessWidget {
   const BookGridCard({
     super.key,
@@ -30,6 +62,7 @@ class BookGridCard extends StatelessWidget {
     this.ownerBadgeLabels,
     required this.gradientSeedA,
     required this.gradientSeedB,
+    this.coverScale = 1.0,
   });
 
   final String title;
@@ -42,6 +75,9 @@ class BookGridCard extends StatelessWidget {
   final String gradientSeedA;
   final String gradientSeedB;
 
+  /// 1.0보다 작으면 표지 영역 가로를 줄여 카드에서 표지 비중을 낮춥니다.
+  final double coverScale;
+
   static const double _coverAspect = 2 / 3;
 
   @override
@@ -50,129 +86,160 @@ class BookGridCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final cover = resolveCoverImageUrl(coverUrl);
     final hasCover = cover != null;
-    final cardBg = scheme.surfaceContainerLow;
+    final cardBg = scheme.surfaceContainerLowest;
     final placeholder = scheme.surfaceContainerHighest;
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 1.5,
-      shadowColor: Colors.black26,
+      elevation: 0,
+      shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+      ),
       color: cardBg,
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AspectRatio(
-              aspectRatio: _coverAspect,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Positioned.fill(
-                    child: hasCover
-                        ? Image.network(
-                            cover,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            headers: kCoverImageRequestHeaders,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return ColoredBox(
-                                color: placeholder,
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 28,
-                                    height: 28,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: theme.colorScheme.primary,
-                                    ),
+        child: LayoutBuilder(
+          builder: (context, cellConstraints) {
+            final maxW = cellConstraints.maxWidth;
+            final maxH = cellConstraints.maxHeight;
+            final targetCoverW = maxW * coverScale.clamp(0.5, 1.0);
+            final naturalCoverH = targetCoverW / _coverAspect;
+            final hasOwnerRow = ownerBadgeLabels != null && ownerBadgeLabels!.isNotEmpty;
+
+            final coverStack = Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  child: hasCover
+                      ? Image.network(
+                          cover,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          headers: kCoverImageRequestHeaders,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return ColoredBox(
+                              color: placeholder,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
-                              );
-                            },
-                            errorBuilder: (_, __, ___) => GradientTitlePanel(
-                              title: title,
-                              seedA: gradientSeedA,
-                              seedB: gradientSeedB,
-                            ),
-                          )
-                        : GradientTitlePanel(
+                              ),
+                            );
+                          },
+                          errorBuilder: (_, __, ___) => GradientTitlePanel(
                             title: title,
                             seedA: gradientSeedA,
                             seedB: gradientSeedB,
                           ),
-                  ),
-                  if (coverBadge != null)
-                    Positioned(
-                      top: 6,
-                      left: 6,
-                      child: coverBadge!,
-                    ),
-                ],
-              ),
-            ),
-            if (ownerBadgeLabels != null && ownerBadgeLabels!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 6, 8, 0),
-                child: Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  alignment: WrapAlignment.center,
-                  children: ownerBadgeLabels!
-                      .map(
-                        (name) => Chip(
-                          visualDensity: VisualDensity.compact,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          padding: EdgeInsets.zero,
-                          labelPadding: const EdgeInsets.symmetric(horizontal: 6),
-                          label: Text(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          side: BorderSide(color: scheme.outlineVariant),
-                          backgroundColor: scheme.secondaryContainer.withValues(alpha: 0.65),
+                        )
+                      : GradientTitlePanel(
+                          title: title,
+                          seedA: gradientSeedA,
+                          seedB: gradientSeedB,
                         ),
-                      )
-                      .toList(),
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (hasCover)
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        height: 1.25,
-                        color: scheme.onSurface,
-                      ),
+                if (coverBadge != null)
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: coverBadge!,
+                  ),
+              ],
+            );
+
+            // 제목 2줄·저자·vertical 패딩·웹/시스템 폰트 배율까지 감안한 여유
+            final ownerReserve = hasOwnerRow ? 40.0 : 0.0;
+            const metaReserve = 76.0;
+            final coverH = maxH.isFinite
+                ? math.min(
+                    naturalCoverH,
+                    math.max(maxH - ownerReserve - metaReserve, 20.0),
+                  )
+                : naturalCoverH;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: targetCoverW,
+                    height: coverH,
+                    child: coverStack,
+                  ),
+                ),
+                if (hasOwnerRow)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                    child: Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      alignment: WrapAlignment.center,
+                      children: ownerBadgeLabels!
+                          .map(
+                            (name) => Chip(
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              padding: EdgeInsets.zero,
+                              labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+                              label: Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              side: BorderSide(color: scheme.outlineVariant),
+                              backgroundColor: scheme.secondaryContainer.withValues(alpha: 0.65),
+                            ),
+                          )
+                          .toList(),
                     ),
-                  if (hasCover && authorsLine.isNotEmpty) const SizedBox(height: 4),
-                  if (authorsLine.isNotEmpty)
-                    Text(
-                      authorsLine,
-                      maxLines: ownerBadgeLabels != null && ownerBadgeLabels!.isNotEmpty ? 2 : 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
+                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (hasCover)
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            height: 1.2,
+                            color: scheme.onSurface,
+                          ),
+                        ),
+                      if (hasCover && authorsLine.isNotEmpty) const SizedBox(height: 3),
+                      if (authorsLine.isNotEmpty)
+                        Text(
+                          authorsLine,
+                          maxLines: hasOwnerRow ? 2 : 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -234,7 +301,7 @@ IconData readingStatusIcon(ReadingStatus s) {
 
 Color readingStatusColor(ReadingStatus s) {
   return switch (s) {
-    ReadingStatus.reading => const Color(0xFF2E7D32),
+    ReadingStatus.reading => BookfolioDesignTokens.tertiary,
     ReadingStatus.completed => const Color(0xFF1565C0),
     ReadingStatus.unread => const Color(0xFF6D4C41),
     ReadingStatus.paused => const Color(0xFFF9A825),

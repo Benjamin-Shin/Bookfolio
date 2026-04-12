@@ -55,7 +55,7 @@ sequenceDiagram
 
 2. **Android**  
    - 앱의 **패키지 이름** + **SHA-1**(디버그/릴리즈 각각) 등록  
-   - 현재 저장소 기본값: `applicationId` / `namespace` 는 `com.example.bookfolio_mobile` (`android/app/build.gradle.kts`)
+   - 현재 저장소 기본값: `applicationId` 는 `app.bookfolio.android`, `namespace` 는 `app.seogadam.mobile` (`android/app/build.gradle.kts`). Google 콘솔 Android 클라이언트에는 **applicationId**(패키지명)를 등록합니다.
 
 3. **iOS** (앱스토어 빌드 시)  
    - 별도 iOS OAuth 클라이언트 + `Info.plist` URL scheme 등 추가 작업이 필요합니다. 아래 [iOS](#ios) 참고.

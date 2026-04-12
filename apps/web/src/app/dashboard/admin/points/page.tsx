@@ -1,10 +1,13 @@
 import { AdminPointRulesEditor } from "@/app/dashboard/admin/points/admin-point-rules-editor.client";
+import { SubscriptionPlanFeaturesEditor } from "@/app/dashboard/admin/points/subscription-plan-features-editor.client";
 import { fetchAdminPointPolicyOverview, fetchAdminRecentLedger } from "@/lib/points/admin-points";
+import { fetchAdminSubscriptionPlansForFeatures } from "@/lib/subscription/admin-subscription-plans";
 
 /**
  * 관리자 — 포인트 정책·원장.
  *
  * @history
+ * - 2026-04-05: 구독 플랜 `caps_json.features` 정책 CMS(리포트·SNS 해금 등)
  * - 2026-03-26: 이벤트 규칙 편집·추가 UI
  * - 2026-03-26: 신규 — `0021` 테이블 연동·내비 노출
  */
@@ -13,6 +16,8 @@ export default async function AdminPointsPage() {
   let rules: Awaited<ReturnType<typeof fetchAdminPointPolicyOverview>>["rules"] = [];
   let ledger: Awaited<ReturnType<typeof fetchAdminRecentLedger>> = [];
   let loadError: string | null = null;
+  let subscriptionPlans: Awaited<ReturnType<typeof fetchAdminSubscriptionPlansForFeatures>> = [];
+  let subscriptionPlansError: string | null = null;
 
   try {
     const overview = await fetchAdminPointPolicyOverview();
@@ -21,6 +26,13 @@ export default async function AdminPointsPage() {
     ledger = await fetchAdminRecentLedger(150);
   } catch (e) {
     loadError = e instanceof Error ? e.message : "데이터를 불러오지 못했습니다.";
+  }
+
+  try {
+    subscriptionPlans = await fetchAdminSubscriptionPlansForFeatures();
+  } catch (e) {
+    subscriptionPlansError =
+      e instanceof Error ? e.message : "구독 플랜 정책을 불러오지 못했습니다.";
   }
 
   const versionLabel: Record<string, string> = Object.fromEntries(
@@ -32,10 +44,27 @@ export default async function AdminPointsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">포인트 · 정책</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          정책 버전·이벤트 규칙(점수·일·월 한도)을 편집하고 원장을 봅니다. 가입·서재 등록 지급은{" "}
+          정책 버전·이벤트 규칙(점수·일·월 한도)을 편집하고 원장을 봅니다. 구독 플랜의 기능 해금은{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">subscription_plans.caps_json.features</code>로
+          관리합니다. 가입·서재 등록 지급은{" "}
           <code className="rounded bg-muted px-1 py-0.5 text-xs">0022</code> 시드 및 앱 로직과 연동됩니다.
         </p>
       </div>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold tracking-tight">구독 플랜 기능 (정책 CMS)</h2>
+        <p className="max-w-2xl text-xs text-muted-foreground">
+          VIP 등 플랜별로 리포트·SNS 공유·테마 등 해금 여부를 저장합니다. 앱에서는{" "}
+          <code className="rounded bg-muted px-1">getActiveSubscriptionFeatures</code>로 활성 구독 기준을 읽습니다.
+        </p>
+        {subscriptionPlansError ? (
+          <p className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            {subscriptionPlansError}
+          </p>
+        ) : (
+          <SubscriptionPlanFeaturesEditor plans={subscriptionPlans} />
+        )}
+      </section>
 
       {loadError ? (
         <p className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">

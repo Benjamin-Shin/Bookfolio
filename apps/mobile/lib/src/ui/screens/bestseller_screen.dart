@@ -1,9 +1,8 @@
-import 'package:bookfolio_mobile/src/models/aladin_bestseller_models.dart';
-import 'package:bookfolio_mobile/src/services/bookfolio_api.dart';
-import 'package:bookfolio_mobile/src/state/auth_controller.dart';
-import 'package:bookfolio_mobile/src/ui/widgets/main_hub_top_nav.dart';
-import 'package:bookfolio_mobile/src/util/cover_image_url.dart';
-import 'package:bookfolio_mobile/src/util/today_list_caption.dart';
+import 'package:seogadam_mobile/src/models/aladin_bestseller_models.dart';
+import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
+import 'package:seogadam_mobile/src/state/auth_controller.dart';
+import 'package:seogadam_mobile/src/util/cover_image_url.dart';
+import 'package:seogadam_mobile/src/util/today_list_caption.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// 베스트셀러 목록 화면.
 ///
 /// History:
+/// - 2026-04-10: 상단 `MainHubTopNavBar` 제거
 /// - 2026-03-29: 다크 모드·테마 색 적용
 /// - 2026-03-26: API·쿼리 노출 제거, 오늘 일자 기준 안내 문구·`MainHubTopNavBar`
 /// - 2026-03-25: 웹 `GET /api/me/aladin-bestseller` 와 동일 데이터 표시
@@ -83,50 +83,42 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const MainHubTopNavBar(current: MainHubTab.bestseller),
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color.lerp(colorScheme.surface, colorScheme.primaryContainer, 0.12)!,
-                    colorScheme.surfaceContainerLow,
-                  ],
-                ),
-              ),
-              child: RefreshIndicator(
-                onRefresh: _load,
-                color: colorScheme.primary,
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _error != null
-                        ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.all(24),
-                            children: [
-                              Material(
-                                color: colorScheme.errorContainer.withValues(alpha: 0.9),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Text(
-                                    _error!,
-                                    style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 14),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        : _buildList(context, _feed!),
-              ),
-            ),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.lerp(colorScheme.surface, colorScheme.primaryContainer, 0.12)!,
+              colorScheme.surfaceContainerLow,
+            ],
           ),
-        ],
+        ),
+        child: RefreshIndicator(
+          onRefresh: _load,
+          color: colorScheme.primary,
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(24),
+                      children: [
+                        Material(
+                          color: colorScheme.errorContainer.withValues(alpha: 0.9),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              _error!,
+                              style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 14),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : _buildList(context, _feed!),
+        ),
       ),
     );
   }

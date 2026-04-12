@@ -1,27 +1,44 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
-import { buildDashboardHref } from "@/lib/dashboard/dashboard-href";
+import {
+  buildDashboardHref,
+  type DashboardOwnedSort,
+} from "@/lib/dashboard/dashboard-href";
 
 /**
  * @history
+ * - 2026-04-12: `ownedSort`로 제목순 쿼리 유지
  * - 2026-03-26: 소장 탭 고정(`tab=owned`)으로 링크
  * - 2026-03-24: 소장 구역 장르 슬러그 필터(링크·쿼리 `genre`)
  */
-function ownedDashboardHref(q: string, genre: string | undefined, page: number) {
-  return buildDashboardHref({ q, genre, page, tab: "owned" });
+function ownedDashboardHref(
+  q: string,
+  genre: string | undefined,
+  page: number,
+  ownedSort: DashboardOwnedSort,
+) {
+  return buildDashboardHref({
+    q,
+    genre,
+    page,
+    tab: "owned",
+    ownedSort: ownedSort === "title" ? "title" : undefined,
+  });
 }
 
 type DashboardOwnedGenreFilterProps = {
   genres: string[];
   selectedGenre: string;
   searchQuery: string;
+  ownedSort: DashboardOwnedSort;
 };
 
 export function DashboardOwnedGenreFilter({
   genres,
   selectedGenre,
-  searchQuery
+  searchQuery,
+  ownedSort,
 }: DashboardOwnedGenreFilterProps) {
   if (genres.length === 0) {
     return null;
@@ -38,7 +55,7 @@ export function DashboardOwnedGenreFilter({
       <span className="text-xs font-medium text-muted-foreground">장르</span>
       <div className="flex flex-wrap gap-1.5">
         <Badge variant={active ? "default" : "outline"} asChild>
-          <Link href={ownedDashboardHref(q, undefined, 1)} prefetch={false}>
+          <Link href={ownedDashboardHref(q, undefined, 1, ownedSort)} prefetch={false}>
             전체
           </Link>
         </Badge>
@@ -46,7 +63,7 @@ export function DashboardOwnedGenreFilter({
           const on = selectedGenre === slug;
           return (
             <Badge key={slug} variant={on ? "default" : "outline"} asChild>
-              <Link href={ownedDashboardHref(q, slug, 1)} prefetch={false}>
+              <Link href={ownedDashboardHref(q, slug, 1, ownedSort)} prefetch={false}>
                 {slug}
               </Link>
             </Badge>

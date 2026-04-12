@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { BOOK_FORMAT_LABEL_KO, READING_STATUS_LABEL_KO } from "@bookfolio/shared";
 
 import { BookDetailSidecars } from "@/components/books/book-detail-sidecars.client";
+import { CanonPurchaseLinksCard } from "@/components/books/canon-purchase-links.client";
 import { getUserBookWithCanonical } from "@/lib/books/repository";
 
 function isLikelyUrl(s: string) {
@@ -18,6 +19,7 @@ function isLikelyUrl(s: string) {
  * 내 서재 도서 상세.
  *
  * @history
+ * - 2026-04-08: 비소장 시 `CanonPurchaseLinksCard`(캐논 구매 링크·커뮤니티 한줄평)
  * - 2026-03-26: 한줄평·마크다운 메모·독서 이벤트(`BookDetailSidecars`); `user_books.memo` 제거 반영
  * - 2026-03-24: 헤더 우측 상단에 장르(`genreSlugs`) 배지 표시, 본문 정의 목록 중복 장르 행 제거
  */
@@ -145,6 +147,8 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
             </dl>
           </CardContent>
         </Card>
+
+        {!userBook.isOwned ? <CanonPurchaseLinksCard bookId={userBook.bookId} /> : null}
 
         <BookDetailSidecars userBookId={userBook.id} bookId={userBook.bookId} />
 

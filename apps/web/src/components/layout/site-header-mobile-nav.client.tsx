@@ -85,6 +85,7 @@ function MobileNavLink({
  * @history
  * - 2026-03-29: 신규 — 햄버거 메뉴·개인정보·약관·쿠키(푸터 동일 경로)
  * - 2026-03-29: `sharedLibrariesBlockingWithdrawal`을 프로필(탈퇴)로 전달
+ * - 2026-04-05: 「서가담 집계」 표기
  */
 export function SiteHeaderMobileNav({
   apkUrl,
@@ -188,7 +189,7 @@ export function SiteHeaderMobileNav({
                   onNavigate={close}
                 >
                   <BarChart3Icon className="size-4 opacity-80" />
-                  북폴리오 집계
+                  서가담 집계
                 </MobileNavLink>
                 <MobileNavLink
                   href="/dashboard/bestsellers"

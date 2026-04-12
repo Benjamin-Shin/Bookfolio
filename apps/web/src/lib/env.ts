@@ -6,6 +6,7 @@
  * `process.env.NEXT_PUBLIC_*`는 getter 본문에 그대로 두면 클라이언트 번들에서도 Next가 인라인합니다.
  *
  * @history
+ * - 2026-04-08: `aladinTtbKey` — ItemLookUp(비소장 구매 힌트)
  * - 2026-03-25: `aladinItemNewApiBaseUrl` — 초이스 신간 등 별도 TTB URL
  * - 2026-03-25: `aladinBestsellerApiBaseUrl` 주석 — `next.config` `loadEnvConfig`와의 관계 안내
  * - 2026-03-25: `aladinBestsellerApiBaseUrl` — 알라딘 목록(서버 전용 URL)
@@ -42,6 +43,17 @@ export const env = {
   /** 초이스 신간 등 별도 ItemList URL(서버 전용). */
   get aladinItemNewApiBaseUrl(): string | undefined {
     const v = process.env.ALADIN_ITEMNEW_API_BASE_URL?.trim();
+    return v || undefined;
+  },
+
+  /**
+   * 알라딘 ItemLookUp API TTB 키(선택). 없으면 알라딘은 검색 URL만 제공.
+   *
+   * @history
+   * - 2026-04-08: 비소장 구매 링크 캐시 `ItemLookUp.aspx` 호출용
+   */
+  get aladinTtbKey(): string | undefined {
+    const v = process.env.ALADIN_TTB_KEY?.trim();
     return v || undefined;
   }
 };

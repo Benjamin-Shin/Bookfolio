@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffdadb",
+                    "on-background": "#1c1c18",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#a9cfb7",
+                    "surface-container": "#f0eee8",
+                    "on-tertiary-container": "#ff9aa1",
+                    "on-secondary-fixed": "#211a13",
+                    "on-primary-container": "#9ac0a7",
+                    "outline-variant": "#c1c8c1",
+                    "tertiary-fixed-dim": "#ffb2b6",
+                    "surface-tint": "#436651",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#2d4f3c",
+                    "primary": "#163826",
+                    "inverse-surface": "#31312d",
+                    "secondary-fixed-dim": "#d2c4b9",
+                    "on-secondary-fixed-variant": "#4e453c",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#67081d",
+                    "surface-dim": "#dcdad4",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-surface": "#1c1c18",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#2c4e3b",
+                    "background": "#fcf9f3",
+                    "surface-container-high": "#ebe8e2",
+                    "surface-container-low": "#f6f3ed",
+                    "on-secondary-container": "#6d6259",
+                    "secondary-fixed": "#efe0d4",
+                    "primary-fixed": "#c5ecd2",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#002112",
+                    "surface-variant": "#e5e2dc",
+                    "secondary": "#675d53",
+                    "on-surface-variant": "#424843",
+                    "secondary-container": "#efe0d4",
+                    "inverse-on-surface": "#f3f0ea",
+                    "tertiary-container": "#862232",
+                    "primary-fixed-dim": "#a9cfb7",
+                    "on-tertiary-fixed": "#40000d",
+                    "outline": "#727973",
+                    "on-tertiary-fixed-variant": "#842131",
+                    "surface-container-highest": "#e5e2dc",
+                    "surface-bright": "#fcf9f3",
+                    "surface": "#fcf9f3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .serif-italic { font-family: 'Newsreader', serif; font-style: italic; }
+        .glass-nav { background: rgba(252, 249, 243, 0.8); backdrop-filter: blur(20px); }
+        .chart-grid { background-image: radial-gradient(#163826 0.5px, transparent 0.5px); background-size: 24px 24px; opacity: 0.05; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#f6f3ed] dark:bg-[#121212] flex flex-col py-8 border-r border-[#163826]/10 z-40">
+<div class="px-8 mb-12">
+<h1 class="font-headline text-xl font-bold text-[#2D4F3C]">Seogadam</h1>
+<p class="font-headline tracking-wide text-xs text-secondary opacity-70">Digital Sanctuary</p>
+</div>
+<nav class="flex-1 flex flex-col">
+<div class="space-y-1">
+<a class="flex items-center text-[#675d53] pl-5 py-3 hover:text-[#2D4F3C] hover:bg-[#fcf9f3]/50 transition-all duration-300 ease-in-out font-headline tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4">auto_stories</span>
+<span>The Atelier</span>
+</a>
+<a class="flex items-center text-[#675d53] pl-5 py-3 hover:text-[#2D4F3C] hover:bg-[#fcf9f3]/50 transition-all duration-300 ease-in-out font-headline tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4">local_library</span>
+<span>Library</span>
+</a>
+<a class="flex items-center text-[#2D4F3C] font-bold border-l-4 border-[#2D4F3C] pl-4 py-3 bg-[#fcf9f3]/50 font-headline tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4">collections_bookmark</span>
+<span>Curations</span>
+</a>
+<a class="flex items-center text-[#675d53] pl-5 py-3 hover:text-[#2D4F3C] hover:bg-[#fcf9f3]/50 transition-all duration-300 ease-in-out font-headline tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4">edit_note</span>
+<span>Archivist Notes</span>
+</a>
+<a class="flex items-center text-[#675d53] pl-5 py-3 hover:text-[#2D4F3C] hover:bg-[#fcf9f3]/50 transition-all duration-300 ease-in-out font-headline tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4">bookmark</span>
+<span>Bookmarks</span>
+</a>
+</div>
+<div class="mt-auto px-6">
+<button class="w-full bg-primary text-on-primary py-3 rounded-sm font-headline font-semibold tracking-tight hover:opacity-90 transition-opacity">
+                    New Entry
+                </button>
+<div class="mt-8 pt-8 border-t border-[#163826]/10">
+<a class="flex items-center text-[#675d53] py-3 hover:text-error transition-colors" href="#">
+<span class="material-symbols-outlined mr-4">logout</span>
+<span class="font-headline tracking-wide">Logout</span>
+</a>
+</div>
+</div>
+</nav>
+</aside>
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-[#fcf9f3]/80 backdrop-blur-md flex justify-between items-center px-12 z-30 border-b border-[#163826]/10">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary">search</span>
+<span class="text-secondary font-headline italic opacity-60">Search the archives...</span>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-[#675d53] hover:text-[#2D4F3C] transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-[#675d53] hover:text-[#2D4F3C] transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-primary/20">
+<img alt="Archivist Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a thoughtful man with a beard in a library setting, soft cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaJjgkNCyzc_2slEQbS2EUo6Q5Ds9Qkwgy_yGmEVrFQKjwvLKU3ODGzCPuxSk_wud-1N3xd68vhfSzplgzU0ChOV3XJVfSntjivqcb_ewhYYgpj4vm4ohKIM4wFfNNuF6JJKJUWUzFCuTkaFwhKa29JxkM7pfQbby_cgF9SZbsThaaKId8tva8obZukqcKNBrGQAe_749F9MbovMeT33Cx9CjAV6LesIcbCGAfqJfj1DMWGlXwJtdl3AKmWUN2hzcA12y2b9Lk40g"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 pb-16 px-12 max-w-7xl mx-auto">
+<!-- Hero Header Section -->
+<section class="mb-16">
+<span class="font-label uppercase text-xs tracking-widest text-primary font-bold mb-2 block">Analytical Reflections</span>
+<h2 class="font-headline text-5xl font-extrabold text-primary tracking-tight mb-6">Statistics &amp; Insights</h2>
+<div class="w-24 h-1 bg-tertiary mb-8"></div>
+<p class="font-headline text-2xl text-secondary max-w-2xl leading-relaxed italic">
+                "A mind needs books as a sword needs a whetstone, if it is to keep its edge."
+            </p>
+</section>
+<!-- Bento Grid Insights -->
+<div class="grid grid-cols-12 gap-8 mb-16">
+<!-- Monthly Progress Line Chart -->
+<div class="col-span-8 bg-surface-container-low rounded-lg p-10 relative overflow-hidden group">
+<div class="absolute inset-0 chart-grid"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-end mb-12">
+<div>
+<h3 class="font-headline text-2xl font-bold text-primary mb-1">Monthly Momentum</h3>
+<p class="text-secondary text-sm">Pages curated across the passing seasons</p>
+</div>
+<div class="text-right">
+<span class="text-4xl font-headline font-black text-primary">1,248</span>
+<p class="text-xs uppercase tracking-widest text-primary font-bold">Total Pages · Oct</p>
+</div>
+</div>
+<!-- Simulated Line Chart -->
+<div class="h-64 flex items-end justify-between gap-2 relative">
+<svg class="absolute inset-0 w-full h-full preserve-3d" viewbox="0 0 1000 200">
+<path d="M0,150 Q100,120 200,160 T400,80 T600,110 T800,40 T1000,90" fill="none" stroke="#163826" stroke-linecap="round" stroke-width="3"></path>
+<path d="M0,150 Q100,120 200,160 T400,80 T600,110 T800,40 T1000,90 V200 H0 Z" fill="url(#grad)" opacity="0.1"></path>
+<defs>
+<lineargradient id="grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#163826;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#163826;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="w-full flex justify-between mt-4 px-2">
+<span class="text-[10px] font-label font-bold text-secondary">MAY</span>
+<span class="text-[10px] font-label font-bold text-secondary">JUN</span>
+<span class="text-[10px] font-label font-bold text-secondary">JUL</span>
+<span class="text-[10px] font-label font-bold text-secondary">AUG</span>
+<span class="text-[10px] font-label font-bold text-secondary">SEP</span>
+<span class="text-[10px] font-label font-bold text-secondary">OCT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Narrative Insight Box -->
+<div class="col-span-4 bg-primary text-on-primary rounded-lg p-10 flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined text-4xl mb-6">auto_awesome</span>
+<h3 class="font-headline text-2xl font-bold mb-4">Curator's Note</h3>
+<p class="font-body text-on-primary/80 leading-relaxed text-sm">
+                        Your reading pace has increased by <span class="text-primary-fixed font-bold">14%</span> this month. You're gravitating towards deeper, more philosophical works as the evenings grow longer.
+                    </p>
+</div>
+<div class="mt-8">
+<p class="font-headline italic text-lg border-l-2 border-primary-fixed pl-4">
+                        "Autumn is a second spring when every leaf is a flower."
+                    </p>
+</div>
+</div>
+<!-- Genre Distribution Pie Chart -->
+<div class="col-span-4 bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-10 flex flex-col items-center">
+<h3 class="font-headline text-xl font-bold text-primary mb-8 self-start">Literary DNA</h3>
+<div class="relative w-48 h-48 mb-10">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#efe0d4" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#163826" stroke-dasharray="45 100" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#67081d" stroke-dasharray="25 100" stroke-dashoffset="-45" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#675d53" stroke-dasharray="30 100" stroke-dashoffset="-70" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-headline text-2xl font-black text-primary">Genres</span>
+</div>
+</div>
+<div class="w-full space-y-3">
+<div class="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
+<span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-primary"></div> Philosophy</span>
+<span class="text-primary">45%</span>
+</div>
+<div class="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
+<span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-tertiary"></div> Poetry</span>
+<span class="text-secondary">25%</span>
+</div>
+<div class="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
+<span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-secondary"></div> History</span>
+<span class="text-secondary">30%</span>
+</div>
+</div>
+</div>
+<!-- Your Reading Soul Section -->
+<div class="col-span-8 bg-surface-container-low rounded-lg overflow-hidden flex">
+<div class="w-1/2 p-10 flex flex-col justify-between border-r border-outline-variant/10">
+<div>
+<h3 class="font-headline text-3xl font-extrabold text-primary mb-6">Your Reading Soul</h3>
+<p class="font-body text-secondary leading-loose">
+                            Based on your interactions with <span class="italic">'The Overstory'</span> and <span class="italic">'Meditations'</span>, your literary soul resonates with environmental ethics and stoic perseverance.
+                        </p>
+</div>
+<div class="flex gap-4 items-center">
+<div class="bg-primary-container p-2 rounded-sm text-on-primary-container">
+<span class="material-symbols-outlined text-lg">psychology</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-tighter text-primary">Archetype: The Contemplative Naturalist</span>
+</div>
+</div>
+<div class="w-1/2 relative bg-surface-container-high group">
+<img alt="Reading Atmosphere" class="w-full h-full object-cover opacity-80 mix-blend-multiply transition-transform duration-700 group-hover:scale-105" data-alt="stacks of vintage books on a rustic wooden table with soft dust motes dancing in sunbeams" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdbuffJoDuq8GqqMQGxCK57CjrOqru3wYCgWs4KAds7gCyr5a3kGDM-8w547fML64gSv4I3rEk0h8i68aIGrSpoXadpS5EafVZU3zabZFaKF6zcSc_v1CTbgAr9OwDP9f1OPv6lrUh01tgIvWIbJNSSal4_q0lTNKJwQ_eimtDpuTNcoy1jLYOcGzUaIMhDSoP0c20o6rqXjs7tmTk0FWdOk_4IUDAb7LHV5UZgFZ0oNQrGBuNIzka8J2BKjVtvdqjGT8dTjA3qy8"/>
+<div class="absolute inset-0 flex items-center justify-center p-8">
+<div class="bg-white/90 backdrop-blur-sm p-6 text-center border border-primary/5">
+<span class="material-symbols-outlined text-tertiary mb-2">format_quote</span>
+<p class="font-headline italic text-lg text-primary leading-tight">
+                                "The more that you read, the more things you will know."
+                            </p>
+<p class="text-[10px] uppercase font-bold tracking-widest mt-4 text-secondary">— Seuss, Personal Legacy</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Weekly Activity Heatmap -->
+<section class="bg-surface-container-lowest p-10 rounded-lg border border-outline-variant/20">
+<div class="flex justify-between items-center mb-10">
+<h3 class="font-headline text-2xl font-bold text-primary">Archive Activity</h3>
+<div class="flex gap-4">
+<div class="flex items-center gap-2"><div class="w-3 h-3 bg-surface-container-high rounded-sm"></div> <span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Rest</span></div>
+<div class="flex items-center gap-2"><div class="w-3 h-3 bg-primary/20 rounded-sm"></div> <span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Glimmer</span></div>
+<div class="flex items-center gap-2"><div class="w-3 h-3 bg-primary/60 rounded-sm"></div> <span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Focus</span></div>
+<div class="flex items-center gap-2"><div class="w-3 h-3 bg-primary rounded-sm"></div> <span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Flow</span></div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-2">
+<!-- 52 weeks simulated -->
+<div class="col-span-12 h-32 flex flex-wrap gap-1 content-start">
+<!-- Javascript would loop this, manually creating a pattern -->
+<div class="w-4 h-4 bg-primary/40 rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary rounded-[1px]"></div>
+<div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary/30 rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary rounded-[1px]"></div>
+<div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div>
+<!-- Repeated pattern for visual density -->
+<div class="w-4 h-4 bg-primary/40 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div><div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div><div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div><div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/30 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/40 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div><div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/30 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/40 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div><div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div><div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div><div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/30 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/40 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div><div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/30 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/40 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div><div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div><div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/20 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-surface-container-high rounded-[1px]"></div><div class="w-4 h-4 bg-primary/80 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/30 rounded-[1px]"></div><div class="w-4 h-4 bg-primary/60 rounded-[1px]"></div><div class="w-4 h-4 bg-primary rounded-[1px]"></div><div class="w-4 h-4 bg-primary/10 rounded-[1px]"></div>
+</div>
+</div>
+<p class="mt-6 font-body text-xs text-secondary italic opacity-60">
+                Reflection: You are most consistent on Tuesday evenings, coinciding with your 'Slow Reading' ritual.
+            </p>
+</section>
+</main>
+<!-- Aesthetic Archivist Ribbon -->
+<div class="fixed right-0 top-1/2 -translate-y-1/2 w-1.5 h-32 bg-tertiary rounded-l-full"></div>
+</body></html>

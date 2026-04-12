@@ -1,4 +1,4 @@
-import 'package:bookfolio_mobile/src/app.dart';
+import 'package:seogadam_mobile/src/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

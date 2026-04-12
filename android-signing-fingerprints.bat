@@ -7,7 +7,7 @@ REM   기본: Android 디버그 keystore (%USERPROFILE%\.android\debug.keystore)
 REM   릴리스: Keystore 경로, 별칭, [store 비밀번호] — 비밀번호 생략 시 입력 프롬프트
 REM
 REM @history
-REM - 2026-04-01: 최초 추가 (Bookfolio 모노레포 루트)
+REM - 2026-04-01: 최초 추가 (Seogadam 모노레포 루트)
 
 title Android signing fingerprints
 

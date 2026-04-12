@@ -38,6 +38,10 @@ function AndroidApkIcon({ className }: { className?: string }) {
  * @history
  * - 2026-03-26: 대시보드·로그아웃 등 네비에 lucide 아이콘 추가
  * - 2026-03-28: 네비 순서 — 공동서재 → 북폴리오 집계 → 베스트셀러 → 초이스 신간 → 내 서재
+ * - 2026-04-05: 브랜드 서가담·글래스 헤더; 내비 「서가담 집계」 표기
+ * - 2026-04-12: 브랜드 링크 — 로그인 시 `/`(랜딩) 대신 `/dashboard`(내 서재)
+ * - 2026-04-12: 모바일(`md` 미만) 브랜드 링크·로고 뷰포트 가운데 정렬; PNG 경로 `Seogadam_Web_logo.png`·`alt` 정리
+ * - 2026-04-07: 헤더 브랜드 마크·표시명 서가담(`seogadam_logo.png`)
  * - 2026-03-29: `md` 미만 Sheet 햄버거 — 전역 내비·푸터와 동일 법적 고지 링크(개인정보·약관·쿠키)
  * - 2026-03-26: 로그인 네비에 베스트셀러·초이스 신간 링크 추가(`dashboard/bestsellers`, `dashboard/choice-new`)
  * - 2026-03-29: 소유 공동서재(타 멤버 있음) 시 탈퇴 막힘 목록을 헤더·모바일 메뉴에 전달
@@ -58,25 +62,29 @@ export async function SiteHeader() {
     "사용자";
 
   return (
-    <header className="border-b border-border/60 bg-card/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md">
+      <div className="relative mx-auto flex h-14 w-full max-w-6xl items-center justify-end gap-4 px-4 md:justify-between">
         <Link
-          href="/"
-          className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground"
+          href={(user?.id ? "/dashboard" : "/") as Route}
+          className="absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center text-foreground md:static md:left-auto md:top-auto md:z-auto md:translate-x-0 md:translate-y-0"
         >
           <img
-            src="/assets/bookfolio_b_favicon.svg"
-            alt=""
-            width={32}
-            height={32}
-            className="size-8 shrink-0"
+            src="/assets/Seogadam_Web_logo.png"
+            alt="서가담"
+            width={200}
+            height={48}
+            className="h-8 w-auto max-w-[min(11rem,calc(100vw-5.5rem))] shrink-0 object-contain md:max-w-[8.5rem]"
           />
-          Bookfolio
         </Link>
         <nav className="flex min-w-0 items-center gap-2">
           <div className="hidden min-w-0 items-center gap-2 md:flex">
             {apkUrl ? (
-              <Button variant="ghost" size="icon-sm" className="shrink-0" asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0"
+                asChild
+              >
                 <a
                   href={apkUrl}
                   target="_blank"
@@ -95,7 +103,9 @@ export async function SiteHeader() {
                   email={user.email}
                   displayLabel={displayLabel}
                   initialProfile={profile}
-                  sharedLibrariesBlockingWithdrawal={sharedLibrariesBlockingWithdrawal}
+                  sharedLibrariesBlockingWithdrawal={
+                    sharedLibrariesBlockingWithdrawal
+                  }
                 />
                 <Button variant="ghost" size="sm" asChild>
                   <Link
@@ -112,7 +122,7 @@ export async function SiteHeader() {
                     className="inline-flex items-center gap-2"
                   >
                     <BarChart3Icon className="size-4 opacity-80" />
-                    북폴리오 집계
+                    서가담 집계
                   </Link>
                 </Button>
                 <Button variant="ghost" size="sm" asChild>
@@ -156,7 +166,10 @@ export async function SiteHeader() {
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/login" className="inline-flex items-center gap-2">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center gap-2"
+                  >
                     <LogInIcon className="size-4 opacity-80" />
                     로그인
                   </Link>
@@ -181,7 +194,9 @@ export async function SiteHeader() {
             }
             displayLabel={displayLabel}
             initialProfile={profile}
-            sharedLibrariesBlockingWithdrawal={sharedLibrariesBlockingWithdrawal}
+            sharedLibrariesBlockingWithdrawal={
+              sharedLibrariesBlockingWithdrawal
+            }
           />
         </nav>
       </div>

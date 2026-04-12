@@ -1,12 +1,13 @@
-import 'package:bookfolio_mobile/src/state/library_controller.dart';
-import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
+import 'package:seogadam_mobile/src/state/library_controller.dart';
+import 'package:seogadam_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-/// 개인 독서 이벤트 캘린더(회원 순위는 「북폴리오 집계」).
+/// 개인 독서 이벤트 캘린더(회원 순위는 「서가담 집계」).
 ///
 /// History:
+/// - 2026-04-07: 안내 문구 서가담 브랜드 정렬
 /// - 2026-03-28: 완독·소장 리더보드 제거 — `BookfolioAggregateScreen`으로 이전; 허브 바 제거(서랍·프로필 등에서 진입)
 /// - 2026-03-26: `MainHubTopNavBar` 추가
 /// - 2026-03-26: 신규
@@ -79,7 +80,7 @@ class _MyStatsScreenState extends State<MyStatsScreen> {
                 child: Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
               ),
             Text(
-              '회원 순위·인기 소장 도서는 상단 메뉴 「북폴리오 집계」에서 확인할 수 있습니다.',
+              '회원 순위·인기 소장 도서는 상단 메뉴 「서가담 집계」에서 확인할 수 있습니다.',
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),

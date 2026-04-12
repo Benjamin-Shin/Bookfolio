@@ -1,12 +1,13 @@
-import 'package:bookfolio_mobile/src/models/shared_library_models.dart';
-import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
-import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
-import 'package:bookfolio_mobile/src/util/cover_image_url.dart';
+import 'package:seogadam_mobile/src/models/shared_library_models.dart';
+import 'package:seogadam_mobile/src/ui/book_ui_labels.dart';
+import 'package:seogadam_mobile/src/ui/mobile_scroll_padding.dart';
+import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
 
 /// 공동서재 한 권의 공유 서지·소유자별 상태(읽기 전용).
 ///
 /// History:
+/// - 2026-04-12: 표지 — 원본(논리 픽셀)보다 크게 확대되지 않도록 상한
 /// - 2026-03-29: 다크 모드 — 앱바·메타/섹션/플레이스홀더·정보 카드 색을 `ColorScheme` 기준으로 통일
 /// - 2026-03-25: 신규
 class SharedLibraryBookDetailScreen extends StatelessWidget {
@@ -51,17 +52,9 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           if (cover != null)
-            ClipRRect(
+            _SharedLibraryDetailCover(
+              url: cover,
               borderRadius: BorderRadius.circular(12),
-              child: AspectRatio(
-                aspectRatio: 2 / 3,
-                child: Image.network(
-                  cover,
-                  fit: BoxFit.cover,
-                  headers: kCoverImageRequestHeaders,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                ),
-              ),
             )
           else
             Container(
@@ -164,6 +157,162 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 네트워크 표지를 **원본 이미지의 논리 픽셀 크기 이하**로만 그린다(업스케일 방지).
+/// 가로는 부모 `maxWidth`를 넘지 않도록 축소만 한다.
+///
+/// History:
+/// - 2026-04-12: `ImageStreamListener`로 intrinsic 크기 측정 후 `SizedBox` 상한
+class _SharedLibraryDetailCover extends StatefulWidget {
+  const _SharedLibraryDetailCover({
+    required this.url,
+    required this.borderRadius,
+  });
+
+  final String url;
+  final BorderRadius borderRadius;
+
+  @override
+  State<_SharedLibraryDetailCover> createState() => _SharedLibraryDetailCoverState();
+}
+
+class _SharedLibraryDetailCoverState extends State<_SharedLibraryDetailCover> {
+  ImageStream? _stream;
+  ImageStreamListener? _listener;
+  String? _listeningUrl;
+
+  double? _intrinsicLogicalW;
+  double? _intrinsicLogicalH;
+  bool _failed = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ensureListening();
+  }
+
+  @override
+  void didUpdateWidget(covariant _SharedLibraryDetailCover oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.url != widget.url) {
+      _tearDownStream();
+      _intrinsicLogicalW = null;
+      _intrinsicLogicalH = null;
+      _failed = false;
+      _listeningUrl = null;
+      _ensureListening();
+    }
+  }
+
+  void _ensureListening() {
+    if (_listeningUrl == widget.url || _failed) return;
+    _tearDownStream();
+    _listeningUrl = widget.url;
+
+    final provider = NetworkImage(widget.url, headers: kCoverImageRequestHeaders);
+    final stream = provider.resolve(createLocalImageConfiguration(context));
+    _stream = stream;
+    _listener = ImageStreamListener(
+      _onImageFrame,
+      onError: (_, __) {
+        if (!mounted) return;
+        setState(() {
+          _failed = true;
+          _intrinsicLogicalW = null;
+          _intrinsicLogicalH = null;
+        });
+      },
+    );
+    stream.addListener(_listener!);
+  }
+
+  void _onImageFrame(ImageInfo info, bool _) {
+    if (!mounted) return;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    if (dpr <= 0) return;
+    setState(() {
+      _intrinsicLogicalW = info.image.width / dpr;
+      _intrinsicLogicalH = info.image.height / dpr;
+    });
+  }
+
+  void _tearDownStream() {
+    if (_stream != null && _listener != null) {
+      _stream!.removeListener(_listener!);
+    }
+    _stream = null;
+    _listener = null;
+  }
+
+  @override
+  void dispose() {
+    _tearDownStream();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_failed) return const SizedBox.shrink();
+
+    final scheme = Theme.of(context).colorScheme;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth;
+
+        if (_intrinsicLogicalW == null ||
+            _intrinsicLogicalH == null ||
+            _intrinsicLogicalW! <= 0 ||
+            _intrinsicLogicalH! <= 0) {
+          return ClipRRect(
+            borderRadius: widget.borderRadius,
+            child: AspectRatio(
+              aspectRatio: 2 / 3,
+              child: ColoredBox(
+                color: scheme.surfaceContainerHighest,
+                child: Center(
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: scheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        final iw = _intrinsicLogicalW!;
+        final ih = _intrinsicLogicalH!;
+        final scale = iw <= maxW ? 1.0 : maxW / iw;
+        final w = iw * scale;
+        final h = ih * scale;
+
+        return Center(
+          child: ClipRRect(
+            borderRadius: widget.borderRadius,
+            child: SizedBox(
+              width: w,
+              height: h,
+              child: Image.network(
+                widget.url,
+                fit: BoxFit.cover,
+                width: w,
+                height: h,
+                headers: kCoverImageRequestHeaders,
+                filterQuality: FilterQuality.medium,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

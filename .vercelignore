@@ -49,3 +49,6 @@ yarn-error.log*
 
 # Git (원격 클론 시 보통 없음, 로컬 CLI 업로드 시 제외)
 .git/
+
+References/
+Resources/

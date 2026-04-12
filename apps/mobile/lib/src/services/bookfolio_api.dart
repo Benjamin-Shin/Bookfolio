@@ -1,14 +1,16 @@
 import 'dart:convert';
 
-import 'package:bookfolio_mobile/src/models/aladin_bestseller_models.dart';
-import 'package:bookfolio_mobile/src/models/book_models.dart'
+import 'package:seogadam_mobile/src/models/aladin_bestseller_models.dart';
+import 'package:seogadam_mobile/src/models/canon_book_models.dart';
+import 'package:seogadam_mobile/src/models/discover_models.dart';
+import 'package:seogadam_mobile/src/models/book_models.dart'
     show
         BookLookupResult,
         BookOneLinerItem,
         ReadingEventItem,
         UserBook,
         UserBookMemo;
-import 'package:bookfolio_mobile/src/models/shared_library_models.dart';
+import 'package:seogadam_mobile/src/models/shared_library_models.dart';
 import 'package:http/http.dart' as http;
 
 /// API가 JSON `{ "error": "..." }` 로 돌려준 메시지를 담습니다 (예: 중복 등록 409).
@@ -89,6 +91,207 @@ class UserBooksPageResult {
   final int total;
   final int page;
   final int pageSize;
+}
+
+/// `GET /api/me/stats/personal-library-summary` 저자 TOP 행.
+///
+/// History:
+/// - 2026-04-02: 신규
+class PersonalLibraryAuthorTop {
+  const PersonalLibraryAuthorTop({required this.name, required this.count});
+
+  final String name;
+  final int count;
+
+  factory PersonalLibraryAuthorTop.fromJson(Map<String, dynamic> json) {
+    final c = json['count'];
+    return PersonalLibraryAuthorTop(
+      name: json['name'] as String? ?? '',
+      count: c is int ? c : (c is num ? c.toInt() : int.tryParse('$c') ?? 0),
+    );
+  }
+}
+
+/// `GET /api/me/stats/personal-library-summary` 응답.
+///
+/// History:
+/// - 2026-04-02: `topAuthorsByOwnedCount` 등
+/// - 2026-04-02: 모바일 내 서재 허브·분석 지표
+class PersonalLibrarySummary {
+  const PersonalLibrarySummary({
+    required this.physicalPaperCount,
+    required this.ownedWorkCount,
+    required this.readingPaperCount,
+    required this.completedCount,
+    required this.unreadCount,
+    required this.lifeBookCount,
+    required this.totalListPriceKrw,
+    required this.memoCount,
+    required this.oneLinerCount,
+    required this.readCompleteThisYearCount,
+    required this.readCompleteThisMonthCount,
+    required this.totalPagesRead,
+    required this.topAuthorsByOwnedCount,
+  });
+
+  final int physicalPaperCount;
+  final int ownedWorkCount;
+  final int readingPaperCount;
+  final int completedCount;
+  final int unreadCount;
+  final int lifeBookCount;
+  final int totalListPriceKrw;
+  final int memoCount;
+  final int oneLinerCount;
+  final int readCompleteThisYearCount;
+  final int readCompleteThisMonthCount;
+  final int totalPagesRead;
+  final List<PersonalLibraryAuthorTop> topAuthorsByOwnedCount;
+
+  factory PersonalLibrarySummary.fromJson(Map<String, dynamic> json) {
+    int g(String k) {
+      final v = json[k];
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v) ?? 0;
+      return 0;
+    }
+
+    final topRaw = json['topAuthorsByOwnedCount'];
+    final top = topRaw is List<dynamic>
+        ? topRaw.map((e) => PersonalLibraryAuthorTop.fromJson(e as Map<String, dynamic>)).toList()
+        : const <PersonalLibraryAuthorTop>[];
+
+    return PersonalLibrarySummary(
+      physicalPaperCount: g('physicalPaperCount'),
+      ownedWorkCount: g('ownedWorkCount'),
+      readingPaperCount: g('readingPaperCount'),
+      completedCount: g('completedCount'),
+      unreadCount: g('unreadCount'),
+      lifeBookCount: g('lifeBookCount'),
+      totalListPriceKrw: g('totalListPriceKrw'),
+      memoCount: g('memoCount'),
+      oneLinerCount: g('oneLinerCount'),
+      readCompleteThisYearCount: g('readCompleteThisYearCount'),
+      readCompleteThisMonthCount: g('readCompleteThisMonthCount'),
+      totalPagesRead: g('totalPagesRead'),
+      topAuthorsByOwnedCount: top,
+    );
+  }
+}
+
+/// `GET/POST /api/me/profile` 응답.
+///
+/// History:
+/// - 2026-04-06: `onboardingCompletedAt`
+/// - 2026-04-06: `annualReadingGoal`
+/// - 2026-04-02: 인구통계 필드
+class MeAppProfile {
+  const MeAppProfile({
+    required this.id,
+    required this.email,
+    required this.displayName,
+    required this.avatarUrl,
+    required this.gender,
+    required this.birthDate,
+    required this.genderPublic,
+    required this.birthDatePublic,
+    this.annualReadingGoal,
+    this.onboardingCompletedAt,
+  });
+
+  final String id;
+  final String email;
+  final String? displayName;
+  final String? avatarUrl;
+  final String? gender;
+  final String? birthDate;
+  final bool genderPublic;
+  final bool birthDatePublic;
+  /// 올해 완독 목표 권수. null이면 미설정.
+  final int? annualReadingGoal;
+  /// 서버 ISO 8601. null/빈 문자열이면 온보딩 미완료.
+  final String? onboardingCompletedAt;
+
+  factory MeAppProfile.fromJson(Map<String, dynamic> json) {
+    final g = json['annualReadingGoal'];
+    final oc = json['onboardingCompletedAt']?.toString();
+    return MeAppProfile(
+      id: json['id'] as String,
+      email: json['email'] as String,
+      displayName: json['displayName'] as String?,
+      avatarUrl: json['avatarUrl'] as String?,
+      gender: json['gender'] as String?,
+      birthDate: json['birthDate'] as String?,
+      genderPublic: json['genderPublic'] == true,
+      birthDatePublic: json['birthDatePublic'] == true,
+      annualReadingGoal: g is int ? g : (g is num ? g.toInt() : null),
+      onboardingCompletedAt: (oc != null && oc.isNotEmpty) ? oc : null,
+    );
+  }
+}
+
+/// `GET /api/me/reading-events/by-day` 행.
+///
+/// History:
+/// - 2026-04-02: 캘린더 셀 표지용
+class ReadingEventDayRow {
+  const ReadingEventDayRow({
+    required this.userBookId,
+    required this.coverUrl,
+    required this.title,
+  });
+
+  final String userBookId;
+  final String? coverUrl;
+  final String title;
+
+  factory ReadingEventDayRow.fromJson(Map<String, dynamic> json) {
+    return ReadingEventDayRow(
+      userBookId:
+          json['userBookId'] as String? ?? json['user_book_id'] as String? ?? '',
+      coverUrl: json['coverUrl'] as String? ?? json['cover_url'] as String?,
+      title: json['title'] as String? ?? '',
+    );
+  }
+}
+
+/// `GET /api/me/mobile-home` 응답 — 모바일 홈 탭 일괄 로드.
+///
+/// History:
+/// - 2026-04-12: 신규
+class MobileHomeBundle {
+  const MobileHomeBundle({
+    required this.profile,
+    required this.personalLibrarySummary,
+    required this.points,
+    required this.readingBook,
+    required this.unreadRecommend,
+  });
+
+  final MeAppProfile? profile;
+  final PersonalLibrarySummary personalLibrarySummary;
+  final PointsBalanceResult? points;
+  final UserBook? readingBook;
+  final List<UserBook> unreadRecommend;
+
+  factory MobileHomeBundle.fromJson(Map<String, dynamic> json) {
+    final p = json['profile'];
+    final pts = json['points'];
+    final sum = json['personalLibrarySummary'];
+    final read = json['readingBook'];
+    final rawUnread = json['unreadRecommend'];
+
+    return MobileHomeBundle(
+      profile: p is Map<String, dynamic> ? MeAppProfile.fromJson(p) : null,
+      personalLibrarySummary: PersonalLibrarySummary.fromJson(sum as Map<String, dynamic>),
+      points: pts is Map<String, dynamic> ? PointsBalanceResult.fromJson(pts) : null,
+      readingBook: read is Map<String, dynamic> ? UserBook.fromJson(read) : null,
+      unreadRecommend: rawUnread is List<dynamic>
+          ? rawUnread.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList()
+          : const <UserBook>[],
+    );
+  }
 }
 
 class BookfolioApi {
@@ -324,6 +527,49 @@ class BookfolioApi {
     return AladinBestsellerFeed.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
+  /// 발견 탭 — 타인이 먼저 등록한 종이책 캐논(본인 미소장).
+  ///
+  /// History:
+  /// - 2026-04-05: `GET /api/me/discover/community-books`
+  Future<List<DiscoverCommunityBook>> fetchDiscoverCommunityBooks({int limit = 30}) async {
+    final uri = Uri.parse('$_baseUrl/api/me/discover/community-books').replace(
+      queryParameters: {'limit': '$limit'},
+    );
+    final response = await _client.get(uri, headers: await _headers());
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final raw = decoded['books'] as List<dynamic>? ?? const [];
+    return raw.map((e) => DiscoverCommunityBook.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// 캐논 도서 구매 링크·가격 힌트(회원 전용).
+  ///
+  /// History:
+  /// - 2026-04-08: `GET /api/me/canon-books/:bookId/purchase-offers`
+  Future<CanonBookPurchaseOffers> fetchCanonBookPurchaseOffers(String bookId) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/canon-books/$bookId/purchase-offers'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    return CanonBookPurchaseOffers.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// 캐논 도서 공개 한줄평(회원 전용).
+  ///
+  /// History:
+  /// - 2026-04-08: `GET /api/me/canon-books/:bookId/community-one-liners`
+  Future<List<CanonCommunityOneLiner>> fetchCanonCommunityOneLiners(String bookId, {int limit = 50}) async {
+    final uri = Uri.parse('$_baseUrl/api/me/canon-books/$bookId/community-one-liners').replace(
+      queryParameters: {'limit': '$limit'},
+    );
+    final response = await _client.get(uri, headers: await _headers());
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final raw = decoded['items'] as List<dynamic>? ?? const [];
+    return raw.map((e) => CanonCommunityOneLiner.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
   /// `GET /api/me/books/:id/memos`
   ///
   /// History:
@@ -409,7 +655,8 @@ class BookfolioApi {
   /// `GET /api/me/stats/bookfolio-aggregate?top=10`
   ///
   /// History:
-  /// - 2026-03-28: 북폴리오 집계(소장·완독·포인트·인기 도서)
+  /// - 2026-04-07: 주석 카피 서가담화
+  /// - 2026-03-28: 커뮤니티 집계(소장·완독·포인트·인기 도서)
   Future<Map<String, dynamic>> fetchBookfolioAggregate({int top = 10}) async {
     final uri = Uri.parse('$_baseUrl/api/me/stats/bookfolio-aggregate').replace(
       queryParameters: {'top': '$top'},
@@ -440,6 +687,19 @@ class BookfolioApi {
       headers: await _headers(),
     );
     _throwIfFailed(response);
+  }
+
+  /// `GET /api/me/mobile-home` — 홈 탭용 프로필·요약·포인트·도서 샘플 일괄 조회.
+  ///
+  /// History:
+  /// - 2026-04-12: 신규
+  Future<MobileHomeBundle> fetchMobileHome() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/mobile-home'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    return MobileHomeBundle.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// `GET /api/me/points/balance`
@@ -473,6 +733,64 @@ class BookfolioApi {
     );
     _throwIfFailed(response);
     return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// `GET /api/me/profile`
+  ///
+  /// History:
+  /// - 2026-04-02: 신규
+  Future<MeAppProfile> fetchMeProfile() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/profile'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    return MeAppProfile.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// `POST /api/me/profile` (`action: update`). 본문은 서버가 부분 갱신으로 처리합니다.
+  ///
+  /// History:
+  /// - 2026-04-06: `onboardingCompleted` — 온보딩 완료 플래그
+  /// - 2026-04-02: 신규
+  Future<MeAppProfile> updateMeProfile(Map<String, dynamic> fields) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/me/profile'),
+      headers: await _headers(),
+      body: jsonEncode({'action': 'update', ...fields}),
+    );
+    _throwIfFailed(response);
+    return MeAppProfile.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// `GET /api/me/stats/personal-library-summary`
+  ///
+  /// History:
+  /// - 2026-04-02: 신규
+  Future<PersonalLibrarySummary> fetchPersonalLibrarySummary() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/stats/personal-library-summary'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    return PersonalLibrarySummary.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// `GET /api/me/reading-events/by-day?day=YYYY-MM-DD`
+  ///
+  /// History:
+  /// - 2026-04-02: 캘린더 날짜별 표지(첫 이벤트)용
+  Future<List<ReadingEventDayRow>> fetchReadingEventsByDay(String dayYmd) async {
+    final uri = Uri.parse('$_baseUrl/api/me/reading-events/by-day').replace(
+      queryParameters: {'day': dayYmd},
+    );
+    final response = await _client.get(uri, headers: await _headers());
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic>) return const [];
+    final items = decoded['items'];
+    if (items is! List<dynamic>) return const [];
+    return items.map((e) => ReadingEventDayRow.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<Map<String, int>> fetchReadingEventsCalendar(String from, String to) async {

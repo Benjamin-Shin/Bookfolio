@@ -1,18 +1,21 @@
-import 'package:bookfolio_mobile/src/models/book_models.dart';
-import 'package:bookfolio_mobile/src/services/bookfolio_api.dart';
-import 'package:bookfolio_mobile/src/state/library_controller.dart';
-import 'package:bookfolio_mobile/src/ui/book_ui_labels.dart';
-import 'package:bookfolio_mobile/src/ui/mobile_scroll_padding.dart';
-import 'package:bookfolio_mobile/src/ui/screens/barcode_scan_screen.dart';
-import 'package:bookfolio_mobile/src/ui/screens/title_search_screen.dart';
-import 'package:bookfolio_mobile/src/util/cover_image_url.dart';
-import 'package:bookfolio_mobile/src/util/isbn.dart';
+import 'package:seogadam_mobile/src/models/book_models.dart';
+import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
+import 'package:seogadam_mobile/src/state/library_controller.dart';
+import 'package:seogadam_mobile/src/ui/book_ui_labels.dart';
+import 'package:seogadam_mobile/src/ui/mobile_scroll_padding.dart';
+import 'package:seogadam_mobile/src/ui/screens/barcode_scan_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/title_keyword_lookup_screen.dart';
+import 'package:seogadam_mobile/src/util/cover_image_url.dart';
+import 'package:seogadam_mobile/src/util/isbn.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 /// 도서 등록·수정 폼.
 ///
 /// History:
+/// - 2026-04-12: `DropdownButtonFormField` — `value` → `initialValue`(Flutter 3.33+)
+/// - 2026-04-02: 제목 메타 검색 진입을 `TitleKeywordLookupScreen`으로 분리
+/// - 2026-04-02: 모바일은 종이책만 — 형식 선택을 `종이책` 고정
 /// - 2026-03-29: 표지 프리뷰·섹션 카드·빠른 입력 타일·별점(스타) UI로 레이아웃 정리
 /// - 2026-03-24: 제목 검색으로 메타 불러오기 버튼 추가
 const _kLocationPresets = ['집', '회사', '빌려줌'];
@@ -62,6 +65,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
       _publishedDate = ex.publishedDate;
       _description = ex.description;
       _priceKrw = ex.priceKrw;
+      _format = BookFormat.paper;
     } else {
       _isbnController = TextEditingController(text: p?.isbn ?? '');
       _titleController = TextEditingController(text: p?.title ?? '');
@@ -111,7 +115,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
 
   Future<void> _openTitleSearch() async {
     final lookup = await Navigator.of(context).push<BookLookupResult>(
-      MaterialPageRoute(builder: (_) => const TitleSearchScreen()),
+      MaterialPageRoute(builder: (_) => const TitleKeywordLookupScreen()),
     );
     if (lookup == null || !mounted) return;
     _applyLookup(lookup);
@@ -291,13 +295,13 @@ class _BookFormScreenState extends State<BookFormScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<BookFormat>(
-                  value: _format,
-                  items: BookFormat.values
-                      .map((format) => DropdownMenuItem(value: format, child: Text(bookFormatLabelKo(format))))
-                      .toList(),
+                  initialValue: _format,
+                  items: [
+                    DropdownMenuItem(value: BookFormat.paper, child: Text(bookFormatLabelKo(BookFormat.paper))),
+                  ],
                   onChanged: (value) => setState(() => _format = value ?? BookFormat.paper),
                   decoration: InputDecoration(
-                    labelText: '형식',
+                    labelText: '형식(종이책만)',
                     border: const OutlineInputBorder(),
                     filled: true,
                     fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
@@ -305,7 +309,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<ReadingStatus>(
-                  value: _status,
+                  initialValue: _status,
                   items: ReadingStatus.values
                       .map((status) => DropdownMenuItem(value: status, child: Text(readingStatusLabelKo(status))))
                       .toList(),

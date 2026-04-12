@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 
-import { libraryBooksListHref } from "@/components/libraries/library-books-list-href";
+import {
+  libraryDetailHref,
+  type LibraryBookTab,
+} from "@/components/libraries/library-books-list-href";
 
 type OwnerOption = {
   userId: string;
@@ -14,19 +17,22 @@ type LibraryOwnerFilterProps = {
   owners: OwnerOption[];
   selectedOwnerUserId: string;
   selectedGenre: string;
+  tab?: LibraryBookTab;
 };
 
 /**
  * 공동서재 상세 소유자(멤버) 필터 — `owner` 쿼리는 `userId`.
  *
  * @history
+ * - 2026-04-12: `tab`·`libraryDetailHref`로 탭 유지
  * - 2026-03-24: 신규
  */
 export function LibraryOwnerFilter({
   libraryId,
   owners,
   selectedOwnerUserId,
-  selectedGenre
+  selectedGenre,
+  tab = "owned",
 }: LibraryOwnerFilterProps) {
   if (owners.length === 0 && !selectedOwnerUserId) {
     return null;
@@ -44,7 +50,7 @@ export function LibraryOwnerFilter({
       <div className="flex flex-wrap gap-1.5">
         <Badge variant={active ? "default" : "outline"} asChild>
           <Link
-            href={libraryBooksListHref(libraryId, { genre, owner: undefined })}
+            href={libraryDetailHref(libraryId, { genre, owner: undefined, tab, page: 1 })}
             prefetch={false}
           >
             전체
@@ -60,9 +66,11 @@ export function LibraryOwnerFilter({
               asChild
             >
               <Link
-                href={libraryBooksListHref(libraryId, {
+                href={libraryDetailHref(libraryId, {
                   genre,
-                  owner: o.userId
+                  owner: o.userId,
+                  tab,
+                  page: 1,
                 })}
                 prefetch={false}
                 title={o.label}

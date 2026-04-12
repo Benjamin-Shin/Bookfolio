@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#675d53",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#40000d",
+                    "tertiary": "#67081d",
+                    "on-primary-fixed": "#002112",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#c5ecd2",
+                    "surface-container-low": "#f6f3ed",
+                    "surface-container": "#f0eee8",
+                    "on-tertiary-container": "#ff9aa1",
+                    "tertiary-fixed-dim": "#ffb2b6",
+                    "surface-container-high": "#ebe8e2",
+                    "secondary-fixed-dim": "#d2c4b9",
+                    "inverse-primary": "#a9cfb7",
+                    "on-primary-container": "#9ac0a7",
+                    "on-secondary-fixed": "#211a13",
+                    "tertiary-fixed": "#ffdadb",
+                    "secondary-container": "#efe0d4",
+                    "primary": "#163826",
+                    "background": "#fcf9f3",
+                    "inverse-on-surface": "#f3f0ea",
+                    "surface-dim": "#dcdad4",
+                    "on-secondary-fixed-variant": "#4e453c",
+                    "outline-variant": "#c1c8c1",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#fcf9f3",
+                    "on-surface": "#1c1c18",
+                    "on-secondary-container": "#6d6259",
+                    "on-secondary": "#ffffff",
+                    "surface-bright": "#fcf9f3",
+                    "outline": "#727973",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#2c4e3b",
+                    "surface-tint": "#436651",
+                    "tertiary-container": "#862232",
+                    "on-surface-variant": "#424843",
+                    "on-background": "#1c1c18",
+                    "surface-container-highest": "#e5e2dc",
+                    "on-error": "#ffffff",
+                    "primary-container": "#2d4f3c",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#a9cfb7",
+                    "surface-variant": "#e5e2dc",
+                    "secondary-fixed": "#efe0d4",
+                    "inverse-surface": "#31312d",
+                    "on-tertiary-fixed-variant": "#842131"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader", "serif"],
+                    "body": ["Manrope", "sans-serif"],
+                    "label": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        .editorial-shadow {
+            box-shadow: 0 24px 48px -12px rgba(22, 56, 38, 0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface antialiased min-h-screen">
+<!-- Background Layer (Simulating Point & Unlock Screen) -->
+<div class="fixed inset-0 z-0 overflow-y-auto filter blur-sm grayscale-[0.2]">
+<!-- Header -->
+<header class="flex items-center justify-between px-6 h-16 w-full fixed top-0 bg-[#fcf9f3]/80 backdrop-blur-md z-10">
+<h1 class="font-['Newsreader'] italic text-2xl tracking-tight text-[#163826]">서가담</h1>
+<span class="material-symbols-outlined text-[#163826]">menu</span>
+</header>
+<main class="pt-24 px-6 pb-20 max-w-md mx-auto space-y-8">
+<section class="space-y-4">
+<p class="font-label uppercase tracking-widest text-xs text-secondary">Your Collection</p>
+<h2 class="font-headline text-4xl leading-tight">Archive &amp; Points</h2>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container p-6 rounded-lg aspect-square flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary text-3xl">token</span>
+<div>
+<p class="text-3xl font-headline italic">1,250</p>
+<p class="text-[10px] uppercase tracking-widest font-medium text-secondary">Points</p>
+</div>
+</div>
+<div class="bg-surface-container-high p-6 rounded-lg aspect-square flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary text-3xl">lock_open</span>
+<div>
+<p class="text-3xl font-headline italic">12</p>
+<p class="text-[10px] uppercase tracking-widest font-medium text-secondary">Unlocked</p>
+</div>
+</div>
+</div>
+</section>
+<section class="space-y-6">
+<div class="bg-surface-container-low p-6 border-l-4 border-tertiary">
+<p class="font-headline italic text-lg text-primary">Monthly Goal</p>
+<p class="text-secondary text-sm mt-1">"A book is a garden, an orchard, a storehouse, a party, a counsellor, a multitude of counsellors."</p>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-sm">
+<div class="w-12 h-16 bg-surface-container flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="minimalist white book cover with elegant black typography on a textured paper background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhcdAefIGXzv4wcJxdX6nYiQIm6IFE60vMJjGLgHcX_chDybPgH9C36Ag_bFkwer8x0z-qt9VTDb3gkQGuRVqPvmqGWMdpsgW1yn1j66ccLibavhBRVut-UsWCd8srHmb9vV_-EAkOB9ypumTBzxRZxiCSF4aUMphT68yAwXIVe6tlFgMKVwK3OgFOxH4Hi-9Ijebt84K3MC6k1-aRZP_2fRCOgtpARItfMc4oSJFRaYzZFx800Kdw6ZRttegj01zQmeX1Kug_qVU"/>
+</div>
+<div class="flex-1">
+<h4 class="font-headline text-base">The Quiet Archive</h4>
+<p class="text-xs text-secondary">75% Complete</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 z-[60] bg-[#163826]/40 backdrop-blur-sm flex items-center justify-center p-6">
+<!-- Popup Container -->
+<div class="w-full max-w-sm bg-surface editorial-shadow rounded-sm flex flex-col overflow-hidden">
+<!-- Close Button Area -->
+<div class="flex justify-end p-4">
+<button class="p-1 hover:opacity-50 transition-opacity">
+<span class="material-symbols-outlined text-outline">close</span>
+</button>
+</div>
+<!-- Content Area -->
+<div class="px-8 pb-10 space-y-8">
+<!-- Header -->
+<div class="text-center space-y-2">
+<h3 class="font-headline italic text-3xl text-primary">포인트 획득 방법</h3>
+<div class="w-12 h-[1px] bg-primary/20 mx-auto mt-4"></div>
+</div>
+<!-- Activities List -->
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="edit_note">edit_note</span>
+</div>
+<div class="flex-1 border-b border-outline-variant/10 pb-2 flex justify-between items-end">
+<span class="text-sm font-medium">기록 남기기</span>
+<span class="font-headline italic text-primary">10P</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="auto_stories">auto_stories</span>
+</div>
+<div class="flex-1 border-b border-outline-variant/10 pb-2 flex justify-between items-end">
+<span class="text-sm font-medium">책 한 권 완독</span>
+<span class="font-headline italic text-primary">50P</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="recommend">recommend</span>
+</div>
+<div class="flex-1 border-b border-outline-variant/10 pb-2 flex justify-between items-end">
+<span class="text-sm font-medium">공동서재 책 추천</span>
+<span class="font-headline italic text-primary">20P</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_today">calendar_today</span>
+</div>
+<div class="flex-1 border-b border-outline-variant/10 pb-2 flex justify-between items-end">
+<span class="text-sm font-medium">매일 서재 방문</span>
+<span class="font-headline italic text-primary">5P</span>
+</div>
+</div>
+</div>
+<!-- Description -->
+<div class="pt-2">
+<p class="text-center text-secondary text-sm leading-relaxed px-2 italic">
+                        정갈한 기록과 꾸준한 독서는<br/>
+                        당신의 서재를 더욱 풍요롭게 만듭니다.
+                    </p>
+</div>
+<!-- Action -->
+<button class="w-full bg-primary text-on-primary py-4 rounded-sm font-label uppercase tracking-widest text-xs hover:opacity-90 active:scale-[0.98] transition-all">
+                    확인
+                </button>
+</div>
+<!-- Footer Signature Decoration -->
+<div class="h-1 bg-gradient-to-r from-primary via-primary-container to-primary"></div>
+</div>
+</div>
+<!-- Navigation Shell (Suppressed context check: Popup/Transactional focus) -->
+<!-- The navigation is suppressed to maintain focus on the modal action -->
+</body></html>

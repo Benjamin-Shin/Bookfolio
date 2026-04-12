@@ -1,4 +1,4 @@
-import 'package:bookfolio_mobile/src/state/shared_library_invite_controller.dart';
+import 'package:seogadam_mobile/src/state/shared_library_invite_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "개인정보처리방침 — Bookfolio",
+  title: "개인정보처리방침 — 서가담",
   description:
-    "Bookfolio 서비스의 개인정보 수집·이용, 보관, 제3자 연동 및 정보주체 권리에 관한 안내입니다.",
+    "서가담 서비스의 개인정보 수집·이용, 보관, 제3자 연동 및 정보주체 권리에 관한 안내입니다.",
 };
 
 /**
  * @history
+ * - 2026-04-05: 메타·도입부·책임자 표기 서가담 정렬
  * - 2026-03-29: 「캐논·투표」를 공통 도서 정보·수정 제안·투표 참여로 풀어 설명.
  * - 2026-03-29: 트레바리 등 유사 서비스 방침을 참고해 도입부·필수·선택·자동 수집, 법정 보존·파기, 제3자 예외, 쿠키·개정 공지(7일·30일), 외부 링크 적용 범위, 피해 구제 기관, 향후 결제(PG) 수집 안내 보강.
  * - 2026-03-28: Google 항목을 소셜 로그인만 명시(Google Books 조회 미사용).
@@ -22,7 +23,7 @@ export default function PrivacyPolicyPage() {
         공고일: 2026년 3월 29일 · 시행일: 2026년 3월 29일
       </p>
       <p className="mt-4 text-sm leading-relaxed text-foreground/90">
-        Bookfolio(이하 &quot;서비스&quot;)는 이용자의 동의를 바탕으로
+        서가담(이하 &quot;서비스&quot;)는 이용자의 동의를 바탕으로
         개인정보를 수집·이용하며, 정보주체의 권리를 존중합니다. 서비스는
         「개인정보 보호법」 등 대한민국 관계 법령과 가이드라인을 준수합니다.
       </p>
@@ -382,7 +383,7 @@ export default function PrivacyPolicyPage() {
             수 있습니다.
           </p>
           <ul className="list-none space-y-1 border-l-2 border-muted pl-4">
-            <li>책임자: 북폴리오 개발자</li>
+            <li>책임자: 서가담 운영</li>
             <li>이메일: bookfolio.app@gmail.com</li>
           </ul>
           <p className="text-xs text-muted-foreground">

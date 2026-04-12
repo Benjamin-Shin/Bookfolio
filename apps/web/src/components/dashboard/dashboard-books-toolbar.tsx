@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   buildDashboardHref,
+  type DashboardOwnedSort,
   type DashboardTab,
 } from "@/lib/dashboard/dashboard-href";
+import { cn } from "@/lib/utils";
 
 type DashboardBooksToolbarProps = {
   searchQuery: string;
@@ -16,17 +18,24 @@ type DashboardBooksToolbarProps = {
   currentTab: DashboardTab;
   /** URL `genre` — 페이지 링크·폼에 유지(소장 탭) */
   genreSlug?: string;
+  /** 소장 탭 제목순 유지 */
+  ownedSort?: DashboardOwnedSort;
   /**
    * 실제 렌더된 권수(읽는 중 탭처럼 API total은 더 큰데 화면에 일부만 둘 때).
    * 생략 시 `listTotal`·페이지로 범위 계산.
    */
   renderedCount?: number;
+  /** `false`면 제목·저자 검색 폼 숨김(권수 요약만). 기본 `true`. */
+  showSearch?: boolean;
 };
 
 /**
  * 대시보드 검색.
  *
  * @history
+ * - 2026-04-12: `DashboardTab`에 `hall` — 페이지네이션 링크
+ * - 2026-04-12: `showSearch` — 소장(ALL) 탭에서만 검색 폼 표시 옵션
+ * - 2026-04-12: 소장 탭 `ownedSort` 폼·페이지네이션 유지
  * - 2026-03-26: 탭(`tab`)·통계 요약 제거 — 상단 통계 카드·탭 네비로 이전
  * - 2026-03-24: 쿼리 `genre` 유지(`dashboardHref`)
  * - 2026-03-24: 소장 페이지 이전/다음은 `DashboardBooksPagination`으로 분리(책장 바로 아래 배치)
@@ -38,7 +47,9 @@ export function DashboardBooksToolbar({
   listTotal,
   currentTab,
   genreSlug = "",
+  ownedSort = "recent",
   renderedCount: renderedCountProp,
+  showSearch = true,
 }: DashboardBooksToolbarProps) {
   const totalPages = Math.max(1, Math.ceil(listTotal / pageSize));
   const start = listTotal > 0 ? (page - 1) * pageSize + 1 : 0;
@@ -51,30 +62,40 @@ export function DashboardBooksToolbar({
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-      <form
-        action="/dashboard"
-        method="get"
-        className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center"
+      {showSearch ? (
+        <form
+          action="/dashboard"
+          method="get"
+          className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:items-center"
+        >
+          <Input
+            name="q"
+            type="search"
+            placeholder="제목 또는 저자 검색"
+            defaultValue={searchQuery}
+            className="flex-1"
+            autoComplete="off"
+          />
+          {genreSlug.trim() ? (
+            <input type="hidden" name="genre" value={genreSlug.trim()} />
+          ) : null}
+          {currentTab !== "reading" ? (
+            <input type="hidden" name="tab" value={currentTab} />
+          ) : null}
+          {currentTab === "owned" && ownedSort === "title" ? (
+            <input type="hidden" name="sort" value="title" />
+          ) : null}
+          <Button type="submit" variant="secondary" className="sm:w-auto">
+            검색
+          </Button>
+        </form>
+      ) : null}
+      <div
+        className={cn(
+          "text-sm text-muted-foreground",
+          !showSearch && "sm:ml-auto",
+        )}
       >
-        <Input
-          name="q"
-          type="search"
-          placeholder="제목 또는 저자 검색"
-          defaultValue={searchQuery}
-          className="flex-1"
-          autoComplete="off"
-        />
-        {genreSlug.trim() ? (
-          <input type="hidden" name="genre" value={genreSlug.trim()} />
-        ) : null}
-        {currentTab !== "reading" ? (
-          <input type="hidden" name="tab" value={currentTab} />
-        ) : null}
-        <Button type="submit" variant="secondary" className="sm:w-auto">
-          검색
-        </Button>
-      </form>
-      <div className="text-sm text-muted-foreground">
         <p>
           이 탭{" "}
           {listTotal > 0 ? (
@@ -112,12 +133,14 @@ type DashboardBooksPaginationProps = {
   tab: DashboardTab;
   /** 접근성·라벨용, 예: 「소장」 */
   sectionLabel: string;
+  ownedSort?: DashboardOwnedSort;
 };
 
 /**
  * 읽기 전·완독·소장 탭용 이전/다음(읽는 중은 한 페이지 고정).
  *
  * @history
+ * - 2026-04-12: `ownedSort` 전달
  * - 2026-03-26: `tab`·`sectionLabel`로 일반화(읽기 전·완독 포함)
  * - 2026-03-24: 쿼리 `genre` 유지(`dashboardHref`)
  * - 2026-03-24: 신규 — 대시보드 소장 구역 하단 페이지네이션
@@ -130,6 +153,7 @@ export function DashboardBooksPagination({
   genreSlug,
   tab,
   sectionLabel,
+  ownedSort = "recent",
 }: DashboardBooksPaginationProps) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   if (totalPages <= 1) {
@@ -155,6 +179,8 @@ export function DashboardBooksPagination({
                 genre: genreSlug,
                 page: page - 1,
                 tab,
+                ownedSort:
+                  tab === "owned" && ownedSort === "title" ? "title" : undefined,
               })}
               prefetch={false}
             >
@@ -172,6 +198,8 @@ export function DashboardBooksPagination({
                 genre: genreSlug,
                 page: page + 1,
                 tab,
+                ownedSort:
+                  tab === "owned" && ownedSort === "title" ? "title" : undefined,
               })}
               prefetch={false}
             >

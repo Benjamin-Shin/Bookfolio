@@ -1,5 +1,6 @@
 /**
  * @history
+ * - 2026-04-10: 클라이언트 오류 수집 관리 링크
  * - 2026-03-29: 공동서재 관리 내비 링크 추가
  * - 2026-03-26: 상단 내비에 포인트·정책 링크 추가
  */
@@ -37,6 +38,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           className="rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           포인트 · 정책
+        </Link>
+        <Link
+          href="/dashboard/admin/client-errors"
+          className="rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          클라이언트 오류
         </Link>
         <Link
           href={"/dashboard/admin/shared-libraries" as Route}

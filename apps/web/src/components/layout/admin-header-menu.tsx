@@ -2,6 +2,7 @@
 
 /**
  * @history
+ * - 2026-04-10: 클라이언트 오류 메뉴
  * - 2026-03-26: 포인트·정책 관리 링크 추가
  */
 import { BookMarkedIcon, CoinsIcon, ShieldIcon, UsersIcon } from "lucide-react";
@@ -44,6 +45,11 @@ export function AdminHeaderMenu() {
           <Link href="/dashboard/admin/points" className="flex cursor-pointer items-center gap-2">
             <CoinsIcon className="size-4 opacity-70" />
             포인트 · 정책
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard/admin/client-errors" className="cursor-pointer">
+            클라이언트 오류
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

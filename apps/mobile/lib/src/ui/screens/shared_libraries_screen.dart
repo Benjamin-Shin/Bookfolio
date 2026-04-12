@@ -1,9 +1,9 @@
-import 'package:bookfolio_mobile/src/models/shared_library_models.dart';
-import 'package:bookfolio_mobile/src/services/bookfolio_api.dart';
-import 'package:bookfolio_mobile/src/state/auth_controller.dart';
-import 'package:bookfolio_mobile/src/ui/screens/shared_library_books_screen.dart';
-import 'package:bookfolio_mobile/src/ui/widgets/book_grid_card.dart';
-import 'package:bookfolio_mobile/src/ui/widgets/main_hub_top_nav.dart';
+import 'package:seogadam_mobile/src/models/shared_library_models.dart';
+import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
+import 'package:seogadam_mobile/src/state/auth_controller.dart';
+import 'package:seogadam_mobile/src/ui/screens/shared_library_books_screen.dart';
+import 'package:seogadam_mobile/src/ui/widgets/book_grid_card.dart';
+import 'package:seogadam_mobile/src/ui/widgets/main_hub_top_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -11,11 +11,15 @@ import 'package:provider/provider.dart';
 /// 참여 중인 공동서재 목록(내 서재와 같은 그리드·그라데이션 배경).
 ///
 /// History:
+/// - 2026-04-05: 그리드 열 수 `bookfolioGridCrossAxisCount`(가용 폭 기준)
+/// - 2026-04-02: `embeddedInShell` — 메인 쉘에서 앱바·허브 바 없이 본문만
 /// - 2026-03-29: 앱바·배경·빈 상태 `ColorScheme` 연동(다크 모드)
 /// - 2026-03-26: `MainHubTopNavBar` 추가
 /// - 2026-03-25: 앱바·그리드 카드를 `LibraryScreen` 스타일에 맞춤
 class SharedLibrariesScreen extends StatefulWidget {
-  const SharedLibrariesScreen({super.key});
+  const SharedLibrariesScreen({super.key, this.embeddedInShell = false});
+
+  final bool embeddedInShell;
 
   @override
   State<SharedLibrariesScreen> createState() => _SharedLibrariesScreenState();
@@ -69,50 +73,7 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
     final onSurface = colorScheme.onSurface;
     final onSurfaceVar = colorScheme.onSurfaceVariant;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              'assets/brand/bookfolio_logo.svg',
-              width: 26,
-              height: 26,
-            ),
-            const SizedBox(width: 10),
-            Flexible(
-              child: Text.rich(
-                TextSpan(
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: onSurface,
-                      ),
-                  children: [
-                    const TextSpan(text: '북폴리오'),
-                    TextSpan(
-                      text: ' - ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: onSurfaceVar,
-                      ),
-                    ),
-                    const TextSpan(text: '공동서재'),
-                  ],
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const MainHubTopNavBar(current: MainHubTab.shared),
-          Expanded(
-            child: DecoratedBox(
+    final panel = DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -213,7 +174,10 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                               sliver: SliverLayoutBuilder(
                                 builder: (context, constraints) {
                                   final width = constraints.crossAxisExtent;
-                                  final columns = width >= 520 ? 3 : 2;
+                                  final columns = bookfolioGridCrossAxisCount(
+                                    width,
+                                    crossAxisSpacing: 12,
+                                  );
                                   return SliverGrid(
                                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: columns,
@@ -252,8 +216,55 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                           ],
                         ),
               ),
+            );
+
+    if (widget.embeddedInShell) {
+      return SizedBox.expand(child: panel);
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              'assets/brand/bookfolio_logo.svg',
+              width: 26,
+              height: 26,
             ),
-          ),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text.rich(
+                TextSpan(
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: onSurface,
+                      ),
+                  children: [
+                    const TextSpan(text: '서가담'),
+                    TextSpan(
+                      text: ' - ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: onSurfaceVar,
+                      ),
+                    ),
+                    const TextSpan(text: '공동서재'),
+                  ],
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const MainHubTopNavBar(current: MainHubTab.shared),
+          Expanded(child: panel),
         ],
       ),
     );

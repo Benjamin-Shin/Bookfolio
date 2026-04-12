@@ -33,6 +33,10 @@ type DbUserBook = {
   published_date: string | null;
   description: string | null;
   price_krw: number | null;
+  /** `0030` RPC — `books.page_count` */
+  book_page_count?: number | null;
+  current_page?: number | null;
+  reading_total_pages?: number | null;
   /** 마이그레이션 0015 이전 RPC는 생략될 수 있음. */
   genre_slugs?: string[];
   is_owned: boolean;
@@ -47,6 +51,8 @@ type DbUserBookOwner = {
   book_id: string;
   reading_status: string;
   rating: number | null;
+  current_page?: number | null;
+  reading_total_pages?: number | null;
   is_owned: boolean;
   location: string | null;
   created_at: string;
@@ -78,6 +84,8 @@ export type DbCanonicalBook = {
   cover_url: string | null;
   description: string | null;
   price_krw: number | null;
+  /** 서지 총 쪽수 (`0020`). */
+  page_count?: number | null;
   source: string;
   /** 외부 메타 조회 API 식별. nullable. */
   api_source?: string | null;
@@ -105,10 +113,15 @@ function pickNestedBook(row: DbUserBookNestedSelect): DbCanonicalBook | null {
  * RPC/조인 행을 클라이언트용 요약으로 변환합니다.
  *
  * @history
+ * - 2026-04-06: `pageCount`·`currentPage`·`readingTotalPages` (`0030`)
  * - 2026-03-26: `bookId`를 항상 문자열로 직렬화(누락 시 빈 문자열) — 모바일에서 키 생략 시 잘못된 API URL 방지
  */
 function mapFlatRow(row: DbUserBook): UserBookDetail {
   const genreSlugs = Array.isArray(row.genre_slugs) ? row.genre_slugs : [];
+  const pageCount =
+    row.book_page_count != null && Number.isFinite(Number(row.book_page_count))
+      ? Math.floor(Number(row.book_page_count))
+      : null;
   return {
     id: row.id,
     userId: row.user_id,
@@ -124,6 +137,15 @@ function mapFlatRow(row: DbUserBook): UserBookDetail {
     publishedDate: row.published_date,
     description: row.description,
     priceKrw: row.price_krw,
+    pageCount,
+    currentPage:
+      row.current_page != null && Number.isFinite(Number(row.current_page))
+        ? Math.floor(Number(row.current_page))
+        : null,
+    readingTotalPages:
+      row.reading_total_pages != null && Number.isFinite(Number(row.reading_total_pages))
+        ? Math.floor(Number(row.reading_total_pages))
+        : null,
     isOwned: row.is_owned,
     location: row.location ?? null,
     createdAt: row.created_at,
@@ -152,6 +174,9 @@ function mapJoinedRow(row: DbUserBookNestedSelect): UserBookDetail {
     published_date: book.published_date,
     description: book.description,
     price_krw: book.price_krw,
+    book_page_count: book.page_count ?? null,
+    current_page: row.current_page ?? null,
+    reading_total_pages: row.reading_total_pages ?? null,
     is_owned: row.is_owned,
     location: row.location,
     created_at: row.created_at,
@@ -193,6 +218,8 @@ const USER_BOOK_WITH_BOOKS_SELECT = `
   book_id,
   reading_status,
   rating,
+  current_page,
+  reading_total_pages,
   is_owned,
   location,
   created_at,
@@ -208,6 +235,7 @@ const USER_BOOK_WITH_BOOKS_SELECT = `
     cover_url,
     description,
     price_krw,
+    page_count,
     source,
     genre_slugs,
     literature_region,
@@ -429,6 +457,10 @@ export type ListUserBooksPagedOptions = {
   isOwned?: boolean;
   /** `books.genre_slugs`에 포함된 슬러그로 한정 (0015 RPC). */
   genreSlug?: string;
+  /** `title`: 제목순(RPC `p_sort`). 생략: `updated_at` 내림차순. */
+  sort?: "title" | "updated";
+  /** `true`면 완독·개인 평점 4+만 (`0038` `p_hall_of_fame`). */
+  hallOfFameOnly?: boolean;
 };
 
 /**
@@ -466,6 +498,10 @@ function parseListUserBooksPagedPayload(data: unknown): { rawItems: unknown[]; t
  * 사용자 도서 목록 페이지(RPC `list_user_books_paged`).
  *
  * @history
+ * - 2026-04-12: `p_hall_of_fame` — 완독·평점 4+만 (`0038`, `hallOfFameOnly`일 때만 RPC에 전달)
+ * - 2026-04-12: `p_sort`는 `sort==='title'`일 때만 RPC 인자에 포함(PostgREST가 `null` 키로 9인자 시그니처를 찾는 문제·`0037` 미적용 DB 호환)
+ * - 2026-04-12: `p_sort`(`0037`) — 제목순·기본 수정일순
+ * - 2026-04-06: RPC `0030` — `book_page_count`·`current_page`·`reading_total_pages`
  * - 2026-03-24: `p_genre_slug`·행 `genre_slugs` 반영(마이그레이션 0015)
  * - 2026-03-24: RPC JSON 응답 문자열·키 누락 등 방어적 파싱(`parseListUserBooksPagedPayload`)
  */
@@ -485,7 +521,9 @@ export async function listUserBooksPaged(
     p_reading_status:
       opts.readingStatus && opts.readingStatus !== "all" ? opts.readingStatus : null,
     p_is_owned: typeof opts.isOwned === "boolean" ? opts.isOwned : null,
-    p_genre_slug: genreTrim ? genreTrim : null
+    p_genre_slug: genreTrim ? genreTrim : null,
+    ...(opts.sort === "title" ? { p_sort: "title" as const } : {}),
+    ...(opts.hallOfFameOnly ? { p_hall_of_fame: true as const } : {}),
   });
 
   if (error) throw error;
@@ -650,7 +688,15 @@ export async function createUserBook(
     reading_status: input.readingStatus ?? "unread",
     rating: input.rating ?? null,
     is_owned: input.isOwned ?? true,
-    location: loc ? loc : null
+    location: loc ? loc : null,
+    current_page:
+      input.currentPage !== undefined && input.currentPage !== null
+        ? Math.floor(Math.min(Math.max(0, input.currentPage), 50_000))
+        : null,
+    reading_total_pages:
+      input.readingTotalPages !== undefined && input.readingTotalPages !== null
+        ? Math.floor(Math.min(Math.max(1, input.readingTotalPages), 50_000))
+        : null
   };
 
   const { data: inserted, error } = await supabase.from("user_books").insert(payload).select("id").single();
@@ -679,6 +725,7 @@ export async function createUserBook(
 
 /**
  * @history
+ * - 2026-04-06: `current_page`·`reading_total_pages` 갱신
  * - 2026-03-26: `user_books.memo` 제거 — 메모는 `user_book_memos`·API로 이관
  * - 2026-03-24: 공유 서지 저자 변경 시 `replaceBookAuthorLinks` 로 `book_authors` 동기화
  */
@@ -724,6 +771,18 @@ export async function updateUserBook(
   if (input.rating !== undefined) userPatch.rating = input.rating;
   if (input.isOwned !== undefined) userPatch.is_owned = input.isOwned;
   if (input.location !== undefined) userPatch.location = input.location;
+  if (input.currentPage !== undefined) {
+    userPatch.current_page =
+      input.currentPage === null
+        ? null
+        : Math.floor(Math.min(Math.max(0, input.currentPage), 50_000));
+  }
+  if (input.readingTotalPages !== undefined) {
+    userPatch.reading_total_pages =
+      input.readingTotalPages === null
+        ? null
+        : Math.floor(Math.min(Math.max(1, input.readingTotalPages), 50_000));
+  }
 
   if (Object.keys(userPatch).length > 0) {
     const { error: uErr } = await supabase.from("user_books").update(userPatch).eq("id", id).eq("user_id", userId);

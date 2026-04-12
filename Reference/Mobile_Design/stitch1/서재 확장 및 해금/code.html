@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#6d6259",
+                        "on-primary-fixed": "#002112",
+                        "tertiary-container": "#862232",
+                        "on-tertiary-container": "#ff9aa1",
+                        "tertiary": "#67081d",
+                        "on-primary-container": "#9ac0a7",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#a9cfb7",
+                        "on-secondary-fixed-variant": "#4e453c",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#efe0d4",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#1c1c18",
+                        "outline-variant": "#c1c8c1",
+                        "primary-fixed-dim": "#a9cfb7",
+                        "surface": "#fcf9f3",
+                        "primary-fixed": "#c5ecd2",
+                        "primary-container": "#2d4f3c",
+                        "surface-tint": "#436651",
+                        "surface-container-highest": "#e5e2dc",
+                        "surface-bright": "#fcf9f3",
+                        "on-primary-fixed-variant": "#2c4e3b",
+                        "surface-container-high": "#ebe8e2",
+                        "surface-variant": "#e5e2dc",
+                        "surface-container-low": "#f6f3ed",
+                        "surface-dim": "#dcdad4",
+                        "secondary": "#675d53",
+                        "on-tertiary-fixed": "#40000d",
+                        "background": "#fcf9f3",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-tertiary-fixed-variant": "#842131",
+                        "on-secondary-fixed": "#211a13",
+                        "primary": "#163826",
+                        "on-surface": "#1c1c18",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#1c1c18",
+                        "surface-container": "#f0eee8",
+                        "inverse-surface": "#31312d",
+                        "outline": "#727973",
+                        "inverse-on-surface": "#f3f0ea",
+                        "secondary-fixed-dim": "#d2c4b9",
+                        "secondary-container": "#efe0d4",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#424843",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b6",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, .serif { font-family: 'Newsreader', serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased mb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fcf9f3]/80 backdrop-blur-xl transition-opacity">
+<div class="flex items-center h-16 px-6 max-w-7xl mx-auto justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#163826]" data-icon="arrow_back">arrow_back</span>
+<h1 class="text-[#163826] font-serif italic tracking-tight text-lg">서재 확장 및 해금</h1>
+</div>
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-low border border-outline-variant/10">
+<span class="material-symbols-outlined text-secondary" data-icon="more_vert">more_vert</span>
+</div>
+</div>
+<div class="h-[1px] w-full bg-stone-200/20"></div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Hero: Current Points -->
+<section class="text-center py-12 mb-8">
+<p class="text-secondary font-label uppercase tracking-widest text-[11px] mb-4">현재까지의 수집</p>
+<h2 class="serif italic text-5xl text-primary mb-2">보유 포인트: 1,250P</h2>
+<div class="flex justify-center mt-6">
+<div class="h-[1px] w-12 bg-primary/20"></div>
+</div>
+</section>
+<!-- Progress Indicator -->
+<section class="mb-16">
+<div class="bg-surface-container-low p-8 rounded-lg">
+<div class="flex justify-between items-end mb-4">
+<div>
+<h3 class="serif text-xl text-primary">명예 사서</h3>
+<p class="text-secondary text-sm">다음 단계까지 350P 남음</p>
+</div>
+<span class="text-primary font-bold text-lg">78%</span>
+</div>
+<div class="relative w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full w-[78%]"></div>
+</div>
+<p class="mt-4 text-secondary text-xs italic">꾸준한 기록과 탐색은 더 넓은 서재를 여는 열쇠가 됩니다.</p>
+</div>
+</section>
+<!-- Section Title -->
+<div class="mb-8 flex items-center gap-4">
+<h3 class="serif text-2xl text-primary italic">해금 가능한 혜택</h3>
+<div class="flex-grow h-[0.5px] bg-outline-variant/30"></div>
+</div>
+<!-- Unlockable Features Grid -->
+<div class="space-y-4">
+<!-- Item 1: Unlocked State (Aspirational) -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-lg transition-all border border-outline-variant/5 hover:border-primary/20">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container-low rounded-lg group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="group_add">group_add</span>
+</div>
+<div>
+<h4 class="text-lg font-medium text-on-surface">공동서재 인원 확장 (+3명)</h4>
+<p class="text-secondary text-sm mt-1">친우들과 함께 서재를 공유하고 소통하세요.</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-primary font-bold text-lg mb-2">500P</span>
+<button class="bg-primary text-white px-5 py-2 text-sm font-medium rounded-md hover:opacity-90 active:scale-95 transition-all">해금하기</button>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-lg transition-all border border-outline-variant/5 hover:border-primary/20">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container-low rounded-lg group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="library_add">library_add</span>
+</div>
+<div>
+<h4 class="text-lg font-medium text-on-surface">추가 서재 생성 (3번 서재)</h4>
+<p class="text-secondary text-sm mt-1">새로운 주제의 컬렉션을 분리하여 보관할 수 있습니다.</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-primary font-bold text-lg mb-2">800P</span>
+<button class="bg-primary text-white px-5 py-2 text-sm font-medium rounded-md hover:opacity-90 active:scale-95 transition-all">해금하기</button>
+</div>
+</div>
+</div>
+<!-- Item 3: Near Lock state -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-lg transition-all border border-outline-variant/5 hover:border-primary/20">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container-low rounded-lg group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h4 class="text-lg font-medium text-on-surface">프리미엄 통계 인사이트</h4>
+<span class="material-symbols-outlined text-[16px] text-secondary" data-icon="lock">lock</span>
+</div>
+<p class="text-secondary text-sm mt-1">독서 성향을 심층 분석하고 시각화된 리포트를 제공합니다.</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-primary font-bold text-lg mb-2">1200P</span>
+<button class="bg-primary text-white px-5 py-2 text-sm font-medium rounded-md hover:opacity-90 active:scale-95 transition-all">해금하기</button>
+</div>
+</div>
+</div>
+<!-- Item 4: Lower cost / Accessible -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-lg transition-all border border-outline-variant/5 hover:border-primary/20">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container-low rounded-lg group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="font_download">font_download</span>
+</div>
+<div>
+<h4 class="text-lg font-medium text-on-surface">기록용 특수 폰트 팩</h4>
+<p class="text-secondary text-sm mt-1">다섯 가지의 감성적인 서체로 감상을 남겨보세요.</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-primary font-bold text-lg mb-2">300P</span>
+<button class="bg-primary text-white px-5 py-2 text-sm font-medium rounded-md hover:opacity-90 active:scale-95 transition-all">해금하기</button>
+</div>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-lg transition-all border border-outline-variant/5 hover:border-primary/20">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container-low rounded-lg group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="link">link</span>
+</div>
+<div>
+<h4 class="text-lg font-medium text-on-surface">서재 초대 링크 커스텀</h4>
+<p class="text-secondary text-sm mt-1">고유한 아이디로 당신만의 서재 주소를 만드세요.</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block text-primary font-bold text-lg mb-2">400P</span>
+<button class="bg-primary text-white px-5 py-2 text-sm font-medium rounded-md hover:opacity-90 active:scale-95 transition-all">해금하기</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footnote -->
+<div class="py-12 text-center">
+<p class="text-secondary/50 text-xs font-label italic uppercase tracking-widest">seogadam curator service</p>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-[#fcf9f3]/80 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.04)]">
+<div class="flex justify-around items-center px-4 pb-safe h-20 max-w-7xl mx-auto">
+<div class="flex flex-col items-center justify-center text-stone-400 pt-2 hover:text-[#163826] transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-sans text-[11px] tracking-wide uppercase font-medium mt-1">홈</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#163826] border-t-2 border-[#163826] pt-2 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-sans text-[11px] tracking-wide uppercase font-medium mt-1">서재</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 pt-2 hover:text-[#163826] transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-sans text-[11px] tracking-wide uppercase font-medium mt-1">탐색</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 pt-2 hover:text-[#163826] transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-sans text-[11px] tracking-wide uppercase font-medium mt-1">통계</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 pt-2 hover:text-[#163826] transition-colors cursor-pointer">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-sans text-[11px] tracking-wide uppercase font-medium mt-1">내 정보</span>
+</div>
+</div>
+</nav>
+</body></html>

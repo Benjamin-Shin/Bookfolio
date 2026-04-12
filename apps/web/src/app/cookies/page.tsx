@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "쿠키 정책 — Bookfolio",
+  title: "쿠키 정책 — 서가담",
   description:
-    "Bookfolio 웹 서비스에서 사용하는 쿠키·유사 기술, 목적 및 관리 방법을 안내합니다."
+    "서가담 웹 서비스에서 사용하는 쿠키·유사 기술, 목적 및 관리 방법을 안내합니다."
 };
 
 /**
  * @history
+ * - 2026-04-05: 메타·도입부 서가담 표기
  * - 2026-03-28: NextAuth(Auth.js) v5·JWT 세션 기준으로 사용 목적·제3자 분석 미도입 등 현재 코드베이스에 맞게 본문 정리; 모바일 앱 저장소 구분
  * - 2026-03-26: 안내용 더미 본문
  */
@@ -17,7 +18,7 @@ export default function CookiePolicyPage() {
       <h1 className="text-2xl font-bold tracking-tight">쿠키 정책</h1>
       <p className="mt-2 text-sm text-muted-foreground">최종 수정: 2026년 3월 28일</p>
       <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
-        본 문서는 Bookfolio <strong>웹 애플리케이션</strong>(Next.js) 기준으로, 브라우저에 저장되는 쿠키 및 이에 준하는
+        본 문서는 서가담 <strong>웹 애플리케이션</strong>(Next.js) 기준으로, 브라우저에 저장되는 쿠키 및 이에 준하는
         기술의 사용 현황을 설명합니다.{" "}
         <a className="underline underline-offset-2 hover:text-foreground" href="/privacy">
           개인정보처리방침

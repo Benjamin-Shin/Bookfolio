@@ -1,12 +1,12 @@
-# Bookfolio
+# Seogadam
 
-Bookfolio is a monorepo for a personal library platform focused on helping people manage the paper books and ebooks they own.
+Seogadam is a monorepo for a personal library platform focused on helping people manage the paper books and ebooks they own.
 
 The project starts with a lean MVP for personal shelf management, then expands toward reviews, reading insights, community features, and long-term reading management.
 
 ## Vision
 
-Bookfolio aims to become a personal reading home where users can:
+Seogadam aims to become a personal reading home where users can:
 
 - register and organize owned books
 - track reading status and personal impressions
@@ -32,7 +32,7 @@ The first release focuses on validating the core value of `personal library mana
 
 ## Planned Beyond MVP
 
-After the MVP is stable, Bookfolio is planned to expand in stages.
+After the MVP is stable, Seogadam is planned to expand in stages.
 
 ### 1. Personal Library Expansion
 

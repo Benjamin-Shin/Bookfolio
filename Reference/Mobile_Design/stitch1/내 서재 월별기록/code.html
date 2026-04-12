@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#67081d",
+                    "secondary-container": "#efe0d4",
+                    "primary-container": "#2d4f3c",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#ebe8e2",
+                    "surface-container": "#f0eee8",
+                    "on-tertiary-fixed-variant": "#842131",
+                    "on-tertiary-fixed": "#40000d",
+                    "surface-container-highest": "#e5e2dc",
+                    "outline": "#727973",
+                    "error-container": "#ffdad6",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#436651",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#fcf9f3",
+                    "on-tertiary-container": "#ff9aa1",
+                    "secondary": "#675d53",
+                    "on-surface": "#1c1c18",
+                    "secondary-fixed-dim": "#d2c4b9",
+                    "on-tertiary": "#ffffff",
+                    "primary": "#163826",
+                    "outline-variant": "#c1c8c1",
+                    "on-secondary-container": "#6d6259",
+                    "on-secondary-fixed": "#211a13",
+                    "on-primary-fixed": "#002112",
+                    "surface-variant": "#e5e2dc",
+                    "secondary-fixed": "#efe0d4",
+                    "inverse-on-surface": "#f3f0ea",
+                    "inverse-surface": "#31312d",
+                    "on-surface-variant": "#424843",
+                    "on-primary-container": "#9ac0a7",
+                    "tertiary-container": "#862232",
+                    "on-background": "#1c1c18",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "background": "#fcf9f3",
+                    "tertiary-fixed-dim": "#ffb2b6",
+                    "tertiary-fixed": "#ffdadb",
+                    "surface": "#fcf9f3",
+                    "on-primary-fixed-variant": "#2c4e3b",
+                    "surface-dim": "#dcdad4",
+                    "on-secondary-fixed-variant": "#4e453c",
+                    "inverse-primary": "#a9cfb7",
+                    "primary-fixed-dim": "#a9cfb7",
+                    "surface-container-low": "#f6f3ed",
+                    "primary-fixed": "#c5ecd2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader", "serif"],
+                    "body": ["Manrope", "sans-serif"],
+                    "label": ["Manrope", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .font-serif { font-family: 'Newsreader', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        .date-cell-active {
+            position: relative;
+        }
+        .date-cell-active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 3px;
+            background-color: #67081d;
+            border-radius: 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fcf9f3]/80 backdrop-blur-xl">
+<div class="flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="active:scale-95 duration-200 hover:bg-[#efe0d4]/50 p-1 rounded-full">
+<span class="material-symbols-outlined text-[#163826]">arrow_back</span>
+</button>
+<h1 class="font-serif text-lg tracking-tight italic text-[#163826]">2025년 1월의 기록</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-serif font-bold text-xl text-[#163826]">서가담</span>
+</div>
+</div>
+<div class="bg-[#f6f3ed] h-[1px] w-full opacity-50"></div>
+</header>
+<main class="pt-24 px-6 space-y-10">
+<!-- Calendar Section -->
+<section class="animate-fade-in">
+<div class="flex justify-between items-end mb-6">
+<h2 class="font-serif text-3xl font-light text-primary">January</h2>
+<span class="font-label text-xs uppercase tracking-[0.2em] text-secondary">Archive No. 12</span>
+</div>
+<div class="grid grid-cols-7 gap-y-6 text-center border-b border-outline-variant/10 pb-8">
+<!-- Days of Week -->
+<div class="text-[10px] uppercase tracking-widest text-secondary/60 font-medium">Sun</div>
+<div class="text-[10px] uppercase tracking-widest text-secondary/60 font-medium">Mon</div>
+<div class="text-[10px] uppercase tracking-widest text-secondary/60 font-medium">Tue</div>
+<div class="text-[10px] uppercase tracking-widest text-secondary/60 font-medium">Wed</div>
+<div class="text-[10px] uppercase tracking-widest text-secondary/60 font-medium">Thu</div>
+<div class="text-[10px] uppercase tracking-widest text-secondary/60 font-medium">Fri</div>
+<div class="text-[10px] uppercase tracking-widest text-secondary/60 font-medium">Sat</div>
+<!-- Calendar Dates -->
+<div class="h-10 flex items-center justify-center text-secondary/30 text-sm">29</div>
+<div class="h-10 flex items-center justify-center text-secondary/30 text-sm">30</div>
+<div class="h-10 flex items-center justify-center text-secondary/30 text-sm">31</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">1</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm relative">
+<span class="z-10">2</span>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-8 h-8 rounded-full border border-tertiary/20"></div>
+</div>
+</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">3</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">4</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">5</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm font-bold bg-secondary-fixed/30 rounded-sm">6</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">7</div>
+<div class="h-12 relative flex flex-col items-center group cursor-pointer">
+<span class="text-primary text-sm mb-1">8</span>
+<img class="w-6 h-8 object-cover rounded-[1px] shadow-sm ring-1 ring-black/5" data-alt="small thumbnail of a minimalist book cover with abstract forest art on a cream background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBd69ypeRuTD-uXtowYTOg2-eJ3oX5E8PDezlg3tn7WBcKzlp_4Ko85KuRNGw8zHypDU3w-_mak7hLi-bevNNm5IbgBb5zcLY3dCejNSliPlM0PJj-iyJoZdmV7kF9eUq9OBDflx_dcm_9v66QiWvkzz4pVJyx3dF0kljonKpcNCSKat2qcMxwJQxFyA47N6obdT9vQjMWL7nqJDfHH7eNWn7y1nNnnvTVe2oQiouifTTsFXRREQzaZ8mW8KPsu1XmkFeeSPhOFsk"/>
+</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">9</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">10</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">11</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">12</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">13</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm date-cell-active">14</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">15</div>
+<div class="h-12 relative flex flex-col items-center group cursor-pointer">
+<span class="text-primary text-sm mb-1">16</span>
+<img class="w-6 h-8 object-cover rounded-[1px] shadow-sm ring-1 ring-black/5" data-alt="tiny book cover visual showing classic dark green leather binding with gold leaf typography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABHMScgh3Q4auxRnndZV46d-xIyvetAwliDJpviibosCgYYUPA1wjDEMu2a9pjtm1KmNP7qhFJvQybvfJvEIG3av4v06hf7PlLJKyNPja5pzH_k7PWnsElej1mcdseTUPiK5kHCuadTpRk3F7RPjbL5whuKuIxG2JwaDDDE6D7a6wQsmWjnTCzqsqR89nQfdAngHuZ2ua1rvh8GHFlI2SaVtDatVLls7-6KNkTjLmddNsPbQfc39tVjgc97brAkCcDCCAAdegQskM"/>
+</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">17</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">18</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">19</div>
+<div class="h-12 relative flex flex-col items-center group cursor-pointer">
+<span class="text-primary text-sm mb-1">20</span>
+<div class="w-6 h-8 bg-tertiary flex items-center justify-center rounded-[1px]">
+<span class="material-symbols-outlined text-[10px] text-white">bookmark</span>
+</div>
+</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">21</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">22</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">23</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">24</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">25</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">26</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">27</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">28</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">29</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">30</div>
+<div class="h-10 flex items-center justify-center text-primary text-sm">31</div>
+<div class="h-10 flex items-center justify-center text-secondary/30 text-sm">1</div>
+</div>
+</section>
+<!-- Monthly Summary Bento-ish Grid -->
+<section class="space-y-4">
+<h3 class="font-serif text-xl text-primary flex items-center gap-2">
+<span class="w-1 h-6 bg-tertiary"></span>
+                이달의 요약
+            </h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-6 flex flex-col justify-between h-32">
+<span class="font-label text-[10px] uppercase tracking-widest text-secondary">완독한 책</span>
+<div class="flex items-baseline gap-2">
+<span class="font-serif text-4xl text-primary italic">5</span>
+<span class="font-label text-sm text-secondary">권</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 flex flex-col justify-between h-32">
+<span class="font-label text-[10px] uppercase tracking-widest text-secondary">읽은 페이지</span>
+<div class="flex items-baseline gap-2">
+<span class="font-serif text-4xl text-primary italic">1,240</span>
+<span class="font-label text-sm text-secondary">p</span>
+</div>
+</div>
+<div class="col-span-2 bg-primary p-6 flex items-center justify-between text-on-primary">
+<div class="space-y-1">
+<span class="font-label text-[10px] uppercase tracking-widest opacity-70">가장 오래 머문 장르</span>
+<p class="font-serif text-xl">현대 영미 소설</p>
+</div>
+<span class="material-symbols-outlined opacity-40 text-4xl">auto_stories</span>
+</div>
+</div>
+</section>
+<!-- Daily Highlight Section -->
+<section class="space-y-4 pb-12">
+<h3 class="font-serif text-xl text-primary italic">오늘의 시선</h3>
+<div class="bg-surface-container-lowest p-8 border-l-[1px] border-tertiary/20">
+<div class="flex items-start gap-6">
+<div class="flex-shrink-0 w-24 shadow-[12px_12px_24px_rgba(22,56,38,0.08)]">
+<img class="w-full aspect-[2/3] object-cover rounded-[1px]" data-alt="elegant minimal book cover with sage green typography on textured off-white paper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf8ngNbScIw_7Wpv2dWHQ-K1K3dagXECHuaonvW2in76ZnaytMXbVHvXLm6DlzVVtymwAXmf-DbJsBhOyQpeKOAPvI8OvoIhnrlMxPDcT0rt6tBQqTLVFZuivqYvjJbZoHcHBDlawA-A6_cLKf0j386KLNDC2Kw0uXuBgGoMBrIyMjQlqY3Rrhtl4eKwY4m2OMsm_p-GDtmRqk-6ngC1Uv3EzqAQeWYTKpb4q3iDhQoiSoqmiS_G65nDziQfNUbiGhJ5mUtyf34_U"/>
+</div>
+<div class="flex-1 space-y-3">
+<div>
+<span class="font-label text-[10px] uppercase tracking-widest text-tertiary font-bold">JAN 16, 2025</span>
+<h4 class="font-serif text-xl leading-tight text-primary mt-1">호밀밭의 파수꾼</h4>
+<p class="font-label text-xs text-secondary">제롬 데이비드 샐린저</p>
+</div>
+<p class="font-serif italic text-sm text-primary/80 leading-relaxed">
+                            "누구에게든 아무 말도 하지 마라. 말을 하게 되면, 모든 사람이 그리워지기 시작하니까."
+                        </p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-20 bg-[#fcf9f3]/80 backdrop-blur-xl border-t border-[#675d53]/10 flex justify-around items-center px-8 pb-safe shadow-[0_-4px_24px_rgba(22,56,38,0.04)] z-50">
+<!-- Atelier -->
+<div class="flex flex-col items-center justify-center text-[#675d53] dark:text-[#918f8c] hover:text-[#163826] transition-all active:opacity-70">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-sans text-[11px] uppercase tracking-widest font-medium mt-1">Atelier</span>
+</div>
+<!-- Archive (Active) -->
+<div class="flex flex-col items-center justify-center text-[#163826] relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#8b0000] after:rounded-full hover:text-[#163826] transition-all active:opacity-70">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="font-sans text-[11px] uppercase tracking-widest font-medium mt-1">Archive</span>
+</div>
+<!-- Curations -->
+<div class="flex flex-col items-center justify-center text-[#675d53] dark:text-[#918f8c] hover:text-[#163826] transition-all active:opacity-70">
+<span class="material-symbols-outlined">import_contacts</span>
+<span class="font-sans text-[11px] uppercase tracking-widest font-medium mt-1">Curations</span>
+</div>
+<!-- Settings -->
+<div class="flex flex-col items-center justify-center text-[#675d53] dark:text-[#918f8c] hover:text-[#163826] transition-all active:opacity-70">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-sans text-[11px] uppercase tracking-widest font-medium mt-1">Settings</span>
+</div>
+</nav>
+</body></html>

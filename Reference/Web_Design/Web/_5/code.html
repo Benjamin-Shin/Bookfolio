@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Seogadam | Admin Book Catalog</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffdadb",
+                        "on-background": "#1c1c18",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#a9cfb7",
+                        "surface-container": "#f0eee8",
+                        "on-tertiary-container": "#ff9aa1",
+                        "on-secondary-fixed": "#211a13",
+                        "on-primary-container": "#9ac0a7",
+                        "outline-variant": "#c1c8c1",
+                        "tertiary-fixed-dim": "#ffb2b6",
+                        "surface-tint": "#436651",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#2d4f3c",
+                        "primary": "#163826",
+                        "inverse-surface": "#31312d",
+                        "secondary-fixed-dim": "#d2c4b9",
+                        "on-secondary-fixed-variant": "#4e453c",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#67081d",
+                        "surface-dim": "#dcdad4",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-surface": "#1c1c18",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#2c4e3b",
+                        "background": "#fcf9f3",
+                        "surface-container-high": "#ebe8e2",
+                        "surface-container-low": "#f6f3ed",
+                        "on-secondary-container": "#6d6259",
+                        "secondary-fixed": "#efe0d4",
+                        "primary-fixed": "#c5ecd2",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#002112",
+                        "surface-variant": "#e5e2dc",
+                        "secondary": "#675d53",
+                        "on-surface-variant": "#424843",
+                        "secondary-container": "#efe0d4",
+                        "inverse-on-surface": "#f3f0ea",
+                        "tertiary-container": "#862232",
+                        "primary-fixed-dim": "#a9cfb7",
+                        "on-tertiary-fixed": "#40000d",
+                        "outline": "#727973",
+                        "on-tertiary-fixed-variant": "#842131",
+                        "surface-container-highest": "#e5e2dc",
+                        "surface-bright": "#fcf9f3",
+                        "surface": "#fcf9f3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .font-serif { font-family: 'Newsreader', serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
+<aside class="fixed left-0 top-0 h-full w-72 border-r border-[#163826]/10 bg-[#fcf9f3] dark:bg-[#0d0d0d] flex flex-col h-screen gap-2 pt-20 z-40">
+<div class="px-8 mb-10">
+<h1 class="font-serif text-lg font-black text-[#2D4F3C]">Admin Panel</h1>
+<p class="font-sans uppercase text-[11px] tracking-widest font-semibold text-secondary">System Control</p>
+</div>
+<nav class="flex-grow flex flex-col gap-2">
+<a class="bg-[#2D4F3C] text-white rounded-sm mx-4 px-4 py-3 flex items-center gap-3 transition-all active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">Book Catalog</span>
+</a>
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 transition-all hover:bg-[#efe0d4] active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">User Registry</span>
+</a>
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 transition-all hover:bg-[#efe0d4] active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">category</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">Curated Collections</span>
+</a>
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 transition-all hover:bg-[#efe0d4] active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">Points Ledger</span>
+</a>
+</nav>
+<div class="mt-auto mb-8">
+<a class="text-[#675d53] mx-4 px-4 py-3 flex items-center gap-3 transition-all hover:bg-[#efe0d4] active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-sans uppercase text-[11px] tracking-widest font-semibold">System Settings</span>
+</a>
+</div>
+</aside>
+<main class="ml-72 min-h-screen p-12">
+<header class="flex justify-between items-end mb-12">
+<div class="max-w-2xl">
+<h2 class="font-serif text-4xl font-medium text-primary tracking-tight mb-2">Book Catalog Management</h2>
+<p class="text-secondary body-lg max-w-md">Maintain the digital archives of Seogadam. Add, curate, or update literary entries across the sanctuary.</p>
+</div>
+<button class="bg-primary text-on-primary px-6 py-3 rounded-sm flex items-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors duration-300 font-semibold text-sm tracking-wide">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                ADD NEW BOOK
+            </button>
+</header>
+<section class="bg-surface-container-low rounded-lg p-6 mb-8 border border-outline-variant/10">
+<div class="flex flex-col md:flex-row gap-6 items-center">
+<div class="relative flex-grow">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-[20px]">search</span>
+<input class="w-full bg-surface-container-highest border-none focus:ring-1 focus:ring-primary py-3 pl-10 pr-4 rounded-sm text-sm placeholder:text-secondary/50" placeholder="Search by title, author, or ISBN..." type="text"/>
+</div>
+<div class="flex gap-4 w-full md:w-auto">
+<div class="relative min-w-[160px]">
+<select class="w-full bg-surface-container-highest border-none focus:ring-1 focus:ring-primary py-3 px-4 rounded-sm text-sm appearance-none cursor-pointer">
+<option>All Statuses</option>
+<option>Curated</option>
+<option>Awaiting Review</option>
+<option>Archived</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none text-[20px]">expand_more</span>
+</div>
+<button class="bg-secondary-container text-on-secondary-container px-6 py-3 rounded-sm text-sm font-semibold hover:bg-surface-container-high transition-colors">
+                        Filter
+                    </button>
+</div>
+</div>
+</section>
+<section class="bg-white border border-outline-variant/10 shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant/20">
+<th class="px-6 py-4 font-serif text-sm font-semibold text-primary uppercase tracking-widest">Title</th>
+<th class="px-6 py-4 font-serif text-sm font-semibold text-primary uppercase tracking-widest">Author</th>
+<th class="px-6 py-4 font-serif text-sm font-semibold text-primary uppercase tracking-widest">Publisher</th>
+<th class="px-6 py-4 font-serif text-sm font-semibold text-primary uppercase tracking-widest">Year</th>
+<th class="px-6 py-4 font-serif text-sm font-semibold text-primary uppercase tracking-widest text-center">Status</th>
+<th class="px-6 py-4 font-serif text-sm font-semibold text-primary uppercase tracking-widest text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-14 bg-surface-container-high flex-shrink-0 overflow-hidden rounded-sm">
+<img class="w-full h-full object-cover opacity-80" data-alt="Close-up of a classic hardcover book with a cream dust jacket and elegant typography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_XfEPRht0A-Yp7ymMUB8hqKbIOH25aver3NnHLj1jsOItBXPgOVuW_SwEO4GHIB0vkPQPBiBsLhDgm-gjyw_vyUPq4evcif7vXCysyFb9bBxvM2YdD1H79vFwSW3eF1GTCaMBhsRHgdLT-NK49B9zc6-X9Y_CT91mXzhBRBwZ6cXcLMKZeiuT29t9aO6RIa2OsEPF0HG2ckJC8esheblouQ8JDm7vyHQq40t4EluW_LBzMZVg1LNdjsgrbXqcGfH1E4VZQzt-ORc"/>
+</div>
+<div>
+<p class="font-serif text-lg text-primary leading-tight">The Silent Archive</p>
+<p class="text-xs text-secondary font-label">ISBN: 978-3-16-148410-0</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-secondary font-medium">Elena Thorne</td>
+<td class="px-6 py-5 text-sm text-secondary">Atelier Press</td>
+<td class="px-6 py-5 text-sm text-secondary">2023</td>
+<td class="px-6 py-5">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Curated</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 text-secondary hover:text-primary hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-2 text-secondary hover:text-error hover:bg-error-container transition-all">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-14 bg-surface-container-high flex-shrink-0 overflow-hidden rounded-sm">
+<img class="w-full h-full object-cover opacity-80" data-alt="Minimalist book cover design with a single abstract leaf illustration and clean serif title" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtlNj3LgXwpzVk7y1t-e91IzsLq5b2DaQvTSCGxiyTtYpIdtGlaKDnYnqKgURs7kH03wVLN099XY3Z6Jvsql4CCYRT8n3XKgzVfgcp1fPouihDCmkclWP4BxCjdesL9qXnLdk1lp4J5chNgow4V87zxmAF845KNZKSneXd84OHRIYINeCf9LCkvMd2FUM0KGrqGMYZss-l1g3Q45h2h66UibB2XYSF7ne_H4MBGGQy66dSsqcGtuhkelZXDNKcFkZI4posyqGNWzM"/>
+</div>
+<div>
+<p class="font-serif text-lg text-primary leading-tight">Paper Pathways</p>
+<p class="text-xs text-secondary font-label">ISBN: 978-0-12-345678-9</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-secondary font-medium">Julian Vane</td>
+<td class="px-6 py-5 text-sm text-secondary">Echo House</td>
+<td class="px-6 py-5 text-sm text-secondary">2021</td>
+<td class="px-6 py-5">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Review</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 text-secondary hover:text-primary hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-2 text-secondary hover:text-error hover:bg-error-container transition-all">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-14 bg-surface-container-high flex-shrink-0 overflow-hidden rounded-sm">
+<img class="w-full h-full object-cover opacity-80" data-alt="Vintage book spine with gold foil lettering on deep forest green leather" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCig6ha4uFj9TsUZd65tIzR02ugve0Og7EBdqPB-0b0TQlNd8W_BGB0372lTkFBguKCf1l_N2-CkNdmi4oo3Zrd3GFV6cNn16SBHSmJnJWtWOPeBKlGTklRi2Mjs5Hwxu2ykq6cKIAffdG8zOVPTX2-Qt9urL_WvdP8lJoM5-W2AxSzjgLjWKusGmjs7UJWrX1-cwnWlnUAPGNDohvk3hyHy-VYT-GaCbATa-I-I2_NkSwqMRrd6sap4go1MyYMTGc3yt3Mom7W4iA"/>
+</div>
+<div>
+<p class="font-serif text-lg text-primary leading-tight">The Gilded Spine</p>
+<p class="text-xs text-secondary font-label">ISBN: 978-1-59-463193-1</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-secondary font-medium">S. K. Aris</td>
+<td class="px-6 py-5 text-sm text-secondary">Heritage Folio</td>
+<td class="px-6 py-5 text-sm text-secondary">2019</td>
+<td class="px-6 py-5">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Curated</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 text-secondary hover:text-primary hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-2 text-secondary hover:text-error hover:bg-error-container transition-all">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-14 bg-surface-container-high flex-shrink-0 overflow-hidden rounded-sm">
+<img class="w-full h-full object-cover opacity-80" data-alt="Modernist book cover with bold geometric shapes and subtle grain texture in earth tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAubzqqH1RVZpNEPOH1JfMEton2WmB5M_o_ddANsN0yAGMBslz4x9itJdyt8z9H-5ecdRh3Rb94Lug0BE2RfQjLqQ1okeqA7wj7kxR_ygUgQwIbCPLmDSU04LZIw8uexHPYFJTaECE02U1fpD5_bXek7GvuRr-D2uVOAQernANmuA9shE-zWvjKCse55GsGDmrMdYpG-yidOdgzZAK7Qphoayek_Jlf8GVAgilCaqgYtYn_LjO4QipmWjY3i2M5iV19IgArh9xEIjs"/>
+</div>
+<div>
+<p class="font-serif text-lg text-primary leading-tight">Of Ink &amp; Ash</p>
+<p class="text-xs text-secondary font-label">ISBN: 978-0-74-327356-5</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-secondary font-medium">Marais Duval</td>
+<td class="px-6 py-5 text-sm text-secondary">Parisian Bound</td>
+<td class="px-6 py-5 text-sm text-secondary">2024</td>
+<td class="px-6 py-5">
+<div class="flex justify-center">
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Draft</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-2 text-secondary hover:text-primary hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-2 text-secondary hover:text-error hover:bg-error-container transition-all">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-6 py-4 bg-surface-container-low flex justify-between items-center">
+<p class="text-xs text-secondary font-medium uppercase tracking-widest">Showing 1 to 4 of 124 entries</p>
+<div class="flex items-center gap-1">
+<button class="p-2 text-secondary hover:text-primary disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-xs font-bold bg-primary text-on-primary rounded-sm">1</button>
+<button class="w-8 h-8 flex items-center justify-center text-xs font-medium text-secondary hover:bg-surface-container rounded-sm transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center text-xs font-medium text-secondary hover:bg-surface-container rounded-sm transition-colors">3</button>
+<span class="text-secondary mx-1">...</span>
+<button class="w-8 h-8 flex items-center justify-center text-xs font-medium text-secondary hover:bg-surface-container rounded-sm transition-colors">31</button>
+<button class="p-2 text-secondary hover:text-primary">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<section class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-[#2D4F3C] p-8 text-white relative overflow-hidden flex flex-col justify-between h-48">
+<div class="relative z-10">
+<h4 class="font-serif text-2xl mb-1">Weekly Growth</h4>
+<p class="text-xs uppercase tracking-widest opacity-70">Catalogue expansion</p>
+</div>
+<div class="flex items-end gap-2 relative z-10">
+<span class="text-4xl font-light">+42</span>
+<span class="text-xs mb-1 opacity-70 text-on-primary-container">new titles added</span>
+</div>
+<div class="absolute right-[-20px] bottom-[-20px] opacity-10">
+<span class="material-symbols-outlined text-[140px]" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+</div>
+<div class="bg-secondary-container p-8 text-on-secondary-container relative overflow-hidden flex flex-col justify-between h-48">
+<div class="relative z-10">
+<h4 class="font-serif text-2xl mb-1">Review Queue</h4>
+<p class="text-xs uppercase tracking-widest opacity-70">Community submissions</p>
+</div>
+<div class="flex items-end gap-2 relative z-10">
+<span class="text-4xl font-light">18</span>
+<span class="text-xs mb-1 opacity-70">pending verification</span>
+</div>
+<div class="absolute right-[-10px] bottom-[-10px] opacity-10">
+<span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'FILL' 1;">rate_review</span>
+</div>
+</div>
+<div class="bg-surface-container-high p-8 text-primary relative overflow-hidden flex flex-col justify-between h-48">
+<div class="relative z-10">
+<h4 class="font-serif text-2xl mb-1">Total Archives</h4>
+<p class="text-xs uppercase tracking-widest opacity-70">Current database size</p>
+</div>
+<div class="flex items-end gap-2 relative z-10">
+<span class="text-4xl font-light">4,812</span>
+<span class="text-xs mb-1 opacity-70 text-secondary">verified books</span>
+</div>
+<div class="absolute right-[-20px] bottom-[-20px] opacity-5">
+<span class="material-symbols-outlined text-[160px]" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+</div>
+</div>
+</section>
+</main>
+</body></html>

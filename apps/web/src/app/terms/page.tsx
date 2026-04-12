@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "서비스 약관 — Bookfolio",
+  title: "서비스 약관 — 서가담",
   description:
-    "Bookfolio 서비스 이용 조건, 회원·이용자 권리와 의무, 약관 개정, 통지, 게시물·저작권, 포인트·VIP, 공동서재, 분쟁 해결 등에 관한 약관입니다.",
+    "서가담 서비스 이용 조건, 회원·이용자 권리와 의무, 약관 개정, 통지, 게시물·저작권, 포인트·VIP, 공동서재, 분쟁 해결 등에 관한 약관입니다.",
 };
 
 /**
  * @history
+ * - 2026-04-05: 메타·정의 조 문구의 서비스 명칭을 서가담으로 정렬
  * - 2026-03-29: 트레바리 등 유사 서비스 약관을 참고해 게시·개정(7일·30일), 개별약관 우선, 이용자·게시물 정의, 이용계약·회원정보 변경, 통지, 운영자 의무, 서비스 제공·변경·무료 서비스, 정보·광고, 게시물 관리·권리 귀속, 환불·이용제한, 강행법규·분쟁 조항을 보강하고 공고·시행일을 명시.
  * - 2026-03-28: 서지 조회 제공자 문구에서 Google Books 제거(미사용).
  * - 2026-03-28: 현재 구현·설계 문서 기준 본문 정리(인증, 서재, 공동서재, 포인트·출석, VIP·구독·한도, 캐논 편집·투표, ISBN 조회·관리자 운영 등 반영; 향후 PG·결제 연계는 별도 고지 예정으로 명시)
@@ -26,7 +27,7 @@ export default function TermsOfServicePage() {
         공고일: 2026년 3월 29일 · 시행일: 2026년 3월 29일
       </p>
       <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
-        본 약관은 Bookfolio(이하 &quot;서비스&quot;)의 이용과 관련하여{" "}
+        본 약관은 서가담(이하 &quot;서비스&quot;)의 이용과 관련하여{" "}
         <strong>운영자</strong>(서비스를 운영하는 사업자 또는 그로부터 위탁받아
         운영하는 주체)와 <strong>이용자</strong> 간 권리·의무·책임사항을
         규정합니다. 본문은 현재 제공·로드맵상 예정 기능을 참고하였으나,{" "}
@@ -65,7 +66,7 @@ export default function TermsOfServicePage() {
             <li>
               <strong>&quot;서비스&quot;</strong>란 PC, 휴대형 단말기 등 각종
               유·무선 기기를 포함한 단말의 종류에 관계없이 이용자가 이용할 수
-              있는 Bookfolio 및 이에 부수하는 기능·API를 말합니다.
+              있는 서가담 및 이에 부수하는 기능·API를 말합니다.
             </li>
             <li>
               <strong>&quot;이용자&quot;</strong>란 사이트에 접속하여 본 약관에

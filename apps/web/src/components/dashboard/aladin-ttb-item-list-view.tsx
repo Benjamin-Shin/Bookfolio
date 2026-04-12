@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 
-import type { AladinFeedResult } from "@/lib/aladin/bestseller-feed";
+import type { AladinFeedItem, AladinFeedResult } from "@/lib/aladin/bestseller-feed";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ export type AladinTtbItemListViewProps = {
  * 알라딘 TTB ItemList 공통 그리드(베스트셀러·초이스 신간 등).
  *
  * @history
+ * - 2026-04-12: 카드 클릭 시 알라딘 상품 URL(피드 `link`, 없으면 ISBN) 새 탭 열기
  * - 2026-03-25: `bestsellers/page`에서 분리, 초이스 신간 재사용
  */
 export function AladinTtbItemListView({
@@ -68,9 +70,18 @@ export function AladinTtbItemListView({
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {feed.items.map((item, index) => {
             const categorySegments = parseAladinCategorySegments(item.categoryName);
+            const aladinHref = resolveAladinItemHref(item);
             return (
               <li key={item.itemId || `${item.isbn13}-${item.isbn}-${index}`}>
-                <Card className="h-full overflow-hidden border-border/80 transition-shadow hover:shadow-md">
+                <AladinItemCardLink
+                  href={aladinHref}
+                  ariaLabel={
+                    aladinHref
+                      ? `${(item.title || "도서").trim()} — 알라딘에서 보기`
+                      : undefined
+                  }
+                >
+                  <Card className="h-full overflow-hidden border-border/80 transition-shadow hover:shadow-md">
                   <CardContent className="flex flex-col gap-3 p-4">
                     {categorySegments.length > 0 ? (
                       <div
@@ -148,6 +159,7 @@ export function AladinTtbItemListView({
                     </div>
                   </CardContent>
                 </Card>
+                </AladinItemCardLink>
               </li>
             );
           })}
@@ -165,4 +177,47 @@ function parseAladinCategorySegments(categoryName: string | undefined): string[]
     .split(">")
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+/**
+ * 피드 `link` 또는 ISBN으로 알라딘 상품 페이지 URL을 만듭니다.
+ *
+ * @history
+ * - 2026-04-12: 베스트셀러·신간 카드 클릭용
+ */
+function resolveAladinItemHref(item: AladinFeedItem): string | null {
+  const fromFeed = item.link?.trim();
+  if (fromFeed) {
+    return fromFeed;
+  }
+  const isbn = (item.isbn13 || item.isbn || "").replace(/[^0-9Xx]/g, "");
+  if (!isbn) {
+    return null;
+  }
+  return `https://www.aladin.co.kr/shop/wproduct.aspx?ISBN=${encodeURIComponent(isbn)}`;
+}
+
+function AladinItemCardLink({
+  href,
+  ariaLabel,
+  children
+}: {
+  href: string | null;
+  ariaLabel?: string;
+  children: ReactNode;
+}) {
+  if (!href) {
+    return <>{children}</>;
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={ariaLabel}
+      className="block rounded-xl outline-none transition-opacity hover:opacity-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      {children}
+    </a>
+  );
 }

@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:bookfolio_mobile/src/models/shared_library_models.dart';
-import 'package:bookfolio_mobile/src/services/bookfolio_api.dart';
-import 'package:bookfolio_mobile/src/state/auth_controller.dart';
-import 'package:bookfolio_mobile/src/ui/app_root_scaffold.dart';
-import 'package:bookfolio_mobile/src/ui/screens/shared_library_books_screen.dart';
+import 'package:seogadam_mobile/src/models/shared_library_models.dart';
+import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
+import 'package:seogadam_mobile/src/state/auth_controller.dart';
+import 'package:seogadam_mobile/src/ui/app_root_scaffold.dart';
+import 'package:seogadam_mobile/src/ui/screens/shared_library_books_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

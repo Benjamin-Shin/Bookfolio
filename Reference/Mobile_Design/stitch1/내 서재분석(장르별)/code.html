@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Seogadam - 나의 지적인 토양</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, .serif {
+            font-family: 'Newsreader', serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffdadb",
+                        "on-tertiary-fixed-variant": "#842131",
+                        "on-primary-fixed-variant": "#2c4e3b",
+                        "surface-variant": "#e5e2dc",
+                        "surface-tint": "#436651",
+                        "surface-container": "#f0eee8",
+                        "primary-fixed-dim": "#a9cfb7",
+                        "on-primary-container": "#9ac0a7",
+                        "tertiary": "#67081d",
+                        "primary": "#163826",
+                        "outline-variant": "#c1c8c1",
+                        "on-error": "#ffffff",
+                        "background": "#fcf9f3",
+                        "tertiary-container": "#862232",
+                        "surface-container-low": "#f6f3ed",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#d2c4b9",
+                        "on-tertiary-fixed": "#40000d",
+                        "inverse-primary": "#a9cfb7",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e5e2dc",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#fcf9f3",
+                        "primary-container": "#2d4f3c",
+                        "primary-fixed": "#c5ecd2",
+                        "inverse-on-surface": "#f3f0ea",
+                        "on-surface-variant": "#424843",
+                        "on-secondary-fixed-variant": "#4e453c",
+                        "outline": "#727973",
+                        "on-surface": "#1c1c18",
+                        "on-tertiary-container": "#ff9aa1",
+                        "on-secondary-fixed": "#211a13",
+                        "surface-dim": "#dcdad4",
+                        "tertiary-fixed-dim": "#ffb2b6",
+                        "on-secondary-container": "#6d6259",
+                        "on-primary-fixed": "#002112",
+                        "inverse-surface": "#31312d",
+                        "surface": "#fcf9f3",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#efe0d4",
+                        "secondary": "#675d53",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#efe0d4",
+                        "on-background": "#1c1c18",
+                        "error": "#ba1a1a",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#ebe8e2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center px-6 h-16 w-full bg-[#fcf9f3] dark:bg-stone-950">
+<div class="flex items-center w-full justify-between">
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity scale-95 duration-200 text-[#163826] dark:text-[#2D4F3C]">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-serif italic text-stone-900 dark:text-stone-50 text-lg">나의 지적인 토양</h1>
+</div>
+<div class="text-xl font-bold tracking-tight text-[#163826] dark:text-[#2D4F3C] font-serif">Seogadam</div>
+</div>
+</header>
+<main class="pt-20 px-6 max-w-2xl mx-auto">
+<!-- Hero Section: Editorial Summary -->
+<section class="mt-8 mb-12">
+<div class="bg-surface-container-lowest p-8 rounded-lg border border-outline-variant/10 shadow-sm">
+<p class="text-secondary text-xs uppercase tracking-[0.2em] mb-3">Curator's Note</p>
+<h2 class="text-3xl headline-lg leading-snug text-primary mb-4 italic">당신의 서재는 인문학적 깊이와 문학적 감성이 조화를 이루고 있습니다.</h2>
+<p class="text-secondary leading-relaxed font-light">
+                    마치 정성스럽게 가꾸어진 정원처럼, 인문학의 뿌리 위에 문학이라는 꽃이 피어나고 있습니다. 예술에 대한 탐구심 또한 고개를 들기 시작하며 지적인 다채로움을 더해가고 있네요.
+                </p>
+</div>
+</section>
+<!-- Main Visualization: Elegant Donut Chart -->
+<section class="mb-16">
+<div class="flex flex-col md:flex-row items-center gap-12">
+<div class="relative w-64 h-64 flex-shrink-0">
+<!-- Custom SVG Donut -->
+<svg class="transform -rotate-90" viewbox="0 0 100 100">
+<!-- Humanities 45% -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#163826" stroke-dasharray="113.1 138.2" stroke-dashoffset="0" stroke-width="12"></circle>
+<!-- Literature 30% -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#675d53" stroke-dasharray="75.4 175.9" stroke-dashoffset="-113.1" stroke-width="12"></circle>
+<!-- Art 15% -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#efe0d4" stroke-dasharray="37.7 213.6" stroke-dashoffset="-188.5" stroke-width="12"></circle>
+<!-- Others 10% -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#e5e2dc" stroke-dasharray="25.1 226.2" stroke-dashoffset="-226.2" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-xs uppercase tracking-widest text-secondary">Total</span>
+<span class="text-2xl font-serif italic text-primary">128</span>
+<span class="text-[10px] text-secondary">Volumes</span>
+</div>
+</div>
+<div class="w-full space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 bg-primary"></div>
+<span class="text-sm font-medium">인문학 (Humanities)</span>
+</div>
+<span class="font-serif italic text-primary text-lg">45%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 bg-secondary"></div>
+<span class="text-sm font-medium">문학 (Literature)</span>
+</div>
+<span class="font-serif italic text-secondary text-lg">30%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 bg-secondary-container"></div>
+<span class="text-sm font-medium">예술 (Art)</span>
+</div>
+<span class="font-serif italic text-secondary text-lg">15%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 bg-surface-variant"></div>
+<span class="text-sm font-medium">기타</span>
+</div>
+<span class="font-serif italic text-secondary text-lg">10%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Detailed Breakdown Cards -->
+<section class="space-y-12">
+<!-- Genre: Humanities -->
+<div class="bg-surface-container-low rounded-lg overflow-hidden">
+<div class="p-8">
+<div class="flex items-baseline justify-between mb-4">
+<h3 class="text-2xl headline-sm text-primary">인문학</h3>
+<span class="font-serif italic text-primary-container text-xl">45%</span>
+</div>
+<p class="text-sm text-secondary leading-relaxed mb-8">역사와 철학을 통해 세상을 바라보는 넓은 시야를 선호하십니다. 고전과 현대 비평을 넘나드는 깊은 탐구심이 돋보입니다.</p>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<div class="flex-shrink-0 w-24">
+<div class="aspect-[2/3] bg-surface-container-highest mb-2 rounded shadow-sm border border-outline-variant/10">
+<img alt="" class="w-full h-full object-cover" data-alt="minimalist white book cover with elegant black serif typography for a philosophy book" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRB4HBd_YRYm5G8MxX-AHJglIRVWLRixWnXMl1X9UkLW8MldoqSQ4AOXbdHmShxw4ygExIN4R2z3dbtiNV8hQdZRz3Z6AL9SWf3lNyrBDM3voKKn4uXdW24WBqE3XrcA2hT853QTEAnjgDikuclszJ7bZwTazKa1GlFM4JyadiAPY_gTulVB98jinvgIZVnndZDzznjWu0PG7YD8_08MECSSs0NB1HFsEHThs27s7DKzYiiHUcL5HDnxdkSR6p1AlG8nVFdbPcsFs"/>
+</div>
+</div>
+<div class="flex-shrink-0 w-24">
+<div class="aspect-[2/3] bg-surface-container-highest mb-2 rounded shadow-sm border border-outline-variant/10">
+<img alt="" class="w-full h-full object-cover" data-alt="vintage leather book cover with gold foil lettering on a dark wooden background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvLMSBbx3LzxsyZSP4Zd-02uRhoophTUzFXbd3semOcXfvO7PoMMFUHk0NWv5hE9NxPo4xabYaqlBtOqFoWVJhAlHiPMR3h96EcZq3-8WHUxS2YGxr3FazNvRp2eCIKhV0IQpoB8UbU-dPEzMnY5NaXqH0SWmrEFTMs0BNlUQpQJa7dK0kdH7UNI97ZAusZWi5w6fEdNyikgN8QhyEIkUdU60QlOVe0ALA7dL1lATImsiOMZAqMl1v2Wh7N9iJCP_WzlzlYnU-pKs"/>
+</div>
+</div>
+<div class="flex-shrink-0 w-24">
+<div class="aspect-[2/3] bg-surface-container-highest mb-2 rounded shadow-sm border border-outline-variant/10">
+<img alt="" class="w-full h-full object-cover" data-alt="stack of classic academic books with cream colored pages and subtle textures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2weguNwlCbeToHqkU9r_Eq04VXQbwNGxuve5tzeEpZc8aprv6X-8FtLlqtjHfTChgShgqlIimHLLGtvINuzX_yktsJFEXzgxww8cZkIdR37AvzoSICug-VrYZHsMd6YXKOqF5fZJQTiXZ2OQIH9LXnskT9_Ip6vTIc0kULXw_IFPCX8zkqBn50cGQadzSqHu2UX_6H5fOYCJhpZu00HJJcBrUtP5KvddSNVlo011wdYf_08UFFJfYWLjyjFBK_KST1FRZcft9SZg"/>
+</div>
+</div>
+<div class="flex-shrink-0 w-24">
+<div class="aspect-[2/3] bg-surface-container-highest mb-2 rounded shadow-sm border border-outline-variant/10">
+<img alt="" class="w-full h-full object-cover" data-alt="modern hardcover book with abstract geometric art in muted earth tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgcfwRBZgN11cF9ijR8bYWjNjozVEKz7wdfYDMs2xzeikqUKmGiHgrVquk5Yh6Hy9nLFm5DjvmxzCSJfAImFY2AXZ4hJfIYDkJ99SqYYHjVKliX4OuiD0QhmqmVtgebP32s4A6hpCojtWzEXZnhTCKMo4OB1PJvrrebtGztM8LGPQqMwR3llVjx7BITkr1_qziSQS--Hogk65pwZYwprEyAfai-MTuLdGMq1r42ntSP4VK8VjhTnKJ-ktJHyW9ElG-m6OHLxPKsec"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Genre: Literature -->
+<div class="bg-surface-container-low rounded-lg overflow-hidden">
+<div class="p-8">
+<div class="flex items-baseline justify-between mb-4">
+<h3 class="text-2xl headline-sm text-primary">문학</h3>
+<span class="font-serif italic text-secondary text-xl">30%</span>
+</div>
+<p class="text-sm text-secondary leading-relaxed mb-8">감각적인 문체와 섬세한 묘사가 돋보이는 소설을 즐겨 읽으십니다. 특히 근현대 문학에 대한 애정이 깊으신 편입니다.</p>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<div class="flex-shrink-0 w-24">
+<div class="aspect-[2/3] bg-surface-container-highest mb-2 rounded shadow-sm border border-outline-variant/10">
+<img alt="" class="w-full h-full object-cover" data-alt="soft focus photo of a collection of classic literature books with aesthetic paper covers" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWQSkFO1Apjtgk51i3xO7GWTRi7vR6-Au_MKBqMETu7KKuacD27kRN8dTgr-aVOHgd5uBdK-dWKwlIhhjxDf6j9TwGFrCQrLsQhGlD1FLfG0eICCUHxDMP2FEHCvuiXd1T-UGaGOkFRSR5TM0OxP6dPU4v5SPoKC3kG7kUh2XIEjJaixBxhxslRcm9HamlIUWkp-IHvJ7rYTCWm0lLBFlIJ17_gucSqbnuAYmw3UN7eg17wVKNNC3gs7ShIFR3_xn4kSqJfqat2z8"/>
+</div>
+</div>
+<div class="flex-shrink-0 w-24">
+<div class="aspect-[2/3] bg-surface-container-highest mb-2 rounded shadow-sm border border-outline-variant/10">
+<img alt="" class="w-full h-full object-cover" data-alt="book cover with delicate watercolor illustration of a single flower in soft pink and green" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2S8415SCwt9ygiSPxjtdpJ89DHPAwZH65SrN7m2iKop2v3fRyEphvc0WnkZKFjcDzD_kqapmIG-5zYka6iWIWgQEtd4Ml1M-KifPZFyxPAxIneH67u3WtvLnrfA-uEO3eWxtgXactse2b70eqV6X-eP1tYOCMmu6WyOk6He2wwpah2awtZE27jf9wfKmDbwvS0rQu0IjytS3NNsS9OPAkP3HuWfW3c3T7qcX3T_MiHiCsMBVWVifeQx1vXzwyzw91Rxz4ZYC9gYU"/>
+</div>
+</div>
+<div class="flex-shrink-0 w-24">
+<div class="aspect-[2/3] bg-surface-container-highest mb-2 rounded shadow-sm border border-outline-variant/10">
+<img alt="" class="w-full h-full object-cover" data-alt="minimalist aesthetic book on a white linen bedsheet with morning sunlight shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj-ma8hJTeUtGiw-pTdSFStb9c7qkpLoJK3kMLkHcfThQp_hrezwUixxA9IEZO1mAUH4BlGkB7Pz2o6FEcvaT_iFckxPlLYlNBI5y_VJ1BW-NeYaXSCcppGQNPrnQHa9lYVNgF8rIzEXoEPHrzeVElcPWgj5cvJfFpS7VSnJIGm_efRpvqflJlgHf8qyLxz5-y5_-q4Pt_AXYd8TJC5zCIBAm_1HMebRGhw-AyD4Gs2TfiMk_wl2tAN_0qgKTXS5-U5tLNHTF8l7k"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Growth Insights Section -->
+<section class="mt-16 mb-8">
+<div class="bg-primary text-on-primary p-8 rounded-lg relative overflow-hidden">
+<!-- Archivist's Ribbon -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-tertiary"></div>
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="insights">insights</span>
+<h3 class="text-lg headline-sm">지적 성장 기록</h3>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-sm opacity-80 uppercase tracking-wider">예술 분야 성장세</span>
+<span class="font-serif italic text-xl">+12%</span>
+</div>
+<div class="h-1 bg-white/10 w-full">
+<div class="h-full bg-primary-fixed" style="width: 65%;"></div>
+</div>
+<p class="mt-4 text-sm font-light leading-relaxed opacity-90">
+                            지난 6개월간 예술 카테고리의 장서가 꾸준히 증가했습니다. 특히 건축과 현대 미술 비평서 위주의 수집이 돋보입니다.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-8 pb-safe bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl z-50 border-t border-stone-200/15 dark:border-stone-800/15 shadow-[0_-4px_24px_rgba(22,56,38,0.04)]">
+<a class="flex flex-col items-center justify-center text-stone-400 dark:text-stone-600 transition-all duration-300 ease-out hover:text-[#163826] dark:hover:text-[#2D4F3C]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home_storage">home_storage</span>
+<span class="font-sans text-[11px] uppercase tracking-widest">Atelier</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 dark:text-stone-600 transition-all duration-300 ease-out hover:text-[#163826] dark:hover:text-[#2D4F3C]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="auto_stories">auto_stories</span>
+<span class="font-sans text-[11px] uppercase tracking-widest">Archive</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#163826] dark:text-[#2D4F3C] font-bold transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-sans text-[11px] uppercase tracking-widest">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 dark:text-stone-600 transition-all duration-300 ease-out hover:text-[#163826] dark:hover:text-[#2D4F3C]" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person_search">person_search</span>
+<span class="font-sans text-[11px] uppercase tracking-widest">Curator</span>
+</a>
+</nav>
+</body></html>

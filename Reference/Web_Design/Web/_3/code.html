@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffdadb",
+                    "on-background": "#1c1c18",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#a9cfb7",
+                    "surface-container": "#f0eee8",
+                    "on-tertiary-container": "#ff9aa1",
+                    "on-secondary-fixed": "#211a13",
+                    "on-primary-container": "#9ac0a7",
+                    "outline-variant": "#c1c8c1",
+                    "tertiary-fixed-dim": "#ffb2b6",
+                    "surface-tint": "#436651",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#2d4f3c",
+                    "primary": "#163826",
+                    "inverse-surface": "#31312d",
+                    "secondary-fixed-dim": "#d2c4b9",
+                    "on-secondary-fixed-variant": "#4e453c",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#67081d",
+                    "surface-dim": "#dcdad4",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-surface": "#1c1c18",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#2c4e3b",
+                    "background": "#fcf9f3",
+                    "surface-container-high": "#ebe8e2",
+                    "surface-container-low": "#f6f3ed",
+                    "on-secondary-container": "#6d6259",
+                    "secondary-fixed": "#efe0d4",
+                    "primary-fixed": "#c5ecd2",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#002112",
+                    "surface-variant": "#e5e2dc",
+                    "secondary": "#675d53",
+                    "on-surface-variant": "#424843",
+                    "secondary-container": "#efe0d4",
+                    "inverse-on-surface": "#f3f0ea",
+                    "tertiary-container": "#862232",
+                    "primary-fixed-dim": "#a9cfb7",
+                    "on-tertiary-fixed": "#40000d",
+                    "outline": "#727973",
+                    "on-tertiary-fixed-variant": "#842131",
+                    "surface-container-highest": "#e5e2dc",
+                    "surface-bright": "#fcf9f3",
+                    "surface": "#fcf9f3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, .serif { font-family: 'Newsreader', serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Left Side Navigation -->
+<aside class="fixed left-0 top-0 h-full w-64 border-r border-[#163826]/10 bg-[#f6f3ed] flex flex-col py-8 z-40">
+<div class="px-8 mb-12">
+<h1 class="font-serif text-xl font-bold text-[#2D4F3C]">Seogadam</h1>
+<p class="font-serif tracking-wide text-xs text-[#675d53] mt-1 uppercase tracking-widest">Digital Sanctuary</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center text-[#675d53] pl-5 py-3 hover:text-[#2D4F3C] hover:bg-[#fcf9f3]/50 transition-all duration-300 ease-in-out font-serif tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="auto_stories">auto_stories</span>
+<span>The Atelier</span>
+</a>
+<a class="flex items-center text-[#2D4F3C] font-bold border-l-4 border-[#2D4F3C] pl-4 py-3 bg-[#fcf9f3]/50 font-serif tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="local_library">local_library</span>
+<span>Library</span>
+</a>
+<a class="flex items-center text-[#675d53] pl-5 py-3 hover:text-[#2D4F3C] hover:bg-[#fcf9f3]/50 transition-all duration-300 ease-in-out font-serif tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="collections_bookmark">collections_bookmark</span>
+<span>Curations</span>
+</a>
+<a class="flex items-center text-[#675d53] pl-5 py-3 hover:text-[#2D4F3C] hover:bg-[#fcf9f3]/50 transition-all duration-300 ease-in-out font-serif tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="edit_note">edit_note</span>
+<span>Archivist Notes</span>
+</a>
+<a class="flex items-center text-[#675d53] pl-5 py-3 hover:text-[#2D4F3C] hover:bg-[#fcf9f3]/50 transition-all duration-300 ease-in-out font-serif tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="bookmark">bookmark</span>
+<span>Bookmarks</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full bg-primary text-on-primary py-3 px-4 rounded-sm font-serif flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+<span>New Entry</span>
+</button>
+<a class="flex items-center text-[#675d53] pl-5 py-3 mt-4 hover:text-[#2D4F3C] transition-all duration-300 ease-in-out font-serif tracking-wide" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mr-80 min-h-screen p-12">
+<!-- Header & Editorial Title -->
+<header class="mb-12">
+<div class="flex justify-between items-end">
+<div>
+<span class="text-secondary font-label text-xs uppercase tracking-[0.2em] mb-3 block">Archive Collection</span>
+<h2 class="text-5xl font-headline text-primary font-bold italic">My Library</h2>
+</div>
+<div class="flex gap-4 items-center">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary/60 text-lg" data-icon="search">search</span>
+<input class="bg-surface-container-low border-none border-b border-outline-variant/30 focus:ring-0 focus:border-primary px-10 py-2 w-64 text-sm font-label placeholder:italic" placeholder="Search the catalog..." type="text"/>
+</div>
+<button class="p-2 text-primary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+</button>
+</div>
+</div>
+<!-- Filters -->
+<nav class="flex gap-8 mt-10 border-b border-outline-variant/15">
+<button class="pb-4 border-b-2 border-primary text-primary font-label text-sm font-bold">All Collections (42)</button>
+<button class="pb-4 border-b-2 border-transparent text-secondary hover:text-primary transition-colors font-label text-sm">Reading (3)</button>
+<button class="pb-4 border-b-2 border-transparent text-secondary hover:text-primary transition-colors font-label text-sm">Completed (28)</button>
+<button class="pb-4 border-b-2 border-transparent text-secondary hover:text-primary transition-colors font-label text-sm">Wishlist (11)</button>
+</nav>
+</header>
+<!-- Book Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10">
+<!-- Book Card 1 -->
+<div class="group relative bg-surface-container-lowest p-5 flex gap-6 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+<div class="w-32 aspect-[2/3] flex-shrink-0 bg-surface-dim overflow-hidden relative border-[0.5px] border-outline-variant/10">
+<img alt="Book Cover" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500" data-alt="Modern book cover with elegant minimalist typography on a textured off-white background paper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn7Wf2bhtjZM0aPnySftX8RCpovw287kUwJ91BCSETJKVQrIoEb2W3XcnH6bb-g_l0zBKRksHuiURWSsn7VV3iA48qQGuhweu3c4lt0nypG7HNWLwj0xES5mxD1l3gJwXLFhLcy_lnruOZPBSjEqF10aRjdXykNXkS-PUWtvhU5RfPdlRoDmwZPhlkczAJRS0HcXPvcPU5ooCXxCHq2AOi9hCs3wutn6_i2uv550h5Sv_5Wo_dkia7VALBiFogky3gGjEc7veBD6k"/>
+<div class="absolute left-0 top-0 h-full w-1 bg-tertiary"></div>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h3 class="text-xl font-headline font-bold text-primary leading-tight mb-1 group-hover:text-tertiary transition-colors">The Architect of Silence</h3>
+<p class="text-sm font-label text-secondary italic">Eleanor Thorne</p>
+</div>
+<div class="mt-4">
+<div class="flex items-center gap-1 mb-2">
+<span class="material-symbols-outlined text-[10px] text-primary" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[10px] text-primary" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[10px] text-primary" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[10px] text-primary" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[10px] text-outline-variant" data-icon="star">star</span>
+</div>
+<div class="w-full bg-surface-container h-1 overflow-hidden">
+<div class="bg-primary h-full w-3/4"></div>
+</div>
+<p class="text-[10px] font-label text-secondary mt-1 tracking-widest uppercase">75% Completed</p>
+</div>
+</div>
+</div>
+<!-- Book Card 2 -->
+<div class="group relative bg-surface-container-lowest p-5 flex gap-6 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+<div class="w-32 aspect-[2/3] flex-shrink-0 bg-surface-dim overflow-hidden relative border-[0.5px] border-outline-variant/10">
+<img alt="Book Cover" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500" data-alt="Classic book cover with golden foil detailing and dark green fabric texture background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJR3z2IcgOI_JYEfpUtTwdggGKanr1PUteCaVHfgU9LYkBz5SoNWqsAqwMts_7U2iTB1eWTrGRTRlN_LoZNcUKqa0hTUHqfT0-yU0vmObGB79sWxC9kzOed-xMz9D0M_XpavONvWqhIKvo7MndiaG57vY7ZLohFnxoJ9-ZhedHl87oed7eSJjZooPMcmtV9bwyv779oMJO4RJelQMQe_9ufwzhH6xMgEw_Ro4tg3WmtdDUjWLOmdrtPZ8EkTnupoKXYSSfXo6csgI"/>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h3 class="text-xl font-headline font-bold text-primary leading-tight mb-1 group-hover:text-tertiary transition-colors">Echoes of the Atelier</h3>
+<p class="text-sm font-label text-secondary italic">Julian Vane</p>
+</div>
+<div class="mt-4">
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold tracking-widest uppercase rounded-sm">Completed</span>
+<p class="text-[10px] font-label text-secondary mt-2">Finished Aug 2023</p>
+</div>
+</div>
+</div>
+<!-- Book Card 3 -->
+<div class="group relative bg-surface-container-lowest p-5 flex gap-6 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+<div class="w-32 aspect-[2/3] flex-shrink-0 bg-surface-dim overflow-hidden relative border-[0.5px] border-outline-variant/10">
+<img alt="Book Cover" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500" data-alt="Abstract art book cover with soft pastel brush strokes and elegant serif font" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAum6PpiVMLod7DjpuiDPPiG53DEZeG2_w4OGEwGUg6DzSinHETbjDu24unjSpMtuDinsznR1FKTg_ZLLk7eDvwz2DjC1IAtU5wOF2EIyb7CPHfNSbISI5rzmS3H44t8sd7db0Kqcqe_AFbHNiv5Z3AXXjvjcGm9aAadBYvZGA8y1a6-q8MFf15vGnXmrGKeP_p_BJpngMmYjaT0iO3zxogQ2ltoBzgoeHiuqXQJ-SqpTTGNxThP2ESwtz3C6ZBvLEuWg7eSeplbBE"/>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h3 class="text-xl font-headline font-bold text-primary leading-tight mb-1 group-hover:text-tertiary transition-colors">Whispers in Ink</h3>
+<p class="text-sm font-label text-secondary italic">Clarice Beaumont</p>
+</div>
+<div class="mt-4">
+<span class="px-2 py-1 border border-outline-variant/30 text-secondary text-[10px] font-bold tracking-widest uppercase rounded-sm">Wishlist</span>
+</div>
+</div>
+</div>
+<!-- Book Card 4 -->
+<div class="group relative bg-surface-container-lowest p-5 flex gap-6 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+<div class="w-32 aspect-[2/3] flex-shrink-0 bg-surface-dim overflow-hidden relative border-[0.5px] border-outline-variant/10">
+<img alt="Book Cover" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500" data-alt="Minimalist design book cover with a single botanical illustration and thin modern sans-serif typography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcrnBeoplATLPsa_Tja--sblk53UpTGPtVg1XeimIqsuy_grCiFgzvf1WPZCNa0iKL0rGlvJaXpxR8l2V6zYQQsM7rHSKUU2Pu0hbEsPkzhNcTuhirKr_h1baMtycuTZ5IDOtAwgMwHMD-3WYdTIMVRT47-uN0r9TwLOkXWILAzk_W5UU51BI6_XkiNgBsJzAcXQjrvR20wBURWce0V_s6JjJSqWJTpIKQaTw3ip8liHy2o7JOcioRLhEDetWSfsAz_CN9RsvxKZY"/>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h3 class="text-xl font-headline font-bold text-primary leading-tight mb-1 group-hover:text-tertiary transition-colors">The Curated Life</h3>
+<p class="text-sm font-label text-secondary italic">Marcello Rossi</p>
+</div>
+<div class="mt-4">
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold tracking-widest uppercase rounded-sm">Completed</span>
+<p class="text-[10px] font-label text-secondary mt-2">Finished Sep 2023</p>
+</div>
+</div>
+</div>
+<!-- Empty Slot for Aesthetic Balance -->
+<div class="group relative border border-dashed border-outline-variant/30 p-5 flex gap-6 items-center justify-center grayscale hover:grayscale-0 transition-all cursor-pointer">
+<div class="text-center">
+<span class="material-symbols-outlined text-4xl text-outline-variant mb-2" data-icon="auto_stories">auto_stories</span>
+<p class="text-xs font-label text-secondary tracking-widest uppercase">Archive New Volume</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Side Panel: Archivist Statistics -->
+<aside class="fixed right-0 top-0 h-full w-80 bg-surface-container-low p-8 border-l border-[#163826]/10 flex flex-col gap-10">
+<section>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-lg" data-icon="person">person</span>
+</div>
+<div>
+<p class="text-xs font-label text-secondary uppercase tracking-widest">Archivist</p>
+<h4 class="text-lg font-headline font-bold text-primary">Elena K.</h4>
+</div>
+</div>
+</section>
+<section class="space-y-8">
+<h5 class="text-xs font-label text-secondary uppercase tracking-[0.2em] font-bold mb-4">Activity Journal</h5>
+<div class="bg-surface-container-lowest p-6 rounded-sm space-y-4">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-3xl font-headline font-bold text-primary">12,482</p>
+<p class="text-[10px] font-label text-secondary uppercase tracking-widest mt-1">Total Pages Read</p>
+</div>
+<span class="material-symbols-outlined text-primary/20 text-3xl" data-icon="menu_book">menu_book</span>
+</div>
+<div class="flex justify-between items-end pt-4 border-t border-outline-variant/10">
+<div>
+<p class="text-3xl font-headline font-bold text-primary">156h</p>
+<p class="text-[10px] font-label text-secondary uppercase tracking-widest mt-1">Focus Time</p>
+</div>
+<span class="material-symbols-outlined text-primary/20 text-3xl" data-icon="hourglass_empty">hourglass_empty</span>
+</div>
+</div>
+<div>
+<h5 class="text-xs font-label text-secondary uppercase tracking-[0.2em] font-bold mb-4">Reading Velocity</h5>
+<div class="flex items-end gap-2 h-24">
+<div class="bg-primary/10 w-full h-[40%] hover:bg-primary/30 transition-colors"></div>
+<div class="bg-primary/10 w-full h-[60%] hover:bg-primary/30 transition-colors"></div>
+<div class="bg-primary/10 w-full h-[30%] hover:bg-primary/30 transition-colors"></div>
+<div class="bg-primary/10 w-full h-[80%] hover:bg-primary/30 transition-colors"></div>
+<div class="bg-primary/10 w-full h-[50%] hover:bg-primary/30 transition-colors"></div>
+<div class="bg-primary w-full h-[95%] hover:opacity-80 transition-opacity"></div>
+<div class="bg-primary/10 w-full h-[20%] hover:bg-primary/30 transition-colors"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[9px] font-label text-secondary">MON</span>
+<span class="text-[9px] font-label text-primary font-bold">SAT</span>
+<span class="text-[9px] font-label text-secondary">SUN</span>
+</div>
+</div>
+</section>
+<section class="mt-auto">
+<div class="relative group cursor-pointer overflow-hidden rounded-sm">
+<img alt="Promo" class="w-full aspect-video object-cover brightness-75 group-hover:scale-105 transition-transform duration-700" data-alt="Cozy library corner with soft afternoon sunlight hitting wooden bookshelves and a comfortable velvet chair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEB9lHyKp4UFRxAK7d-MIGQ7qUgc_ad2IHfobiT_KUUqFDpbt15upgQWnE7t3PEJotlAKZAOZM9SRWqpu3zuCmIiujerlz96Ie8fwdwGEALvDtQPUF3NLLnkkrtPDRDiQszANXNlcDWzNDoPVFPapeK5b1SrPzTv0qZEgRAIWucmGbN1Lh-iV_DbJ0rib84kBOOrtlSPKXzqwjx019WjDhGMSipG-WdRv22r3eUomr4GaB5TyMJVUu0W-RFDv7J2wPFac8xJcuHwk"/>
+<div class="absolute inset-0 bg-primary/40 flex flex-col justify-center px-6">
+<p class="text-white text-[10px] font-label uppercase tracking-widest">Premium Curations</p>
+<h6 class="text-white font-headline text-lg leading-tight mt-1">Unlock the Archivist's Secret Vault</h6>
+</div>
+</div>
+</section>
+</aside>
+</body></html>

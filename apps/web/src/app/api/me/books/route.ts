@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
 import {
+  fetchCommunityRatingsByBookIds,
+  mergeCommunityRatingsIntoUserBooks
+} from "@/lib/books/book-community-ratings";
+import {
   createUserBook,
   listUserBooks,
   listUserBooksPaged,
@@ -86,8 +90,10 @@ export async function GET(request: NextRequest) {
         },
         { userId, useAdmin: true }
       );
+      const ratings = await fetchCommunityRatingsByBookIds(items.map((b) => b.bookId));
+      const enriched = mergeCommunityRatingsIntoUserBooks(items, ratings);
       return NextResponse.json({
-        items,
+        items: enriched,
         total,
         page,
         pageSize
@@ -109,7 +115,8 @@ export async function GET(request: NextRequest) {
       },
       { userId, useAdmin: true }
     );
-    return NextResponse.json(data);
+    const ratings = await fetchCommunityRatingsByBookIds(data.map((b) => b.bookId));
+    return NextResponse.json(mergeCommunityRatingsIntoUserBooks(data, ratings));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to load books";
     return NextResponse.json({ error: message }, { status: message === "Unauthorized" ? 401 : 500 });
@@ -128,7 +135,9 @@ export async function POST(request: NextRequest) {
     await linkUserBookToOwnedLibraries(created.id, userId, { userId, useAdmin: true });
 
     if (contentType.includes("application/json")) {
-      return NextResponse.json(created, { status: 201 });
+      const ratings = await fetchCommunityRatingsByBookIds([created.bookId]);
+      const [enriched] = mergeCommunityRatingsIntoUserBooks([created], ratings);
+      return NextResponse.json(enriched, { status: 201 });
     }
 
     return NextResponse.redirect(new URL(`/dashboard/books/${created.id}`, request.url), 303);

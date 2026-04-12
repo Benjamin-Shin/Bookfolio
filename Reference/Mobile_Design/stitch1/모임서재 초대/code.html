@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Seogadam - 공동서재 초대</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#4e453c",
+                        "inverse-primary": "#a9cfb7",
+                        "on-tertiary-fixed": "#40000d",
+                        "on-primary-fixed-variant": "#2c4e3b",
+                        "on-surface-variant": "#424843",
+                        "on-tertiary-container": "#ff9aa1",
+                        "on-secondary-fixed": "#211a13",
+                        "inverse-on-surface": "#f3f0ea",
+                        "tertiary": "#67081d",
+                        "primary-container": "#2d4f3c",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#436651",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b6",
+                        "on-primary-fixed": "#002112",
+                        "surface-bright": "#fcf9f3",
+                        "tertiary-container": "#862232",
+                        "on-surface": "#1c1c18",
+                        "surface-dim": "#dcdad4",
+                        "inverse-surface": "#31312d",
+                        "primary": "#163826",
+                        "surface": "#fcf9f3",
+                        "secondary": "#675d53",
+                        "on-background": "#1c1c18",
+                        "outline": "#727973",
+                        "surface-container-low": "#f6f3ed",
+                        "on-tertiary-fixed-variant": "#842131",
+                        "surface-container": "#f0eee8",
+                        "primary-fixed": "#c5ecd2",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#9ac0a7",
+                        "secondary-fixed-dim": "#d2c4b9",
+                        "surface-variant": "#e5e2dc",
+                        "primary-fixed-dim": "#a9cfb7",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e5e2dc",
+                        "tertiary-fixed": "#ffdadb",
+                        "secondary-container": "#efe0d4",
+                        "outline-variant": "#c1c8c1",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#6d6259",
+                        "background": "#fcf9f3",
+                        "surface-container-high": "#ebe8e2",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #fcf9f3;
+        }
+        .serif-italic { font-family: 'Newsreader', serif; font-style: italic; }
+        .serif-bold { font-family: 'Newsreader', serif; font-weight: 600; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center">
+<!-- TopAppBar -->
+<header class="bg-[#fcf9f3] dark:bg-stone-950 flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50">
+<div class="cursor-pointer active:scale-95 duration-300">
+<span class="material-symbols-outlined text-[#2D4F3C] dark:text-[#4A7A5F]" data-icon="arrow_back">arrow_back</span>
+</div>
+<h1 class="text-2xl font-serif italic tracking-tight text-[#2D4F3C] dark:text-[#fcf9f3]">서재 초대</h1>
+<div class="cursor-pointer active:scale-95 duration-300">
+<span class="material-symbols-outlined text-[#2D4F3C] dark:text-[#4A7A5F]" data-icon="more_vert">more_vert</span>
+</div>
+</header>
+<div class="bg-[#f6f3ed] dark:bg-stone-900 h-px w-full"></div>
+<main class="w-full max-w-md px-6 pt-8 pb-32 flex flex-col gap-10">
+<!-- Hero Invitation Section -->
+<section class="flex flex-col gap-4">
+<div class="w-12 h-[1px] bg-primary opacity-30"></div>
+<h2 class="text-3xl font-headline italic text-primary leading-tight">
+                함께 읽는 즐거움,<br/>우리의 서가로 초대합니다.
+            </h2>
+<p class="text-secondary text-sm leading-relaxed max-w-[80%]">
+                생각을 나누고 문장을 수집하는 시간. 서가담의 공동 서재에서 당신의 영감을 공유해보세요.
+            </p>
+</section>
+<!-- Search Bar -->
+<section>
+<div class="relative group">
+<input class="w-full bg-surface-container-low border-b border-outline-variant focus:border-primary focus:ring-0 py-4 px-2 text-sm transition-colors duration-300 placeholder:text-stone-400 font-body" placeholder="이름 또는 아이디로 검색" type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-4 text-primary opacity-60" data-icon="search">search</span>
+</div>
+</section>
+<!-- Suggested Members (Bento-lite Horizontal Scroll) -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<h3 class="font-headline text-lg italic text-primary">추천 멤버</h3>
+<span class="text-[10px] uppercase tracking-widest text-secondary">Suggested</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2">
+<!-- Suggestion Card 1 -->
+<div class="min-w-[140px] bg-surface-container-lowest p-5 flex flex-col items-center text-center gap-3 border border-outline-variant/10">
+<img class="w-16 h-16 rounded-full object-cover grayscale opacity-80 border border-outline-variant/20" data-alt="portrait of a thoughtful young woman in a minimal library setting soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr1ZmiEFRK5o3yFKgmHcwtsY5vZOwDLdZO6fQj_jRgwTmm-HlaNC3e2NTRlGZtPcezmOmyF0QhMj8C3CmluE5p7nORK2hvPRIGdqVY6hHplO4P1qtdfPKDzGldHwOS3ZX155VO2pfcD8kgt2WVAE477cDbgcSmX9Z_Px7JOYq2uwyP6b2EYlDCzL0v1KQjC_Sz3_iJjI-NvTMvu2DZczg3velPdoJVf9sEw8Ph3hSA0ZQ0GYeq3F1ParFtNL45UklOmUCQlVzd0OI"/>
+<div>
+<p class="text-sm font-bold text-on-surface">김지유</p>
+<p class="text-[10px] text-secondary">@jiyu_read</p>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary text-[10px] font-bold tracking-wider hover:opacity-90 active:scale-95 transition-all">초대</button>
+</div>
+<!-- Suggestion Card 2 -->
+<div class="min-w-[140px] bg-surface-container-lowest p-5 flex flex-col items-center text-center gap-3 border border-outline-variant/10">
+<img class="w-16 h-16 rounded-full object-cover grayscale opacity-80 border border-outline-variant/20" data-alt="profile portrait of a middle-aged man with glasses wearing a linen shirt warm atmospheric lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkJuKpwLo2LHSzpXnqtUiMgiL2BHTrdPJfaLxJzFEyQSwo0X0G1e3ou274WDCKFmMFPVEU9nl9Lr84WEJLuH9VukZBOaregcXByfGfgRHnT96DZhVFJRE0L49Xsh-8dl1WJyET2ly_A1qCc7nGve9hmBk3c5RQ7WCCqzJ9cPPkVWslP7ZWK-hVcNp_3FbDn-lGiJHGzRi0KxqpGv2e3PwQXXJhQJDr2VRmtd8W9DJrctBFRKHYxOF1ngsbifKiz0EHF_ayKxR4DNc"/>
+<div>
+<p class="text-sm font-bold text-on-surface">이태민</p>
+<p class="text-[10px] text-secondary">@archivist_lee</p>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary text-[10px] font-bold tracking-wider hover:opacity-90 active:scale-95 transition-all">초대</button>
+</div>
+<!-- Suggestion Card 3 -->
+<div class="min-w-[140px] bg-surface-container-lowest p-5 flex flex-col items-center text-center gap-3 border border-outline-variant/10">
+<img class="w-16 h-16 rounded-full object-cover grayscale opacity-80 border border-outline-variant/20" data-alt="smiling young woman with book in hands soft blurred bookstore background warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3bLRZiBKF66f1vm_Uo6Djqcj75SfBe-lkOQ1UmRWQcFfrRcq5mii3Cnaz_TbUo5vjt2IYgCY0qUU7jWfM_eus4EbInD5aJ-Q9JyxfG0dWy48-ov2sAQA03IFF11hcKBP3TW3CV9PSyYpf6EiQ9hRcm_RPtaejOKnXP7_ZZeSUjfMNv0HmxfyzMChXBBC2fjM2kx_r0SzTPU-Balu9S61Sv-Pwg3chFmCrKgXKsWR_PmrctZXHY8RnxrJ7avzLPMF7ns6RX_cXk8U"/>
+<div>
+<p class="text-sm font-bold text-on-surface">정서우</p>
+<p class="text-[10px] text-secondary">@seowoo_books</p>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary text-[10px] font-bold tracking-wider hover:opacity-90 active:scale-95 transition-all">초대</button>
+</div>
+</div>
+</section>
+<!-- Current Members List -->
+<section class="flex flex-col gap-6">
+<div class="flex justify-between items-end border-b border-outline-variant/20 pb-2">
+<h3 class="font-headline text-lg italic text-primary">현재 멤버</h3>
+<span class="text-xs text-secondary">3명 참여 중</span>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Member Item (Owner) -->
+<div class="flex items-center justify-between py-2">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img class="w-12 h-12 rounded-full object-cover grayscale" data-alt="professional woman portrait minimal studio setting clean elegant aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA23rcMPGJNwMLfAQLG3VSH8Ij_TgmYT1DwdZsJ9HUIHJw8bQ8YZ96vIdbLujD996CgLAZg8lxnxRg-Gxp7M0yxFDo-0XEWF-cXNLi-W2ut6cAvI4Kc8lp3szJ4TNcZOwrWrMOeU86t5Irm-1E0Y0TYutdLpEF2WrSprjbmnTxiAbqeLyEtFnMghNkmpImLHiQaBCcZwKAuZvIiN9CfehxDK8KlunmJcNz7bs0GeTK4__JcKMG8UnLH85tY2fp8ShMRDFho2qRa8fQ"/>
+<div class="absolute -left-1 top-0 w-1 h-full bg-tertiary"></div> <!-- Archivist's Ribbon -->
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">나의 서가 (본인)</p>
+<p class="text-[11px] text-tertiary font-bold tracking-tighter uppercase">Owner</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-300" data-icon="lock">lock</span>
+</div>
+<!-- Member Item -->
+<div class="flex items-center justify-between py-2">
+<div class="flex items-center gap-4">
+<img class="w-12 h-12 rounded-full object-cover grayscale opacity-60" data-alt="creative man portrait artistic lighting soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqezkRqxnNrFl_VwpIqfTjDomYtJSEyh3ey8TkG_3oyYLgVcf_5hxSWbRRahRIitCQ8eUPIgdPu30z5VGHwDoGjsiCCiIij8syvxgL12GKtZab26lPWG8m0B289uzxTT2duMtVIsZoYW6XDd9n-kdePKylqDU7ZZwhkBayM-0Okmlqsleyyr1pV0czfH6IABi6wBON4a1E7YhNufguqelPqm39oPuY3zZQP9elWn00IJtcTYlj7mjGlz1i7up_LoB7Ivwyzn3voEk"/>
+<div>
+<p class="text-sm font-medium text-on-surface">한결</p>
+<p class="text-[11px] text-secondary tracking-tighter uppercase">Member</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-300 text-sm" data-icon="close">close</span>
+</div>
+<!-- Member Item -->
+<div class="flex items-center justify-between py-2">
+<div class="flex items-center gap-4">
+<img class="w-12 h-12 rounded-full object-cover grayscale opacity-60" data-alt="close-up portrait of a woman with thoughtful expression monochrome aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8oztNeBecN4XvZcq1Yqv_bojyCea99gJ97pr9Z6Dm-E9Jm9aTd-y_UuRGqA-nPDSD1kSBIS0QGgC_-ygq8sg8Rm0vDnvaQHCZg8C3ddkVyLklIVSXyChKBE4O-J9q3tq5sheFKmOqTv3C6q6-qEgHUZ1ZnlpLuKyZraaqDufNSu3MMjjHOlN-rouD1CsfWZ9KGX7dp3YvQghTye9Ppr0AyrgXpWHxO4egsA2yME7dicAq4pjpZ6c1BjczB5N9WCXguw-o-N5Y-s0"/>
+<div>
+<p class="text-sm font-medium text-on-surface">최유진</p>
+<p class="text-[11px] text-secondary tracking-tighter uppercase">Member</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-300 text-sm" data-icon="close">close</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating CTA -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-surface/80 backdrop-blur-md">
+<button class="w-full bg-primary text-on-primary py-4 rounded-md shadow-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-transform duration-300">
+<span class="material-symbols-outlined text-lg" data-icon="share">share</span>
+<span class="font-bold tracking-tight">초대 링크 공유하기</span>
+</button>
+</div>
+<!-- Bottom Navigation Bar (Hidden on this focused screen per rules, but scaffolded for structure) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-md border-t border-stone-200/10 shadow-[0_-4px_24px_rgba(22,56,38,0.04)] z-50 hidden">
+<div class="flex flex-col items-center justify-center text-stone-400 dark:text-stone-600 transition-all duration-500 ease-out hover:text-[#2D4F3C] dark:hover:text-[#fcf9f3]">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-sans text-[11px] tracking-widest uppercase">Atelier</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#2D4F3C] dark:text-[#fcf9f3] font-bold transition-all duration-500 ease-out hover:text-[#2D4F3C] dark:hover:text-[#fcf9f3]">
+<span class="material-symbols-outlined" data-icon="collections_bookmark">collections_bookmark</span>
+<span class="font-sans text-[11px] tracking-widest uppercase">Archive</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 dark:text-stone-600 transition-all duration-500 ease-out hover:text-[#2D4F3C] dark:hover:text-[#fcf9f3]">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-sans text-[11px] tracking-widest uppercase">Curation</span>
+</div>
+<div class="flex flex-col items-center justify-center text-stone-400 dark:text-stone-600 transition-all duration-500 ease-out hover:text-[#2D4F3C] dark:hover:text-[#fcf9f3]">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-sans text-[11px] tracking-widest uppercase">Profile</span>
+</div>
+</nav>
+</body></html>

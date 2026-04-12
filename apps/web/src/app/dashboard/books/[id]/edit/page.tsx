@@ -15,6 +15,7 @@ import { getUserBookWithCanonical } from "@/lib/books/repository";
 
 /**
  * @history
+ * - 2026-04-06: 독서 진행(현재 쪽·총 쪽 재정의) — `user_books` 전용
  * - 2026-03-25: `BookCoverUploadFieldState` — `variant="edit"`(미리보기·비-Cloudinary 이관)
  * - 2026-03-25: `BookCoverUploadFieldState` — 표지 Cloudinary 업로드·저장
  */
@@ -36,9 +37,9 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
           <div>
             <CardTitle className="text-xl">내 서재 기록 수정</CardTitle>
             <CardDescription className="mt-1">
-              「{displayTitle}」의 내 서재 필드(형식·상태·위치·소장 여부), 참고 가격, 표지 이미지 URL을 바꿀 수 있습니다.
-              긴 메모는 상세 화면의 마크다운 메모에서 관리합니다.
-              가격·표지는 공유 도서(`books`)에 저장되어 같은 서지를 쓰는 경우에도 반영될 수 있습니다.
+              「{displayTitle}」의 내 서재 필드(형식·상태·위치·소장 여부·독서 진행 쪽), 참고 가격, 표지 이미지 URL을 바꿀 수
+              있습니다. 긴 메모는 상세 화면의 마크다운 메모에서 관리합니다. 가격·표지는 공유 도서(`books`)에 저장되어 같은 서지를
+              쓰는 경우에도 반영될 수 있습니다.
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" asChild>
@@ -77,6 +78,42 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
                 placeholder="예: 집 책장 2층 / 회사 / 이모에게 빌려줌"
                 defaultValue={userBook.location ?? ""}
               />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="currentPage">현재까지 읽은 쪽</Label>
+                <p className="text-xs text-muted-foreground">
+                  비우면 진행 쪽을 지웁니다. 서지에 등록된 총 쪽은{" "}
+                  {userBook.pageCount != null && userBook.pageCount > 0
+                    ? `${userBook.pageCount}쪽`
+                    : "아직 없습니다"}
+                  .
+                </p>
+                <Input
+                  id="currentPage"
+                  name="currentPage"
+                  type="number"
+                  min={0}
+                  step={1}
+                  placeholder="예: 120"
+                  defaultValue={userBook.currentPage ?? ""}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="readingTotalPages">총 쪽(선택)</Label>
+                <p className="text-xs text-muted-foreground">
+                  서지 쪽수와 다를 때만 입력하세요. 비우면 서지(`books.page_count`)를 따릅니다.
+                </p>
+                <Input
+                  id="readingTotalPages"
+                  name="readingTotalPages"
+                  type="number"
+                  min={1}
+                  step={1}
+                  placeholder="재정의 시만 입력"
+                  defaultValue={userBook.readingTotalPages ?? ""}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <input

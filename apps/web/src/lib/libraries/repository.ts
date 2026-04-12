@@ -483,6 +483,10 @@ export async function transferLibraryOwnership(
   if (upOldErr) throw upOldErr;
 }
 
+/**
+ * @history
+ * - 2026-04-12: `app_users.image` 포함 — 멤버 아바타
+ */
 export async function listLibraryMembers(
   libraryId: string,
   userId: string,
@@ -506,7 +510,7 @@ export async function listLibraryMembers(
   const ids = rows.map((r) => r.user_id as string);
   const { data: users, error: uErr } = await supabase
     .from("app_users")
-    .select("id, email, name")
+    .select("id, email, name, image")
     .in("id", ids);
 
   if (uErr) throw uErr;
@@ -518,6 +522,7 @@ export async function listLibraryMembers(
       userId: r.user_id as string,
       email: (u?.email as string) ?? "",
       name: (u?.name as string | null) ?? null,
+      image: (u?.image as string | null) ?? null,
       role: r.role as LibraryMemberRole,
       joinedAt: r.joined_at as string
     };
@@ -539,7 +544,7 @@ export async function addLibraryMemberByEmail(
 
   const { data: userRow, error: userErr } = await supabase
     .from("app_users")
-    .select("id, email, name")
+    .select("id, email, name, image")
     .ilike("email", email)
     .maybeSingle();
 
@@ -609,6 +614,7 @@ export async function addLibraryMemberByEmail(
     userId: targetId,
     email: userRow.email as string,
     name: (userRow.name as string | null) ?? null,
+    image: (userRow.image as string | null) ?? null,
     role: "member",
     joinedAt: new Date().toISOString()
   };
@@ -682,6 +688,7 @@ type LinkedLibraryRow = {
     user_id: string;
     book_id: string;
     reading_status: string;
+    rating: number | null;
     location: string | null;
     updated_at: string;
     books: DbCanonicalBook | DbCanonicalBook[];
@@ -700,6 +707,7 @@ type FlatLinked = {
   userId: string;
   bookId: string;
   readingStatus: ReadingStatus;
+  rating: number | null;
   location: string | null;
   book: DbCanonicalBook;
 };
@@ -714,12 +722,16 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
       st === "unread" || st === "reading" || st === "completed" || st === "paused" || st === "dropped"
         ? st
         : "unread";
+    const rawRating = r.user_books.rating;
+    const rating =
+      typeof rawRating === "number" && Number.isFinite(rawRating) ? rawRating : null;
     out.push({
       userBookId: r.user_book_id,
       linkedAt: r.linked_at,
       userId: r.user_books.user_id,
       bookId: r.user_books.book_id,
       readingStatus: rs,
+      rating,
       location: r.user_books.location,
       book
     });
@@ -731,6 +743,7 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
  * `book_id`별 소유자 묶음 → 집계 행.
  *
  * @history
+ * - 2026-04-12: 소유자별 `rating` — 공동서재 Hall of Fame
  * - 2026-03-24: 공유 서지 `genre_slugs`를 `genreSlugs`로 노출
  */
 function buildAggregatedList(
@@ -763,6 +776,7 @@ function buildAggregatedList(
         name: p?.name ?? null,
         userBookId: g.userBookId,
         readingStatus: g.readingStatus,
+        rating: g.rating,
         location: g.location,
         memoPreview: memoPreviewByUserBookId.get(g.userBookId) ?? null,
         linkedAt: g.linkedAt
@@ -805,6 +819,7 @@ async function fetchLinkedRowsForLibrary(
         user_id,
         book_id,
         reading_status,
+        rating,
         location,
         updated_at,
         books!inner (
@@ -851,6 +866,10 @@ async function loadProfilesForUserIds(
   );
 }
 
+/**
+ * @history
+ * - 2026-04-12: 조인 `user_books.rating` — 집계 소유자별 평점(Hall of Fame)
+ */
 export async function listLibraryBooks(
   libraryId: string,
   userId: string,

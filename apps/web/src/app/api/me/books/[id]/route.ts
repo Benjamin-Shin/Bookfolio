@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { BOOK_FORMATS, type BookFormat, type UpdateUserBookInput } from "@bookfolio/shared";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
+import { fetchCommunityRatingsByBookIds, mergeCommunityRatingsIntoUserBooks } from "@/lib/books/book-community-ratings";
 import { deleteUserBook, getUserBook, updateUserBook } from "@/lib/books/repository";
 
 function parsePriceKrwField(raw: string): number | null {
@@ -56,6 +57,28 @@ function parseFormDataToUpdate(input: FormData): UpdateUserBookInput {
     const raw = input.get("location")?.toString().trim() ?? "";
     out.location = raw ? raw : null;
   }
+  if (input.has("currentPage")) {
+    const raw = input.get("currentPage")?.toString().trim() ?? "";
+    if (!raw) {
+      out.currentPage = null;
+    } else {
+      const n = Number(raw);
+      if (Number.isFinite(n) && n >= 0) {
+        out.currentPage = Math.floor(Math.min(n, 50_000));
+      }
+    }
+  }
+  if (input.has("readingTotalPages")) {
+    const raw = input.get("readingTotalPages")?.toString().trim() ?? "";
+    if (!raw) {
+      out.readingTotalPages = null;
+    } else {
+      const n = Number(raw);
+      if (Number.isFinite(n) && n >= 1) {
+        out.readingTotalPages = Math.floor(Math.min(n, 50_000));
+      }
+    }
+  }
   if (input.has("coverUrl")) {
     const raw = input.get("coverUrl")?.toString().trim() ?? "";
     out.coverUrl = raw ? raw : null;
@@ -77,7 +100,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!book) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    return NextResponse.json(book);
+    const ratings = await fetchCommunityRatingsByBookIds([book.bookId]);
+    const [enriched] = mergeCommunityRatingsIntoUserBooks([book], ratings);
+    return NextResponse.json(enriched);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to load book";
     return NextResponse.json({ error: message }, { status: message === "Unauthorized" ? 401 : 500 });
@@ -102,7 +127,9 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       if (action === "update") {
         const { action: _a, ...rest } = body;
         const book = await updateUserBook(id, rest as UpdateUserBookInput, { userId, useAdmin: true });
-        return NextResponse.json(book);
+        const ratings = await fetchCommunityRatingsByBookIds([book.bookId]);
+        const [enriched] = mergeCommunityRatingsIntoUserBooks([book], ratings);
+        return NextResponse.json(enriched);
       }
 
       return NextResponse.json(

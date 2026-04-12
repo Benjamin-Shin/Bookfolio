@@ -1,6 +1,9 @@
 import Link from "next/link";
 
-import { libraryBooksListHref } from "@/components/libraries/library-books-list-href";
+import {
+  libraryDetailHref,
+  type LibraryBookTab,
+} from "@/components/libraries/library-books-list-href";
 import { Badge } from "@/components/ui/badge";
 
 type LibraryGenreFilterProps = {
@@ -8,12 +11,15 @@ type LibraryGenreFilterProps = {
   genres: string[];
   selectedGenre: string;
   selectedOwnerUserId: string;
+  /** 필터 변경 시 유지할 탭(페이지는 1로 리셋) */
+  tab?: LibraryBookTab;
 };
 
 /**
  * 공동서재 상세 장르 슬러그 필터(쿼리 `genre`).
  *
  * @history
+ * - 2026-04-12: `tab`·`libraryDetailHref`로 탭 유지
  * - 2026-03-24: `libraryBooksListHref`로 `owner` 쿼리 유지
  * - 2026-03-24: 공동서재 상세 장르 슬러그 필터(쿼리 `genre`)
  */
@@ -21,7 +27,8 @@ export function LibraryGenreFilter({
   libraryId,
   genres,
   selectedGenre,
-  selectedOwnerUserId
+  selectedOwnerUserId,
+  tab = "owned",
 }: LibraryGenreFilterProps) {
   if (genres.length === 0 && !selectedGenre) {
     return null;
@@ -39,7 +46,7 @@ export function LibraryGenreFilter({
       <div className="flex flex-wrap gap-1.5">
         <Badge variant={active ? "default" : "outline"} asChild>
           <Link
-            href={libraryBooksListHref(libraryId, { genre: undefined, owner })}
+            href={libraryDetailHref(libraryId, { genre: undefined, owner, tab, page: 1 })}
             prefetch={false}
           >
             전체
@@ -50,7 +57,7 @@ export function LibraryGenreFilter({
           return (
             <Badge key={slug} variant={on ? "default" : "outline"} asChild>
               <Link
-                href={libraryBooksListHref(libraryId, { genre: slug, owner })}
+                href={libraryDetailHref(libraryId, { genre: slug, owner, tab, page: 1 })}
                 prefetch={false}
               >
                 {slug}

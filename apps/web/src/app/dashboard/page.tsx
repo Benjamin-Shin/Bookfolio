@@ -1,9 +1,14 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BookOpen, Bookmark, CheckCircle, Library, Medal } from "lucide-react";
 
 import { auth } from "@/auth";
-import { Bookshelf, BOOKS_PER_SHELF } from "@/components/books/bookshelf";
+import {
+  BOOKS_PER_SHELF,
+  BOOKS_PER_VISUAL_ROW,
+  chunk,
+} from "@/components/books/bookshelf-shared";
 import {
   DashboardBooksPagination,
   DashboardBooksToolbar,
@@ -20,15 +25,16 @@ import {
 } from "@/components/ui/card";
 import {
   buildDashboardHref,
+  parseDashboardOwnedSort,
   parseDashboardTab,
-  type DashboardTab,
 } from "@/lib/dashboard/dashboard-href";
 import { cn } from "@/lib/utils";
 import {
-  getUserOwnedBooksPriceStats,
   listUserBooksPaged,
   listUserOwnedGenreSlugs,
 } from "@/lib/books/repository";
+
+import type { UserBookSummary } from "@bookfolio/shared";
 
 const PAGE_SIZE = BOOKS_PER_SHELF;
 const READING_SHELF_LIMIT = 50;
@@ -39,20 +45,131 @@ type DashboardPageProps = {
     page?: string;
     genre?: string;
     tab?: string;
+    sort?: string;
   }>;
 };
 
-const TAB_LABEL: Record<DashboardTab, string> = {
-  reading: "읽는 중",
-  unread: "읽기 전",
-  completed: "완독",
-  owned: "소장",
-};
+function readingProgressPercent(book: UserBookSummary): number | null {
+  const total = book.readingTotalPages ?? book.pageCount ?? null;
+  const cur = book.currentPage;
+  if (total == null || total <= 0 || cur == null || cur < 1) {
+    return null;
+  }
+  return Math.min(100, Math.round((cur / total) * 100));
+}
+
+function DashboardShelfBookCover({ book }: { book: UserBookSummary }) {
+  const authors = book.authors.join(", ") || "저자 미상";
+  if (book.coverUrl) {
+    return (
+      <img
+        src={book.coverUrl}
+        alt=""
+        className="h-auto max-h-[min(280px,42vw)] w-auto max-w-full object-contain"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+  return (
+    <div className="flex aspect-[2/3] w-full max-w-[200px] flex-col justify-between rounded-sm bg-gradient-to-br from-[#e4e2dd] to-[#f0eee9] p-2">
+      <p className="line-clamp-4 font-serif text-xs font-medium leading-tight text-[#051b0e]">
+        {book.title}
+      </p>
+      <p className="line-clamp-2 text-[0.65rem] text-[#434843]">{authors}</p>
+    </div>
+  );
+}
+
+function EditorialGrid({
+  books,
+  variant,
+}: {
+  books: UserBookSummary[];
+  variant: "reading" | "owned";
+}) {
+  const rows = chunk(books, BOOKS_PER_VISUAL_ROW);
+  return (
+    <div className="mb-24 space-y-20 md:space-y-24">
+      {rows.map((rowBooks, rowIdx) => (
+        <div key={rowIdx}>
+          <div className="grid grid-cols-2 gap-x-12 md:grid-cols-4 lg:grid-cols-6">
+            {rowBooks.map((book) => (
+              <div key={book.id} className="group flex flex-col items-center">
+                <Link
+                  href={`/dashboard/books/${book.id}`}
+                  className="flex w-full flex-col items-center text-left"
+                >
+                  <div className="mb-2 flex w-full justify-center transition-transform group-hover:-translate-y-3">
+                    <div className="book-shadow flex max-h-[min(280px,42vw)] items-end justify-center">
+                      <DashboardShelfBookCover book={book} />
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+          <div
+            className="wood-shelf mt-2 h-12 w-full shrink-0 opacity-90"
+            aria-hidden
+          />
+          <div className="relative z-10 mt-4 grid grid-cols-2 gap-x-12 md:grid-cols-4 lg:grid-cols-6">
+            {rowBooks.map((book) => {
+              const authors = book.authors.join(", ") || "저자 미상";
+              const pct =
+                variant === "reading" ? readingProgressPercent(book) : null;
+              return (
+                <Link
+                  key={`${book.id}-meta`}
+                  href={`/dashboard/books/${book.id}`}
+                  className="flex flex-col items-center text-center sm:text-left"
+                >
+                  {variant === "reading" ? (
+                    <>
+                      <div className="mb-2 h-1 w-full overflow-hidden rounded-full bg-[#e4e2dd]">
+                        <div
+                          className="h-full bg-[#e9c176] transition-[width]"
+                          style={{
+                            width: pct != null ? `${pct}%` : "0%",
+                          }}
+                        />
+                      </div>
+                      <h4 className="line-clamp-2 w-full font-serif text-sm text-[#051b0e]">
+                        {book.title}
+                      </h4>
+                      <p className="font-sans text-[10px] uppercase tracking-widest text-[#434843]">
+                        {pct != null ? `${pct}% 완료` : "진행률 미입력"}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h4 className="line-clamp-2 w-full font-serif text-sm text-[#051b0e]">
+                        {book.title}
+                      </h4>
+                      <p className="font-sans text-[10px] uppercase tracking-widest text-[#434843]">
+                        {authors}
+                      </p>
+                    </>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /**
- * 로그인 사용자의 읽는 중·소장 책장.
+ * 로그인 사용자의 읽는 중·소장 책장(에디토리얼 내 서재 레이아웃).
  *
  * @history
+ * - 2026-04-12: Hall of Fame은 `tab=hall`에서만 선반 그리드·페이지네이션; 다른 탭에서는 HoF 구역 미표시
+ * - 2026-04-12: 컬렉션 권수·탭 목록은 소장/읽기상태 전체; `p_hall_of_fame`는 Hall of Fame 탭·사이드 카운트만
+ * - 2026-04-12: Hall of Fame 전용 목록(`p_hall_of_fame`/`0038`)·사이드 권수·ALL에서만 검색·선반·커버 스케일·상단 탭·가격 합계 제거
+ * - 2026-04-12: 스티치 HTML 목업 기반 UI — 사이드 컬렉션·Hall of Fame·목판 선반 그리드·소장 `sort=title`(`0037`)
+ * - 2026-04-05: 빈 서재 안내 카피 서가담 표기
  * - 2026-03-26: 독서 이벤트 캘린더(`DashboardReadingEventsCalendar`, `/api/me/reading-events/calendar`)
  * - 2026-03-26: 좌측 메뉴 카드 제거, 읽기 상태·소장 `tab` 탭, 상단 통계 카드(모바일형 지표)
  * - 2026-03-25: 사이드 카드에 OAuth 등 `session.user.image` 있으면 아바타 표시
@@ -75,20 +192,26 @@ export default async function DashboardPage({
   const q = (sp.q ?? "").trim();
   const genreFilter = (sp.genre ?? "").trim();
   const tab = parseDashboardTab(sp.tab);
+  const ownedSort = parseDashboardOwnedSort(sp.sort);
   const pageRaw = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const ctx = { userId: session.user.id, useAdmin: true } as const;
   const searchOpt = q ? q : undefined;
   const genreSlugOpt = genreFilter ? genreFilter : undefined;
+  const ownedListSort = ownedSort === "title" ? ("title" as const) : undefined;
 
   const [
-    libraryProbe,
-    statReading,
-    statUnread,
-    statCompleted,
-    priceStats,
+    hallTotalProbe,
+    ownedAllCountProbe,
+    readingCountProbe,
+    unreadCountProbe,
+    completedCountProbe,
     searchProbeRes,
   ] = await Promise.all([
-    listUserBooksPaged({ limit: 1, offset: 0 }, ctx),
+    listUserBooksPaged(
+      { isOwned: true, limit: 1, offset: 0, hallOfFameOnly: true },
+      ctx,
+    ),
+    listUserBooksPaged({ isOwned: true, limit: 1, offset: 0 }, ctx),
     listUserBooksPaged(
       { readingStatus: "reading", limit: 1, offset: 0 },
       ctx,
@@ -98,19 +221,31 @@ export default async function DashboardPage({
       ctx,
     ),
     listUserBooksPaged(
-      { readingStatus: "completed", limit: 1, offset: 0 },
+      {
+        readingStatus: "completed",
+        limit: 1,
+        offset: 0,
+      },
       ctx,
     ),
-    getUserOwnedBooksPriceStats(ctx),
-    q
+    q.length > 0 && tab === "owned"
       ? listUserBooksPaged(
-          { limit: 1, offset: 0, search: searchOpt },
+          {
+            isOwned: true,
+            limit: 1,
+            offset: 0,
+            search: searchOpt,
+          },
           ctx,
         )
       : Promise.resolve({ total: 0, items: [] as never[] }),
   ]);
 
-  const libraryTotalAll = libraryProbe.total;
+  const hallTotalAll = hallTotalProbe.total;
+  const hallTotalPages = Math.max(1, Math.ceil(hallTotalAll / PAGE_SIZE));
+  const ownedTotalAll = ownedAllCountProbe.total;
+  const emptyLibrary = ownedTotalAll === 0 && !q;
+  const showBookSections = !(ownedTotalAll === 0 && !q);
 
   if (tab === "reading" && pageRaw > 1) {
     redirect(
@@ -118,22 +253,34 @@ export default async function DashboardPage({
     );
   }
 
-  const readingListP =
-    tab === "reading"
+  const readingForShelfP = showBookSections
+    ? listUserBooksPaged(
+        {
+          readingStatus: "reading",
+          limit: READING_SHELF_LIMIT,
+          offset: 0,
+        },
+        ctx,
+      )
+    : Promise.resolve({
+        items: [] as UserBookSummary[],
+        total: readingCountProbe.total,
+      });
+
+  const hallListP =
+    tab === "hall" && showBookSections
       ? listUserBooksPaged(
           {
-            readingStatus: "reading",
-            search: searchOpt,
-            limit: READING_SHELF_LIMIT,
-            offset: 0,
+            isOwned: true,
+            hallOfFameOnly: true,
+            limit: PAGE_SIZE,
+            offset: (pageRaw - 1) * PAGE_SIZE,
           },
           ctx,
         )
       : Promise.resolve({
-          items: [] as Awaited<
-            ReturnType<typeof listUserBooksPaged>
-          >["items"],
-          total: statReading.total,
+          items: [] as UserBookSummary[],
+          total: hallTotalAll,
         });
 
   const unreadListP =
@@ -141,17 +288,14 @@ export default async function DashboardPage({
       ? listUserBooksPaged(
           {
             readingStatus: "unread",
-            search: searchOpt,
             limit: PAGE_SIZE,
             offset: (pageRaw - 1) * PAGE_SIZE,
           },
           ctx,
         )
       : Promise.resolve({
-          items: [] as Awaited<
-            ReturnType<typeof listUserBooksPaged>
-          >["items"],
-          total: statUnread.total,
+          items: [] as UserBookSummary[],
+          total: unreadCountProbe.total,
         });
 
   const completedListP =
@@ -159,17 +303,14 @@ export default async function DashboardPage({
       ? listUserBooksPaged(
           {
             readingStatus: "completed",
-            search: searchOpt,
             limit: PAGE_SIZE,
             offset: (pageRaw - 1) * PAGE_SIZE,
           },
           ctx,
         )
       : Promise.resolve({
-          items: [] as Awaited<
-            ReturnType<typeof listUserBooksPaged>
-          >["items"],
-          total: statCompleted.total,
+          items: [] as UserBookSummary[],
+          total: completedCountProbe.total,
         });
 
   const ownedListP =
@@ -181,29 +322,36 @@ export default async function DashboardPage({
             genreSlug: genreSlugOpt,
             limit: PAGE_SIZE,
             offset: (pageRaw - 1) * PAGE_SIZE,
+            sort: ownedListSort,
           },
           ctx,
         )
       : listUserBooksPaged(
           {
             isOwned: true,
-            search: searchOpt,
             limit: 1,
             offset: 0,
           },
           ctx,
         );
 
-  const [readingRes, unreadRes, completedRes, ownedRes, ownedGenres] =
-    await Promise.all([
-      readingListP,
-      unreadListP,
-      completedListP,
-      ownedListP,
-      tab === "owned"
-        ? listUserOwnedGenreSlugs(ctx)
-        : Promise.resolve([] as string[]),
-    ]);
+  const [
+    readingRes,
+    hallRes,
+    unreadRes,
+    completedRes,
+    ownedRes,
+    ownedGenres,
+  ] = await Promise.all([
+    readingForShelfP,
+    hallListP,
+    unreadListP,
+    completedListP,
+    ownedListP,
+    tab === "owned"
+      ? listUserOwnedGenreSlugs(ctx)
+      : Promise.resolve([] as string[]),
+  ]);
 
   const readingBooks = readingRes.items;
   const readingTotal = readingRes.total;
@@ -212,20 +360,16 @@ export default async function DashboardPage({
   const completedBooks = completedRes.items;
   const completedTotal = completedRes.total;
   const ownedBooks = ownedRes.items;
+  const hallBooks = hallRes.items;
+  const hallListTotal = hallRes.total;
 
-  const ownedTotalForPager =
-    q.length > 0 || genreFilter.length > 0
-      ? ownedRes.total
-      : Math.max(ownedRes.total, priceStats.ownedCount);
+  const ownedTotalForPager = ownedRes.total;
 
   const ownedTotalPages = Math.max(
     1,
     Math.ceil(ownedTotalForPager / PAGE_SIZE),
   );
-  const unreadTotalPages = Math.max(
-    1,
-    Math.ceil(unreadTotal / PAGE_SIZE),
-  );
+  const unreadTotalPages = Math.max(1, Math.ceil(unreadTotal / PAGE_SIZE));
   const completedTotalPages = Math.max(
     1,
     Math.ceil(completedTotal / PAGE_SIZE),
@@ -238,12 +382,16 @@ export default async function DashboardPage({
   const completedPage =
     completedTotal === 0 ? 1 : Math.min(pageRaw, completedTotalPages);
 
+  const hallPage =
+    hallListTotal === 0 ? 1 : Math.min(pageRaw, hallTotalPages);
+
   if (tab === "owned" && ownedTotalForPager > 0 && pageRaw > ownedTotalPages) {
     const np = new URLSearchParams();
     if (q) np.set("q", q);
     if (genreFilter) np.set("genre", genreFilter);
     np.set("tab", "owned");
     np.set("page", String(ownedTotalPages));
+    if (ownedSort === "title") np.set("sort", "title");
     redirect(`/dashboard?${np.toString()}` as Route);
   }
 
@@ -271,10 +419,20 @@ export default async function DashboardPage({
     );
   }
 
-  const emptyLibrary = libraryTotalAll === 0 && !q;
+  if (tab === "hall" && hallListTotal > 0 && pageRaw > hallTotalPages) {
+    redirect(
+      buildDashboardHref({
+        q,
+        page: hallTotalPages,
+        tab: "hall",
+      }),
+    );
+  }
+
   const emptySearch =
     !emptyLibrary &&
     q.length > 0 &&
+    tab === "owned" &&
     searchProbeRes.total === 0;
 
   let listTotalForToolbar = 0;
@@ -288,345 +446,413 @@ export default async function DashboardPage({
   } else if (tab === "completed") {
     listTotalForToolbar = completedTotal;
     toolbarPage = completedPage;
+  } else if (tab === "hall") {
+    listTotalForToolbar = hallListTotal;
+    toolbarPage = hallPage;
   } else {
     listTotalForToolbar = ownedTotalForPager;
     toolbarPage = ownedPage;
   }
 
+  const sideLinkClass = (active: boolean) =>
+    cn(
+      "flex items-center gap-3 px-4 py-3 transition-transform hover:translate-x-1",
+      active
+        ? "border-l-2 border-[#e9c176] bg-[#1a3021]/5 font-bold text-[#051b0e]"
+        : "text-[#1a3021]/70 hover:bg-[#1a3021]/5",
+    );
+
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Dashboard
-            </p>
-            <h1 className="text-3xl font-bold tracking-tight">내 서재</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              탭으로 읽기 상태·소장을 바꿔 보세요. 표지를 누르면 상세·수정으로
-              이동합니다.
+    <div className="min-h-screen bg-[#fbf9f4] text-[#1b1c19] selection:bg-[#e9c176] selection:text-[#261900]">
+      <div className="flex min-h-screen">
+        <aside
+          className="fixed left-0 top-20 z-40 hidden h-[calc(100vh-5rem)] w-64 flex-col border-r border-[#051b0e]/10 bg-[#fbf9f4] px-6 py-8 lg:flex"
+          aria-label="컬렉션"
+        >
+          <div className="mb-10">
+            <h3 className="mb-1 font-sans text-[0.75rem] font-bold uppercase tracking-widest text-[#051b0e]">
+              Collections
+            </h3>
+            <p className="font-sans text-[0.65rem] text-[#1a3021]/60">
+              Archival filters
             </p>
           </div>
-          <Button variant="outline" asChild>
-            <Link href="/dashboard/books/new">책 추가하기</Link>
-          </Button>
-        </div>
-
-        {!emptyLibrary ? (
-          <section aria-label="서재 요약">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              <div className="rounded-xl border border-border/80 bg-card px-4 py-3 shadow-sm">
-                <p className="text-xs font-medium text-muted-foreground">
-                  전체 등록
-                </p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
-                  {libraryTotalAll.toLocaleString("ko-KR")}
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">권</p>
-              </div>
-              {(
-                [
-                  ["reading", statReading.total],
-                  ["unread", statUnread.total],
-                  ["completed", statCompleted.total],
-                  ["owned", priceStats.ownedCount],
-                ] as const
-              ).map(([key, count]) => {
-                const t = key;
-                const active = tab === t;
-                return (
-                  <Link
-                    key={t}
-                    href={buildDashboardHref({
-                      q,
-                      tab: t,
-                      ...(t === "owned" ? { genre: genreFilter } : {}),
-                    })}
-                    className={cn(
-                      "rounded-xl border px-4 py-3 shadow-sm transition-colors",
-                      active
-                        ? "border-primary/50 bg-primary/5"
-                        : "border-border/80 bg-card hover:bg-muted/40",
-                    )}
-                  >
-                    <p className="text-xs font-medium text-muted-foreground">
-                      {TAB_LABEL[t]}
-                    </p>
-                    <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
-                      {count.toLocaleString("ko-KR")}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">권</p>
-                  </Link>
-                );
+          <nav className="space-y-2">
+            <Link
+              href={buildDashboardHref({
+                q,
+                tab: "owned",
+                genre: genreFilter,
+                ownedSort: ownedSort === "title" ? "title" : undefined,
               })}
-            </div>
-          </section>
-        ) : null}
-
-        {!emptyLibrary ? (
-          <>
-            <nav
-              className="flex flex-wrap gap-2 border-b border-border/80 pb-1"
-              aria-label="서재 탭"
+              className={sideLinkClass(tab === "owned")}
             >
-              {(
-                ["reading", "unread", "completed", "owned"] as const
-              ).map((t) => {
-                const active = tab === t;
-                return (
-                  <Link
-                    key={t}
-                    href={buildDashboardHref({
-                      q,
-                      tab: t,
-                      ...(t === "owned" ? { genre: genreFilter } : {}),
-                    })}
-                    className={cn(
-                      "relative rounded-t-md px-3 py-2 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {TAB_LABEL[t]}
-                  </Link>
-                );
-              })}
-            </nav>
+              <Library className="size-5 shrink-0" aria-hidden />
+              <span className="font-sans text-[0.75rem] uppercase tracking-widest">
+                All ({ownedAllCountProbe.total.toLocaleString("ko-KR")})
+              </span>
+            </Link>
+            <Link
+              href={buildDashboardHref({ tab: "reading" })}
+              className={sideLinkClass(tab === "reading")}
+            >
+              <BookOpen className="size-5 shrink-0" aria-hidden />
+              <span className="font-sans text-[0.75rem] uppercase tracking-widest">
+                Reading ({readingCountProbe.total.toLocaleString("ko-KR")})
+              </span>
+            </Link>
+            <Link
+              href={buildDashboardHref({ tab: "unread" })}
+              className={sideLinkClass(tab === "unread")}
+            >
+              <Bookmark className="size-5 shrink-0" aria-hidden />
+              <span className="font-sans text-[0.75rem] uppercase tracking-widest">
+                To Read ({unreadCountProbe.total.toLocaleString("ko-KR")})
+              </span>
+            </Link>
+            <Link
+              href={buildDashboardHref({ tab: "completed" })}
+              className={sideLinkClass(tab === "completed")}
+            >
+              <CheckCircle className="size-5 shrink-0" aria-hidden />
+              <span className="font-sans text-[0.75rem] uppercase tracking-widest">
+                Completed (
+                {completedCountProbe.total.toLocaleString("ko-KR")})
+              </span>
+            </Link>
+            <Link
+              href={buildDashboardHref({ tab: "hall" })}
+              className={sideLinkClass(tab === "hall")}
+            >
+              <Medal className="size-5 shrink-0" aria-hidden />
+              <span className="font-sans text-[0.75rem] uppercase tracking-widest">
+                Hall of Fame ({hallTotalAll.toLocaleString("ko-KR")})
+              </span>
+            </Link>
+          </nav>
+        </aside>
 
-            <DashboardBooksToolbar
-              searchQuery={q}
-              page={toolbarPage}
-              pageSize={
-                tab === "reading" ? READING_SHELF_LIMIT : PAGE_SIZE
-              }
-              listTotal={listTotalForToolbar}
-              currentTab={tab}
-              genreSlug={genreFilter}
-              renderedCount={
-                tab === "reading" ? readingBooks.length : undefined
-              }
-            />
-          </>
-        ) : null}
-
-        {!emptyLibrary && priceStats.ownedCount > 0 ? (
-          <div className="rounded-lg border border-border/80 bg-muted/25 px-4 py-3 text-sm">
-            <p className="font-medium text-foreground">소장 책 가격 합계</p>
-            <p className="mt-1 text-muted-foreground">
-              {priceStats.pricedOwnedCount > 0 ? (
-                <>
-                  소장 {priceStats.ownedCount.toLocaleString("ko-KR")}권 중{" "}
-                  {priceStats.pricedOwnedCount.toLocaleString("ko-KR")}권에
-                  가격이 있어요.{" "}
-                  <span className="font-semibold tabular-nums text-foreground">
-                    {priceStats.totalKrw.toLocaleString("ko-KR")}원
-                  </span>
-                </>
-              ) : (
-                <>
-                  소장 {priceStats.ownedCount.toLocaleString("ko-KR")}권 — 책
-                  등록·수정에서 가격(원)을 넣으면 여기에 합계가 표시됩니다.
-                </>
-              )}
+        <main className="flex-1 px-8 pb-24 pt-12 md:px-16 lg:ml-64">
+          <section className="mb-16 max-w-4xl md:mb-20">
+            <h1 className="mb-6 font-sans text-2xl font-bold italic text-[#051b0e]">
+              내 서재
+            </h1>
+            <p className="max-w-2xl font-sans text-lg leading-relaxed text-[#434843]">
+              기록되지 않은 삶은 망각의 뒤편으로 사라집니다. 이곳은 단순히 책을
+              보관하는 장소가 아니라, 당신의 사유와 시간이 겹겹이 쌓인 사적인
+              아카이브입니다.
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              제공처·시점에 따라 실제 구매가와 다를 수 있는 참고 값입니다.
-            </p>
-          </div>
-        ) : null}
+          </section>
 
-        {emptyLibrary ? (
-          <Card className="border-dashed">
-            <CardHeader>
-              <CardTitle>아직 등록한 책이 없습니다</CardTitle>
-              <CardDescription>
-                첫 책을 추가해 Bookfolio를 시작해 보세요.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild>
-                <Link href="/dashboard/books/new">책 등록하기</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : null}
+          {!emptyLibrary ? (
+            <div className="mb-12 space-y-6">
+              <DashboardBooksToolbar
+                searchQuery={q}
+                page={toolbarPage}
+                pageSize={tab === "reading" ? READING_SHELF_LIMIT : PAGE_SIZE}
+                listTotal={listTotalForToolbar}
+                currentTab={tab}
+                genreSlug={genreFilter}
+                ownedSort={ownedSort}
+                renderedCount={
+                  tab === "reading" ? readingBooks.length : undefined
+                }
+                showSearch={tab === "owned"}
+              />
+            </div>
+          ) : null}
 
-        {emptySearch ? (
-          <Card className="border-dashed">
-            <CardHeader>
-              <CardTitle>검색 결과가 없습니다</CardTitle>
-              <CardDescription>
-                「{q}」에 맞는 책이 없습니다. 다른 키워드로 시도하거나{" "}
-                <Link
-                  href="/dashboard"
-                  className="text-primary underline-offset-4 hover:underline"
+          {emptyLibrary ? (
+            <Card className="border-dashed border-[#051b0e]/20 bg-white/50">
+              <CardHeader>
+                <CardTitle className="font-serif text-[#051b0e]">
+                  소장 도서가 아직 없습니다
+                </CardTitle>
+                <CardDescription>
+                  첫 책을 등록해 보세요. 완독 후 개인 평점 4점 이상이면 Hall of
+                  Fame에도 올릴 수 있습니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  asChild
+                  className="bg-[#1a3021] text-white hover:bg-[#1a3021]/90"
                 >
-                  전체 목록
+                  <Link href="/dashboard/books/new">책 등록하기</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {emptySearch ? (
+            <Card className="border-dashed border-[#051b0e]/20 bg-white/50">
+              <CardHeader>
+                <CardTitle className="font-serif text-[#051b0e]">
+                  검색 결과가 없습니다
+                </CardTitle>
+                <CardDescription>
+                  「{q}」에 맞는 책이 없습니다. 다른 키워드로 시도하거나{" "}
+                  <Link
+                    href="/dashboard"
+                    className="text-[#163826] underline-offset-4 hover:underline"
+                  >
+                    전체 목록
+                  </Link>
+                  으로 돌아가 보세요.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : null}
+
+          {!emptyLibrary && !emptySearch && readingBooks.length > 0 ? (
+            <section
+              className="mb-20 md:mb-24"
+              aria-labelledby="dash-reading-shelf-heading"
+            >
+              <div className="mb-10 flex items-baseline justify-between md:mb-12">
+                <h2
+                  id="dash-reading-shelf-heading"
+                  className="font-serif text-3xl text-[#051b0e]"
+                >
+                  현재 읽고 있는 도서
+                </h2>
+                <Link
+                  href={buildDashboardHref({ q, tab: "reading" })}
+                  className="font-sans text-xs uppercase tracking-widest text-[#434843] transition-colors hover:text-[#051b0e]"
+                >
+                  전체 보기
                 </Link>
-                으로 돌아가 보세요.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        ) : null}
+              </div>
+              <EditorialGrid books={readingBooks} variant="reading" />
+            </section>
+          ) : null}
 
-        {!emptyLibrary && !emptySearch ? (
-          <div className="space-y-6">
-            {tab === "reading" ? (
-              <section
-                className="space-y-3"
-                aria-labelledby="dash-reading-heading"
-              >
-                <div>
-                  <h2
-                    id="dash-reading-heading"
-                    className="text-lg font-semibold tracking-tight"
-                  >
-                    읽는 중
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    읽기 상태를 「읽는 중」으로 바꾸면 여기에 모입니다. 최대{" "}
-                    {READING_SHELF_LIMIT}권까지 한 번에 보여 줍니다.
-                  </p>
-                </div>
-                {readingTotal > READING_SHELF_LIMIT ? (
-                  <p className="text-xs text-muted-foreground">
-                    읽는 중인 책이 {readingTotal.toLocaleString("ko-KR")}
-                    권입니다. 나머지는 검색으로 찾아 보세요.
-                  </p>
-                ) : null}
-                {readingBooks.length > 0 ? (
-                  <Bookshelf variant="reading" books={readingBooks} />
-                ) : (
-                  <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
+          {!emptyLibrary && !emptySearch ? (
+            <div className="space-y-20 md:space-y-32">
+              {tab === "reading" ? (
+                readingBooks.length === 0 ? (
+                  <p className="rounded-lg border border-dashed border-[#051b0e]/15 bg-[#f5f3ee]/50 py-10 text-center text-sm text-[#434843]">
                     지금 읽는 책이 없습니다.
-                  </div>
-                )}
-              </section>
-            ) : null}
-
-            {tab === "unread" ? (
-              <section className="space-y-3" aria-labelledby="dash-unread-heading">
-                <div>
-                  <h2
-                    id="dash-unread-heading"
-                    className="text-lg font-semibold tracking-tight"
-                  >
-                    읽기 전
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    아직 읽기 시작 전인 도서입니다.
                   </p>
-                </div>
-                {unreadBooks.length > 0 ? (
-                  <>
-                    <Bookshelf variant="owned" books={unreadBooks} />
-                    <DashboardBooksPagination
-                      searchQuery={q}
-                      page={unreadPage}
-                      pageSize={PAGE_SIZE}
-                      total={unreadTotal}
-                      tab="unread"
-                      sectionLabel="읽기 전"
-                    />
-                  </>
-                ) : (
-                  <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
-                    {q.length > 0 || genreFilter.length > 0
-                      ? "검색·필터에 맞는 책이 없습니다."
-                      : "읽기 전 상태인 책이 없습니다."}
-                  </div>
-                )}
-              </section>
-            ) : null}
-
-            {tab === "completed" ? (
-              <section
-                className="space-y-3"
-                aria-labelledby="dash-completed-heading"
-              >
-                <div>
-                  <h2
-                    id="dash-completed-heading"
-                    className="text-lg font-semibold tracking-tight"
-                  >
-                    완독
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    읽기 상태가 「완독」인 도서입니다.
+                ) : readingTotal > READING_SHELF_LIMIT ? (
+                  <p className="text-xs text-[#675d53]">
+                    읽는 중인 책이 {readingTotal.toLocaleString("ko-KR")}
+                    권입니다. 나머지는 왼쪽 ALL에서 제목·저자 검색으로 찾아
+                    보세요.
                   </p>
-                </div>
-                {completedBooks.length > 0 ? (
-                  <>
-                    <Bookshelf variant="owned" books={completedBooks} />
-                    <DashboardBooksPagination
-                      searchQuery={q}
-                      page={completedPage}
-                      pageSize={PAGE_SIZE}
-                      total={completedTotal}
-                      tab="completed"
-                      sectionLabel="완독"
-                    />
-                  </>
-                ) : (
-                  <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
-                    {q.length > 0 || genreFilter.length > 0
-                      ? "검색·필터에 맞는 책이 없습니다."
-                      : "완독으로 표시된 책이 없습니다."}
-                  </div>
-                )}
-              </section>
-            ) : null}
+                ) : null
+              ) : null}
 
-            {tab === "owned" ? (
-              <section className="space-y-3" aria-labelledby="dash-owned-heading">
-                <div>
-                  <h2
-                    id="dash-owned-heading"
-                    className="text-lg font-semibold tracking-tight"
-                  >
-                    소장
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    「소장 중」으로 표시된 책입니다. 아래 페이지 넘김은 소장
-                    책만 기준입니다.
-                  </p>
-                </div>
-                <DashboardOwnedGenreFilter
-                  genres={ownedGenres}
-                  selectedGenre={genreFilter}
-                  searchQuery={q}
-                />
-                {ownedBooks.length > 0 ? (
-                  <>
-                    <Bookshelf variant="owned" books={ownedBooks} />
-                    <DashboardBooksPagination
-                      searchQuery={q}
-                      page={ownedPage}
-                      pageSize={PAGE_SIZE}
-                      total={ownedTotalForPager}
-                      genreSlug={genreFilter}
-                      tab="owned"
-                      sectionLabel="소장"
-                    />
-                  </>
-                ) : (
-                  <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 py-10 text-center text-sm text-muted-foreground">
-                    {priceStats.ownedCount > 0 &&
-                    (q.length > 0 || genreFilter.length > 0)
-                      ? "검색·장르 조건에 맞는 소장 도서가 없습니다."
-                      : "소장으로 표시된 책이 없습니다. 책 수정에서 「소장 중」을 켜 보세요."}
+              {tab === "unread" ? (
+                <section
+                  className="space-y-8"
+                  aria-labelledby="dash-unread-heading"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+                    <h2
+                      id="dash-unread-heading"
+                      className="font-serif text-3xl text-[#051b0e]"
+                    >
+                      읽기 전
+                    </h2>
                   </div>
-                )}
-              </section>
-            ) : null}
-          </div>
-        ) : null}
+                  {unreadBooks.length > 0 ? (
+                    <>
+                      <EditorialGrid books={unreadBooks} variant="owned" />
+                      <DashboardBooksPagination
+                        searchQuery={q}
+                        page={unreadPage}
+                        pageSize={PAGE_SIZE}
+                        total={unreadTotal}
+                        tab="unread"
+                        sectionLabel="읽기 전"
+                      />
+                    </>
+                  ) : (
+                    <p className="rounded-lg border border-dashed border-[#051b0e]/15 bg-[#f5f3ee]/50 py-10 text-center text-sm text-[#434843]">
+                      {q.length > 0 || genreFilter.length > 0
+                        ? "검색·필터에 맞는 책이 없습니다."
+                        : "읽기 전 상태인 책이 없습니다."}
+                    </p>
+                  )}
+                </section>
+              ) : null}
 
-        <section className="space-y-3" aria-label="독서 이벤트 캘린더">
-          <DashboardReadingEventsCalendar />
-        </section>
+              {tab === "completed" ? (
+                <section
+                  className="space-y-8"
+                  aria-labelledby="dash-completed-heading"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+                    <h2
+                      id="dash-completed-heading"
+                      className="font-serif text-3xl text-[#051b0e]"
+                    >
+                      완독
+                    </h2>
+                  </div>
+                  {completedBooks.length > 0 ? (
+                    <>
+                      <EditorialGrid books={completedBooks} variant="owned" />
+                      <DashboardBooksPagination
+                        searchQuery={q}
+                        page={completedPage}
+                        pageSize={PAGE_SIZE}
+                        total={completedTotal}
+                        tab="completed"
+                        sectionLabel="완독"
+                      />
+                    </>
+                  ) : (
+                    <p className="rounded-lg border border-dashed border-[#051b0e]/15 bg-[#f5f3ee]/50 py-10 text-center text-sm text-[#434843]">
+                      {q.length > 0 || genreFilter.length > 0
+                        ? "검색·필터에 맞는 책이 없습니다."
+                        : "완독으로 표시된 책이 없습니다."}
+                    </p>
+                  )}
+                </section>
+              ) : null}
+
+              {tab === "hall" ? (
+                <section
+                  className="space-y-8"
+                  aria-labelledby="dash-hall-heading"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+                    <h2
+                      id="dash-hall-heading"
+                      className="font-serif text-3xl text-[#051b0e]"
+                    >
+                      Hall of Fame
+                    </h2>
+                    <span className="font-sans text-xs uppercase tracking-widest text-[#e9c176]">
+                      완독 · 개인 평점 4점 이상
+                    </span>
+                  </div>
+                  {hallBooks.length > 0 ? (
+                    <>
+                      <EditorialGrid books={hallBooks} variant="owned" />
+                      <DashboardBooksPagination
+                        searchQuery={q}
+                        page={hallPage}
+                        pageSize={PAGE_SIZE}
+                        total={hallListTotal}
+                        tab="hall"
+                        sectionLabel="Hall of Fame"
+                      />
+                    </>
+                  ) : (
+                    <p className="rounded-lg border border-dashed border-[#051b0e]/15 bg-[#f5f3ee]/50 py-10 text-center text-sm text-[#434843]">
+                      Hall of Fame(완독·개인 평점 4점 이상)에 해당하는 소장
+                      도서가 없습니다.
+                    </p>
+                  )}
+                </section>
+              ) : null}
+
+              {tab === "owned" ? (
+                <section
+                  className="space-y-8"
+                  aria-labelledby="dash-owned-heading"
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-baseline sm:justify-between">
+                    <h2
+                      id="dash-owned-heading"
+                      className="font-serif text-3xl text-[#051b0e]"
+                    >
+                      전체 도서
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-6">
+                      <Link
+                        href={buildDashboardHref({
+                          q,
+                          genre: genreFilter,
+                          page: 1,
+                          tab: "owned",
+                        })}
+                        className={cn(
+                          "font-sans text-xs uppercase tracking-widest transition-colors",
+                          ownedSort === "recent"
+                            ? "border-b border-[#051b0e] text-[#051b0e]"
+                            : "border-b border-transparent text-[#434843] hover:border-[#051b0e]",
+                        )}
+                      >
+                        최근 추가순
+                      </Link>
+                      <Link
+                        href={buildDashboardHref({
+                          q,
+                          genre: genreFilter,
+                          page: 1,
+                          tab: "owned",
+                          ownedSort: "title",
+                        })}
+                        className={cn(
+                          "font-sans text-xs uppercase tracking-widest transition-colors",
+                          ownedSort === "title"
+                            ? "border-b border-[#051b0e] text-[#051b0e]"
+                            : "border-b border-transparent text-[#434843]/50 hover:border-[#051b0e]",
+                        )}
+                      >
+                        제목순
+                      </Link>
+                    </div>
+                  </div>
+                  <DashboardOwnedGenreFilter
+                    genres={ownedGenres}
+                    selectedGenre={genreFilter}
+                    searchQuery={q}
+                    ownedSort={ownedSort}
+                  />
+                  {ownedBooks.length > 0 ? (
+                    <>
+                      <EditorialGrid books={ownedBooks} variant="owned" />
+                      <DashboardBooksPagination
+                        searchQuery={q}
+                        page={ownedPage}
+                        pageSize={PAGE_SIZE}
+                        total={ownedTotalForPager}
+                        genreSlug={genreFilter}
+                        tab="owned"
+                        sectionLabel="소장"
+                        ownedSort={ownedSort}
+                      />
+                    </>
+                  ) : (
+                    <p className="rounded-lg border border-dashed border-[#051b0e]/15 bg-[#f5f3ee]/50 py-10 text-center text-sm text-[#434843]">
+                      {q.length > 0 || genreFilter.length > 0
+                        ? "검색·장르 조건에 맞는 도서가 없습니다."
+                        : "표시할 소장 도서가 없습니다."}
+                    </p>
+                  )}
+                </section>
+              ) : null}
+            </div>
+          ) : null}
+
+          {!emptyLibrary ? (
+            <section
+              className="mt-16 space-y-3 border-t border-[#051b0e]/5 pt-12"
+              aria-label="독서 이벤트 캘린더"
+            >
+              <DashboardReadingEventsCalendar />
+            </section>
+          ) : null}
+        </main>
       </div>
-    </main>
+
+      {!emptyLibrary ? (
+        <Link
+          href="/dashboard/books/new"
+          className="group fixed bottom-12 right-12 z-50 flex size-16 items-center justify-center rounded-full bg-[#1a3021] text-white shadow-2xl transition-transform hover:scale-110"
+          aria-label="새 도서 추가"
+        >
+          <span className="text-3xl font-light leading-none">+</span>
+          <span className="pointer-events-none absolute right-20 whitespace-nowrap rounded-lg bg-[#1a3021] px-4 py-2 font-sans text-xs uppercase tracking-widest opacity-0 transition-opacity group-hover:opacity-100">
+            새 도서 추가
+          </span>
+        </Link>
+      ) : null}
+    </div>
   );
 }

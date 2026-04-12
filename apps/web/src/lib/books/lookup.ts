@@ -420,6 +420,8 @@ type NaverBookItem = {
   isbn?: string;
   description?: string;
   image?: string;
+  /** 네이버 책 상세/구매 페이지 URL. */
+  link?: string;
   /** 정가(원). JSON에서 문자열로 올 수 있음. */
   price?: string | number;
   /** 판매가(원). */
@@ -505,7 +507,13 @@ async function lookupNaver(
   return naverBookItemToLookupResult(matched, normalized);
 }
 
-async function fetchNaverBookSearchRaw(
+/**
+ * 네이버 책 검색 원본 행(구매 링크·가격 힌트용).
+ *
+ * @history
+ * - 2026-04-08: `book.json` `link` 필드 파싱·비소장 구매 API에서 재사용
+ */
+export async function fetchNaverBookSearchRaw(
   searchQuery: string,
   clientId: string,
   clientSecret: string,
@@ -636,6 +644,34 @@ function naverPriceKrw(item: NaverBookItem): number | null {
     return sale;
   }
   return parsePositiveKrw(item.price);
+}
+
+/**
+ * 검색어로 첫 결과의 링크·표시 가격을 가져옵니다(비소장 구매 힌트).
+ *
+ * @history
+ * - 2026-04-08: `book_purchase_offer_cache` 갱신용
+ */
+export async function fetchNaverBookOfferHint(
+  searchQuery: string,
+  clientId: string,
+  clientSecret: string
+): Promise<{ link: string | null; priceKrw: number | null } | null> {
+  const items = await fetchNaverBookSearchRaw(searchQuery.trim(), clientId, clientSecret, 5);
+  if (items.length === 0) {
+    return null;
+  }
+  const item = items[0]!;
+  const raw = item.link?.trim();
+  const link =
+    raw == null || raw === ""
+      ? null
+      : raw.startsWith("http://")
+        ? `https://${raw.slice(7)}`
+        : raw.startsWith("//")
+          ? `https:${raw}`
+          : raw;
+  return { link, priceKrw: naverPriceKrw(item) };
 }
 
 const NL_PRICE_KEYS = ["PRICE", "PRICES", "SALE_PRICE", "REAL_PRICE", "BOOK_PRICE", "RETAIL_PRICE"] as const;

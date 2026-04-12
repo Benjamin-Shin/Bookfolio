@@ -1,5 +1,5 @@
-import 'package:bookfolio_mobile/src/state/library_controller.dart';
-import 'package:bookfolio_mobile/src/util/isbn.dart';
+import 'package:seogadam_mobile/src/state/library_controller.dart';
+import 'package:seogadam_mobile/src/util/isbn.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';

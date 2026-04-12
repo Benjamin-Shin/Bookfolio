@@ -79,6 +79,27 @@ export interface UserBookSummary {
   readingStatus: ReadingStatus;
   rating: number | null;
   coverUrl: string | null;
+  /**
+   * 공유 서지 `books.page_count`. 진행률 분모는 `readingTotalPages ?? pageCount`.
+   *
+   * @history
+   * - 2026-04-06: `0030` — 목록·상세 API가 조인해 채움
+   */
+  pageCount?: number | null;
+  /**
+   * 현재까지 읽은 쪽(1-based 권장). NULL이면 미입력.
+   *
+   * @history
+   * - 2026-04-06: `user_books.current_page`
+   */
+  currentPage?: number | null;
+  /**
+   * 총 쪽 수 사용자 재정의. NULL이면 `pageCount`만 사용.
+   *
+   * @history
+   * - 2026-04-06: `user_books.reading_total_pages`
+   */
+  readingTotalPages?: number | null;
   /** 참고·집계용 가격(원). */
   priceKrw: number | null;
   isOwned: boolean;
@@ -86,6 +107,20 @@ export interface UserBookSummary {
   location: string | null;
   createdAt: string;
   updatedAt: string;
+  /**
+   * 같은 `books` 행에 대해 다른 회원들의 `user_books.rating` 평균(소수 둘째 자리까지).
+   *
+   * @history
+   * - 2026-04-02: 신규 — 목록/상세 API가 집계해 채움
+   */
+  communityRatingAvg?: number | null;
+  /**
+   * 평균에 포함된 평점 개수.
+   *
+   * @history
+   * - 2026-04-02: 신규
+   */
+  communityRatingCount?: number;
 }
 
 export interface UserBookDetail extends UserBookSummary {
@@ -113,6 +148,9 @@ export interface CreateUserBookInput {
   priceKrw?: number | null;
   isOwned?: boolean;
   location?: string | null;
+  /** @history 2026-04-06: `user_books` 독서 진행 */
+  currentPage?: number | null;
+  readingTotalPages?: number | null;
 }
 
 export interface UpdateUserBookInput {
@@ -129,6 +167,25 @@ export interface UpdateUserBookInput {
   rating?: number | null;
   isOwned?: boolean;
   location?: string | null;
+  /** @history 2026-04-06: `user_books` 독서 진행 */
+  currentPage?: number | null;
+  readingTotalPages?: number | null;
+}
+
+/** 진행률 분모. 둘 다 없으면 null(진행률 미표시). */
+export function effectiveReadingTotalPages(summary: {
+  pageCount?: number | null;
+  readingTotalPages?: number | null;
+}): number | null {
+  const o = summary.readingTotalPages;
+  if (typeof o === "number" && Number.isFinite(o) && o >= 1) {
+    return Math.floor(o);
+  }
+  const c = summary.pageCount;
+  if (typeof c === "number" && Number.isFinite(c) && c >= 1) {
+    return Math.floor(c);
+  }
+  return null;
 }
 
 export const READING_EVENT_TYPES = [
@@ -240,21 +297,36 @@ export interface LibrarySummary {
   myRole: LibraryMemberRole;
 }
 
+/**
+ * 공동서재 멤버 한 줄.
+ *
+ * @history
+ * - 2026-04-12: `image` — `app_users.image`(OAuth 아바타 등) 목록 표시용
+ */
 export interface LibraryMemberRow {
   userId: string;
   email: string;
   name: string | null;
+  /** 프로필 이미지 URL(`app_users.image`). 없으면 null */
+  image: string | null;
   role: LibraryMemberRole;
   joinedAt: string;
 }
 
-/** 공동서재 집계 한 줄에 포함되는 소유자(개인 user_books 1행). */
+/**
+ * 공동서재 집계 한 줄에 포함되는 소유자(개인 user_books 1행).
+ *
+ * @history
+ * - 2026-04-12: `rating` — Hall of Fame(완독·개인 평점 4+) 판별용
+ */
 export interface LibrarySharedOwnerRow {
   userId: string;
   email: string;
   name: string | null;
   userBookId: string;
   readingStatus: ReadingStatus;
+  /** 개인 평점(1–5). 없으면 null */
+  rating: number | null;
   location: string | null;
   /** 최신 개인 메모(`user_book_memos`) 앞부분(서고 목록용). */
   memoPreview: string | null;

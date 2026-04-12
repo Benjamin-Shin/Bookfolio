@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
  * 회원·도서 집계 TOP10(소장·완독·포인트·인기 소장 도서).
  *
  * @history
+ * - 2026-04-05: 페이지 제목 사용자 노출 「서가담 집계」
  * - 2026-03-28: 신규
  */
 export const dynamic = "force-dynamic";
@@ -110,7 +111,9 @@ export default async function BookfolioAggregatePage() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">Dashboard</p>
-          <h1 className="text-3xl font-bold tracking-tight">북폴리오 집계</h1>
+          <h1 className="font-serif text-3xl font-medium tracking-tight">
+            서가담 집계
+          </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             회원 기준 소장·완독·포인트 순위와, 많은 회원이 소장으로 등록한 도서 TOP 10입니다.
           </p>

@@ -1,11 +1,11 @@
 ---
-description: Bookfolio 웹 앱 개발 규칙 (apps/web)
+description: Seogadam 웹 앱 개발 규칙 (apps/web)
 globs:
   - apps/web/**
 alwaysApply: false
 ---
 
-# Bookfolio Web 개발 규칙
+# Seogadam Web 개발 규칙
 
 모든 저장소 변경은 먼저 `docs/todo/` 일지·승인·`@history` 규칙을 따른다 (`.cursor/rules/workflow-todo-approval.mdc`).
 
@@ -22,16 +22,16 @@ Bookfolio는 **개인 소장 도서 관리** 서비스이다.
 
 ## 기술 스택
 
-| 영역 | 기술 |
-| --- | --- |
-| 프레임워크 | Next.js 15 (App Router) |
-| 언어 | TypeScript (strict) |
-| UI 라이브러리 | **shadcn/ui** (Radix UI + Tailwind CSS) |
-| 스타일링 | Tailwind CSS v4 |
-| 폰트 | **Pretendard** (로컬 셀프호스팅, `apps/web/public/fonts/`) |
-| 인증 | **NextAuth.js (Auth.js v5)** — 이메일·비밀번호(Credentials) + **Google OAuth** |
-| DB | Supabase (PostgreSQL), `user_books` 등은 **서비스 롤 + 앱에서 user id 검증** |
-| 패키지 매니저 | pnpm (모노레포 workspace) |
+| 영역          | 기술                                                                           |
+| ------------- | ------------------------------------------------------------------------------ |
+| 프레임워크    | Next.js 15 (App Router)                                                        |
+| 언어          | TypeScript (strict)                                                            |
+| UI 라이브러리 | **shadcn/ui** (Radix UI + Tailwind CSS)                                        |
+| 스타일링      | Tailwind CSS v4                                                                |
+| 폰트          | **Pretendard** (로컬 셀프호스팅, `apps/web/public/fonts/`)                     |
+| 인증          | **NextAuth.js (Auth.js v5)** — 이메일·비밀번호(Credentials) + **Google OAuth** |
+| DB            | Supabase (PostgreSQL), `user_books` 등은 **서비스 롤 + 앱에서 user id 검증**   |
+| 패키지 매니저 | pnpm (모노레포 workspace)                                                      |
 
 ## 인증 (NextAuth)
 
@@ -122,8 +122,8 @@ apps/web/public/
 #### HTTP 메서드 (필수)
 
 - **애플리케이션이 정의·호출하는 메서드는 `GET`과 `POST`만 허용한다.**
-- **`PUT`, `PATCH`, `DELETE`, `HEAD`, `TRACE` 등 그 외 메서드는 사용하지 않는다.**  
-  - Route Handler에서 `export async function PATCH` / `DELETE` 등을 두지 않는다.  
+- **`PUT`, `PATCH`, `DELETE`, `HEAD`, `TRACE` 등 그 외 메서드는 사용하지 않는다.**
+  - Route Handler에서 `export async function PATCH` / `DELETE` 등을 두지 않는다.
   - 클라이언트(웹·Flutter 등)에서도 `method: "PATCH"` 등으로 호출하지 않는다.
 - **`OPTIONS`는 “우리가 API 설계로 쓰는 메서드”가 아니다.** 브라우저 CORS 프리플라이트 등으로 인해 서버 로그에 `OPTIONS … 204`가 찍힐 수 있다. 이는 Next.js·런타임이 처리하는 경우가 많으며, **의도적으로 `OPTIONS` 핸들러를 추가하거나, 클라이언트에서 `OPTIONS`를 호출하는 패턴은 쓰지 않는다.**
 - 수정·삭제 의미는 `POST`로 표현한다. 예: 동일 경로에 `POST` + JSON 본문의 `action: "update" | "delete"` 또는 전용 하위 경로 `POST .../update`, `POST .../delete` 등 팀에서 정한 하나의 패턴으로 통일.
@@ -154,7 +154,7 @@ interface Book {
   publisher?: string;
   coverUrl?: string;
   status: "unread" | "reading" | "finished";
-  rating?: number;       // 1-5
+  rating?: number; // 1-5
   memo?: string;
   createdAt: string;
   updatedAt: string;

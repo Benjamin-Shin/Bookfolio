@@ -18,7 +18,9 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.bookfolio_mobile"
+    // Dart 패키지명 `seogadam_mobile`과 정렬(앱 표시명은 strings.xml `서가담`).
+    // @history 2026-04-12: `app.seogadam.mobile` — 기존 `com.example.bookfolio_mobile` 대체
+    namespace = "app.seogadam.mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
