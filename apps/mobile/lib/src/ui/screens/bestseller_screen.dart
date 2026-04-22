@@ -1,6 +1,7 @@
 import 'package:seogadam_mobile/src/models/aladin_bestseller_models.dart';
 import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
 import 'package:seogadam_mobile/src/state/auth_controller.dart';
+import 'package:seogadam_mobile/src/util/aladin_category_filter.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:seogadam_mobile/src/util/today_list_caption.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import 'package:url_launcher/url_launcher.dart';
 /// 베스트셀러 목록 화면.
 ///
 /// History:
+/// - 2026-04-22: 목록 가격 표기를 `priceStandard`(정가)로 변경
+/// - 2026-04-22: 카테고리 드롭다운 + `categoryId` 기반 재조회
 /// - 2026-04-10: 상단 `MainHubTopNavBar` 제거
 /// - 2026-03-29: 다크 모드·테마 색 적용
 /// - 2026-03-26: API·쿼리 노출 제거, 오늘 일자 기준 안내 문구·`MainHubTopNavBar`
@@ -24,6 +27,8 @@ class BestsellerScreen extends StatefulWidget {
 class _BestsellerScreenState extends State<BestsellerScreen> {
   final BookfolioApi _api = BookfolioApi();
   AladinBestsellerFeed? _feed;
+  List<AladinCategoryOption> _categories = const [];
+  AladinCategoryFilterState _categoryState = const AladinCategoryFilterState();
   bool _loading = true;
   String? _error;
 
@@ -41,9 +46,12 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
       _error = null;
     });
     try {
-      final feed = await _api.fetchAladinBestsellerFeed();
+      final categories = _categories.isEmpty ? await _api.fetchAladinCategories() : _categories;
+      final options = buildAladinCategoryFilterOptions(categories, _categoryState);
+      final feed = await _api.fetchAladinBestsellerFeed(categoryId: options.categoryId);
       if (mounted) {
         setState(() {
+          _categories = categories;
           _feed = feed;
           _loading = false;
         });
@@ -124,11 +132,91 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
   }
 
   Widget _buildList(BuildContext context, AladinBestsellerFeed feed) {
+    final categoryFilter = buildAladinCategoryFilterOptions(_categories, _categoryState);
+
+    Widget buildCategorySelect({
+      required String? value,
+      required List<String> options,
+      required ValueChanged<String?> onChanged,
+    }) {
+      return DropdownButtonFormField<String>(
+        initialValue: value,
+        decoration: const InputDecoration(
+          hintText: '카테고리',
+          border: OutlineInputBorder(),
+          isDense: true,
+        ),
+        items: [
+          const DropdownMenuItem<String>(value: '', child: Text('카테고리')),
+          ...options.map((v) => DropdownMenuItem<String>(value: v, child: Text(v))),
+        ],
+        onChanged: (v) => onChanged((v ?? '').isEmpty ? null : v),
+      );
+    }
+
     if (feed.items.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(24),
         children: [
+          if (_categories.isNotEmpty) ...[
+            buildCategorySelect(
+              value: _categoryState.mall,
+              options: categoryFilter.malls,
+              onChanged: (v) {
+                setState(() {
+                  _categoryState = AladinCategoryFilterState(mall: v);
+                });
+                _load();
+              },
+            ),
+            const SizedBox(height: 8),
+            buildCategorySelect(
+              value: _categoryState.depth1,
+              options: categoryFilter.depth1,
+              onChanged: (v) {
+                setState(() {
+                  _categoryState = AladinCategoryFilterState(
+                    mall: _categoryState.mall,
+                    depth1: v,
+                  );
+                });
+                _load();
+              },
+            ),
+            const SizedBox(height: 8),
+            buildCategorySelect(
+              value: _categoryState.depth2,
+              options: categoryFilter.depth2,
+              onChanged: (v) {
+                setState(() {
+                  _categoryState = AladinCategoryFilterState(
+                    mall: _categoryState.mall,
+                    depth1: _categoryState.depth1,
+                    depth2: v,
+                  );
+                });
+                _load();
+              },
+            ),
+            const SizedBox(height: 8),
+            buildCategorySelect(
+              value: _categoryState.depth3,
+              options: categoryFilter.depth3,
+              onChanged: (v) {
+                setState(() {
+                  _categoryState = AladinCategoryFilterState(
+                    mall: _categoryState.mall,
+                    depth1: _categoryState.depth1,
+                    depth2: _categoryState.depth2,
+                    depth3: v,
+                  );
+                });
+                _load();
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
           Text(todayBestsellerListCaption(), style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 12),
           Text(
@@ -148,6 +236,64 @@ class _BestsellerScreenState extends State<BestsellerScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (_categories.isNotEmpty) ...[
+                  buildCategorySelect(
+                    value: _categoryState.mall,
+                    options: categoryFilter.malls,
+                    onChanged: (v) {
+                      setState(() {
+                        _categoryState = AladinCategoryFilterState(mall: v);
+                      });
+                      _load();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  buildCategorySelect(
+                    value: _categoryState.depth1,
+                    options: categoryFilter.depth1,
+                    onChanged: (v) {
+                      setState(() {
+                        _categoryState = AladinCategoryFilterState(
+                          mall: _categoryState.mall,
+                          depth1: v,
+                        );
+                      });
+                      _load();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  buildCategorySelect(
+                    value: _categoryState.depth2,
+                    options: categoryFilter.depth2,
+                    onChanged: (v) {
+                      setState(() {
+                        _categoryState = AladinCategoryFilterState(
+                          mall: _categoryState.mall,
+                          depth1: _categoryState.depth1,
+                          depth2: v,
+                        );
+                      });
+                      _load();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  buildCategorySelect(
+                    value: _categoryState.depth3,
+                    options: categoryFilter.depth3,
+                    onChanged: (v) {
+                      setState(() {
+                        _categoryState = AladinCategoryFilterState(
+                          mall: _categoryState.mall,
+                          depth1: _categoryState.depth1,
+                          depth2: _categoryState.depth2,
+                          depth3: v,
+                        );
+                      });
+                      _load();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 Text(
                   todayBestsellerListCaption(),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -278,10 +424,10 @@ class _BestsellerRow extends StatelessWidget {
                           ),
                         ),
                       ],
-                      if (item.priceSales != null) ...[
+                      if ((item.priceStandard ?? item.priceSales) != null) ...[
                         const SizedBox(height: 6),
                         Text(
-                          '${item.priceSales!.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',')}원',
+                          '${(item.priceStandard ?? item.priceSales)!.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',')}원',
                           style: theme.textTheme.labelLarge?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: scheme.onSurface,

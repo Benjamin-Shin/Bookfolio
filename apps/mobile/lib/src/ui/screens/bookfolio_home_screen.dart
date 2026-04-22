@@ -7,7 +7,6 @@ import 'package:seogadam_mobile/src/theme/bookfolio_design_tokens.dart';
 import 'package:seogadam_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:seogadam_mobile/src/ui/screens/book_detail_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/book_form_screen.dart';
-import 'package:seogadam_mobile/src/ui/widgets/book_grid_card.dart';
 import 'package:seogadam_mobile/src/ui/widgets/reading_events_calendar_card.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +17,7 @@ import 'package:provider/provider.dart';
 /// 메인 쉘 「홈」— 에디토리얼 벤토 대시(HTML 목업 정렬).
 ///
 /// @history
+/// - 2026-04-22: 추천 API 연동 — `GET /api/me/recommendations` 기반 추천 카드 + 관심 저장/추가 상호작용 로깅
 /// - 2026-04-12: 홈 데이터 — `GET /api/me/mobile-home` 단일 요청으로 일괄 로드
 /// - 2026-04-12: 이벤트 캘린더 — `LibraryScreen` 요약 탭에서 이전(`ReadingEventsCalendarCard`)
 /// - 2026-04-12: 차트 보조색 — `DESIGN.md` secondary 톤
@@ -54,7 +54,10 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
   PersonalLibrarySummary? _summary;
   PointsBalanceResult? _points;
   UserBook? _readingBook;
-  List<UserBook> _unreadRecommend = const [];
+  List<RecommendationBook> _recommendations = const [];
+  String? _recommendationError;
+  final String _recommendationRequestId =
+      'mobile-home-${DateTime.now().microsecondsSinceEpoch}';
   bool _loading = true;
   String? _error;
 
@@ -82,13 +85,26 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
 
     try {
       final bundle = await api.fetchMobileHome();
+      RecommendationsResult? recommendationResult;
+      String? recommendationError;
+      try {
+        recommendationResult = await api.fetchRecommendations(
+          limit: 6,
+          trackImpression: true,
+          requestId: _recommendationRequestId,
+          bucket: 'mobile_home',
+        );
+      } catch (e) {
+        recommendationError = e.toString();
+      }
       if (!mounted) return;
       setState(() {
         _profile = bundle.profile;
         _summary = bundle.personalLibrarySummary;
         _points = bundle.points;
         _readingBook = bundle.readingBook;
-        _unreadRecommend = bundle.unreadRecommend;
+        _recommendations = recommendationResult?.items ?? const [];
+        _recommendationError = recommendationError;
         _loading = false;
       });
     } catch (e) {
@@ -130,6 +146,47 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
     if (!mounted) return;
     await context.read<LibraryController>().loadBooks();
     await _load();
+  }
+
+  Future<void> _openAddBookWithRecommendation(RecommendationBook rec) async {
+    final prefill = BookLookupResult(
+      isbn: '',
+      title: rec.title,
+      authors: rec.authors,
+      publisher: null,
+      publishedDate: null,
+      coverUrl: rec.coverUrl,
+      description: null,
+      priceKrw: null,
+      source: 'recommendation',
+      genreSlugs: rec.genreSlugs,
+      literatureRegion: null,
+      originalLanguage: null,
+    );
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => BookFormScreen(prefill: prefill)),
+    );
+    if (!mounted) return;
+    await context.read<LibraryController>().loadBooks();
+    await _load();
+  }
+
+  Future<void> _recordRecommendationInteraction(
+    RecommendationBook rec,
+    String interactionType,
+  ) async {
+    try {
+      final api = context.read<LibraryController>().api;
+      await api.recordRecommendationInteraction(
+        bookId: rec.bookId,
+        interactionType: interactionType,
+        surface: 'mobile_home_recommendation',
+        requestId: _recommendationRequestId,
+        metadata: {'title': rec.title},
+      );
+    } catch (_) {
+      // no-op
+    }
   }
 
   @override
@@ -582,13 +639,21 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          '알고리즘 추천 전까지 — 읽기 전으로 둔 책을 모았습니다.',
+          '최근 평점·독서 상태·장르 선호를 기반으로 추천합니다.',
           style: GoogleFonts.manrope(fontSize: 12, color: BookfolioDesignTokens.onSurfaceVariant, height: 1.35),
         ),
         const SizedBox(height: 18),
-        if (_unreadRecommend.isEmpty)
+        if (_recommendationError != null)
           Text(
-            '읽기 전 책이 없습니다. 도서를 추가해 보세요.',
+            _recommendationError!,
+            style: GoogleFonts.manrope(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          )
+        else if (_recommendations.isEmpty)
+          Text(
+            '추천할 책이 아직 없습니다. 평점/완독 데이터가 쌓이면 더 정확해집니다.',
             style: BookfolioDesignTokens.bodyLg(BookfolioDesignTokens.onSurfaceVariant),
           )
         else
@@ -596,22 +661,27 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             builder: (context, c) {
               const gap = 16.0;
               final w = c.maxWidth;
-              final cols = w >= 520 ? 4 : 2;
+              final cols = w >= 520 ? 3 : 1;
               final tileW = (w - gap * (cols - 1)) / cols;
               return Wrap(
                 spacing: gap,
                 runSpacing: gap,
-                children: _unreadRecommend.map((book) {
+                children: _recommendations.map((book) {
                   return SizedBox(
                     width: tileW,
-                    child: BookGridCard(
-                      title: book.title,
-                      authorsLine: book.authors.isEmpty ? '' : book.authors.join(', '),
-                      coverUrl: book.coverUrl,
-                      onTap: () => _openBook(book),
-                      gradientSeedA: book.title,
-                      gradientSeedB: book.id,
-                      coverScale: cols >= 4 ? 0.92 : 1.0,
+                    child: _RecommendationCard(
+                      rec: book,
+                      onTapSave: () async {
+                        await _recordRecommendationInteraction(book, 'save');
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('관심 저장했습니다.')),
+                        );
+                      },
+                      onTapAdd: () async {
+                        await _recordRecommendationInteraction(book, 'click');
+                        await _openAddBookWithRecommendation(book);
+                      },
                     ),
                   );
                 }).toList(),
@@ -884,6 +954,129 @@ class _TextLink extends StatelessWidget {
         child: Text(
           label,
           style: style.copyWith(decoration: TextDecoration.underline, decorationThickness: 1),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecommendationCard extends StatelessWidget {
+  const _RecommendationCard({
+    required this.rec,
+    required this.onTapSave,
+    required this.onTapAdd,
+  });
+
+  final RecommendationBook rec;
+  final Future<void> Function() onTapSave;
+  final Future<void> Function() onTapAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final cover = resolveCoverImageUrl(rec.coverUrl);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BookfolioDesignTokens.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+        border: Border.all(color: BookfolioDesignTokens.ghostOutline(0.12)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                width: 64,
+                height: 92,
+                child: cover != null
+                    ? Image.network(
+                        cover,
+                        fit: BoxFit.cover,
+                        headers: kCoverImageRequestHeaders,
+                        errorBuilder: (_, __, ___) =>
+                            const _MiniCoverPlaceholder(),
+                      )
+                    : const _MiniCoverPlaceholder(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    rec.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: BookfolioDesignTokens
+                        .headlineMd(
+                          BookfolioDesignTokens.primary,
+                          fontStyle: FontStyle.normal,
+                        )
+                        .copyWith(fontSize: 18),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    rec.authors.join(', ').isEmpty
+                        ? '저자 미상'
+                        : rec.authors.join(', '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.manrope(
+                      fontSize: 11,
+                      color: BookfolioDesignTokens.onSurfaceVariant,
+                    ),
+                  ),
+                  if (rec.reasons.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      '근거: ${rec.reasons.join(' · ')}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.manrope(
+                        fontSize: 10,
+                        color: BookfolioDesignTokens.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      TextButton(
+                        onPressed: () => onTapSave(),
+                        child: const Text('관심 저장'),
+                      ),
+                      const SizedBox(width: 4),
+                      FilledButton(
+                        onPressed: () => onTapAdd(),
+                        child: const Text('서재에 추가'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniCoverPlaceholder extends StatelessWidget {
+  const _MiniCoverPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: BookfolioDesignTokens.surfaceContainerHigh,
+      child: Center(
+        child: Icon(
+          Icons.menu_book_rounded,
+          color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.55),
+          size: 24,
         ),
       ),
     );

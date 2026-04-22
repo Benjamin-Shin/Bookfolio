@@ -4,6 +4,7 @@
  * 프로필 아바타: 파일·클립보드·원격 URL을 `/api/upload`(kind `avatar`)로 Cloudinary에 올리고 `avatarUrl`을 갱신합니다.
  *
  * @history
+ * - 2026-04-22: `프로필에 쓸 이미지 주소` 직접 입력 필드를 숨겨 업로드/붙여넣기 중심으로 단순화
  * - 2026-03-26: `sm` 이상 2열 — 왼쪽 안내·미리보기·이관, 오른쪽 붙여넣기·파일·URL·직접 입력
  * - 2026-03-26: 신규 — `BookCoverUploadField`와 동일 업로드 패턴, `bookfolio-avatars`
  */
@@ -249,18 +250,6 @@ export function ProfileAvatarUploadField({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor={`${idBase}-final`}>프로필에 쓸 이미지 주소</Label>
-          <Input
-            id={`${idBase}-final`}
-            value={avatarUrl}
-            onChange={(ev) => onAvatarUrlChange(ev.target.value)}
-            placeholder="https://…"
-            type="url"
-            inputMode="url"
-            disabled={disabled}
-          />
-        </div>
       </div>
 
       {localError ? (

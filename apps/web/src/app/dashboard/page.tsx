@@ -15,6 +15,7 @@ import {
 } from "@/components/dashboard/dashboard-books-toolbar";
 import { DashboardOwnedGenreFilter } from "@/components/dashboard/dashboard-owned-genre-filter";
 import { DashboardReadingEventsCalendar } from "@/components/dashboard/dashboard-reading-events-calendar.client";
+import { DashboardRecommendationPanel } from "@/components/books/dashboard-recommendation-panel.client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -165,6 +166,7 @@ function EditorialGrid({
  * 로그인 사용자의 읽는 중·소장 책장(에디토리얼 내 서재 레이아웃).
  *
  * @history
+ * - 2026-04-22: 내 취향 추천 패널(`DashboardRecommendationPanel`) 추가, `/api/me/recommendations` 연동
  * - 2026-04-12: Hall of Fame은 `tab=hall`에서만 선반 그리드·페이지네이션; 다른 탭에서는 HoF 구역 미표시
  * - 2026-04-12: 컬렉션 권수·탭 목록은 소장/읽기상태 전체; `p_hall_of_fame`는 Hall of Fame 탭·사이드 카운트만
  * - 2026-04-12: Hall of Fame 전용 목록(`p_hall_of_fame`/`0038`)·사이드 권수·ALL에서만 검색·선반·커버 스케일·상단 탭·가격 합계 제거
@@ -560,6 +562,12 @@ export default async function DashboardPage({
                 showSearch={tab === "owned"}
               />
             </div>
+          ) : null}
+
+          {!emptyLibrary ? (
+            <section className="mb-12" aria-label="추천 도서 패널">
+              <DashboardRecommendationPanel />
+            </section>
           ) : null}
 
           {emptyLibrary ? (

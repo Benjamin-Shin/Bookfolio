@@ -4,12 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { fetchAladinBestsellerFeed, type AladinFeedItem } from "@/lib/aladin/bestseller-feed";
+import type { AladinFeedItem } from "@/lib/aladin/bestseller-feed";
 import {
   aladinFeedItemDbIsbnKeys,
   authorsFromAladinAuthorField,
   canonicalStoredIsbnFromAladinItem
 } from "@/lib/aladin/admin-book-prefill";
+import { fetchAladinItemList } from "@/lib/aladin/item-list";
 import { mergeAladinFeedItemsDeduped } from "@/lib/aladin/merge-feed-items";
 import { fetchExistingBooksIsbnSet } from "@/lib/books/existing-isbn-lookup";
 import { normalizeIsbn } from "@/lib/books/lookup";
@@ -317,8 +318,10 @@ export async function deleteAdminCanonicalBook(
  * 알라딘 베스트셀러·초이스(신간) 목록을 받아 `books`에 없는 ISBN만 일괄 등록합니다.
  *
  * @history
+ * - 2026-04-22: `price_krw`를 `priceStandard`(정가) 우선으로 반영
+ * - 2026-04-22: `ALADIN_API_BASE_URL` + QueryType 조합 방식으로 통합
  * - 2026-03-26: 일괄 등록 시 `page_count`(알라딘 `pageCount`) 반영
- * - 2026-03-26: `ALADIN_BESTSELLER_API_BASE_URL` + `ALADIN_ITEMNEW_API_BASE_URL` 처리
+ * - 2026-03-26: 베스트셀러 + 초이스 신간 병합 처리
  */
 export async function bulkImportAladinCatalogNotInBooks(
   _prev: AladinBulkImportState | null,
@@ -326,14 +329,12 @@ export async function bulkImportAladinCatalogNotInBooks(
 ): Promise<AladinBulkImportState> {
   await requireAdmin();
 
-  const bestsellerUrl = env.aladinBestsellerApiBaseUrl;
-  const itemNewUrl = env.aladinItemNewApiBaseUrl;
+  const apiBaseUrl = env.aladinApiBaseUrl;
 
-  if (!bestsellerUrl && !itemNewUrl) {
+  if (!apiBaseUrl) {
     return {
       ...initialAladinBulkImportState,
-      error:
-        "ALADIN_BESTSELLER_API_BASE_URL 또는 ALADIN_ITEMNEW_API_BASE_URL 중 하나 이상을 설정해 주세요."
+      error: "ALADIN_API_BASE_URL을 설정해 주세요."
     };
   }
 
@@ -341,22 +342,24 @@ export async function bulkImportAladinCatalogNotInBooks(
   let bestsellerItems: AladinFeedItem[] = [];
   let itemNewItems: AladinFeedItem[] = [];
 
-  if (bestsellerUrl) {
-    try {
-      const feed = await fetchAladinBestsellerFeed(bestsellerUrl);
-      bestsellerItems = feed.items;
-    } catch (e) {
-      feedErrors.push(`오늘 베스트셀러 목록: ${e instanceof Error ? e.message : "불러오기 실패"}`);
-    }
+  try {
+    const feed = await fetchAladinItemList(apiBaseUrl, {
+      queryType: "Bestseller",
+      categoryId: 0
+    });
+    bestsellerItems = feed.items;
+  } catch (e) {
+    feedErrors.push(`오늘 베스트셀러 목록: ${e instanceof Error ? e.message : "불러오기 실패"}`);
   }
 
-  if (itemNewUrl) {
-    try {
-      const feed = await fetchAladinBestsellerFeed(itemNewUrl);
-      itemNewItems = feed.items;
-    } catch (e) {
-      feedErrors.push(`초이스·신간 목록: ${e instanceof Error ? e.message : "불러오기 실패"}`);
-    }
+  try {
+    const feed = await fetchAladinItemList(apiBaseUrl, {
+      queryType: "ItemNewSpecial",
+      categoryId: 0
+    });
+    itemNewItems = feed.items;
+  } catch (e) {
+    feedErrors.push(`초이스·신간 목록: ${e instanceof Error ? e.message : "불러오기 실패"}`);
   }
 
   const merged = mergeAladinFeedItemsDeduped(bestsellerItems, itemNewItems);
@@ -417,10 +420,15 @@ export async function bulkImportAladinCatalogNotInBooks(
     const coverUrl = item.cover?.trim() || null;
     const publisher = item.publisher?.trim() || null;
     const publishedDate = item.pubDate?.trim() || null;
-    const priceKrw =
+    const standardPriceKrw =
+      item.priceStandard != null && Number.isFinite(item.priceStandard) && item.priceStandard >= 0
+        ? Math.floor(item.priceStandard)
+        : null;
+    const salePriceKrw =
       item.priceSales != null && Number.isFinite(item.priceSales) && item.priceSales >= 0
         ? Math.floor(item.priceSales)
         : null;
+    const priceKrw = standardPriceKrw ?? salePriceKrw;
 
     const pageCountRaw = item.pageCount;
     const pageCount =

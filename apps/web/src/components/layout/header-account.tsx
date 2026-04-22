@@ -33,6 +33,8 @@ type HeaderAccountProps = {
  * 헤더 오른쪽 계정 표시·프로필 편집 다이얼로그.
  *
  * @history
+ * - 2026-04-22: 2열 비율을 1:2로 조정해 좌측 입력 컬럼을 전체 너비의 1/3로 고정
+ * - 2026-04-22: 프로필 다이얼로그 폭을 약 1.5배 확장하고 아바타 업로드 영역을 우측 2열로 분리
  * - 2026-03-26: 탈퇴 안내 — 공동서재 소유권 이전·단독 소유 시 CASCADE 정리 문구
  * - 2026-03-26: 프로필 다이얼로그 1행에 이메일·표시 이름(2열), 2행에 `ProfileAvatarUploadField`(내부 2열)
  * - 2026-03-26: 표시 이름 왼쪽에 아바타 썸네일·저장 응답·서버 props 동기화
@@ -125,7 +127,7 @@ export function HeaderAccount({
             <Settings2Icon className="size-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="gap-0 sm:max-w-2xl">
+        <DialogContent className="gap-0 sm:max-w-[63rem]">
           <DialogHeader>
             <DialogTitle>프로필</DialogTitle>
             <DialogDescription>
@@ -134,7 +136,7 @@ export function HeaderAccount({
             </DialogDescription>
           </DialogHeader>
           <form
-            className="grid gap-4 py-2 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-4"
+            className="grid gap-4 py-2 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-x-6 md:gap-y-4"
             onSubmit={async (e) => {
               e.preventDefault();
               setSaving(true);
@@ -173,77 +175,77 @@ export function HeaderAccount({
               setSaving(false);
             }}
           >
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="profile-email">이메일</Label>
-              <Input id="profile-email" value={email} readOnly className="bg-muted/50" />
+            <div className="min-w-0 space-y-4 md:col-start-1">
+              <div className="space-y-2">
+                <Label htmlFor="profile-email">이메일</Label>
+                <Input id="profile-email" value={email} readOnly className="bg-muted/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="profile-display">표시 이름</Label>
+                <Input
+                  id="profile-display"
+                  value={displayName}
+                  onChange={(ev) => setDisplayName(ev.target.value)}
+                  placeholder="이름"
+                  autoComplete="name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="profile-gender">성별 (선택)</Label>
+                <select
+                  id="profile-gender"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  value={gender}
+                  onChange={(ev) => setGender(ev.target.value)}
+                  disabled={saving}
+                >
+                  <option value="">선택 안 함</option>
+                  <option value="male">남성</option>
+                  <option value="female">여성</option>
+                  <option value="other">기타</option>
+                  <option value="unknown">비공개</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="profile-birth">생년월일 (선택)</Label>
+                <Input
+                  id="profile-birth"
+                  type="date"
+                  value={birthDate}
+                  onChange={(ev) => setBirthDate(ev.target.value)}
+                  disabled={saving}
+                />
+              </div>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-primary"
+                  checked={genderPublic}
+                  onChange={(ev) => setGenderPublic(ev.target.checked)}
+                  disabled={saving}
+                />
+                성별을 익명 통계에 포함
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-primary"
+                  checked={birthDatePublic}
+                  onChange={(ev) => setBirthDatePublic(ev.target.checked)}
+                  disabled={saving}
+                />
+                생년(출생 연도)을 익명 통계에 포함
+              </label>
+              {error ? <p className="text-sm text-destructive">{error}</p> : null}
             </div>
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="profile-display">표시 이름</Label>
-              <Input
-                id="profile-display"
-                value={displayName}
-                onChange={(ev) => setDisplayName(ev.target.value)}
-                placeholder="이름"
-                autoComplete="name"
-              />
-            </div>
-            <div className="min-w-0 border-t border-border/60 pt-4 sm:col-span-2 sm:border-t sm:pt-4">
+            <div className="min-w-0 border-t border-border/60 pt-4 md:col-start-2 md:row-span-2 md:border-l md:border-t-0 md:pl-6 md:pt-0">
               <ProfileAvatarUploadField
                 avatarUrl={avatarUrl}
                 onAvatarUrlChange={setAvatarUrl}
                 disabled={saving}
               />
             </div>
-            <div className="min-w-0 space-y-2 sm:col-span-2">
-              <Label htmlFor="profile-gender">성별 (선택)</Label>
-              <select
-                id="profile-gender"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                value={gender}
-                onChange={(ev) => setGender(ev.target.value)}
-                disabled={saving}
-              >
-                <option value="">선택 안 함</option>
-                <option value="male">남성</option>
-                <option value="female">여성</option>
-                <option value="other">기타</option>
-                <option value="unknown">비공개</option>
-              </select>
-            </div>
-            <div className="min-w-0 space-y-2 sm:col-span-2">
-              <Label htmlFor="profile-birth">생년월일 (선택)</Label>
-              <Input
-                id="profile-birth"
-                type="date"
-                value={birthDate}
-                onChange={(ev) => setBirthDate(ev.target.value)}
-                disabled={saving}
-              />
-            </div>
-            <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
-              <input
-                type="checkbox"
-                className="size-4 accent-primary"
-                checked={genderPublic}
-                onChange={(ev) => setGenderPublic(ev.target.checked)}
-                disabled={saving}
-              />
-              성별을 익명 통계에 포함
-            </label>
-            <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
-              <input
-                type="checkbox"
-                className="size-4 accent-primary"
-                checked={birthDatePublic}
-                onChange={(ev) => setBirthDatePublic(ev.target.checked)}
-                disabled={saving}
-              />
-              생년(출생 연도)을 익명 통계에 포함
-            </label>
-            {error ? (
-              <p className="text-sm text-destructive sm:col-span-2">{error}</p>
-            ) : null}
-            <div className="flex flex-col gap-2 border-t border-border/60 pt-4 sm:col-span-2">
+            <div className="flex flex-col gap-2 border-t border-border/60 pt-4 md:col-span-2">
               <div className="flex flex-row flex-wrap items-center justify-between gap-2">
                 <Button
                   type="button"

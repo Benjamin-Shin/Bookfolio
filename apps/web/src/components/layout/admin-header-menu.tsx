@@ -2,10 +2,11 @@
 
 /**
  * @history
+ * - 2026-04-22: 헤더 관리자 트리거 아이콘을 방패에서 설정(톱니) 아이콘으로 변경
  * - 2026-04-10: 클라이언트 오류 메뉴
  * - 2026-03-26: 포인트·정책 관리 링크 추가
  */
-import { BookMarkedIcon, CoinsIcon, ShieldIcon, UsersIcon } from "lucide-react";
+import { BookMarkedIcon, CoinsIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ export function AdminHeaderMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button type="button" variant="outline" size="icon-sm" className="shrink-0" aria-label="관리자 메뉴">
-          <ShieldIcon className="size-4" />
+          <SettingsIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">

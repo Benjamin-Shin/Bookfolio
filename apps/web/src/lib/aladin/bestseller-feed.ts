@@ -219,15 +219,14 @@ export function parseAladinItemListBody(body: string): AladinFeedResult {
 }
 
 /**
- * `ALADIN_BESTSELLER_API_BASE_URL`로 알라딘 목록을 가져와 파싱합니다.
+ * 조합된 알라딘 ItemList URL로 목록을 가져와 파싱합니다.
  *
  * @history
+ * - 2026-04-22: 함수명 일반화(`fetchAladinItemListFeed`)
  * - 2026-03-25: 서버 전용 env·5분 캐시
  */
-export async function fetchAladinBestsellerFeed(
-  baseUrl: string
-): Promise<AladinFeedResult> {
-  const res = await fetch(baseUrl, {
+export async function fetchAladinItemListFeed(url: string): Promise<AladinFeedResult> {
+  const res = await fetch(url, {
     next: { revalidate: 300 }
   });
   if (!res.ok) {
@@ -236,3 +235,8 @@ export async function fetchAladinBestsellerFeed(
   const text = await res.text();
   return parseAladinItemListBody(text);
 }
+
+/**
+ * @deprecated `fetchAladinItemListFeed`를 사용하세요.
+ */
+export const fetchAladinBestsellerFeed = fetchAladinItemListFeed;

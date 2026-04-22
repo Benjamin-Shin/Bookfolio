@@ -40,7 +40,7 @@ export function AdminBooksTopActions({ hasAladinConfig }: AdminBooksTopActionsPr
       </div>
       {!hasAladinConfig ? (
         <p className="max-w-md text-right text-xs text-muted-foreground">
-          ALADIN_BESTSELLER_API_BASE_URL 또는 ALADIN_ITEMNEW_API_BASE_URL을 설정하면, 오늘 베스트셀러·초이스 신간 중
+          ALADIN_API_BASE_URL을 설정하면, 오늘 베스트셀러·초이스 신간 중
           아직 books에 없는 ISBN만 일괄 등록할 수 있습니다.
         </p>
       ) : null}

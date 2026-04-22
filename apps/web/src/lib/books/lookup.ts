@@ -639,11 +639,12 @@ function parsePositiveKrw(value: unknown): number | null {
 }
 
 function naverPriceKrw(item: NaverBookItem): number | null {
-  const sale = parsePositiveKrw(item.discount);
-  if (sale != null) {
-    return sale;
+  // 책 추가 시 표시는/저장은 정가 우선 정책.
+  const standard = parsePositiveKrw(item.price);
+  if (standard != null) {
+    return standard;
   }
-  return parsePositiveKrw(item.price);
+  return parsePositiveKrw(item.discount);
 }
 
 /**

@@ -67,6 +67,7 @@ export function aladinFeedItemDbIsbnKeys(item: AladinFeedItem): string[] {
  * 알라딘 한 권 → 관리자 「도서 추가」 폼으로 열 링크(쿼리 프리필).
  *
  * @history
+ * - 2026-04-22: `priceKrw`를 `priceStandard`(정가) 우선으로 반영
  * - 2026-03-26: `pageCount` 쿼리 반영(알라딘 Open API)
  * - 2026-03-25: 관리자 도서 목록 빠른 추가용
  */
@@ -91,7 +92,9 @@ export function adminNewBookPrefillHrefFromAladinItem(item: AladinFeedItem): Rou
   if (item.cover) {
     params.set("coverUrl", item.cover);
   }
-  if (item.priceSales != null) {
+  if (item.priceStandard != null) {
+    params.set("priceKrw", String(item.priceStandard));
+  } else if (item.priceSales != null) {
     params.set("priceKrw", String(item.priceSales));
   }
   if (item.pageCount != null) {

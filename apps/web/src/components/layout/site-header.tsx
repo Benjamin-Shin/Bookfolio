@@ -78,24 +78,6 @@ export async function SiteHeader() {
         </Link>
         <nav className="flex min-w-0 items-center gap-2">
           <div className="hidden min-w-0 items-center gap-2 md:flex">
-            {apkUrl ? (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="shrink-0"
-                asChild
-              >
-                <a
-                  href={apkUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Android 앱(APK) 다운로드"
-                  title="Android 앱(APK) 다운로드"
-                >
-                  <AndroidApkIcon className="size-4" />
-                </a>
-              </Button>
-            ) : null}
             {user?.id && user.email ? (
               <>
                 {user.role === "ADMIN" ? <AdminHeaderMenu /> : null}

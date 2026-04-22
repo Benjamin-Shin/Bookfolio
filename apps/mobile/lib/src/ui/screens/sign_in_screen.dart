@@ -13,6 +13,9 @@ import 'package:provider/provider.dart';
 /// 이메일·비밀번호·Google 로그인 및 에디토리얼 스타일 회원가입(목업 기반).
 ///
 /// History:
+/// - 2026-04-22: 소셜 로그인 에셋 경로를 `assets/` 기준(카카오·구글)으로 변경, 구글 버튼을 카카오와 동일 슬롯 크기로 고정
+/// - 2026-04-22: 로그인 로고 에셋 로드 실패 시 붉은 에러 박스 대신 텍스트 폴백 렌더링 추가
+/// - 2026-04-22: 로그인 헤더 텍스트 `서가담`을 브랜드 로고 PNG(`assets/brand/Seogadam_Web_logo.png`)로 교체
 /// - 2026-04-12: Manrope·구글 테두리 고스트·필드 포커스 `primary` — `#Reference/DESIGN.md` 단일 토큰
 /// - 2026-04-05: 로그인 카드 — 「이메일 또는 아이디」, @ 앞 로컬만 입력 가능 안내
 ///
@@ -36,11 +39,10 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   /// 카카오 로그인 버튼 공식 이미지(개발자 가이드 제공 에셋)
-  static const _kakaoOfficialAsset = 'web/icons/kakao_login_medium_narrow.png';
+  static const _kakaoOfficialAsset = 'assets/kakao_login_medium_narrow.png';
 
-  /// Google Branding Android `light` rounded — Sign in / Sign up (`#Resources/google-signin-assets`).
-  static const _googleSignInOfficialAsset = 'web/icons/google_signin_light_rd_si.png';
-  static const _googleSignUpOfficialAsset = 'web/icons/google_signup_light_rd_su.png';
+  /// 요청 기준 고정 구글 로그인 이미지(카카오와 동일 슬롯으로 렌더링).
+  static const _googleOfficialAsset = 'assets/google_signup_light_sq_su.png';
 
   /// 공식 `medium_narrow` 에셋 intrinsic 픽셀 크기(파일 메타). 높이 [`_primaryLoginButtonHeight`]에 맞춘 너비로 주 버튼·구글을 정렬.
   static const double _kakaoOfficialImageWidthPx = 183;
@@ -377,7 +379,7 @@ class _SignInScreenState extends State<SignInScreen> {
         _googleOfficialLoginButton(
           context,
           auth: auth,
-          asset: _isSignIn ? _googleSignInOfficialAsset : _googleSignUpOfficialAsset,
+          asset: _googleOfficialAsset,
           enabled: !auth.isLoading,
         ),
       ],
@@ -447,10 +449,21 @@ class _SignInScreenState extends State<SignInScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      '서가담',
-                      textAlign: TextAlign.center,
-                      style: BookfolioDesignTokens.displayLg(BookfolioDesignTokens.primary),
+                    SizedBox(
+                      height: 72,
+                      child: Image.asset(
+                        'assets/brand/Seogadam_Web_logo.png',
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        semanticLabel: '서가담 로고',
+                        errorBuilder: (context, error, stackTrace) {
+                          return Text(
+                            '서가담',
+                            textAlign: TextAlign.center,
+                            style: BookfolioDesignTokens.displayLg(BookfolioDesignTokens.primary),
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(

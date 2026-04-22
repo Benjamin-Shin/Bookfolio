@@ -89,3 +89,42 @@ class AladinBestsellerFeed {
     );
   }
 }
+
+/// 알라딘 ItemList 카테고리 옵션(`GET /api/me/aladin-categories`).
+///
+/// History:
+/// - 2026-04-22: 베스트셀러/초이스 신간 카테고리 필터용
+class AladinCategoryOption {
+  AladinCategoryOption({
+    required this.categoryId,
+    required this.mall,
+    required this.depth1,
+    required this.depth2,
+    required this.depth3,
+    required this.label,
+  });
+
+  final int categoryId;
+  final String mall;
+  final String depth1;
+  final String depth2;
+  final String depth3;
+  final String label;
+
+  factory AladinCategoryOption.fromJson(Map<String, dynamic> json) {
+    int asInt(dynamic v) {
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return int.tryParse(v?.toString() ?? '') ?? 0;
+    }
+
+    return AladinCategoryOption(
+      categoryId: asInt(json['categoryId']),
+      mall: json['mall']?.toString() ?? '',
+      depth1: json['depth1']?.toString() ?? '',
+      depth2: json['depth2']?.toString() ?? '',
+      depth3: json['depth3']?.toString() ?? '',
+      label: json['label']?.toString() ?? '',
+    );
+  }
+}

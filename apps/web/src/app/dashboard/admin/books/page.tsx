@@ -52,10 +52,16 @@ async function userBookRefStatsByBookIds(
  * @history
  * - 2026-03-24: 장르(`genre=missing`)·검색어·페이지 쿼리 유지
  */
-function adminBooksListHref(q: string, genreMode: "all" | "missing", page: number): Route {
+function adminBooksListHref(
+  q: string,
+  genreMode: "all" | "missing",
+  sortMode: "updated_desc" | "title_asc" | "title_desc" | "page_count_asc",
+  page: number
+): Route {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (genreMode === "missing") params.set("genre", "missing");
+  if (sortMode !== "updated_desc") params.set("sort", sortMode);
   if (page > 1) params.set("page", String(page));
   const s = params.toString();
   return (s ? `/dashboard/admin/books?${s}` : "/dashboard/admin/books") as Route;
@@ -65,6 +71,8 @@ function adminBooksListHref(q: string, genreMode: "all" | "missing", page: numbe
  * 관리자 공유 서지(`books`) 목록 — 검색·페이지네이션·장르 필터.
  *
  * @history
+ * - 2026-04-22: 정렬 선택(`sort`) 추가 — 수정일/제목/쪽수 기준 선택 지원
+ * - 2026-04-22: 검색에 저자(`authors`) 포함, 정렬에 `page_count` null 우선 추가
  * - 2026-03-26: 알라딘은 표 목록 대신 「빠르게 추가」일괄 등록(`bulkImportAladinCatalogNotInBooks`)
  * - 2026-03-26: `cover_hosted_on_cloudinary` asc — Cloudinary가 아닌 표지(빈 URL 포함)를 장르 정렬 다음 우선(0019)
  * - 2026-03-24: 장르 필터(전체·장르 없음만)·전체 목록에서 장르 미지정 행 상단 정렬(`has_genre_slugs`, 마이그레이션 0016)
@@ -73,7 +81,7 @@ function adminBooksListHref(q: string, genreMode: "all" | "missing", page: numbe
 export default async function AdminBooksPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; page?: string; genre?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; genre?: string; sort?: string }>;
 }) {
   await requireAdmin();
 
@@ -81,6 +89,10 @@ export default async function AdminBooksPage({
   const q = sp.q?.trim() ?? "";
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const genreMode = sp.genre === "missing" ? "missing" : "all";
+  const sortMode =
+    sp.sort === "title_asc" || sp.sort === "title_desc" || sp.sort === "page_count_asc"
+      ? sp.sort
+      : "updated_desc";
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
@@ -94,19 +106,30 @@ export default async function AdminBooksPage({
     });
 
   if (safeQ) {
-    query = query.or(`title.ilike.%${safeQ}%,isbn.ilike.%${safeQ}%`);
+    query = query.or(`title.ilike.%${safeQ}%,isbn.ilike.%${safeQ}%,authors::text.ilike.%${safeQ}%`);
   }
 
   if (genreMode === "missing") {
-    query = query
-      .eq("has_genre_slugs", false)
-      .order("cover_hosted_on_cloudinary", { ascending: true })
-      .order("updated_at", { ascending: false });
+    query = query.eq("has_genre_slugs", false);
   } else {
-    query = query
-      .order("has_genre_slugs", { ascending: true })
-      .order("cover_hosted_on_cloudinary", { ascending: true })
-      .order("updated_at", { ascending: false });
+    query = query.order("has_genre_slugs", { ascending: true });
+  }
+
+  query = query.order("cover_hosted_on_cloudinary", { ascending: true }).order("page_count", {
+    ascending: true,
+    nullsFirst: true
+  });
+
+  if (sortMode === "title_asc") {
+    query = query.order("title", { ascending: true }).order("updated_at", { ascending: false });
+  } else if (sortMode === "title_desc") {
+    query = query.order("title", { ascending: false }).order("updated_at", { ascending: false });
+  } else if (sortMode === "page_count_asc") {
+    query = query.order("page_count", { ascending: true, nullsFirst: true }).order("updated_at", {
+      ascending: false
+    });
+  } else {
+    query = query.order("updated_at", { ascending: false });
   }
 
   query = query.range(from, to);
@@ -127,7 +150,7 @@ export default async function AdminBooksPage({
     books.map((b) => b.id)
   );
 
-  const hasAladinConfig = Boolean(env.aladinBestsellerApiBaseUrl || env.aladinItemNewApiBaseUrl);
+  const hasAladinConfig = Boolean(env.aladinApiBaseUrl);
 
   return (
     <div className="space-y-6">
@@ -135,7 +158,7 @@ export default async function AdminBooksPage({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">도서 관리</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            공유 서지(`books`)입니다. 제목·ISBN 일부 검색이 가능합니다. 소장 서재에 포함된 도서는 삭제할 수 없습니다.
+            공유 서지(`books`)입니다. 제목·ISBN·저자 일부 검색이 가능합니다. 소장 서재에 포함된 도서는 삭제할 수 없습니다.
           </p>
         </div>
         <AdminBooksTopActions hasAladinConfig={hasAladinConfig} />
@@ -146,7 +169,7 @@ export default async function AdminBooksPage({
           <label htmlFor="q" className="text-xs text-muted-foreground">
             검색
           </label>
-          <Input id="q" name="q" type="search" placeholder="제목 또는 ISBN" defaultValue={q} />
+          <Input id="q" name="q" type="search" placeholder="제목, ISBN 또는 저자" defaultValue={q} />
         </div>
         <div className="min-w-[11rem] space-y-1">
           <label htmlFor="genre" className="text-xs text-muted-foreground">
@@ -164,6 +187,26 @@ export default async function AdminBooksPage({
           >
             <option value="all">전체 (장르 없음 먼저)</option>
             <option value="missing">장르 없음만</option>
+          </select>
+        </div>
+        <div className="min-w-[11rem] space-y-1">
+          <label htmlFor="sort" className="text-xs text-muted-foreground">
+            정렬
+          </label>
+          <select
+            id="sort"
+            name="sort"
+            defaultValue={sortMode}
+            suppressHydrationWarning
+            className={cn(
+              "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] md:text-sm dark:bg-input/30",
+              "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            )}
+          >
+            <option value="updated_desc">최신 수정순</option>
+            <option value="title_asc">제목 오름차순</option>
+            <option value="title_desc">제목 내림차순</option>
+            <option value="page_count_asc">쪽수 없음 우선(작은 쪽수순)</option>
           </select>
         </div>
         <Button type="submit" size="sm">
@@ -246,12 +289,12 @@ export default async function AdminBooksPage({
         <div className="flex flex-wrap gap-2">
           {page > 1 ? (
             <Button variant="outline" size="sm" asChild>
-              <Link href={adminBooksListHref(q, genreMode, page - 1)}>이전</Link>
+              <Link href={adminBooksListHref(q, genreMode, sortMode, page - 1)}>이전</Link>
             </Button>
           ) : null}
           {page < totalPages ? (
             <Button variant="outline" size="sm" asChild>
-              <Link href={adminBooksListHref(q, genreMode, page + 1)}>다음</Link>
+              <Link href={adminBooksListHref(q, genreMode, sortMode, page + 1)}>다음</Link>
             </Button>
           ) : null}
         </div>

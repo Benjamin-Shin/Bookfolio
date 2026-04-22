@@ -18,12 +18,15 @@ export type AladinTtbItemListViewProps = {
   loadError: string | null;
   pageTitle: string;
   pageDescription: string;
+  filters?: ReactNode;
 };
 
 /**
  * 알라딘 TTB ItemList 공통 그리드(베스트셀러·초이스 신간 등).
  *
  * @history
+ * - 2026-04-22: 가격 표기를 `priceStandard`(정가) 기준으로 변경
+ * - 2026-04-22: 상단 필터 슬롯(`filters`) 추가
  * - 2026-04-12: 카드 클릭 시 알라딘 상품 URL(피드 `link`, 없으면 ISBN) 새 탭 열기
  * - 2026-03-25: `bestsellers/page`에서 분리, 초이스 신간 재사용
  */
@@ -32,6 +35,7 @@ export function AladinTtbItemListView({
   loadError,
   pageTitle,
   pageDescription,
+  filters
 }: AladinTtbItemListViewProps) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
@@ -41,9 +45,12 @@ export function AladinTtbItemListView({
           <h1 className="text-3xl font-bold tracking-tight">{pageTitle}</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{pageDescription}</p>
         </div>
-        <Button variant="outline" asChild>
-          <Link href={"/dashboard" as Route}>내 서재로</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {filters}
+          <Button variant="outline" asChild>
+            <Link href={"/dashboard" as Route}>내 서재로</Link>
+          </Button>
+        </div>
       </div>
 
       {loadError ? (
@@ -139,9 +146,9 @@ export function AladinTtbItemListView({
                           </p>
                         ) : null}
                         <div className="flex flex-wrap items-center gap-2 pt-1">
-                          {item.priceSales != null ? (
+                          {(item.priceStandard ?? item.priceSales) != null ? (
                             <span className="text-sm font-semibold tabular-nums text-foreground">
-                              {item.priceSales.toLocaleString("ko-KR")}원
+                              {(item.priceStandard ?? item.priceSales)!.toLocaleString("ko-KR")}원
                             </span>
                           ) : null}
                           {item.salesPoint != null && item.salesPoint > 0 ? (

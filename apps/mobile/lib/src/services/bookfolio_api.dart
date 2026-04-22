@@ -294,6 +294,71 @@ class MobileHomeBundle {
   }
 }
 
+/// `GET /api/me/recommendations` 추천 도서 1행.
+///
+/// History:
+/// - 2026-04-22: 모바일 홈 추천 패널 연동
+class RecommendationBook {
+  const RecommendationBook({
+    required this.bookId,
+    required this.title,
+    required this.authors,
+    required this.genreSlugs,
+    required this.format,
+    required this.coverUrl,
+    required this.score,
+    required this.reasons,
+  });
+
+  final String bookId;
+  final String title;
+  final List<String> authors;
+  final List<String> genreSlugs;
+  final String format;
+  final String? coverUrl;
+  final double score;
+  final List<String> reasons;
+
+  factory RecommendationBook.fromJson(Map<String, dynamic> json) {
+    final scoreRaw = json['score'];
+    return RecommendationBook(
+      bookId: json['bookId'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      authors: (json['authors'] as List<dynamic>? ?? const []).map((e) => e.toString()).toList(),
+      genreSlugs: (json['genreSlugs'] as List<dynamic>? ?? const []).map((e) => e.toString()).toList(),
+      format: json['format'] as String? ?? 'unknown',
+      coverUrl: json['coverUrl'] as String?,
+      score: scoreRaw is num ? scoreRaw.toDouble() : double.tryParse('$scoreRaw') ?? 0,
+      reasons: (json['reasons'] as List<dynamic>? ?? const []).map((e) => e.toString()).toList(),
+    );
+  }
+}
+
+/// `GET /api/me/recommendations` 응답.
+///
+/// History:
+/// - 2026-04-22: 모바일 홈 추천 패널 연동
+class RecommendationsResult {
+  const RecommendationsResult({
+    required this.algorithmVersion,
+    required this.profileUpdatedAt,
+    required this.items,
+  });
+
+  final String algorithmVersion;
+  final String? profileUpdatedAt;
+  final List<RecommendationBook> items;
+
+  factory RecommendationsResult.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List<dynamic>? ?? const [];
+    return RecommendationsResult(
+      algorithmVersion: json['algorithmVersion'] as String? ?? 'unknown',
+      profileUpdatedAt: json['profileUpdatedAt'] as String?,
+      items: raw.map((e) => RecommendationBook.fromJson(e as Map<String, dynamic>)).toList(),
+    );
+  }
+}
+
 class BookfolioApi {
   BookfolioApi({http.Client? client}) : _client = client ?? http.Client();
 
@@ -501,30 +566,54 @@ class BookfolioApi {
     return list.map((e) => BookLookupResult.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  /// 알라딘 연동 목록(서버가 `ALADIN_BESTSELLER_API_BASE_URL`로 조회).
+  /// 알라딘 연동 목록(서버가 `ALADIN_API_BASE_URL` + QueryType로 조회).
   ///
   /// History:
+  /// - 2026-04-22: `categoryId` 쿼리 파라미터 추가
   /// - 2026-03-25: `GET /api/me/aladin-bestseller` 연동
-  Future<AladinBestsellerFeed> fetchAladinBestsellerFeed() async {
+  Future<AladinBestsellerFeed> fetchAladinBestsellerFeed({int categoryId = 0}) async {
     final response = await _client.get(
-      Uri.parse('$_baseUrl/api/me/aladin-bestseller'),
+      Uri.parse('$_baseUrl/api/me/aladin-bestseller').replace(
+        queryParameters: {'categoryId': '$categoryId'},
+      ),
       headers: await _headers(),
     );
     _throwIfFailed(response);
     return AladinBestsellerFeed.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
-  /// 초이스 신간 등(서버가 `ALADIN_ITEMNEW_API_BASE_URL`로 조회).
+  /// 초이스 신간 등(서버가 `ALADIN_API_BASE_URL` + QueryType로 조회).
   ///
   /// History:
+  /// - 2026-04-22: `categoryId` 쿼리 파라미터 추가
   /// - 2026-03-25: `GET /api/me/aladin-item-new` 연동
-  Future<AladinBestsellerFeed> fetchAladinItemNewFeed() async {
+  Future<AladinBestsellerFeed> fetchAladinItemNewFeed({int categoryId = 0}) async {
     final response = await _client.get(
-      Uri.parse('$_baseUrl/api/me/aladin-item-new'),
+      Uri.parse('$_baseUrl/api/me/aladin-item-new').replace(
+        queryParameters: {'categoryId': '$categoryId'},
+      ),
       headers: await _headers(),
     );
     _throwIfFailed(response);
     return AladinBestsellerFeed.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// 알라딘 카테고리 목록.
+  ///
+  /// History:
+  /// - 2026-04-22: `GET /api/me/aladin-categories` 추가
+  Future<List<AladinCategoryOption>> fetchAladinCategories() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/aladin-categories'),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final raw = decoded['items'];
+    if (raw is! List<dynamic>) return const <AladinCategoryOption>[];
+    return raw
+        .map((e) => AladinCategoryOption.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// 발견 탭 — 타인이 먼저 등록한 종이책 캐논(본인 미소장).
@@ -700,6 +789,53 @@ class BookfolioApi {
     );
     _throwIfFailed(response);
     return MobileHomeBundle.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// `GET /api/me/recommendations`
+  ///
+  /// History:
+  /// - 2026-04-22: 모바일 홈 추천 패널 연동
+  Future<RecommendationsResult> fetchRecommendations({
+    int limit = 6,
+    bool trackImpression = true,
+    String? requestId,
+    String bucket = 'mobile_home',
+  }) async {
+    final qp = <String, String>{
+      'limit': '${limit.clamp(1, 20)}',
+      if (trackImpression) 'trackImpression': '1',
+      if (requestId != null && requestId.trim().isNotEmpty) 'requestId': requestId.trim(),
+      if (bucket.trim().isNotEmpty) 'bucket': bucket.trim(),
+    };
+    final uri = Uri.parse('$_baseUrl/api/me/recommendations').replace(queryParameters: qp);
+    final response = await _client.get(uri, headers: await _headers());
+    _throwIfFailed(response);
+    return RecommendationsResult.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// `POST /api/me/recommendations/interactions`
+  ///
+  /// History:
+  /// - 2026-04-22: 모바일 홈 추천 상호작용 로깅
+  Future<void> recordRecommendationInteraction({
+    required String bookId,
+    required String interactionType,
+    String surface = 'mobile_home',
+    String? requestId,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/me/recommendations/interactions'),
+      headers: await _headers(),
+      body: jsonEncode({
+        'bookId': bookId,
+        'interactionType': interactionType,
+        'surface': surface,
+        if (requestId != null && requestId.trim().isNotEmpty) 'requestId': requestId.trim(),
+        if (metadata != null) 'metadata': metadata,
+      }),
+    );
+    _throwIfFailed(response);
   }
 
   /// `GET /api/me/points/balance`

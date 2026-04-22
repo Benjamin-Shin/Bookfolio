@@ -6,10 +6,10 @@
  * `process.env.NEXT_PUBLIC_*`는 getter 본문에 그대로 두면 클라이언트 번들에서도 Next가 인라인합니다.
  *
  * @history
+ * - 2026-04-22: `aladinApiBaseUrl` — ItemList 공통 베이스 URL(+ttbkey)
  * - 2026-04-08: `aladinTtbKey` — ItemLookUp(비소장 구매 힌트)
- * - 2026-03-25: `aladinItemNewApiBaseUrl` — 초이스 신간 등 별도 TTB URL
- * - 2026-03-25: `aladinBestsellerApiBaseUrl` 주석 — `next.config` `loadEnvConfig`와의 관계 안내
- * - 2026-03-25: `aladinBestsellerApiBaseUrl` — 알라딘 목록(서버 전용 URL)
+ * - 2026-03-25: `aladinApiBaseUrl` 주석 — `next.config` `loadEnvConfig`와의 관계 안내
+ * - 2026-03-25: `aladinApiBaseUrl` — 알라딘 목록(서버 전용 URL)
  */
 export const env = {
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
@@ -31,18 +31,9 @@ export const env = {
 
   metadataProvider: process.env.BOOK_METADATA_PROVIDER ?? "openlibrary",
 
-  /**
-   * 알라딘 TTB ItemList 전체 URL(쿼리·ttbkey 포함). 서버 전용.
-   * `apps/web/.env`는 `next.config.mjs`의 `loadEnvConfig(appDir)`로 항상 앱 루트에서 로드됩니다.
-   */
-  get aladinBestsellerApiBaseUrl(): string | undefined {
-    const v = process.env.ALADIN_BESTSELLER_API_BASE_URL?.trim();
-    return v || undefined;
-  },
-
-  /** 초이스 신간 등 별도 ItemList URL(서버 전용). */
-  get aladinItemNewApiBaseUrl(): string | undefined {
-    const v = process.env.ALADIN_ITEMNEW_API_BASE_URL?.trim();
+  /** 알라딘 TTB ItemList 베이스 URL(서버 전용). `ttbkey`까지만 포함합니다. */
+  get aladinApiBaseUrl(): string | undefined {
+    const v = process.env.ALADIN_API_BASE_URL?.trim();
     return v || undefined;
   },
 
