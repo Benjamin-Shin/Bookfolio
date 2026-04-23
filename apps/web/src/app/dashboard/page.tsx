@@ -460,7 +460,7 @@ export default async function DashboardPage({
         >
           <div className="mb-10">
             <h3 className="mb-1 font-sans text-[0.75rem] font-bold uppercase tracking-widest text-[#051b0e]">
-              Collections
+              컬렉션
             </h3>
             <p className="font-sans text-[0.65rem] text-[#1a3021]/60">
               Archival filters
@@ -478,7 +478,7 @@ export default async function DashboardPage({
             >
               <Library className="size-5 shrink-0" aria-hidden />
               <span className="font-sans text-[0.75rem] uppercase tracking-widest">
-                All ({ownedAllCountProbe.total.toLocaleString("ko-KR")})
+                전체 ({ownedAllCountProbe.total.toLocaleString("ko-KR")})
               </span>
             </Link>
             <Link
@@ -487,7 +487,7 @@ export default async function DashboardPage({
             >
               <BookOpen className="size-5 shrink-0" aria-hidden />
               <span className="font-sans text-[0.75rem] uppercase tracking-widest">
-                Reading ({readingCountProbe.total.toLocaleString("ko-KR")})
+                읽는 중 ({readingCountProbe.total.toLocaleString("ko-KR")})
               </span>
             </Link>
             <Link
@@ -496,7 +496,7 @@ export default async function DashboardPage({
             >
               <Bookmark className="size-5 shrink-0" aria-hidden />
               <span className="font-sans text-[0.75rem] uppercase tracking-widest">
-                To Read ({unreadCountProbe.total.toLocaleString("ko-KR")})
+                읽기 전 ({unreadCountProbe.total.toLocaleString("ko-KR")})
               </span>
             </Link>
             <Link
@@ -505,7 +505,7 @@ export default async function DashboardPage({
             >
               <CheckCircle className="size-5 shrink-0" aria-hidden />
               <span className="font-sans text-[0.75rem] uppercase tracking-widest">
-                Completed ({completedCountProbe.total.toLocaleString("ko-KR")})
+                완독 ({completedCountProbe.total.toLocaleString("ko-KR")})
               </span>
             </Link>
             <Link
@@ -514,7 +514,7 @@ export default async function DashboardPage({
             >
               <Medal className="size-5 shrink-0" aria-hidden />
               <span className="font-sans text-[0.75rem] uppercase tracking-widest">
-                Hall of Fame ({hallTotalAll.toLocaleString("ko-KR")})
+                명예의 전당 ({hallTotalAll.toLocaleString("ko-KR")})
               </span>
             </Link>
           </nav>
