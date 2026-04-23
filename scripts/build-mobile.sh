@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Flutter 릴리스 빌드 — BOOKFOLIO_API_BASE_URL, 선택적 GOOGLE_AUTH_CLIENT_ID 를 --dart-define 으로 넣습니다.
+# Flutter 릴리스 빌드 — BOOKFOLIO_API_BASE_URL, 선택적 GOOGLE_AUTH_CLIENT_ID/KAKAO_NATIVE_APP_KEY 를 --dart-define 으로 넣습니다.
 #
 # 사용 예:
 #   export BOOKFOLIO_API_BASE_URL=https://your-app.vercel.app
@@ -71,6 +71,9 @@ TARGET="${1:-apk-split}"
 DART_DEF=(--dart-define="BOOKFOLIO_API_BASE_URL=$BOOKFOLIO_API_BASE_URL")
 if [[ -n "${GOOGLE_AUTH_CLIENT_ID:-}" ]]; then
   DART_DEF+=(--dart-define="GOOGLE_AUTH_CLIENT_ID=$GOOGLE_AUTH_CLIENT_ID")
+fi
+if [[ -n "${KAKAO_NATIVE_APP_KEY:-}" ]]; then
+  DART_DEF+=(--dart-define="KAKAO_NATIVE_APP_KEY=$KAKAO_NATIVE_APP_KEY")
 fi
 
 cd "$MOBILE_DIR"

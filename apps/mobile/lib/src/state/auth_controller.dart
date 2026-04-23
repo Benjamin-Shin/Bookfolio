@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthSession {
@@ -14,6 +15,7 @@ class AuthSession {
 /// Bearer 세션, 이메일·Google 로그인, 이메일 가입.
 ///
 /// History:
+/// - 2026-04-24: `signInWithKakao` 추가 — 카카오 SDK 토큰을 `/api/auth/mobile/kakao`로 교환
 /// - 2026-04-12: `signIn`/`signUp` — 기본 오류 메시지 `??=` (lint)
 /// - 2026-04-05: `signUp` 자동 로그인·`/api/upload` 아바타·`/api/me/profile` 인구통계 반영
 class AuthController extends ChangeNotifier {
@@ -39,9 +41,11 @@ class AuthController extends ChangeNotifier {
   }
 
   static const _apiBase = String.fromEnvironment('BOOKFOLIO_API_BASE_URL');
+
   /// 서버 `AUTH_GOOGLE_ID`(웹 클라이언트 ID)와 같게 두면 ID 토큰 aud 검증이 맞습니다.
   /// 비우면 네이티브 클라이언트 aud 만 쓰게 되므로 서버에 `AUTH_GOOGLE_MOBILE_AUDIENCES` 로 해당 ID를 추가해야 합니다.
-  static const _googleAuthClientId = String.fromEnvironment('GOOGLE_AUTH_CLIENT_ID');
+  static const _googleAuthClientId =
+      String.fromEnvironment('GOOGLE_AUTH_CLIENT_ID');
 
   Uri _apiUri(String path) {
     final base = _apiBase.trim().replaceAll(RegExp(r'/+$'), '');
@@ -69,7 +73,8 @@ class AuthController extends ChangeNotifier {
     }
 
     try {
-      final token = await _exchangePasswordForToken(email: email, password: password);
+      final token =
+          await _exchangePasswordForToken(email: email, password: password);
       if (token != null) {
         await _storeAccessToken(token);
       } else {
@@ -102,7 +107,8 @@ class AuthController extends ChangeNotifier {
     );
 
     if (kDebugMode) {
-      debugPrint('[auth] login status=${response.statusCode} bodyLen=${response.body.length}');
+      debugPrint(
+          '[auth] login status=${response.statusCode} bodyLen=${response.body.length}');
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -114,7 +120,8 @@ class AuthController extends ChangeNotifier {
       }
       return token;
     }
-    _error = _parseErrorBody(response.body) ?? '로그인에 실패했습니다. (${response.statusCode})';
+    _error = _parseErrorBody(response.body) ??
+        '로그인에 실패했습니다. (${response.statusCode})';
     return null;
   }
 
@@ -175,12 +182,14 @@ class AuthController extends ChangeNotifier {
       );
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        _error = _parseErrorBody(response.body) ?? '가입에 실패했습니다. (${response.statusCode})';
+        _error = _parseErrorBody(response.body) ??
+            '가입에 실패했습니다. (${response.statusCode})';
         return;
       }
 
       _error = null;
-      final token = await _exchangePasswordForToken(email: email, password: password);
+      final token =
+          await _exchangePasswordForToken(email: email, password: password);
       if (token == null) {
         _error ??= '가입은 되었으나 자동 로그인에 실패했습니다. 로그인을 시도해 주세요.';
         return;
@@ -194,15 +203,20 @@ class AuthController extends ChangeNotifier {
         avatarUrl = await _tryUploadAvatar(
           accessToken: token,
           bytes: bytes,
-          fileName: (avatarFileName?.trim().isNotEmpty ?? false) ? avatarFileName!.trim() : 'avatar.jpg',
-          mimeType: (avatarMimeType?.trim().isNotEmpty ?? false) ? avatarMimeType!.trim() : 'image/jpeg',
+          fileName: (avatarFileName?.trim().isNotEmpty ?? false)
+              ? avatarFileName!.trim()
+              : 'avatar.jpg',
+          mimeType: (avatarMimeType?.trim().isNotEmpty ?? false)
+              ? avatarMimeType!.trim()
+              : 'image/jpeg',
         );
       }
 
       final g = gender?.trim();
       final bd = birthDateIso?.trim();
-      final hasDemographics =
-          (g != null && g.isNotEmpty) || (bd != null && bd.isNotEmpty) || (avatarUrl != null && avatarUrl.isNotEmpty);
+      final hasDemographics = (g != null && g.isNotEmpty) ||
+          (bd != null && bd.isNotEmpty) ||
+          (avatarUrl != null && avatarUrl.isNotEmpty);
 
       if (hasDemographics) {
         await _tryPatchProfileAfterSignup(
@@ -243,7 +257,8 @@ class AuthController extends ChangeNotifier {
       final resp = await http.Response.fromStream(streamed);
       if (resp.statusCode < 200 || resp.statusCode >= 300) {
         if (kDebugMode) {
-          debugPrint('[auth] avatar upload status=${resp.statusCode} body=${resp.body}');
+          debugPrint(
+              '[auth] avatar upload status=${resp.statusCode} body=${resp.body}');
         }
         return null;
       }
@@ -288,7 +303,8 @@ class AuthController extends ChangeNotifier {
         body: jsonEncode(body),
       );
       if (kDebugMode && (resp.statusCode < 200 || resp.statusCode >= 300)) {
-        debugPrint('[auth] profile update status=${resp.statusCode} body=${resp.body}');
+        debugPrint(
+            '[auth] profile update status=${resp.statusCode} body=${resp.body}');
       }
     } on Exception catch (e) {
       if (kDebugMode) {
@@ -345,7 +361,8 @@ class AuthController extends ChangeNotifier {
       );
 
       if (kDebugMode) {
-        debugPrint('[auth] google status=${response.statusCode} bodyLen=${response.body.length}');
+        debugPrint(
+            '[auth] google status=${response.statusCode} bodyLen=${response.body.length}');
       }
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -354,12 +371,78 @@ class AuthController extends ChangeNotifier {
         if (token == null || token.isEmpty) {
           _error = '서버 응답이 올바르지 않습니다.';
         } else {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(_tokenKey, token);
-          _session = AuthSession(token);
+          await _storeAccessToken(token);
         }
       } else {
-        _error = _parseErrorBody(response.body) ?? 'Google 로그인에 실패했습니다. (${response.statusCode})';
+        _error = _parseErrorBody(response.body) ??
+            'Google 로그인에 실패했습니다. (${response.statusCode})';
+      }
+    } on Exception catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> signInWithKakao() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    if (_apiBase.trim().isEmpty) {
+      _error =
+          'BOOKFOLIO_API_BASE_URL 이 비어 있습니다. 실행 시 --dart-define=BOOKFOLIO_API_BASE_URL=<웹 URL> 을 넣거나 VS Code launch.json 의 toolArgs 를 확인하세요.';
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    try {
+      OAuthToken token;
+      final installed = await isKakaoTalkInstalled();
+      if (installed) {
+        try {
+          token = await UserApi.instance.loginWithKakaoTalk();
+        } catch (_) {
+          token = await UserApi.instance.loginWithKakaoAccount();
+        }
+      } else {
+        token = await UserApi.instance.loginWithKakaoAccount();
+      }
+
+      final kakaoAccessToken = token.accessToken.trim();
+      if (kakaoAccessToken.isEmpty) {
+        _error = '카카오 액세스 토큰을 받지 못했습니다.';
+        return;
+      }
+
+      final url = _apiUri('/api/auth/mobile/kakao');
+      if (kDebugMode) {
+        debugPrint('[auth] POST $url (kakao)');
+      }
+      final response = await http.post(
+        url,
+        headers: const {'Content-Type': 'application/json'},
+        body: jsonEncode({'accessToken': kakaoAccessToken}),
+      );
+
+      if (kDebugMode) {
+        debugPrint(
+            '[auth] kakao status=${response.statusCode} bodyLen=${response.body.length}');
+      }
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final map = jsonDecode(response.body) as Map<String, dynamic>;
+        final accessToken = map['accessToken'] as String?;
+        if (accessToken == null || accessToken.isEmpty) {
+          _error = '서버 응답이 올바르지 않습니다.';
+        } else {
+          await _storeAccessToken(accessToken);
+        }
+      } else {
+        _error = _parseErrorBody(response.body) ??
+            '카카오 로그인에 실패했습니다. (${response.statusCode})';
       }
     } on Exception catch (e) {
       _error = e.toString();
@@ -375,6 +458,9 @@ class AuthController extends ChangeNotifier {
     _session = null;
     try {
       await GoogleSignIn().signOut();
+    } catch (_) {}
+    try {
+      await UserApi.instance.logout();
     } catch (_) {}
     notifyListeners();
   }

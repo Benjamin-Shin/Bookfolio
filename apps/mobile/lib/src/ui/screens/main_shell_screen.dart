@@ -18,6 +18,9 @@ enum _ShelfMode { my, shared }
 
 /// 하단 5탭(홈·서재·발견·통계·프로필) + 상단 블러 앱바·드로어.
 ///
+/// @history
+/// - 2026-04-23: 상단 브레드크럼 내비게이션 추가 — 주요 페이지를 한 번에 이동
+///
 /// History:
 /// - 2026-04-12: 앱바·하단 내비 글래스 — `DESIGN.md` surface 80%·20px 블러, 구분선 제거
 /// - 2026-04-07: 하단 내비 아이콘 22px — 얇은 라인 톤(Stitch1)
@@ -84,6 +87,16 @@ class _MainShellScreenState extends State<MainShellScreen> {
     });
   }
 
+  void _goTab(int tabIndex) {
+    final was = _tabIndex;
+    setState(() {
+      _tabIndex = tabIndex;
+      if (tabIndex == 0 && was != 0) _homeRefreshSignal++;
+      if (tabIndex == 1) _shelfMode = _ShelfMode.my;
+    });
+    if (tabIndex == 4) _loadToolbarAvatar();
+  }
+
   @override
   Widget build(BuildContext context) {
     final topInset = MediaQuery.paddingOf(context).top;
@@ -96,7 +109,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
         onTapSharedLibrary: _goSharedShelf,
       ),
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(topInset + 56),
+        preferredSize: Size.fromHeight(topInset + 96),
         child: ClipRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(
@@ -110,34 +123,50 @@ class _MainShellScreenState extends State<MainShellScreen> {
               ),
               child: SafeArea(
                 bottom: false,
-                child: SizedBox(
-                  height: 56,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: _openDrawer,
-                          icon: Icon(Icons.menu_rounded, color: BookfolioDesignTokens.primary),
-                          tooltip: '메뉴',
-                        ),
-                        Expanded(
-                          child: Text(
-                            '서가담',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.newsreader(
-                              fontSize: 22,
-                              fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.w500,
-                              color: BookfolioDesignTokens.primary,
-                              height: 1.1,
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 56,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              onPressed: _openDrawer,
+                              icon: Icon(Icons.menu_rounded, color: BookfolioDesignTokens.primary),
+                              tooltip: '메뉴',
                             ),
-                          ),
+                            Expanded(
+                              child: Text(
+                                '서가담',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.newsreader(
+                                  fontSize: 22,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.w500,
+                                  color: BookfolioDesignTokens.primary,
+                                  height: 1.1,
+                                ),
+                              ),
+                            ),
+                            ProfileToolbarAvatar(imageUrl: _toolbarAvatarUrl, size: 40),
+                          ],
                         ),
-                        ProfileToolbarAvatar(imageUrl: _toolbarAvatarUrl, size: 40),
-                      ],
+                      ),
                     ),
-                  ),
+                    Expanded(
+                      child: _ShellBreadcrumbBar(
+                        tabIndex: _tabIndex,
+                        shelfMode: _shelfMode,
+                        onTapHome: () => _goTab(0),
+                        onTapMyShelf: _goMyShelf,
+                        onTapSharedShelf: _goSharedShelf,
+                        onTapDiscover: () => _goTab(2),
+                        onTapStats: () => _goTab(3),
+                        onTapProfile: () => _goTab(4),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -161,14 +190,151 @@ class _MainShellScreenState extends State<MainShellScreen> {
       ),
       bottomNavigationBar: _BookfolioBottomNavBar(
         currentIndex: _tabIndex,
-        onChanged: (i) {
-          final was = _tabIndex;
-          setState(() {
-            _tabIndex = i;
-            if (i == 0 && was != 0) _homeRefreshSignal++;
-          });
-          if (i == 4) _loadToolbarAvatar();
-        },
+        onChanged: _goTab,
+      ),
+    );
+  }
+}
+
+class _ShellBreadcrumbBar extends StatelessWidget {
+  const _ShellBreadcrumbBar({
+    required this.tabIndex,
+    required this.shelfMode,
+    required this.onTapHome,
+    required this.onTapMyShelf,
+    required this.onTapSharedShelf,
+    required this.onTapDiscover,
+    required this.onTapStats,
+    required this.onTapProfile,
+  });
+
+  final int tabIndex;
+  final _ShelfMode shelfMode;
+  final VoidCallback onTapHome;
+  final VoidCallback onTapMyShelf;
+  final VoidCallback onTapSharedShelf;
+  final VoidCallback onTapDiscover;
+  final VoidCallback onTapStats;
+  final VoidCallback onTapProfile;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool shelfSelected = tabIndex == 1;
+    final bool sharedSelected = shelfSelected && shelfMode == _ShelfMode.shared;
+    final Color activeColor = BookfolioDesignTokens.primary;
+    final Color inactiveColor = Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _BreadcrumbItem(
+              label: '홈',
+              selected: tabIndex == 0,
+              onTap: onTapHome,
+              activeColor: activeColor,
+              inactiveColor: inactiveColor,
+            ),
+            _BreadcrumbChevron(color: inactiveColor),
+            _BreadcrumbItem(
+              label: '서재',
+              selected: shelfSelected && shelfMode == _ShelfMode.my,
+              onTap: onTapMyShelf,
+              activeColor: activeColor,
+              inactiveColor: inactiveColor,
+            ),
+            _BreadcrumbChevron(color: inactiveColor),
+            _BreadcrumbItem(
+              label: '공유서재',
+              selected: sharedSelected,
+              onTap: onTapSharedShelf,
+              activeColor: activeColor,
+              inactiveColor: inactiveColor,
+            ),
+            _BreadcrumbChevron(color: inactiveColor),
+            _BreadcrumbItem(
+              label: '발견',
+              selected: tabIndex == 2,
+              onTap: onTapDiscover,
+              activeColor: activeColor,
+              inactiveColor: inactiveColor,
+            ),
+            _BreadcrumbChevron(color: inactiveColor),
+            _BreadcrumbItem(
+              label: '통계',
+              selected: tabIndex == 3,
+              onTap: onTapStats,
+              activeColor: activeColor,
+              inactiveColor: inactiveColor,
+            ),
+            _BreadcrumbChevron(color: inactiveColor),
+            _BreadcrumbItem(
+              label: '프로필',
+              selected: tabIndex == 4,
+              onTap: onTapProfile,
+              activeColor: activeColor,
+              inactiveColor: inactiveColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BreadcrumbChevron extends StatelessWidget {
+  const _BreadcrumbChevron({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Icon(
+        Icons.chevron_right_rounded,
+        size: 16,
+        color: color.withValues(alpha: 0.72),
+      ),
+    );
+  }
+}
+
+class _BreadcrumbItem extends StatelessWidget {
+  const _BreadcrumbItem({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.activeColor,
+    required this.inactiveColor,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color activeColor;
+  final Color inactiveColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = selected ? activeColor : inactiveColor.withValues(alpha: 0.88);
+    return TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        foregroundColor: color,
+        minimumSize: const Size(0, 28),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.manrope(
+          fontSize: 13,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          letterSpacing: 0.1,
+        ),
       ),
     );
   }

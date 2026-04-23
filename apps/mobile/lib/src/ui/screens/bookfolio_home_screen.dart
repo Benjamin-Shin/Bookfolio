@@ -207,8 +207,6 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             const SizedBox(height: 14),
             _buildQuickLinks(context),
             const SizedBox(height: 24),
-            ReadingEventsCalendarCard(key: _eventsCalendarKey),
-            const SizedBox(height: 28),
             if (_loading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 32),
@@ -220,6 +218,14 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text(_error!, style: TextStyle(color: scheme.error, fontSize: 13)),
                 ),
+              Text(
+                '현재 읽고 있는 도서',
+                style: BookfolioDesignTokens.headlineMd(
+                  BookfolioDesignTokens.primary,
+                  fontStyle: FontStyle.normal,
+                ).copyWith(fontSize: 26),
+              ),
+              const SizedBox(height: 16),
               LayoutBuilder(
                 builder: (context, c) {
                   final wide = c.maxWidth >= 600;
@@ -245,6 +251,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                   );
                 },
               ),
+              const SizedBox(height: 24),
+              ReadingEventsCalendarCard(key: _eventsCalendarKey),
               const SizedBox(height: 32),
               _buildRecommendSection(context),
               const SizedBox(height: 32),
@@ -612,7 +620,7 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
           children: [
             Expanded(
               child: Text(
-                '당신을 위한 추천',
+                '내 취향 추천',
                 style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal).copyWith(fontSize: 26),
               ),
             ),
@@ -661,7 +669,7 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             builder: (context, c) {
               const gap = 16.0;
               final w = c.maxWidth;
-              final cols = w >= 520 ? 3 : 1;
+              final cols = w >= 880 ? 3 : (w >= 560 ? 2 : 1);
               final tileW = (w - gap * (cols - 1)) / cols;
               return Wrap(
                 spacing: gap,

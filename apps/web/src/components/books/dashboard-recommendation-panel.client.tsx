@@ -172,7 +172,7 @@ export function DashboardRecommendationPanel() {
         ) : null}
 
         {!error && data.items.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4">
             {data.items.map((item) => (
               <article key={item.bookId} className="rounded-lg border border-[#051b0e]/10 bg-[#fbf9f4] p-3">
                 <div className="flex gap-3">
@@ -201,9 +201,9 @@ export function DashboardRecommendationPanel() {
                     ) : null}
                   </div>
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-2">
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-[11px] text-[#675d53]">점수 {item.score.toFixed(2)}</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Button
                       type="button"
                       size="sm"

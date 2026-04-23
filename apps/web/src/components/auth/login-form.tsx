@@ -4,6 +4,7 @@
  * 이메일·구글·카카오(에셋) 로그인 폼.
  *
  * @history
+ * - 2026-04-24: 카카오 OAuth 연동 — `kakaoEnabled`일 때 `signIn("kakao", { callbackUrl })` 실행
  * - 2026-04-12: 구글 공식 Web PNG(`/assets/google_signin_light_sq_si.png`·`google_signup_light_sq_su.png`) — 로그인/가입 탭별 SI·SU; 카카오와 동일 52px 높이 `object-contain`
  * - 2026-04-12: 카카오 공식 PNG(`/assets/kakao_login_medium_narrow.png`)·모바일과 동일 순서·183×45 비율 너비 컬럼; 카카오 OAuth 미연동 시 안내
  * - 2026-04-05: 로그인 탭 — 라벨·힌트「이메일 또는 아이디」, @ 앞 로컬만 입력 가능(`type="text"`)
@@ -27,6 +28,7 @@ import { cn } from "@/lib/utils";
 
 type LoginFormProps = {
   googleEnabled: boolean;
+  kakaoEnabled: boolean;
 };
 
 function toSafeCallbackUrl(raw: string | null): Route {
@@ -45,6 +47,7 @@ const GOOGLE_SIGNUP_ASSET_PX = { w: 358, h: 80 } as const;
 
 type OauthContinueBlockProps = {
   googleEnabled: boolean;
+  kakaoEnabled: boolean;
   pending: boolean;
   callbackUrl: Route;
   /** 로그인 탭이면 SI, 회원가입 탭이면 SU 에셋. */
@@ -55,6 +58,7 @@ type OauthContinueBlockProps = {
 
 function OauthContinueBlock({
   googleEnabled,
+  kakaoEnabled,
   pending,
   callbackUrl,
   googleAsset,
@@ -69,21 +73,23 @@ function OauthContinueBlock({
           또는 다음으로 계속하기
         </p>
         <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            disabled={pending}
-            onClick={onKakaoClick}
-            className="relative flex h-[52px] w-full shrink-0 items-center justify-center overflow-hidden rounded-md border border-transparent bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
-          >
-            <Image
-              src="/assets/kakao_login_medium_narrow.png"
-              alt="카카오 로그인"
-              width={183}
-              height={45}
-              className="h-[52px] w-auto max-w-full object-contain object-center"
-              priority
-            />
-          </button>
+          {kakaoEnabled ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={onKakaoClick}
+              className="relative flex h-[52px] w-full shrink-0 items-center justify-center overflow-hidden rounded-md border border-transparent bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            >
+              <Image
+                src="/assets/kakao_login_medium_narrow.png"
+                alt="카카오 로그인"
+                width={183}
+                height={45}
+                className="h-[52px] w-auto max-w-full object-contain object-center"
+                priority
+              />
+            </button>
+          ) : null}
           {googleEnabled ? (
             <button
               type="button"
@@ -115,7 +121,7 @@ function OauthContinueBlock({
   );
 }
 
-export function LoginForm({ googleEnabled }: LoginFormProps) {
+export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
   const searchParams = useSearchParams();
   const callbackUrl = toSafeCallbackUrl(searchParams.get("callbackUrl"));
 
@@ -260,10 +266,11 @@ export function LoginForm({ googleEnabled }: LoginFormProps) {
                 ) : null}
                 <OauthContinueBlock
                   googleEnabled={googleEnabled}
+                  kakaoEnabled={kakaoEnabled}
                   pending={pending}
                   callbackUrl={callbackUrl}
                   googleAsset="signin"
-                  onKakaoClick={() => setInfo("카카오 로그인은 준비 중입니다.")}
+                  onKakaoClick={() => signIn("kakao", { callbackUrl })}
                   primarySlot={
                     <Button type="submit" className="h-[52px] w-full" disabled={pending}>
                       {pending ? "처리 중…" : "로그인"}
@@ -328,10 +335,11 @@ export function LoginForm({ googleEnabled }: LoginFormProps) {
                 ) : null}
                 <OauthContinueBlock
                   googleEnabled={googleEnabled}
+                  kakaoEnabled={kakaoEnabled}
                   pending={pending}
                   callbackUrl={callbackUrl}
                   googleAsset="signup"
-                  onKakaoClick={() => setInfo("카카오 로그인은 준비 중입니다.")}
+                  onKakaoClick={() => signIn("kakao", { callbackUrl })}
                   primarySlot={
                     <Button type="submit" className="h-[52px] w-full" disabled={pending}>
                       {pending ? "처리 중…" : "가입하고 로그인"}

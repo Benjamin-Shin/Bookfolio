@@ -6,6 +6,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import Kakao from "next-auth/providers/kakao";
 
 import { getAppUserRole } from "@/lib/auth/get-app-user-role";
 import { ensureOAuthAppUser } from "@/lib/auth/app-users";
@@ -17,6 +18,8 @@ function normalizeEmail(email: string) {
 
 const googleConfigured =
   Boolean(process.env.AUTH_GOOGLE_ID?.trim()) && Boolean(process.env.AUTH_GOOGLE_SECRET?.trim());
+const kakaoConfigured =
+  Boolean(process.env.AUTH_KAKAO_ID?.trim()) && Boolean(process.env.AUTH_KAKAO_SECRET?.trim());
 
 const providers: NextAuthConfig["providers"] = [];
 
@@ -25,6 +28,15 @@ if (googleConfigured) {
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!
+    })
+  );
+}
+
+if (kakaoConfigured) {
+  providers.push(
+    Kakao({
+      clientId: process.env.AUTH_KAKAO_ID!,
+      clientSecret: process.env.AUTH_KAKAO_SECRET!
     })
   );
 }
@@ -66,7 +78,7 @@ export const authConfig = {
   trustHost: true,
   callbacks: {
     async jwt({ token, user, account, profile }) {
-      if (account?.provider === "google") {
+      if (account?.provider === "google" || account?.provider === "kakao") {
         const p = profile as { email?: string; name?: string; picture?: string };
         if (!p.email) {
           return token;

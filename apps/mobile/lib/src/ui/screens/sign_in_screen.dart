@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 /// 이메일·비밀번호·Google 로그인 및 에디토리얼 스타일 회원가입(목업 기반).
 ///
 /// History:
+/// - 2026-04-24: 로그인 화면을 히어로 카피·글래스 카드·강조 CTA 중심으로 전면 리디자인해 시각적 완성도와 가독성 개선
+/// - 2026-04-24: 카카오 버튼을 `AuthController.signInWithKakao()`에 연결
 /// - 2026-04-22: 소셜 로그인 에셋 경로를 `assets/` 기준(카카오·구글)으로 변경, 구글 버튼을 카카오와 동일 슬롯 크기로 고정
 /// - 2026-04-22: 로그인 로고 에셋 로드 실패 시 붉은 에러 박스 대신 텍스트 폴백 렌더링 추가
 /// - 2026-04-22: 로그인 헤더 텍스트 `서가담`을 브랜드 로고 PNG(`assets/brand/Seogadam_Web_logo.png`)로 교체
@@ -55,7 +57,9 @@ class _SignInScreenState extends State<SignInScreen> {
 
   /// 카카오 PNG를 늘리지 않고 맞출 때, 주 버튼·카카오·구글이 공유하는 가로 길이.
   static double get _kakaoWidthAlignedButtonWidth =>
-      _kakaoOfficialImageWidthPx * _primaryLoginButtonHeight / _kakaoOfficialImageHeightPx;
+      _kakaoOfficialImageWidthPx *
+      _primaryLoginButtonHeight /
+      _kakaoOfficialImageHeightPx;
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -91,7 +95,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<void> _pickAvatar() async {
     final picker = ImagePicker();
-    final file = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1024);
+    final file =
+        await picker.pickImage(source: ImageSource.gallery, maxWidth: 1024);
     if (file != null) {
       setState(() => _avatarFile = file);
     }
@@ -103,7 +108,9 @@ class _SignInScreenState extends State<SignInScreen> {
     final first = DateTime(1900);
     final picked = await showDatePicker(
       context: context,
-      initialDate: initial.isAfter(first) && initial.isBefore(now) ? initial : DateTime(1990),
+      initialDate: initial.isAfter(first) && initial.isBefore(now)
+          ? initial
+          : DateTime(1990),
       firstDate: first,
       lastDate: now,
       locale: const Locale('ko', 'KR'),
@@ -150,9 +157,13 @@ class _SignInScreenState extends State<SignInScreen> {
     await auth.signUp(
       email: email,
       password: password,
-      name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+      name: _nameController.text.trim().isEmpty
+          ? null
+          : _nameController.text.trim(),
       gender: _gender,
-      birthDateIso: _birthDate == null ? null : DateFormat('yyyy-MM-dd').format(_birthDate!),
+      birthDateIso: _birthDate == null
+          ? null
+          : DateFormat('yyyy-MM-dd').format(_birthDate!),
       avatarBytes: avatarBytes,
       avatarFileName: avatarName,
       avatarMimeType: avatarMime,
@@ -186,14 +197,18 @@ class _SignInScreenState extends State<SignInScreen> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      labelStyle: BookfolioDesignTokens.labelMd(BookfolioDesignTokens.onSurfaceVariant, opacity: 0.7),
-      hintStyle: BookfolioDesignTokens.bodyLg(BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.35)),
+      labelStyle: BookfolioDesignTokens.labelMd(
+          BookfolioDesignTokens.onSurfaceVariant,
+          opacity: 0.7),
+      hintStyle: BookfolioDesignTokens.bodyLg(
+          BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.35)),
       floatingLabelBehavior: FloatingLabelBehavior.always,
       contentPadding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
       border: UnderlineInputBorder(borderSide: ghost),
       enabledBorder: UnderlineInputBorder(borderSide: ghost),
       focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: BookfolioDesignTokens.inputFocus, width: 1.5),
+        borderSide:
+            BorderSide(color: BookfolioDesignTokens.inputFocus, width: 1.5),
       ),
     );
   }
@@ -208,7 +223,8 @@ class _SignInScreenState extends State<SignInScreen> {
       labelText: label,
       hintText: hint,
       suffixIcon: suffix,
-      labelStyle: BookfolioDesignTokens.labelMd(BookfolioDesignTokens.onSurfaceVariant),
+      labelStyle:
+          BookfolioDesignTokens.labelMd(BookfolioDesignTokens.onSurfaceVariant),
       hintStyle: GoogleFonts.manrope(
         color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.35),
         fontSize: 15,
@@ -218,7 +234,8 @@ class _SignInScreenState extends State<SignInScreen> {
       border: UnderlineInputBorder(borderSide: ghost),
       enabledBorder: UnderlineInputBorder(borderSide: ghost),
       focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: BookfolioDesignTokens.inputFocus, width: 1.5),
+        borderSide:
+            BorderSide(color: BookfolioDesignTokens.inputFocus, width: 1.5),
       ),
     );
   }
@@ -244,7 +261,10 @@ class _SignInScreenState extends State<SignInScreen> {
             style: GoogleFonts.manrope(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: skip && selected ? BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.55) : BookfolioDesignTokens.onSurface,
+              color: skip && selected
+                  ? BookfolioDesignTokens.onSurfaceVariant
+                      .withValues(alpha: 0.55)
+                  : BookfolioDesignTokens.onSurface,
             ),
           ),
         ),
@@ -269,7 +289,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 height: orb,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: BookfolioDesignTokens.secondaryContainer.withValues(alpha: 0.1),
+                  color: BookfolioDesignTokens.secondaryContainer
+                      .withValues(alpha: 0.1),
                 ),
               ),
             ),
@@ -284,7 +305,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 height: orb,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: BookfolioDesignTokens.primaryContainer.withValues(alpha: 0.05),
+                  color: BookfolioDesignTokens.primaryContainer
+                      .withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -308,7 +330,8 @@ class _SignInScreenState extends State<SignInScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 20, color: Color(0xFF93000A)),
+              const Icon(Icons.error_outline_rounded,
+                  size: 20, color: Color(0xFF93000A)),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -327,19 +350,14 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  void _showKakaoLoginComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('카카오 로그인은 준비 중입니다.')),
-    );
-  }
-
-  /// OAuth 연동 전: 탭 시 준비 중 스낵바. 부모는 [_kakaoWidthAlignedButtonWidth]·[_primaryLoginButtonHeight] 슬롯; PNG는 `BoxFit.contain`으로 왜곡 없음.
-  Widget _kakaoOfficialLoginButton(BuildContext context, {required bool enabled}) {
+  /// 카카오 공식 이미지 버튼. 부모는 [_kakaoWidthAlignedButtonWidth]·[_primaryLoginButtonHeight] 슬롯; PNG는 `BoxFit.contain`으로 왜곡 없음.
+  Widget _kakaoOfficialLoginButton(
+      {required bool enabled, required AuthController auth}) {
     final radius = BorderRadius.circular(BookfolioDesignTokens.radiusMd);
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: enabled ? () => _showKakaoLoginComingSoon(context) : null,
+        onTap: enabled ? () => auth.signInWithKakao() : null,
         borderRadius: radius,
         child: SizedBox(
           width: double.infinity,
@@ -374,7 +392,10 @@ class _SignInScreenState extends State<SignInScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _kakaoOfficialLoginButton(context, enabled: !auth.isLoading),
+        _kakaoOfficialLoginButton(
+          enabled: !auth.isLoading,
+          auth: auth,
+        ),
         const SizedBox(height: 12),
         _googleOfficialLoginButton(
           context,
@@ -449,191 +470,16 @@ class _SignInScreenState extends State<SignInScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      height: 72,
-                      child: Image.asset(
-                        'assets/brand/Seogadam_Web_logo.png',
-                        fit: BoxFit.contain,
-                        alignment: Alignment.center,
-                        semanticLabel: '서가담 로고',
-                        errorBuilder: (context, error, stackTrace) {
-                          return Text(
-                            '서가담',
-                            textAlign: TextAlign.center,
-                            style: BookfolioDesignTokens.displayLg(BookfolioDesignTokens.primary),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Welcome back to your private archive',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.newsreader(
-                        fontSize: 18,
-                        fontStyle: FontStyle.italic,
-                        height: 1.35,
-                        color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                    ColoredBox(
-                      color: BookfolioDesignTokens.surfaceContainerLow,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: BookfolioDesignTokens.surfaceContainerLowest,
-                            borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
-                            boxShadow: BookfolioDesignTokens.ambientShadowPrimary(),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(28),
-                            child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              TextField(
-                                controller: _emailController,
-                                focusNode: _emailFocus,
-                                keyboardType: TextInputType.text,
-                                textInputAction: TextInputAction.next,
-                                style: BookfolioDesignTokens.bodyLg(BookfolioDesignTokens.onSurface),
-                                cursorColor: BookfolioDesignTokens.primary,
-                                autofillHints: const [AutofillHints.username],
-                                onSubmitted: (_) => _passwordFocus.requestFocus(),
-                                decoration: _loginFieldDecoration(
-                                  label: '이메일 또는 아이디',
-                                  hint: 'you@example.com 또는 아이디',
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Text(
-                                  '이메일 @ 앞 아이디(영문·숫자 등)만으로도 로그인할 수 있습니다.',
-                                  style: BookfolioDesignTokens.labelMd(
-                                    BookfolioDesignTokens.onSurfaceVariant,
-                                    opacity: 0.65,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 28),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          '비밀번호',
-                                          style: BookfolioDesignTokens.labelMd(
-                                            BookfolioDesignTokens.onSurfaceVariant,
-                                            opacity: 0.7,
-                                          ),
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: _onForgotPassword,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(left: 8, bottom: 2),
-                                          child: Text(
-                                            '비밀번호를 잊으셨나요?',
-                                            style: GoogleFonts.newsreader(
-                                              fontSize: 14,
-                                              fontStyle: FontStyle.italic,
-                                              color: BookfolioDesignTokens.onSurfaceVariant,
-                                              height: 1.2,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  TextField(
-                                    controller: _passwordController,
-                                    focusNode: _passwordFocus,
-                                    obscureText: true,
-                                    textInputAction: TextInputAction.done,
-                                    style: BookfolioDesignTokens.bodyLg(BookfolioDesignTokens.onSurface),
-                                    cursorColor: BookfolioDesignTokens.primary,
-                                    autofillHints: const [AutofillHints.password],
-                                    onSubmitted: (_) => _submit(auth),
-                                    decoration: InputDecoration(
-                                      hintText: '••••••••',
-                                      hintStyle: BookfolioDesignTokens.bodyLg(
-                                        BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.35),
-                                      ),
-                                      contentPadding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
-                                      border: UnderlineInputBorder(
-                                        borderSide: BookfolioDesignTokens.ghostBorderSide(),
-                                      ),
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BookfolioDesignTokens.ghostBorderSide(),
-                                      ),
-                                      focusedBorder: const UnderlineInputBorder(
-                                        borderSide: BorderSide(color: BookfolioDesignTokens.inputFocus, width: 1.5),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              _errorBanner(auth),
-                              const SizedBox(height: 8),
-                              _kakaoWidthAlignedButtonColumn(
-                                children: [
-                                  DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd),
-                                      gradient: BookfolioDesignTokens.inkGradient,
-                                    ),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: auth.isLoading ? null : () => _submit(auth),
-                                        borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd),
-                                        child: SizedBox(
-                                          width: double.infinity,
-                                          height: _primaryLoginButtonHeight,
-                                          child: Center(
-                                            child: auth.isLoading
-                                                ? const SizedBox(
-                                                    height: 22,
-                                                    width: 22,
-                                                    child: CircularProgressIndicator(
-                                                      strokeWidth: 2.5,
-                                                      color: Colors.white,
-                                                    ),
-                                                  )
-                                                : Text(
-                                                    '로그인',
-                                                    style: BookfolioDesignTokens.bodyLg(
-                                                      BookfolioDesignTokens.onPrimary,
-                                                      fontWeight: FontWeight.w700,
-                                                    ),
-                                                  ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 32),
-                                  _socialContinueCaption(),
-                                  const SizedBox(height: 24),
-                                  _socialKakaoGoogleColumn(auth),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                    const SizedBox(height: 40),
+                    _buildLoginHero(),
+                    const SizedBox(height: 22),
+                    _buildLoginFormCard(auth),
+                    const SizedBox(height: 32),
                     Text.rich(
                       TextSpan(
                         style: GoogleFonts.manrope(
                           fontSize: 14,
-                          color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.6),
+                          color: BookfolioDesignTokens.onSurfaceVariant
+                              .withValues(alpha: 0.6),
                         ),
                         children: [
                           const TextSpan(text: '계정이 없으신가요? '),
@@ -641,7 +487,9 @@ class _SignInScreenState extends State<SignInScreen> {
                             alignment: PlaceholderAlignment.baseline,
                             baseline: TextBaseline.alphabetic,
                             child: GestureDetector(
-                              onTap: auth.isLoading ? null : () => _switchMode(auth),
+                              onTap: auth.isLoading
+                                  ? null
+                                  : () => _switchMode(auth),
                               child: Text(
                                 '회원가입하기',
                                 style: GoogleFonts.manrope(
@@ -649,7 +497,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                   fontWeight: FontWeight.w700,
                                   color: BookfolioDesignTokens.primary,
                                   decoration: TextDecoration.underline,
-                                  decorationColor: BookfolioDesignTokens.outlineVariant.withValues(alpha: 0.4),
+                                  decorationColor: BookfolioDesignTokens
+                                      .outlineVariant
+                                      .withValues(alpha: 0.4),
                                   decorationThickness: 1.2,
                                 ),
                               ),
@@ -669,6 +519,278 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
+  Widget _buildLoginHero() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BookfolioDesignTokens.secondaryContainer.withValues(alpha: 0.34),
+            BookfolioDesignTokens.surfaceContainerLow.withValues(alpha: 0.7),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(
+          color: BookfolioDesignTokens.outlineVariant.withValues(alpha: 0.32),
+        ),
+        boxShadow: BookfolioDesignTokens.ambientShadowPrimary(),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: BookfolioDesignTokens.primaryContainer
+                    .withValues(alpha: 0.88),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Text(
+                'BOOKFOLIO SIGN IN',
+                style: BookfolioDesignTokens.labelMd(
+                  BookfolioDesignTokens.onPrimaryContainer,
+                  opacity: 0.95,
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              height: 66,
+              child: Image.asset(
+                'assets/brand/Seogadam_Web_logo.png',
+                fit: BoxFit.contain,
+                alignment: Alignment.centerLeft,
+                semanticLabel: '서가담 로고',
+                errorBuilder: (context, error, stackTrace) {
+                  return Text(
+                    '서가담',
+                    style: BookfolioDesignTokens.displayLg(
+                        BookfolioDesignTokens.primary),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '독서 기록의 흐름을 이어서 시작하세요',
+              style: GoogleFonts.newsreader(
+                fontSize: 24,
+                fontStyle: FontStyle.italic,
+                height: 1.25,
+                color: BookfolioDesignTokens.onSurface,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '큐레이션, 리뷰, 독서 이벤트까지 한 번에 관리할 수 있도록 로그인 경험을 새롭게 다듬었습니다.',
+              style: BookfolioDesignTokens.bodyLg(
+                BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.88),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginFormCard(AuthController auth) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: BookfolioDesignTokens.glassBlurSigma,
+          sigmaY: BookfolioDesignTokens.glassBlurSigma,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: BookfolioDesignTokens.surfaceContainerLowest.withValues(
+              alpha: BookfolioDesignTokens.glassSurfaceOpacity,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color:
+                  BookfolioDesignTokens.outlineVariant.withValues(alpha: 0.35),
+            ),
+            boxShadow: BookfolioDesignTokens.ambientShadowPrimary(),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '계정 로그인',
+                  style: BookfolioDesignTokens.titleMd(
+                      BookfolioDesignTokens.onSurface),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '이메일 또는 아이디로 빠르게 접속할 수 있어요.',
+                  style: BookfolioDesignTokens.bodyLg(
+                    BookfolioDesignTokens.onSurfaceVariant
+                        .withValues(alpha: 0.82),
+                  ),
+                ),
+                const SizedBox(height: 28),
+                TextField(
+                  controller: _emailController,
+                  focusNode: _emailFocus,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  style: BookfolioDesignTokens.bodyLg(
+                      BookfolioDesignTokens.onSurface),
+                  cursorColor: BookfolioDesignTokens.primary,
+                  autofillHints: const [AutofillHints.username],
+                  onSubmitted: (_) => _passwordFocus.requestFocus(),
+                  decoration: _loginFieldDecoration(
+                    label: '이메일 또는 아이디',
+                    hint: 'you@example.com 또는 아이디',
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    '이메일 @ 앞 아이디(영문·숫자 등)만으로도 로그인할 수 있습니다.',
+                    style: BookfolioDesignTokens.labelMd(
+                      BookfolioDesignTokens.onSurfaceVariant,
+                      opacity: 0.65,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '비밀번호',
+                            style: BookfolioDesignTokens.labelMd(
+                              BookfolioDesignTokens.onSurfaceVariant,
+                              opacity: 0.7,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: _onForgotPassword,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8, bottom: 2),
+                            child: Text(
+                              '비밀번호를 잊으셨나요?',
+                              style: GoogleFonts.newsreader(
+                                fontSize: 14,
+                                fontStyle: FontStyle.italic,
+                                color: BookfolioDesignTokens.onSurfaceVariant,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TextField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.done,
+                      style: BookfolioDesignTokens.bodyLg(
+                          BookfolioDesignTokens.onSurface),
+                      cursorColor: BookfolioDesignTokens.primary,
+                      autofillHints: const [AutofillHints.password],
+                      onSubmitted: (_) => _submit(auth),
+                      decoration: InputDecoration(
+                        hintText: '••••••••',
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            size: 20,
+                            color: BookfolioDesignTokens.onSurfaceVariant,
+                          ),
+                        ),
+                        hintStyle: BookfolioDesignTokens.bodyLg(
+                          BookfolioDesignTokens.onSurfaceVariant
+                              .withValues(alpha: 0.35),
+                        ),
+                        contentPadding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
+                        border: UnderlineInputBorder(
+                          borderSide: BookfolioDesignTokens.ghostBorderSide(),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BookfolioDesignTokens.ghostBorderSide(),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: BookfolioDesignTokens.inputFocus,
+                              width: 1.5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                _errorBanner(auth),
+                const SizedBox(height: 8),
+                _kakaoWidthAlignedButtonColumn(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                            BookfolioDesignTokens.radiusMd),
+                        gradient: BookfolioDesignTokens.inkGradient,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: auth.isLoading ? null : () => _submit(auth),
+                          borderRadius: BorderRadius.circular(
+                              BookfolioDesignTokens.radiusMd),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: _primaryLoginButtonHeight,
+                            child: Center(
+                              child: auth.isLoading
+                                  ? const SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(
+                                      '로그인',
+                                      style: BookfolioDesignTokens.bodyLg(
+                                        BookfolioDesignTokens.onPrimary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    _socialContinueCaption(),
+                    const SizedBox(height: 24),
+                    _socialKakaoGoogleColumn(auth),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSignUpLayout(AuthController auth) {
     return Stack(
       children: [
@@ -678,7 +800,8 @@ class _SignInScreenState extends State<SignInScreen> {
           width: MediaQuery.sizeOf(context).width * 0.33,
           height: MediaQuery.sizeOf(context).height,
           child: ColoredBox(
-            color: BookfolioDesignTokens.surfaceContainerLow.withValues(alpha: 0.5),
+            color: BookfolioDesignTokens.surfaceContainerLow
+                .withValues(alpha: 0.5),
           ),
         ),
         SafeArea(
@@ -687,7 +810,9 @@ class _SignInScreenState extends State<SignInScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: MediaQuery.sizeOf(context).height - MediaQuery.paddingOf(context).vertical - 56,
+                minHeight: MediaQuery.sizeOf(context).height -
+                    MediaQuery.paddingOf(context).vertical -
+                    56,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -696,7 +821,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   Text(
                     '서가담 가입',
                     textAlign: TextAlign.center,
-                    style: BookfolioDesignTokens.displayLg(BookfolioDesignTokens.primary),
+                    style: BookfolioDesignTokens.displayLg(
+                        BookfolioDesignTokens.primary),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -705,7 +831,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     style: GoogleFonts.newsreader(
                       fontSize: 20,
                       height: 1.3,
-                      color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.82),
+                      color: BookfolioDesignTokens.onSurfaceVariant
+                          .withValues(alpha: 0.82),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -725,7 +852,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                   height: 112,
                                   decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: BookfolioDesignTokens.surfaceContainerHigh,
+                                    color: BookfolioDesignTokens
+                                        .surfaceContainerHigh,
                                   ),
                                   clipBehavior: Clip.antiAlias,
                                   child: _avatarFile != null
@@ -736,7 +864,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                       : Icon(
                                           Icons.photo_camera_outlined,
                                           size: 40,
-                                          color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.55),
+                                          color: BookfolioDesignTokens
+                                              .onSurfaceVariant
+                                              .withValues(alpha: 0.55),
                                         ),
                                 ),
                               ],
@@ -746,7 +876,8 @@ class _SignInScreenState extends State<SignInScreen> {
                         const SizedBox(height: 10),
                         Text(
                           '아바타 이미지 (선택)',
-                          style: BookfolioDesignTokens.labelMd(BookfolioDesignTokens.onSurfaceVariant),
+                          style: BookfolioDesignTokens.labelMd(
+                              BookfolioDesignTokens.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -757,7 +888,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     focusNode: _emailFocus,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    style: BookfolioDesignTokens.bodyLg(BookfolioDesignTokens.onSurface),
+                    style: BookfolioDesignTokens.bodyLg(
+                        BookfolioDesignTokens.onSurface),
                     cursorColor: BookfolioDesignTokens.primary,
                     autofillHints: const [AutofillHints.email],
                     onSubmitted: (_) => _passwordFocus.requestFocus(),
@@ -772,7 +904,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     focusNode: _passwordFocus,
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.next,
-                    style: BookfolioDesignTokens.bodyLg(BookfolioDesignTokens.onSurface),
+                    style: BookfolioDesignTokens.bodyLg(
+                        BookfolioDesignTokens.onSurface),
                     cursorColor: BookfolioDesignTokens.primary,
                     autofillHints: const [AutofillHints.newPassword],
                     onSubmitted: (_) => _nameFocus.requestFocus(),
@@ -780,9 +913,12 @@ class _SignInScreenState extends State<SignInScreen> {
                       label: '비밀번호',
                       hint: '••••••••',
                       suffix: IconButton(
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           size: 20,
                           color: BookfolioDesignTokens.onSurfaceVariant,
                         ),
@@ -794,7 +930,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     controller: _nameController,
                     focusNode: _nameFocus,
                     textInputAction: TextInputAction.done,
-                    style: BookfolioDesignTokens.bodyLg(BookfolioDesignTokens.onSurface),
+                    style: BookfolioDesignTokens.bodyLg(
+                        BookfolioDesignTokens.onSurface),
                     cursorColor: BookfolioDesignTokens.primary,
                     onSubmitted: (_) => _submit(auth),
                     decoration: _underlineDecoration(
@@ -807,7 +944,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '성별 (선택)',
-                      style: BookfolioDesignTokens.labelMd(BookfolioDesignTokens.onSurfaceVariant),
+                      style: BookfolioDesignTokens.labelMd(
+                          BookfolioDesignTokens.onSurfaceVariant),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -837,7 +975,8 @@ class _SignInScreenState extends State<SignInScreen> {
                               : DateFormat.yMMMMd('ko_KR').format(_birthDate!),
                           style: BookfolioDesignTokens.bodyLg(
                             _birthDate == null
-                                ? BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.35)
+                                ? BookfolioDesignTokens.onSurfaceVariant
+                                    .withValues(alpha: 0.35)
                                 : BookfolioDesignTokens.onSurface,
                           ),
                         ),
@@ -848,13 +987,16 @@ class _SignInScreenState extends State<SignInScreen> {
                     const SizedBox(height: 20),
                     Material(
                       color: const Color(0xFFFFDAD6),
-                      borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                      borderRadius:
+                          BorderRadius.circular(BookfolioDesignTokens.radiusSm),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.error_outline_rounded, size: 20, color: Color(0xFF93000A)),
+                            const Icon(Icons.error_outline_rounded,
+                                size: 20, color: Color(0xFF93000A)),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
@@ -876,15 +1018,18 @@ class _SignInScreenState extends State<SignInScreen> {
                     children: [
                       DecoratedBox(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                              BookfolioDesignTokens.radiusMd),
                           gradient: BookfolioDesignTokens.inkGradient,
-                          boxShadow: BookfolioDesignTokens.ambientShadowPrimary(),
+                          boxShadow:
+                              BookfolioDesignTokens.ambientShadowPrimary(),
                         ),
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: auth.isLoading ? null : () => _submit(auth),
-                            borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd),
+                            borderRadius: BorderRadius.circular(
+                                BookfolioDesignTokens.radiusMd),
                             child: SizedBox(
                               width: double.infinity,
                               height: _primaryLoginButtonHeight,
@@ -920,13 +1065,17 @@ class _SignInScreenState extends State<SignInScreen> {
                   Center(
                     child: Text.rich(
                       TextSpan(
-                        style: GoogleFonts.manrope(fontSize: 14, color: BookfolioDesignTokens.onSurfaceVariant),
+                        style: GoogleFonts.manrope(
+                            fontSize: 14,
+                            color: BookfolioDesignTokens.onSurfaceVariant),
                         children: [
                           const TextSpan(text: '이미 계정이 있으신가요? '),
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
                             child: GestureDetector(
-                              onTap: auth.isLoading ? null : () => _switchMode(auth),
+                              onTap: auth.isLoading
+                                  ? null
+                                  : () => _switchMode(auth),
                               child: Text(
                                 '로그인하기',
                                 style: GoogleFonts.manrope(

@@ -283,63 +283,71 @@ export function DashboardReadingEventsCalendar({
           {error}
         </p>
       ) : null}
-      <div className="grid grid-cols-7 gap-1 border-b border-border/60 pb-2 text-center text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        {WEEKDAYS_KO.map((w) => (
-          <div key={w} className="py-1">
-            {w}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div>
+          <div className="grid grid-cols-7 gap-1 border-b border-border/60 pb-2 text-center text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            {WEEKDAYS_KO.map((w) => (
+              <div key={w} className="py-1">
+                {w}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="mt-2 grid grid-cols-7 gap-1">
-        {cells.map((c, idx) => {
-          if (c.kind === "blank") {
-            return <div key={`b-${idx}`} className="aspect-square min-h-9" />;
-          }
-          const keyYmd = ymdLocal(year, month0, c.day);
-          const n = counts[keyYmd];
-          const has = n !== undefined && n > 0;
-          const selected = selectedYmd === keyYmd;
-          return (
-            <button
-              key={keyYmd}
-              type="button"
-              disabled={!has}
-              onClick={() => {
-                if (!has) {
-                  return;
-                }
-                setSelectedYmd((prev) => (prev === keyYmd ? null : keyYmd));
-              }}
-              className={cn(
-                "flex aspect-square min-h-9 flex-col items-center justify-center rounded-md border text-sm transition-colors",
-                !has && "cursor-default opacity-50",
-                has && "cursor-pointer hover:bg-muted/50",
-                has && !selected && "border-transparent bg-muted/25 text-muted-foreground",
-                has && selected && "border-primary bg-primary/15 font-medium text-foreground shadow-sm",
-                !has && "border-transparent bg-muted/20 text-muted-foreground",
-              )}
-              aria-pressed={selected}
-              aria-label={
-                has
-                  ? `${c.day}일, 이벤트 ${n}건${selected ? ", 선택됨" : ""}`
-                  : `${c.day}일`
+          <div className="mt-2 grid grid-cols-7 gap-1">
+            {cells.map((c, idx) => {
+              if (c.kind === "blank") {
+                return <div key={`b-${idx}`} className="aspect-square min-h-9" />;
               }
-            >
-              <span className="tabular-nums leading-none">{c.day}</span>
-              {has ? (
-                <span className="mt-0.5 text-[10px] font-semibold tabular-nums text-primary">
-                  {n}
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
+              const keyYmd = ymdLocal(year, month0, c.day);
+              const n = counts[keyYmd];
+              const has = n !== undefined && n > 0;
+              const selected = selectedYmd === keyYmd;
+              return (
+                <button
+                  key={keyYmd}
+                  type="button"
+                  disabled={!has}
+                  onClick={() => {
+                    if (!has) {
+                      return;
+                    }
+                    setSelectedYmd((prev) => (prev === keyYmd ? null : keyYmd));
+                  }}
+                  className={cn(
+                    "flex aspect-square min-h-9 flex-col items-center justify-center rounded-md border text-sm transition-colors",
+                    !has && "cursor-default opacity-50",
+                    has && "cursor-pointer hover:bg-muted/50",
+                    has &&
+                      !selected &&
+                      "border-transparent bg-muted/25 text-muted-foreground",
+                    has &&
+                      selected &&
+                      "border-primary bg-primary/15 font-medium text-foreground shadow-sm",
+                    !has && "border-transparent bg-muted/20 text-muted-foreground",
+                  )}
+                  aria-pressed={selected}
+                  aria-label={
+                    has
+                      ? `${c.day}일, 이벤트 ${n}건${selected ? ", 선택됨" : ""}`
+                      : `${c.day}일`
+                  }
+                >
+                  <span className="tabular-nums leading-none">{c.day}</span>
+                  {has ? (
+                    <span className="mt-0.5 text-[10px] font-semibold tabular-nums text-primary">
+                      {n}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-      {selectedYmd ? (
-        <div className="mt-6 space-y-2">
+        <div className="space-y-2 rounded-lg border border-border/80 bg-muted/10 p-3">
           <h3 className="text-sm font-semibold text-foreground">
-            {selectedYmd.replace(/-/g, ".")} 이벤트
+            {selectedYmd
+              ? `${selectedYmd.replace(/-/g, ".")} 이벤트`
+              : "일자를 선택하면 이벤트가 표시됩니다."}
           </h3>
           {dayError ? (
             <p className="text-sm text-destructive" role="alert">
@@ -349,12 +357,12 @@ export function DashboardReadingEventsCalendar({
           {dayLoading ? (
             <p className="text-xs text-muted-foreground">목록 불러오는 중…</p>
           ) : null}
-          {!dayLoading && !dayError && dayRows.length === 0 ? (
+          {selectedYmd && !dayLoading && !dayError && dayRows.length === 0 ? (
             <p className="text-sm text-muted-foreground">표시할 이벤트가 없습니다.</p>
           ) : null}
           {!dayLoading && dayRows.length > 0 ? (
             <div className="overflow-x-auto rounded-lg border border-border/80">
-              <table className="w-full min-w-[32rem] text-left text-sm">
+              <table className="w-full min-w-[26rem] text-left text-sm">
                 <thead>
                   <tr className="border-b border-border/80 bg-muted/35">
                     <th className="w-16 px-3 py-2 font-medium" scope="col">
@@ -433,7 +441,6 @@ export function DashboardReadingEventsCalendar({
             </div>
           ) : null}
         </div>
-      ) : null}
     </div>
   );
 }

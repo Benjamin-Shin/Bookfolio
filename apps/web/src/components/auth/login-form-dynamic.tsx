@@ -14,8 +14,9 @@ const LoginForm = dynamic(
 
 type LoginFormDynamicProps = {
   googleEnabled: boolean;
+  kakaoEnabled: boolean;
 };
 
-export function LoginFormDynamic({ googleEnabled }: LoginFormDynamicProps) {
-  return <LoginForm googleEnabled={googleEnabled} />;
+export function LoginFormDynamic({ googleEnabled, kakaoEnabled }: LoginFormDynamicProps) {
+  return <LoginForm googleEnabled={googleEnabled} kakaoEnabled={kakaoEnabled} />;
 }

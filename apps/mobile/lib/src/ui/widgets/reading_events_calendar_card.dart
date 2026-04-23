@@ -103,7 +103,7 @@ class ReadingEventsCalendarCardState extends State<ReadingEventsCalendarCard> {
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
           child: Text(
-            '이벤트 캘린더',
+            '독서 캘린더',
             style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),

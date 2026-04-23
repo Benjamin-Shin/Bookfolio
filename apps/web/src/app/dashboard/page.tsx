@@ -162,6 +162,66 @@ function EditorialGrid({
   );
 }
 
+function DashboardCurrentReadingPanel({
+  books,
+  total,
+}: {
+  books: UserBookSummary[];
+  total: number;
+}) {
+  return (
+    <Card className="border-[#051b0e]/15 bg-white/70">
+      <CardHeader className="space-y-2">
+        <CardTitle className="font-serif text-xl text-[#051b0e]">
+          현재 읽고 있는 도서
+        </CardTitle>
+        <CardDescription>
+          읽는 중 상태로 기록된 책을 빠르게 이어서 확인합니다.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {books.length === 0 ? (
+          <p className="text-sm text-[#434843]">지금 읽는 책이 없습니다.</p>
+        ) : (
+          <div className="space-y-3">
+            {books.slice(0, 3).map((book) => {
+              const authors = book.authors.join(", ") || "저자 미상";
+              const pct = readingProgressPercent(book);
+              return (
+                <div
+                  key={book.id}
+                  className="rounded-md border border-[#051b0e]/10 bg-[#fbf9f4] p-3"
+                >
+                  <Link
+                    href={`/dashboard/books/${book.id}`}
+                    className="line-clamp-1 font-serif text-sm text-[#051b0e] underline-offset-4 hover:underline"
+                  >
+                    {book.title}
+                  </Link>
+                  <p className="mt-1 line-clamp-1 text-xs text-[#434843]">
+                    {authors}
+                  </p>
+                  <p className="mt-1 text-[11px] text-[#675d53]">
+                    {pct != null ? `진행률 ${pct}%` : "진행률 미입력"}
+                  </p>
+                </div>
+              );
+            })}
+            {total > 3 ? (
+              <Link
+                href={buildDashboardHref({ tab: "reading" })}
+                className="inline-block text-xs font-semibold text-[#163826] underline underline-offset-4"
+              >
+                읽는 중 {total.toLocaleString("ko-KR")}권 전체 보기
+              </Link>
+            ) : null}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 /**
  * 로그인 사용자의 읽는 중·소장 책장(에디토리얼 내 서재 레이아웃).
  *
@@ -565,8 +625,13 @@ export default async function DashboardPage({
           ) : null}
 
           {!emptyLibrary ? (
-            <section className="mb-12" aria-label="추천 도서 패널">
+            <section
+              className="mb-12 grid grid-cols-1 gap-4 xl:grid-cols-3"
+              aria-label="홈 인사이트 패널"
+            >
+              <DashboardCurrentReadingPanel books={readingBooks} total={readingTotal} />
               <DashboardRecommendationPanel />
+              <DashboardReadingEventsCalendar />
             </section>
           ) : null}
 
@@ -838,14 +903,6 @@ export default async function DashboardPage({
             </div>
           ) : null}
 
-          {!emptyLibrary ? (
-            <section
-              className="mt-16 space-y-3 border-t border-[#051b0e]/5 pt-12"
-              aria-label="독서 이벤트 캘린더"
-            >
-              <DashboardReadingEventsCalendar />
-            </section>
-          ) : null}
         </main>
       </div>
 

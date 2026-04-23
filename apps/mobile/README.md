@@ -4,6 +4,7 @@ Flutter MVP app for:
 
 - Email auth (NextAuth와 동일한 `app_users` 자격 증명, `/api/auth/mobile/login`)
 - Google 로그인 (`/api/auth/mobile/google`, 웹과 동일 `ensureOAuthAppUser` 로 계정 연동)
+- Kakao 로그인 (`/api/auth/mobile/kakao`, 카카오 액세스 토큰 검증 후 `ensureOAuthAppUser` 연동)
 - Personal shelf list and detail management
 - Manual book registration
 - Barcode-based ISBN lookup
@@ -12,6 +13,7 @@ Flutter MVP app for:
 
 - `BOOKFOLIO_API_BASE_URL` — 웹 API 베이스 URL (예: `https://your-app.vercel.app`).
 - `GOOGLE_AUTH_CLIENT_ID` (선택, Google 로그인 시 권장) — **`apps/web` 의 `AUTH_GOOGLE_ID`와 동일한 웹 OAuth 클라이언트 ID**. `google_sign_in` 의 `serverClientId`로 넘겨 ID 토큰의 `aud`가 서버 검증과 맞습니다. 비우면 일부 기기에서 ID 토큰이 없거나, Android 네이티브 클라이언트 `aud`만 나올 수 있어 서버에 `AUTH_GOOGLE_MOBILE_AUDIENCES` 로 해당 클라이언트 ID를 추가해야 합니다.
+- `KAKAO_NATIVE_APP_KEY` (선택, Kakao 로그인 시 필수) — Flutter 시작 시 `KakaoSdk.init(nativeAppKey: ...)`에 사용합니다.
 
 **상세 문서:** [docs/auth/google-mobile-login.md](../../docs/auth/google-mobile-login.md) (콘솔 설정, SHA-1, API, 트러블슈팅)
 
@@ -19,7 +21,8 @@ Flutter MVP app for:
 
 ```bash
 flutter run --dart-define=BOOKFOLIO_API_BASE_URL=https://your-app.example.com \
-  --dart-define=GOOGLE_AUTH_CLIENT_ID=xxxx.apps.googleusercontent.com
+  --dart-define=GOOGLE_AUTH_CLIENT_ID=xxxx.apps.googleusercontent.com \
+  --dart-define=KAKAO_NATIVE_APP_KEY=yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 ```
 
 개발 서버 포트가 30082 등이면 URL 만 그에 맞게 바꿉니다.
