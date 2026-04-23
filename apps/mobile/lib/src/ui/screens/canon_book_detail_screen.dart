@@ -127,17 +127,21 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, bottom + kBookfolioShellBottomNavClearance),
+              padding: EdgeInsets.fromLTRB(
+                  16, 12, 16, bottom + kBookfolioShellBottomNavClearance),
               children: [
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Material(
                       color: scheme.errorContainer.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                      borderRadius:
+                          BorderRadius.circular(BookfolioDesignTokens.radiusSm),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
-                        child: Text(_error!, style: TextStyle(color: scheme.onErrorContainer, fontSize: 13)),
+                        child: Text(_error!,
+                            style: TextStyle(
+                                color: scheme.onErrorContainer, fontSize: 13)),
                       ),
                     ),
                   ),
@@ -154,7 +158,8 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
                                 cover,
                                 fit: BoxFit.cover,
                                 headers: kCoverImageRequestHeaders,
-                                errorBuilder: (_, __, ___) => ColoredBox(color: scheme.surfaceContainerHighest),
+                                errorBuilder: (_, __, ___) => ColoredBox(
+                                    color: scheme.surfaceContainerHighest),
                               )
                             : ColoredBox(color: scheme.surfaceContainerHighest),
                       ),
@@ -166,12 +171,18 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
                         children: [
                           Text(
                             b.title,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             b.authors.join(', '),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   color: scheme.onSurfaceVariant,
                                 ),
                           ),
@@ -179,15 +190,21 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
                             const SizedBox(height: 6),
                             Text(
                               'ISBN ${b.isbn}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: scheme.onSurfaceVariant,
                                   ),
                             ),
                           ],
                           const SizedBox(height: 8),
                           Text(
-                            '${b.otherOwnerCount}명이 서재에 등록했어요',
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            '${b.otherOwnerCount}명이 서가에 등록했어요',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
                                   color: scheme.primary,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -201,12 +218,13 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
                 FilledButton.icon(
                   onPressed: _openAddToLibrary,
                   icon: const Icon(Icons.library_add_outlined),
-                  label: const Text('내 서재에 담기'),
+                  label: const Text('내 서가에 담기'),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   '구매·가격 (외부 사이트)',
-                  style: BookfolioDesignTokens.labelMd(scheme.onSurface).copyWith(
+                  style:
+                      BookfolioDesignTokens.labelMd(scheme.onSurface).copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.4,
                   ),
@@ -233,7 +251,8 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
                         ? '링크 없음'
                         : _priceOrDash(_offers!.naverPriceKrw),
                     icon: Icons.menu_book_outlined,
-                    enabled: _offers!.naverUrl != null && _offers!.naverUrl!.trim().isNotEmpty,
+                    enabled: _offers!.naverUrl != null &&
+                        _offers!.naverUrl!.trim().isNotEmpty,
                     onTap: () => _openUrl(_offers!.naverUrl),
                   ),
                   _PurchaseTile(
@@ -248,7 +267,8 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
                       child: Text(
                         '가격·링크는 서버에 잠시 저장된 정보입니다. 갱신: ${_offers!.fetchedAt}',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant.withValues(alpha: 0.85),
+                              color: scheme.onSurfaceVariant
+                                  .withValues(alpha: 0.85),
                             ),
                       ),
                     ),
@@ -256,7 +276,8 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
                 const SizedBox(height: 28),
                 Text(
                   '회원 한줄평',
-                  style: BookfolioDesignTokens.labelMd(scheme.onSurface).copyWith(
+                  style:
+                      BookfolioDesignTokens.labelMd(scheme.onSurface).copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.4,
                   ),
@@ -265,28 +286,42 @@ class _CanonBookDetailScreenState extends State<CanonBookDetailScreen> {
                 if (_liners.isEmpty)
                   Text(
                     '아직 한줄평이 없어요.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: scheme.onSurfaceVariant),
                   )
                 else
                   ..._liners.map(
                     (e) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Material(
-                        color: scheme.surfaceContainerHigh.withValues(alpha: 0.65),
-                        borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                        color:
+                            scheme.surfaceContainerHigh.withValues(alpha: 0.65),
+                        borderRadius: BorderRadius.circular(
+                            BookfolioDesignTokens.radiusSm),
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                e.displayName?.trim().isNotEmpty == true ? e.displayName! : '회원',
-                                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                e.displayName?.trim().isNotEmpty == true
+                                    ? e.displayName!
+                                    : '회원',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),
                               const SizedBox(height: 6),
-                              Text(e.body, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.35)),
+                              Text(e.body,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(height: 1.35)),
                             ],
                           ),
                         ),
@@ -329,7 +364,10 @@ class _PurchaseTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
-                Icon(icon, color: enabled ? scheme.primary : scheme.onSurfaceVariant.withValues(alpha: 0.4)),
+                Icon(icon,
+                    color: enabled
+                        ? scheme.primary
+                        : scheme.onSurfaceVariant.withValues(alpha: 0.4)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -337,12 +375,18 @@ class _PurchaseTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -350,7 +394,9 @@ class _PurchaseTile extends StatelessWidget {
                 Icon(
                   Icons.open_in_new_rounded,
                   size: 18,
-                  color: enabled ? scheme.onSurfaceVariant : scheme.onSurfaceVariant.withValues(alpha: 0.35),
+                  color: enabled
+                      ? scheme.onSurfaceVariant
+                      : scheme.onSurfaceVariant.withValues(alpha: 0.35),
                 ),
               ],
             ),

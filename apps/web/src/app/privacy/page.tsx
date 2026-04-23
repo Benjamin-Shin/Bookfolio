@@ -14,7 +14,7 @@ export const metadata: Metadata = {
  * - 2026-03-29: 「캐논·투표」를 공통 도서 정보·수정 제안·투표 참여로 풀어 설명.
  * - 2026-03-29: 트레바리 등 유사 서비스 방침을 참고해 도입부·필수·선택·자동 수집, 법정 보존·파기, 제3자 예외, 쿠키·개정 공지(7일·30일), 외부 링크 적용 범위, 피해 구제 기관, 향후 결제(PG) 수집 안내 보강.
  * - 2026-03-28: Google 항목을 소셜 로그인만 명시(Google Books 조회 미사용).
- * - 2026-03-28: 현재 웹·모바일·DB 스키마 기준 개인정보처리방침 본문 정리(인증, 서재, 공동서재, 포인트·출석, VIP·구독, 캐논 편집·투표, ISBN 조회·Cloudinary 등 반영)
+ * - 2026-03-28: 현재 웹·모바일·DB 스키마 기준 개인정보처리방침 본문 정리(인증, 서가, 공동서가, 포인트·출석, VIP·구독, 캐논 편집·투표, ISBN 조회·Cloudinary 등 반영)
  * - 2026-03-26: 법률 검토 전 안내용 더미 본문
  */
 export default function PrivacyPolicyPage() {
@@ -25,9 +25,9 @@ export default function PrivacyPolicyPage() {
         공고일: 2026년 3월 29일 · 시행일: 2026년 3월 29일
       </p>
       <p className="mt-4 text-sm leading-relaxed text-foreground/90">
-        서가담(이하 &quot;서비스&quot;)는 이용자의 동의를 바탕으로
-        개인정보를 수집·이용하며, 정보주체의 권리를 존중합니다. 서비스는
-        「개인정보 보호법」 등 대한민국 관계 법령과 가이드라인을 준수합니다.
+        서가담(이하 &quot;서비스&quot;)는 이용자의 동의를 바탕으로 개인정보를
+        수집·이용하며, 정보주체의 권리를 존중합니다. 서비스는 「개인정보
+        보호법」 등 대한민국 관계 법령과 가이드라인을 준수합니다.
       </p>
       <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
         &quot;개인정보 처리방침&quot;은 이용자가 안심하고 서비스를 이용할 수
@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc space-y-1 pl-5">
             <li>회원 가입·로그인·본인 식별, 계정 및 세션 관리</li>
             <li>
-              개인 서재(소장 도서) 등록·편집·조회, 읽기 상태·별점·메모·독서
+              개인 서가(소장 도서) 등록·편집·조회, 읽기 상태·별점·메모·독서
               이벤트 기록
             </li>
             <li>
@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
               이용자에게 같은 내용으로 보이도록 모아 둔{" "}
               <strong>공통 도서 정보(내부 용어: 캐논)</strong> 보강
             </li>
-            <li>공동서재 생성·초대·멤버 관리 및 공유 소장 정보 표시</li>
+            <li>공동서가 생성·초대·멤버 관리 및 공유 소장 정보 표시</li>
             <li>
               포인트 적립·차감, 출석(일일 활동) 처리, 플랜·이용 한도와의 연동
             </li>
@@ -83,11 +83,10 @@ export default function PrivacyPolicyPage() {
           <p>
             항목은 회원 가입·이용 과정에서{" "}
             <strong>이용자가 입력하거나, 연동·자동 생성되는 정보</strong>로
-            나뉩니다.{" "}
-            <strong>필수 항목</strong>은 해당 기능의 본질적 제공에 필요한
-            정보이고, <strong>선택 항목</strong>은 없어도 기본 이용이 가능하나
-            편의·개인화를 위해 추가로 제공받는 정보입니다(실제 화면의 입력·동의
-            문구가 우선합니다).
+            나뉩니다. <strong>필수 항목</strong>은 해당 기능의 본질적 제공에
+            필요한 정보이고, <strong>선택 항목</strong>은 없어도 기본 이용이
+            가능하나 편의·개인화를 위해 추가로 제공받는 정보입니다(실제 화면의
+            입력·동의 문구가 우선합니다).
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>
@@ -108,12 +107,12 @@ export default function PrivacyPolicyPage() {
               타임존(IANA) 등 서비스가 제공하는 프로필 설정 항목
             </li>
             <li>
-              <strong>서재·도서 활동:</strong> 읽기 상태, 별점, 소장 여부, 보관
+              <strong>서가·도서 활동:</strong> 읽기 상태, 별점, 소장 여부, 보관
               위치 등 텍스트, 마크다운 메모, 독서 이벤트 기록, 도서별 공개
               한줄평 등 이용자가 기록하는 콘텐츠
             </li>
             <li>
-              <strong>공동서재:</strong> 서재 이름·설명·유형, 멤버십·역할,
+              <strong>공동서가:</strong> 서가 이름·설명·유형, 멤버십·역할,
               공유에 포함된 소장 항목 매핑 정보; 멤버 초대 시 초대 대상의 이메일
               주소(초대·가입 연계 처리)
             </li>
@@ -123,9 +122,10 @@ export default function PrivacyPolicyPage() {
               플랜 식별자·상태·이용 기간 등
             </li>
             <li>
-              <strong>공통 도서 정보 수정·투표(캐논):</strong> &quot;캐논&quot;은
-              ISBN 등으로 묶인 <strong>서비스 공통 도서 정보</strong>(제목·저자
-              등 표시용 데이터)를 가리키는 내부 이름입니다. 회원이 이 정보의{" "}
+              <strong>공통 도서 정보 수정·투표(캐논):</strong>{" "}
+              &quot;캐논&quot;은 ISBN 등으로 묶인{" "}
+              <strong>서비스 공통 도서 정보</strong>(제목·저자 등 표시용
+              데이터)를 가리키는 내부 이름입니다. 회원이 이 정보의{" "}
               <strong>오류를 고치자는 제안</strong>을 올리거나, 반영 여부를
               정하는 <strong>투표에 참여</strong>할 때 제안·검토·투표 내역, 기여
               점수·순위 계산에 필요한 식별 정보가 기록될 수 있습니다.
@@ -133,15 +133,15 @@ export default function PrivacyPolicyPage() {
             <li>
               <strong>기술·자동 생성 정보:</strong> 단말기·브라우저 환경에 따른
               일부 정보, 접속 IP 주소, 쿠키·세션·로그인 유지에 필요한 식별자,
-              방문·이용 시각, 서비스 이용 기록, 부정 이용 방지를 위한 기록, 모바일
-              앱 등에서 API 접근 시 발급·사용하는 액세스 토큰(보유 기간·항목
-              세부는 내부 보안 정책에 따름)
+              방문·이용 시각, 서비스 이용 기록, 부정 이용 방지를 위한 기록,
+              모바일 앱 등에서 API 접근 시 발급·사용하는 액세스 토큰(보유
+              기간·항목 세부는 내부 보안 정책에 따름)
             </li>
             <li>
               <strong>모바일 앱 카메라(안드로이드·iOS):</strong> 앱에서{" "}
               <strong>도서 ISBN 바코드를 스캔</strong>하거나, 메모 작성 시{" "}
-              <strong>책 페이지를 촬영해 글자로 변환(OCR)</strong>하는 기능을
-              쓸 때 단말의 카메라(또는 이에 상응하는 영상 입력)에 접근할 수
+              <strong>책 페이지를 촬영해 글자로 변환(OCR)</strong>하는 기능을 쓸
+              때 단말의 카메라(또는 이에 상응하는 영상 입력)에 접근할 수
               있습니다. 운영체제는 이 과정에서 카메라 권한 허용을 요청할 수
               있습니다.
             </li>
@@ -158,7 +158,7 @@ export default function PrivacyPolicyPage() {
                   카메라 영상 전체를 서비스 서버에 저장하거나 전송하는 기능은
                   제공하지 않습니다.
                 </strong>{" "}
-                읽은 ISBN 등 식별값은 기존과 같이 외부 서지 API 조회·내 서재
+                읽은 ISBN 등 식별값은 기존과 같이 외부 서지 API 조회·내 서가
                 등록 등 서비스 제공 목적에 한해 처리될 수 있습니다.
               </li>
               <li>
@@ -204,12 +204,12 @@ export default function PrivacyPolicyPage() {
           </h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              회원 가입·로그인, 프로필·서재 화면에서 이용자가 입력·동의하는 경우
+              회원 가입·로그인, 프로필·서가 화면에서 이용자가 입력·동의하는 경우
             </li>
             <li>Google 등 소셜 로그인 연동 시 인증 서버로부터의 수신·매핑</li>
             <li>
-              서비스 이용 과정에서의 자동 생성·기록(포인트 원장, 출석, 접속·로그,
-              세션·쿠키 등)
+              서비스 이용 과정에서의 자동 생성·기록(포인트 원장, 출석,
+              접속·로그, 세션·쿠키 등)
             </li>
             <li>
               고객 문의·민원 대응 과정에서 이메일 등을 통해 이용자가 제공하는
@@ -224,10 +224,9 @@ export default function PrivacyPolicyPage() {
           </h2>
           <p>
             원칙적으로 <strong>회원 탈퇴 시 또는 처리 목적 달성 시</strong> 지체
-            없이 파기합니다. 공동서재·공통 도서 정보(캐논) 참여 기록 등 타
-            이용자 또는 공개 영역과 연계된
-            정보는 서비스 무결성·분쟁 대응을 위해 일정 기간 제한 보관될 수
-            있으며, 세부는 내부 정책에 따릅니다.
+            없이 파기합니다. 공동서가·공통 도서 정보(캐논) 참여 기록 등 타
+            이용자 또는 공개 영역과 연계된 정보는 서비스 무결성·분쟁 대응을 위해
+            일정 기간 제한 보관될 수 있으며, 세부는 내부 정책에 따릅니다.
           </p>
           <p>
             전자적 파일 형태의 개인정보는 복구·재생이 불가능한 방법으로
@@ -263,8 +262,8 @@ export default function PrivacyPolicyPage() {
             <li>이용자가 사전에 동의한 경우</li>
             <li>법령에 근거하거나 수사·재판 등 정당한 요청이 있는 경우</li>
             <li>
-              통계 작성·학술 연구·시장 조사 등을 위해 필요한 경우, 특정
-              개인을 알아볼 수 없는 형태로 가공하여 제공하는 경우
+              통계 작성·학술 연구·시장 조사 등을 위해 필요한 경우, 특정 개인을
+              알아볼 수 없는 형태로 가공하여 제공하는 경우
             </li>
             <li>
               정보주체 또는 제3자의 생명·신체·재산에 급박한 위험이 있어 이를
@@ -285,7 +284,7 @@ export default function PrivacyPolicyPage() {
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              <strong>Supabase(PostgreSQL 등):</strong> 회원·서재·포인트 등 주된
+              <strong>Supabase(PostgreSQL 등):</strong> 회원·서가·포인트 등 주된
               저장소
             </li>
             <li>
@@ -325,16 +324,19 @@ export default function PrivacyPolicyPage() {
           </p>
           <p>
             서비스 내 프로필·설정 화면에서 직접 확인·수정이 가능한 항목은 해당
-            화면을 이용해 주시고, 그 외에는 아래 &quot;개인정보 보호 책임자·문의&quot;를 통해
-            요청하실 수 있습니다. 요청이 법령상 제한되는 경우 그 사유를
-            안내합니다.
+            화면을 이용해 주시고, 그 외에는 아래 &quot;개인정보 보호
+            책임자·문의&quot;를 통해 요청하실 수 있습니다. 요청이 법령상
+            제한되는 경우 그 사유를 안내합니다.
           </p>
           <p>
             <strong>회원 탈퇴</strong>를 하시면 관련 법령과 내부 정책 범위에서
             개인정보 수집·이용에 대한 동의를 철회하는 효과가 있습니다. 탈퇴
             절차는 서비스 내 안내에 따르며, 웹·앱에서의 구체적인 경로와 삭제
             범위는{" "}
-            <a className="underline underline-offset-2 hover:text-foreground" href="/terms#article-20-withdrawal">
+            <a
+              className="underline underline-offset-2 hover:text-foreground"
+              href="/terms#article-20-withdrawal"
+            >
               이용약관 제20조 (계약 해지·탈퇴)
             </a>
             를 참고해 주세요. 이미 제3자 제공 또는 위탁 처리된 정보에 대해서는
@@ -347,11 +349,11 @@ export default function PrivacyPolicyPage() {
             8. 쿠키 및 유사 기술
           </h2>
           <p>
-            서비스는 로그인 유지·보안·이용 편의를 위해 쿠키 등 정보를 저장·조회할
-            수 있습니다. 쿠키는 이용자 개인을 직접 식별하지 않는 경우가 많으나,
-            브라우저 설정에 따라 모든 쿠키 저장을 거부하거나 저장 시 확인을
-            받도록 할 수 있습니다. 쿠키를 거부하면 로그인 등 일부 기능 이용에
-            불편이 있을 수 있습니다.
+            서비스는 로그인 유지·보안·이용 편의를 위해 쿠키 등 정보를
+            저장·조회할 수 있습니다. 쿠키는 이용자 개인을 직접 식별하지 않는
+            경우가 많으나, 브라우저 설정에 따라 모든 쿠키 저장을 거부하거나 저장
+            시 확인을 받도록 할 수 있습니다. 쿠키를 거부하면 로그인 등 일부 기능
+            이용에 불편이 있을 수 있습니다.
           </p>
           <p className="text-muted-foreground">
             설정 예: Microsoft Edge — 설정 &gt; 쿠키 및 사이트 권한 &gt; 쿠키 및
@@ -365,8 +367,8 @@ export default function PrivacyPolicyPage() {
             9. 안전성 확보 조치
           </h2>
           <p>
-            서비스는 개인정보 안전성 확보를 위해 다음과 같은 조치를 취합니다(실제
-            운영 수준에 맞게 보완·기재하세요).
+            서비스는 개인정보 안전성 확보를 위해 다음과 같은 조치를
+            취합니다(실제 운영 수준에 맞게 보완·기재하세요).
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>
@@ -413,10 +415,10 @@ export default function PrivacyPolicyPage() {
           </h2>
           <p>
             법령 또는 서비스 변경에 따라 본 방침을 개정할 수 있습니다. 내용
-            추가·삭제·변경이 있는 경우, 시행일 최소{" "}
-            <strong>7일 전</strong>부터 서비스 내 공지 등을 통해 안내하는 것을
-            원칙으로 합니다. 다만 이용자의 권리·의무에 중대한 변경이 있는 경우에는
-            최소 <strong>30일 전</strong>에 공지할 수 있습니다.
+            추가·삭제·변경이 있는 경우, 시행일 최소 <strong>7일 전</strong>부터
+            서비스 내 공지 등을 통해 안내하는 것을 원칙으로 합니다. 다만
+            이용자의 권리·의무에 중대한 변경이 있는 경우에는 최소{" "}
+            <strong>30일 전</strong>에 공지할 수 있습니다.
           </p>
         </section>
 
@@ -433,8 +435,9 @@ export default function PrivacyPolicyPage() {
             <li>이메일: bookfolio.app@gmail.com</li>
           </ul>
           <p className="text-xs text-muted-foreground">
-            운영 주체·담당 부서명 등은 실제 사업 현황에 맞게 보완하시기 바랍니다.
-            개인정보 침해에 대한 상담·신고는 아래 기관에도 문의하실 수 있습니다.
+            운영 주체·담당 부서명 등은 실제 사업 현황에 맞게 보완하시기
+            바랍니다. 개인정보 침해에 대한 상담·신고는 아래 기관에도 문의하실 수
+            있습니다.
           </p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
             <li>

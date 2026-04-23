@@ -7,11 +7,17 @@ import { getMergedAppUserPoliciesForUser } from "@/lib/auth/app-user-policies";
 import { countLibrariesCreatedByUser } from "@/lib/libraries/repository";
 import { NewLibraryForm } from "@/components/libraries/new-library-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 /**
  * @history
- * - 2026-03-25: 공동서재 생성 상한(`policies_json`) 반영해 폼에 전달
+ * - 2026-03-25: 공동서가 생성 상한(`policies_json`) 반영해 폼에 전달
  */
 export default async function NewLibraryPage() {
   const session = await auth();
@@ -22,7 +28,7 @@ export default async function NewLibraryPage() {
   const ctx = { userId: session.user.id, useAdmin: true } as const;
   const [policies, createdCount] = await Promise.all([
     getMergedAppUserPoliciesForUser(session.user.id),
-    countLibrariesCreatedByUser(session.user.id, ctx)
+    countLibrariesCreatedByUser(session.user.id, ctx),
   ]);
   const canCreateMore = createdCount < policies.sharedLibraryCreateLimit;
 
@@ -31,8 +37,10 @@ export default async function NewLibraryPage() {
       <Card className="border-border/80">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>새 공동서재</CardTitle>
-            <CardDescription>이름과 종류를 정한 뒤 멤버를 이메일로 초대할 수 있습니다.</CardDescription>
+            <CardTitle>새 공동서가</CardTitle>
+            <CardDescription>
+              이름과 종류를 정한 뒤 멤버를 이메일로 초대할 수 있습니다.
+            </CardDescription>
           </div>
           <Button variant="ghost" size="sm" asChild>
             <Link href={"/dashboard/libraries" as Route}>목록</Link>

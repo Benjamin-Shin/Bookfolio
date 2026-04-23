@@ -5,7 +5,13 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { LibraryNewBookForm } from "@/components/libraries/library-new-book-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { getLibrary } from "@/lib/libraries/repository";
 
 type PageProps = {
@@ -19,7 +25,10 @@ export default async function LibraryNewBookPage({ params }: PageProps) {
   }
 
   const { libraryId } = await params;
-  const lib = await getLibrary(libraryId, session.user.id, { userId: session.user.id, useAdmin: true });
+  const lib = await getLibrary(libraryId, session.user.id, {
+    userId: session.user.id,
+    useAdmin: true,
+  });
   if (!lib) {
     notFound();
   }
@@ -29,11 +38,15 @@ export default async function LibraryNewBookPage({ params }: PageProps) {
       <Card className="border-border/80">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>공동서재에 책 추가</CardTitle>
-            <CardDescription>「{lib.name}」에 물리적 한 권을 등록합니다.</CardDescription>
+            <CardTitle>공동서가에 책 추가</CardTitle>
+            <CardDescription>
+              「{lib.name}」에 물리적 한 권을 등록합니다.
+            </CardDescription>
           </div>
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/dashboard/libraries/${libraryId}` as Route}>서재로</Link>
+            <Link href={`/dashboard/libraries/${libraryId}` as Route}>
+              서가로
+            </Link>
           </Button>
         </CardHeader>
         <CardContent>

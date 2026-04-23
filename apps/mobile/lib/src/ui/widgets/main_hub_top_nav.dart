@@ -7,15 +7,15 @@ import 'package:flutter/material.dart';
 /// 5개 허브 화면 간 이동용 탭 식별자.
 enum MainHubTab { shared, aggregate, bestseller, choice, library }
 
-/// 루트(내 서재)까지 돌아간 뒤 선택한 허브로 이동합니다.
+/// 루트(내 서가)까지 돌아간 뒤 선택한 허브로 이동합니다.
 ///
 /// History:
 /// - 2026-04-05: `MainHubTab.aggregate` → `LibraryAnalysisScreen`(집계 포함)
 /// - 2026-04-07: 「서가담 집계」라벨
-/// - 2026-03-28: 순서 — 공동서재·집계·베스트셀러·초이스 신간·내 서재; `aggregate` 추가
-/// - 2026-03-26: 허브 탭에 Material 아이콘(서재·통계·공동·불꽃·신규)
+/// - 2026-03-28: 순서 — 공동서가·집계·베스트셀러·초이스 신간·내 서가; `aggregate` 추가
+/// - 2026-03-26: 허브 탭에 Material 아이콘(서가·통계·공동·불꽃·신규)
 /// - 2026-03-26: 「초이스신간」 표기 → 「초이스 신간」
-/// - 2026-03-26: 신규 — 내서재·통계·공동서재·베스트셀러·초이스 상단 바
+/// - 2026-03-26: 신규 — 내서가·통계·공동서가·베스트셀러·초이스 상단 바
 void openMainHubTab(BuildContext context, MainHubTab tab) {
   final nav = Navigator.of(context);
   nav.popUntil((route) => route.isFirst);
@@ -94,12 +94,12 @@ class MainHubTopNavBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         child: Row(
           children: [
-            link('공동서재', MainHubTab.shared, Icons.groups_2_outlined),
+            link('공동서가', MainHubTab.shared, Icons.groups_2_outlined),
             link('서가담 집계', MainHubTab.aggregate, Icons.leaderboard_outlined),
             link('베스트셀러', MainHubTab.bestseller,
                 Icons.local_fire_department_outlined),
             link('초이스 신간', MainHubTab.choice, Icons.new_releases_outlined),
-            link('내 서재', MainHubTab.library,
+            link('내 서가', MainHubTab.library,
                 Icons.collections_bookmark_outlined),
           ],
         ),

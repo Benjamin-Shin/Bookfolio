@@ -5,9 +5,18 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 
 import { AdminBookDeleteForm } from "./admin-book-delete-form";
-import { AdminCanonicalBookForm, type AdminCanonicalBookFormValues } from "./admin-canonical-book-form";
+import {
+  AdminCanonicalBookForm,
+  type AdminCanonicalBookFormValues,
+} from "./admin-canonical-book-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 const EDIT_BOOK_FORM_ID = "admin-edit-canonical-book";
 
@@ -36,7 +45,7 @@ export type AdminEditBookPageClientProps = {
 function EditBookToolbar({
   formId,
   pending,
-  booksListHref
+  booksListHref,
 }: {
   formId: string;
   pending: boolean;
@@ -59,7 +68,7 @@ export function AdminEditBookPageClient({
   metaLine,
   defaultValues,
   deleteDisabled,
-  deleteTitle
+  deleteTitle,
 }: AdminEditBookPageClientProps) {
   const [savePending, setSavePending] = useState(false);
   const onSubmitPendingChange = useCallback((p: boolean) => {
@@ -74,29 +83,39 @@ export function AdminEditBookPageClient({
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold tracking-tight">도서 수정</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            카탈로그 출처: <span className="font-mono text-xs">{book.source}</span>
+            카탈로그 출처:{" "}
+            <span className="font-mono text-xs">{book.source}</span>
             {book.api_source ? (
               <>
                 {" "}
-                · API소스: <span className="font-mono text-xs">{book.api_source}</span>
+                · API소스:{" "}
+                <span className="font-mono text-xs">{book.api_source}</span>
               </>
             ) : null}
             {metaLine.totalRefs > 0 ? (
               <>
                 {" "}
-                · 서재 연결 {metaLine.totalRefs}건
-                {metaLine.ownedRefs > 0 ? ` (소장 ${metaLine.ownedRefs}건)` : null}
+                · 서가 연결 {metaLine.totalRefs}건
+                {metaLine.ownedRefs > 0
+                  ? ` (소장 ${metaLine.ownedRefs}건)`
+                  : null}
               </>
             ) : null}
           </p>
         </div>
-        <EditBookToolbar formId={EDIT_BOOK_FORM_ID} pending={savePending} booksListHref={booksListHref} />
+        <EditBookToolbar
+          formId={EDIT_BOOK_FORM_ID}
+          pending={savePending}
+          booksListHref={booksListHref}
+        />
       </div>
 
       <Card className="border-border/80">
         <CardHeader>
           <CardTitle>{book.title}</CardTitle>
-          <CardDescription>공유 서지 필드를 수정합니다. 연결된 모든 사용자에게 반영됩니다.</CardDescription>
+          <CardDescription>
+            공유 서지 필드를 수정합니다. 연결된 모든 사용자에게 반영됩니다.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           <AdminCanonicalBookForm
@@ -112,13 +131,19 @@ export function AdminEditBookPageClient({
           <div className="space-y-2">
             <h2 className="text-sm font-medium">삭제</h2>
             <p className="text-xs text-muted-foreground">
-              {deleteDisabled ? deleteTitle : "서재에 연결된 기록이 없을 때만 삭제할 수 있습니다."}
+              {deleteDisabled
+                ? deleteTitle
+                : "서가에 연결된 기록이 없을 때만 삭제할 수 있습니다."}
             </p>
             <AdminBookDeleteForm bookId={book.id} disabled={deleteDisabled} />
           </div>
 
           <div className="flex flex-wrap justify-end border-t border-border/60 pt-6">
-            <EditBookToolbar formId={EDIT_BOOK_FORM_ID} pending={savePending} booksListHref={booksListHref} />
+            <EditBookToolbar
+              formId={EDIT_BOOK_FORM_ID}
+              pending={savePending}
+              booksListHref={booksListHref}
+            />
           </div>
         </CardContent>
       </Card>

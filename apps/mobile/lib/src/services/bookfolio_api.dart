@@ -47,7 +47,7 @@ class PointsBalanceResult {
 /// `GET /api/me/stats/owned-books-price` 응답 (웹 대시보드·동일 RPC).
 ///
 /// History:
-/// - 2026-03-29: 소장 책 가격 합계(모바일 내 서재)
+/// - 2026-03-29: 소장 책 가격 합계(모바일 내 서가)
 class UserOwnedBooksPriceStats {
   const UserOwnedBooksPriceStats({
     required this.totalKrw,
@@ -78,7 +78,7 @@ class UserOwnedBooksPriceStats {
 /// `GET /api/me/books?page=&pageSize=` 응답.
 ///
 /// History:
-/// - 2026-03-29: 내 서재 목록 페이지네이션용
+/// - 2026-03-29: 내 서가 목록 페이지네이션용
 class UserBooksPageResult {
   const UserBooksPageResult({
     required this.items,
@@ -116,7 +116,7 @@ class PersonalLibraryAuthorTop {
 ///
 /// History:
 /// - 2026-04-02: `topAuthorsByOwnedCount` 등
-/// - 2026-04-02: 모바일 내 서재 허브·분석 지표
+/// - 2026-04-02: 모바일 내 서가 허브·분석 지표
 class PersonalLibrarySummary {
   const PersonalLibrarySummary({
     required this.physicalPaperCount,
@@ -159,7 +159,10 @@ class PersonalLibrarySummary {
 
     final topRaw = json['topAuthorsByOwnedCount'];
     final top = topRaw is List<dynamic>
-        ? topRaw.map((e) => PersonalLibraryAuthorTop.fromJson(e as Map<String, dynamic>)).toList()
+        ? topRaw
+            .map((e) =>
+                PersonalLibraryAuthorTop.fromJson(e as Map<String, dynamic>))
+            .toList()
         : const <PersonalLibraryAuthorTop>[];
 
     return PersonalLibrarySummary(
@@ -208,8 +211,10 @@ class MeAppProfile {
   final String? birthDate;
   final bool genderPublic;
   final bool birthDatePublic;
+
   /// 올해 완독 목표 권수. null이면 미설정.
   final int? annualReadingGoal;
+
   /// 서버 ISO 8601. null/빈 문자열이면 온보딩 미완료.
   final String? onboardingCompletedAt;
 
@@ -248,8 +253,9 @@ class ReadingEventDayRow {
 
   factory ReadingEventDayRow.fromJson(Map<String, dynamic> json) {
     return ReadingEventDayRow(
-      userBookId:
-          json['userBookId'] as String? ?? json['user_book_id'] as String? ?? '',
+      userBookId: json['userBookId'] as String? ??
+          json['user_book_id'] as String? ??
+          '',
       coverUrl: json['coverUrl'] as String? ?? json['cover_url'] as String?,
       title: json['title'] as String? ?? '',
     );
@@ -284,11 +290,17 @@ class MobileHomeBundle {
 
     return MobileHomeBundle(
       profile: p is Map<String, dynamic> ? MeAppProfile.fromJson(p) : null,
-      personalLibrarySummary: PersonalLibrarySummary.fromJson(sum as Map<String, dynamic>),
-      points: pts is Map<String, dynamic> ? PointsBalanceResult.fromJson(pts) : null,
-      readingBook: read is Map<String, dynamic> ? UserBook.fromJson(read) : null,
+      personalLibrarySummary:
+          PersonalLibrarySummary.fromJson(sum as Map<String, dynamic>),
+      points: pts is Map<String, dynamic>
+          ? PointsBalanceResult.fromJson(pts)
+          : null,
+      readingBook:
+          read is Map<String, dynamic> ? UserBook.fromJson(read) : null,
       unreadRecommend: rawUnread is List<dynamic>
-          ? rawUnread.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList()
+          ? rawUnread
+              .map((e) => UserBook.fromJson(e as Map<String, dynamic>))
+              .toList()
           : const <UserBook>[],
     );
   }
@@ -324,12 +336,20 @@ class RecommendationBook {
     return RecommendationBook(
       bookId: json['bookId'] as String? ?? '',
       title: json['title'] as String? ?? '',
-      authors: (json['authors'] as List<dynamic>? ?? const []).map((e) => e.toString()).toList(),
-      genreSlugs: (json['genreSlugs'] as List<dynamic>? ?? const []).map((e) => e.toString()).toList(),
+      authors: (json['authors'] as List<dynamic>? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
+      genreSlugs: (json['genreSlugs'] as List<dynamic>? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
       format: json['format'] as String? ?? 'unknown',
       coverUrl: json['coverUrl'] as String?,
-      score: scoreRaw is num ? scoreRaw.toDouble() : double.tryParse('$scoreRaw') ?? 0,
-      reasons: (json['reasons'] as List<dynamic>? ?? const []).map((e) => e.toString()).toList(),
+      score: scoreRaw is num
+          ? scoreRaw.toDouble()
+          : double.tryParse('$scoreRaw') ?? 0,
+      reasons: (json['reasons'] as List<dynamic>? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
     );
   }
 }
@@ -354,7 +374,9 @@ class RecommendationsResult {
     return RecommendationsResult(
       algorithmVersion: json['algorithmVersion'] as String? ?? 'unknown',
       profileUpdatedAt: json['profileUpdatedAt'] as String?,
-      items: raw.map((e) => RecommendationBook.fromJson(e as Map<String, dynamic>)).toList(),
+      items: raw
+          .map((e) => RecommendationBook.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 }
@@ -363,7 +385,8 @@ class BookfolioApi {
   BookfolioApi({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
-  final String _baseUrl = const String.fromEnvironment('BOOKFOLIO_API_BASE_URL');
+  final String _baseUrl =
+      const String.fromEnvironment('BOOKFOLIO_API_BASE_URL');
 
   /// [AuthController] 등에서 설정합니다.
   String? Function()? accessToken;
@@ -379,7 +402,7 @@ class BookfolioApi {
   /// 페이지 단위 목록 (`page` 쿼리가 있을 때 서버는 `{ items, total, page, pageSize }` 반환).
   ///
   /// History:
-  /// - 2026-03-29: 모바일 내 서재 그리드 페이지네이션
+  /// - 2026-03-29: 모바일 내 서가 그리드 페이지네이션
   Future<UserBooksPageResult> fetchBooksPaged({
     int page = 1,
     int pageSize = 20,
@@ -403,12 +426,15 @@ class BookfolioApi {
     if (fmt != null && fmt.isNotEmpty && fmt != 'all') {
       qp['format'] = fmt;
     }
-    final uri = Uri.parse('$_baseUrl/api/me/books').replace(queryParameters: qp);
+    final uri =
+        Uri.parse('$_baseUrl/api/me/books').replace(queryParameters: qp);
     final response = await _client.get(uri, headers: await _headers());
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body);
     if (decoded is List<dynamic>) {
-      final items = decoded.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList();
+      final items = decoded
+          .map((e) => UserBook.fromJson(e as Map<String, dynamic>))
+          .toList();
       return UserBooksPageResult(
         items: items,
         total: items.length,
@@ -423,7 +449,9 @@ class BookfolioApi {
     if (listRaw is! List<dynamic>) {
       throw BookfolioApiException(500, '도서 목록 응답 형식이 올바르지 않습니다.');
     }
-    final items = listRaw.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList();
+    final items = listRaw
+        .map((e) => UserBook.fromJson(e as Map<String, dynamic>))
+        .toList();
     final totalRaw = decoded['total'] ?? decoded['Total'];
     int total = 0;
     if (totalRaw is int) {
@@ -476,7 +504,9 @@ class BookfolioApi {
     if (decoded is Map<String, dynamic>) {
       final list = decoded['items'];
       if (list is List<dynamic>) {
-        return list.map((e) => UserBook.fromJson(e as Map<String, dynamic>)).toList();
+        return list
+            .map((e) => UserBook.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
     }
     if (decoded is! List<dynamic>) {
@@ -524,11 +554,13 @@ class BookfolioApi {
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body) as List<dynamic>;
     return decoded
-        .map((item) => SharedLibrarySummary.fromJson(item as Map<String, dynamic>))
+        .map((item) =>
+            SharedLibrarySummary.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 
-  Future<List<SharedLibraryBookSummary>> fetchSharedLibraryBooks(String libraryId) async {
+  Future<List<SharedLibraryBookSummary>> fetchSharedLibraryBooks(
+      String libraryId) async {
     final response = await _client.get(
       Uri.parse('$_baseUrl/api/me/libraries/$libraryId/books'),
       headers: await _headers(),
@@ -536,7 +568,8 @@ class BookfolioApi {
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body) as List<dynamic>;
     return decoded
-        .map((item) => SharedLibraryBookSummary.fromJson(item as Map<String, dynamic>))
+        .map((item) =>
+            SharedLibraryBookSummary.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 
@@ -547,7 +580,8 @@ class BookfolioApi {
       body: jsonEncode({'isbn': isbn}),
     );
     _throwIfFailed(response);
-    return BookLookupResult.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return BookLookupResult.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// 제목·키워드로 메타 검색 (`POST /api/books/search-by-title`).
@@ -563,7 +597,9 @@ class BookfolioApi {
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     final list = decoded['results'] as List<dynamic>? ?? const [];
-    return list.map((e) => BookLookupResult.fromJson(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => BookLookupResult.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// 알라딘 연동 목록(서버가 `ALADIN_API_BASE_URL` + QueryType로 조회).
@@ -571,7 +607,8 @@ class BookfolioApi {
   /// History:
   /// - 2026-04-22: `categoryId` 쿼리 파라미터 추가
   /// - 2026-03-25: `GET /api/me/aladin-bestseller` 연동
-  Future<AladinBestsellerFeed> fetchAladinBestsellerFeed({int categoryId = 0}) async {
+  Future<AladinBestsellerFeed> fetchAladinBestsellerFeed(
+      {int categoryId = 0}) async {
     final response = await _client.get(
       Uri.parse('$_baseUrl/api/me/aladin-bestseller').replace(
         queryParameters: {'categoryId': '$categoryId'},
@@ -579,7 +616,8 @@ class BookfolioApi {
       headers: await _headers(),
     );
     _throwIfFailed(response);
-    return AladinBestsellerFeed.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return AladinBestsellerFeed.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// 초이스 신간 등(서버가 `ALADIN_API_BASE_URL` + QueryType로 조회).
@@ -587,7 +625,8 @@ class BookfolioApi {
   /// History:
   /// - 2026-04-22: `categoryId` 쿼리 파라미터 추가
   /// - 2026-03-25: `GET /api/me/aladin-item-new` 연동
-  Future<AladinBestsellerFeed> fetchAladinItemNewFeed({int categoryId = 0}) async {
+  Future<AladinBestsellerFeed> fetchAladinItemNewFeed(
+      {int categoryId = 0}) async {
     final response = await _client.get(
       Uri.parse('$_baseUrl/api/me/aladin-item-new').replace(
         queryParameters: {'categoryId': '$categoryId'},
@@ -595,7 +634,8 @@ class BookfolioApi {
       headers: await _headers(),
     );
     _throwIfFailed(response);
-    return AladinBestsellerFeed.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return AladinBestsellerFeed.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// 알라딘 카테고리 목록.
@@ -620,7 +660,8 @@ class BookfolioApi {
   ///
   /// History:
   /// - 2026-04-05: `GET /api/me/discover/community-books`
-  Future<List<DiscoverCommunityBook>> fetchDiscoverCommunityBooks({int limit = 30}) async {
+  Future<List<DiscoverCommunityBook>> fetchDiscoverCommunityBooks(
+      {int limit = 30}) async {
     final uri = Uri.parse('$_baseUrl/api/me/discover/community-books').replace(
       queryParameters: {'limit': '$limit'},
     );
@@ -628,35 +669,45 @@ class BookfolioApi {
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     final raw = decoded['books'] as List<dynamic>? ?? const [];
-    return raw.map((e) => DiscoverCommunityBook.fromJson(e as Map<String, dynamic>)).toList();
+    return raw
+        .map((e) => DiscoverCommunityBook.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// 캐논 도서 구매 링크·가격 힌트(회원 전용).
   ///
   /// History:
   /// - 2026-04-08: `GET /api/me/canon-books/:bookId/purchase-offers`
-  Future<CanonBookPurchaseOffers> fetchCanonBookPurchaseOffers(String bookId) async {
+  Future<CanonBookPurchaseOffers> fetchCanonBookPurchaseOffers(
+      String bookId) async {
     final response = await _client.get(
       Uri.parse('$_baseUrl/api/me/canon-books/$bookId/purchase-offers'),
       headers: await _headers(),
     );
     _throwIfFailed(response);
-    return CanonBookPurchaseOffers.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return CanonBookPurchaseOffers.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// 캐논 도서 공개 한줄평(회원 전용).
   ///
   /// History:
   /// - 2026-04-08: `GET /api/me/canon-books/:bookId/community-one-liners`
-  Future<List<CanonCommunityOneLiner>> fetchCanonCommunityOneLiners(String bookId, {int limit = 50}) async {
-    final uri = Uri.parse('$_baseUrl/api/me/canon-books/$bookId/community-one-liners').replace(
+  Future<List<CanonCommunityOneLiner>> fetchCanonCommunityOneLiners(
+      String bookId,
+      {int limit = 50}) async {
+    final uri =
+        Uri.parse('$_baseUrl/api/me/canon-books/$bookId/community-one-liners')
+            .replace(
       queryParameters: {'limit': '$limit'},
     );
     final response = await _client.get(uri, headers: await _headers());
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     final raw = decoded['items'] as List<dynamic>? ?? const [];
-    return raw.map((e) => CanonCommunityOneLiner.fromJson(e as Map<String, dynamic>)).toList();
+    return raw
+        .map((e) => CanonCommunityOneLiner.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// `GET /api/me/books/:id/memos`
@@ -670,17 +721,21 @@ class BookfolioApi {
     );
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body) as List<dynamic>;
-    return decoded.map((e) => UserBookMemo.fromJson(e as Map<String, dynamic>)).toList();
+    return decoded
+        .map((e) => UserBookMemo.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
-  Future<UserBookMemo> createUserBookMemo(String userBookId, String bodyMd) async {
+  Future<UserBookMemo> createUserBookMemo(
+      String userBookId, String bodyMd) async {
     final response = await _client.post(
       Uri.parse('$_baseUrl/api/me/books/$userBookId/memos'),
       headers: await _headers(),
       body: jsonEncode({'action': 'create', 'bodyMd': bodyMd}),
     );
     _throwIfFailed(response);
-    return UserBookMemo.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return UserBookMemo.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<void> upsertOneLiner(String userBookId, String body) async {
@@ -708,7 +763,9 @@ class BookfolioApi {
     );
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body) as List<dynamic>;
-    return decoded.map((e) => BookOneLinerItem.fromJson(e as Map<String, dynamic>)).toList();
+    return decoded
+        .map((e) => BookOneLinerItem.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<ReadingEventItem>> fetchReadingEvents(String userBookId) async {
@@ -718,7 +775,9 @@ class BookfolioApi {
     );
     _throwIfFailed(response);
     final decoded = jsonDecode(response.body) as List<dynamic>;
-    return decoded.map((e) => ReadingEventItem.fromJson(e as Map<String, dynamic>)).toList();
+    return decoded
+        .map((e) => ReadingEventItem.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<ReadingEventItem> appendReadingEvent(
@@ -738,7 +797,8 @@ class BookfolioApi {
       }),
     );
     _throwIfFailed(response);
-    return ReadingEventItem.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return ReadingEventItem.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// `GET /api/me/stats/bookfolio-aggregate?top=10`
@@ -788,7 +848,8 @@ class BookfolioApi {
       headers: await _headers(),
     );
     _throwIfFailed(response);
-    return MobileHomeBundle.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return MobileHomeBundle.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// `GET /api/me/recommendations`
@@ -804,13 +865,16 @@ class BookfolioApi {
     final qp = <String, String>{
       'limit': '${limit.clamp(1, 20)}',
       if (trackImpression) 'trackImpression': '1',
-      if (requestId != null && requestId.trim().isNotEmpty) 'requestId': requestId.trim(),
+      if (requestId != null && requestId.trim().isNotEmpty)
+        'requestId': requestId.trim(),
       if (bucket.trim().isNotEmpty) 'bucket': bucket.trim(),
     };
-    final uri = Uri.parse('$_baseUrl/api/me/recommendations').replace(queryParameters: qp);
+    final uri = Uri.parse('$_baseUrl/api/me/recommendations')
+        .replace(queryParameters: qp);
     final response = await _client.get(uri, headers: await _headers());
     _throwIfFailed(response);
-    return RecommendationsResult.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return RecommendationsResult.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// `POST /api/me/recommendations/interactions`
@@ -831,7 +895,8 @@ class BookfolioApi {
         'bookId': bookId,
         'interactionType': interactionType,
         'surface': surface,
-        if (requestId != null && requestId.trim().isNotEmpty) 'requestId': requestId.trim(),
+        if (requestId != null && requestId.trim().isNotEmpty)
+          'requestId': requestId.trim(),
         if (metadata != null) 'metadata': metadata,
       }),
     );
@@ -881,7 +946,8 @@ class BookfolioApi {
       headers: await _headers(),
     );
     _throwIfFailed(response);
-    return MeAppProfile.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return MeAppProfile.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// `POST /api/me/profile` (`action: update`). 본문은 서버가 부분 갱신으로 처리합니다.
@@ -896,7 +962,8 @@ class BookfolioApi {
       body: jsonEncode({'action': 'update', ...fields}),
     );
     _throwIfFailed(response);
-    return MeAppProfile.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return MeAppProfile.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// `GET /api/me/stats/personal-library-summary`
@@ -909,14 +976,16 @@ class BookfolioApi {
       headers: await _headers(),
     );
     _throwIfFailed(response);
-    return PersonalLibrarySummary.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return PersonalLibrarySummary.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// `GET /api/me/reading-events/by-day?day=YYYY-MM-DD`
   ///
   /// History:
   /// - 2026-04-02: 캘린더 날짜별 표지(첫 이벤트)용
-  Future<List<ReadingEventDayRow>> fetchReadingEventsByDay(String dayYmd) async {
+  Future<List<ReadingEventDayRow>> fetchReadingEventsByDay(
+      String dayYmd) async {
     final uri = Uri.parse('$_baseUrl/api/me/reading-events/by-day').replace(
       queryParameters: {'day': dayYmd},
     );
@@ -926,10 +995,13 @@ class BookfolioApi {
     if (decoded is! Map<String, dynamic>) return const [];
     final items = decoded['items'];
     if (items is! List<dynamic>) return const [];
-    return items.map((e) => ReadingEventDayRow.fromJson(e as Map<String, dynamic>)).toList();
+    return items
+        .map((e) => ReadingEventDayRow.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
-  Future<Map<String, int>> fetchReadingEventsCalendar(String from, String to) async {
+  Future<Map<String, int>> fetchReadingEventsCalendar(
+      String from, String to) async {
     final uri = Uri.parse('$_baseUrl/api/me/reading-events/calendar').replace(
       queryParameters: {'from': from, 'to': to},
     );
@@ -960,4 +1032,3 @@ class BookfolioApi {
     throw BookfolioApiException(response.statusCode, message);
   }
 }
-

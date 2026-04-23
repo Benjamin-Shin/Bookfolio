@@ -71,7 +71,7 @@ apps/web/src/
 ├── app/                    # Next.js App Router 페이지
 │   ├── (auth)/             # 인증 관련 (로그인 등)
 │   ├── (main)/             # 인증 후 메인 레이아웃
-│   │   ├── dashboard/      # 대시보드 (내 서재)
+│   │   ├── dashboard/      # 대시보드 (내 서가)
 │   │   └── books/          # 도서 상세·편집
 │   ├── api/                # API Route Handlers
 │   ├── layout.tsx

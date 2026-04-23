@@ -25,11 +25,17 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "서가담",
   description:
-    "소장 도서를 정리하고 ISBN·바코드로 빠르게 찾는 개인 서재 — 서가담",
+    "소장 도서를 정리하고 ISBN·바코드로 빠르게 찾는 개인 서가 — 서가담",
   icons: {
     icon: [{ url: "/favicon.ico", sizes: "any" }],
-    apple: [{ url: "/assets/seogadam_favicon.png", sizes: "256x256", type: "image/png" }]
-  }
+    apple: [
+      {
+        url: "/assets/seogadam_favicon.png",
+        sizes: "256x256",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
 /**
@@ -39,13 +45,10 @@ export const metadata: Metadata = {
  * - 2026-04-07: 파비콘·애플 터치 아이콘을 `#Resources` Seogadam 에셋으로 연결
  */
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="ko"
-      className={cn(manrope.variable, newsreader.variable)}
-    >
+    <html lang="ko" className={cn(manrope.variable, newsreader.variable)}>
       <body className={cn(manrope.className, "antialiased")}>
         <Providers>
           <SiteHeader />

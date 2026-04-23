@@ -1,260 +1,410 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="ko"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Seogadam - 2025 Annual Reading Report</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "surface-variant": "#e5e2dc",
-                        "on-tertiary": "#ffffff",
-                        "inverse-on-surface": "#f3f0ea",
-                        "tertiary-fixed": "#ffdadb",
-                        "primary-fixed-dim": "#a9cfb7",
-                        "surface-container-high": "#ebe8e2",
-                        "on-surface": "#1c1c18",
-                        "tertiary-fixed-dim": "#ffb2b6",
-                        "on-primary-container": "#9ac0a7",
-                        "on-tertiary-container": "#ff9aa1",
-                        "on-error": "#ffffff",
-                        "surface-container-lowest": "#ffffff",
-                        "inverse-primary": "#a9cfb7",
-                        "secondary-fixed-dim": "#d2c4b9",
-                        "on-tertiary-fixed": "#40000d",
-                        "error-container": "#ffdad6",
-                        "surface-container-highest": "#e5e2dc",
-                        "outline-variant": "#c1c8c1",
-                        "inverse-surface": "#31312d",
-                        "surface-dim": "#dcdad4",
-                        "surface-container": "#f0eee8",
-                        "secondary-fixed": "#efe0d4",
-                        "on-tertiary-fixed-variant": "#842131",
-                        "on-surface-variant": "#424843",
-                        "on-secondary-fixed": "#211a13",
-                        "on-primary-fixed": "#002112",
-                        "secondary-container": "#efe0d4",
-                        "on-secondary-container": "#6d6259",
-                        "error": "#ba1a1a",
-                        "on-primary": "#ffffff",
-                        "background": "#fcf9f3",
-                        "surface": "#fcf9f3",
-                        "tertiary-container": "#862232",
-                        "primary-container": "#2d4f3c",
-                        "on-background": "#1c1c18",
-                        "primary-fixed": "#c5ecd2",
-                        "secondary": "#675d53",
-                        "surface-container-low": "#f6f3ed",
-                        "surface-bright": "#fcf9f3",
-                        "outline": "#727973",
-                        "on-secondary-fixed-variant": "#4e453c",
-                        "on-secondary": "#ffffff",
-                        "primary": "#163826",
-                        "tertiary": "#67081d",
-                        "on-error-container": "#93000a",
-                        "surface-tint": "#436651",
-                        "on-primary-fixed-variant": "#2c4e3b"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "fontFamily": {
-                        "headline": ["Newsreader", "serif"],
-                        "body": ["Manrope", "sans-serif"],
-                        "label": ["Manrope", "sans-serif"]
-                    }
-                },
+<html class="light" lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Seogadam - 2025 Annual Reading Report</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#e5e2dc",
+              "on-tertiary": "#ffffff",
+              "inverse-on-surface": "#f3f0ea",
+              "tertiary-fixed": "#ffdadb",
+              "primary-fixed-dim": "#a9cfb7",
+              "surface-container-high": "#ebe8e2",
+              "on-surface": "#1c1c18",
+              "tertiary-fixed-dim": "#ffb2b6",
+              "on-primary-container": "#9ac0a7",
+              "on-tertiary-container": "#ff9aa1",
+              "on-error": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "inverse-primary": "#a9cfb7",
+              "secondary-fixed-dim": "#d2c4b9",
+              "on-tertiary-fixed": "#40000d",
+              "error-container": "#ffdad6",
+              "surface-container-highest": "#e5e2dc",
+              "outline-variant": "#c1c8c1",
+              "inverse-surface": "#31312d",
+              "surface-dim": "#dcdad4",
+              "surface-container": "#f0eee8",
+              "secondary-fixed": "#efe0d4",
+              "on-tertiary-fixed-variant": "#842131",
+              "on-surface-variant": "#424843",
+              "on-secondary-fixed": "#211a13",
+              "on-primary-fixed": "#002112",
+              "secondary-container": "#efe0d4",
+              "on-secondary-container": "#6d6259",
+              error: "#ba1a1a",
+              "on-primary": "#ffffff",
+              background: "#fcf9f3",
+              surface: "#fcf9f3",
+              "tertiary-container": "#862232",
+              "primary-container": "#2d4f3c",
+              "on-background": "#1c1c18",
+              "primary-fixed": "#c5ecd2",
+              secondary: "#675d53",
+              "surface-container-low": "#f6f3ed",
+              "surface-bright": "#fcf9f3",
+              outline: "#727973",
+              "on-secondary-fixed-variant": "#4e453c",
+              "on-secondary": "#ffffff",
+              primary: "#163826",
+              tertiary: "#67081d",
+              "on-error-container": "#93000a",
+              "surface-tint": "#436651",
+              "on-primary-fixed-variant": "#2c4e3b",
             },
-        }
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            fontFamily: {
+              headline: ["Newsreader", "serif"],
+              body: ["Manrope", "sans-serif"],
+              label: ["Manrope", "sans-serif"],
+            },
+          },
+        },
+      };
     </script>
-<style>.material-symbols-outlined {
-    font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24
-    }
-.paper-texture {
-    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAI5mgmD1frItNay2fYD587Bp_qEpCyECDawl55c_X2vXxNpp_rRpIm5ZcDPjri1DIFI-153jJAuM974H3ijdrAb4wTfZDkccFdufX-3F46coChSZ7TLnA3FelyE6tNauyPXat1NfWhlITwyYQrYeceKzAMMDoDu7_uspg4Gv5tFXEN9sJnYmhzOM3fJK_w82Db9qzG9TEIcbCD8f97s7wHSNVwFyoJs8xtJLio5c6COOllFK-rE9Muu--Ir3o_tfXvW0Rf6ZKfNos)
-    }
-.hide-scrollbar::-webkit-scrollbar {
-    display: none
-    }
-.hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none
-    }</style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 300,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .paper-texture {
+        background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAI5mgmD1frItNay2fYD587Bp_qEpCyECDawl55c_X2vXxNpp_rRpIm5ZcDPjri1DIFI-153jJAuM974H3ijdrAb4wTfZDkccFdufX-3F46coChSZ7TLnA3FelyE6tNauyPXat1NfWhlITwyYQrYeceKzAMMDoDu7_uspg4Gv5tFXEN9sJnYmhzOM3fJK_w82Db9qzG9TEIcbCD8f97s7wHSNVwFyoJs8xtJLio5c6COOllFK-rE9Muu--Ir3o_tfXvW0Rf6ZKfNos);
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-surface font-body text-on-surface paper-texture selection:bg-primary-fixed-dim/30">
-<!-- TopAppBar -->
-<header class="w-full top-0 sticky z-50 bg-[#fcf9f3] dark:bg-stone-950 flex justify-between items-center px-6 py-4">
-<button class="hover:opacity-80 transition-opacity scale-95 duration-200 ease-in-out">
-<span class="material-symbols-outlined text-[#2D4F3C] dark:text-[#4A7A5D]">menu</span>
-</button>
-<h1 class="font-newsreader italic font-bold text-[#2D4F3C] dark:text-stone-100 text-2xl tracking-tight">Seogadam</h1>
-<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/20 hover:opacity-80 transition-opacity cursor-pointer">
-<img alt="User profile photo" data-alt="close-up portrait of a young woman with a thoughtful expression in soft natural lighting and warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdyNRSALQwez6osiDWnrwZhOD4vvH-dkI3CEpPWrOVUjXckQlEciYnqsh8uTTMNTHp2HvTPcZJklT4PUqNomOEcbH_xTufJgNcxLM17JLIykZMS7RwOxEJC43XPLuPJ88mRW1qGmxwyTWjVIhNIlwR2O7wHZJUXpK7J_Js5oWihOj7wM38HGfZPQlFtFEeWVQ3naNFBurTiQWJOeFsQrpOBsFtz23_mFtC4cp8XPLpbgrHEzoDr_ZIPUiqnDWWSwNNiwcgWHEdDVA"/>
-</div>
-</header>
-<main class="max-w-2xl mx-auto px-6 pt-8 pb-32 space-y-12">
-<!-- Hero Section -->
-<section class="space-y-6">
-<div class="relative w-full aspect-[4/5] overflow-hidden rounded-sm group">
-<img alt="Annual report cover" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="stacks of antique books on a heavy oak table in a sun-drenched library with dust motes dancing in light beams" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeqoxFNnwMlJpFd_L2icShtY7Nb-AwcpWuuz7HopaB26WrULBurXdrkKLeGeqwRrEz2rKUbkwRvbHUWg7MkgdQ4nZG2A4qIa93R_wIRqoTfaiVP-SCVIM7Q67bclRrgrpwp3_LNNbzzJZIW76xcBDFUC3qW2Jg_Nrorun5xlDKUZ-8eOqQ9o0qhzoPKYWuloV0I5CZXu9ARWMkpOgMLEFZ9nhj-1To7uWCDuuaMpSh2GBvECNprUkd7mWG4mIbg_tm_Mr7GnLWSTQ"/>
-<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent"></div>
-<div class="absolute bottom-8 left-8 right-8 text-on-primary">
-<span class="font-label text-xs uppercase tracking-[0.2em] opacity-80 mb-2 block">2025 Annual Reading Report</span>
-<h2 class="font-headline text-4xl leading-tight italic">당신의 한 해를 채운<br/>52권의 기록</h2>
-</div>
-</div>
-<p class="font-headline text-lg text-secondary italic leading-relaxed px-2">
-                "책을 읽는다는 것은 타인의 온기를 자신의 서재로 옮겨오는 일입니다."
-            </p>
-</section>
-<!-- Achievements Bento Grid -->
-<section class="grid grid-cols-2 gap-4">
-<!-- Book Count -->
-<div class="col-span-1 bg-surface-container-low p-6 rounded-sm flex flex-col justify-between aspect-square">
-<span class="font-label text-[10px] uppercase tracking-widest text-secondary">Volume</span>
-<div>
-<span class="font-headline text-5xl text-primary block mb-1">52</span>
-<span class="font-body text-sm font-medium">올해의 완독 수</span>
-</div>
-</div>
-<!-- Longest Season -->
-<div class="col-span-1 bg-surface-container-low p-6 rounded-sm flex flex-col justify-between aspect-square relative overflow-hidden">
-<span class="font-label text-[10px] uppercase tracking-widest text-secondary">Peak Season</span>
-<div class="z-10">
-<span class="font-headline text-3xl text-primary block mb-1 italic">가을</span>
-<span class="font-body text-sm font-medium">가장 깊게 머문 계절</span>
-</div>
-<!-- Mini Line Chart Visualization -->
-<div class="absolute bottom-0 left-0 right-0 h-16 flex items-end px-2 gap-1 opacity-20">
-<div class="w-full bg-primary h-[20%]"></div>
-<div class="w-full bg-primary h-[40%]"></div>
-<div class="w-full bg-primary h-[90%]"></div>
-<div class="w-full bg-primary h-[30%]"></div>
-</div>
-</div>
-</section>
-<!-- Quote Block -->
-<section class="py-12 border-y border-outline-variant/15 text-center px-4">
-<span class="material-symbols-outlined text-primary/30 mb-6 scale-150">format_quote</span>
-<p class="font-headline text-2xl text-primary leading-snug italic">
-                당신은 고요한 새벽,<br/>
-                철학의 숲을 거니는 사색가였습니다.
-            </p>
-</section>
-<!-- Most Read Authors -->
-<section class="space-y-8">
-<h3 class="font-label text-[10px] uppercase tracking-[0.3em] text-secondary text-center">가장 많이 만난 작가</h3>
-<div class="flex justify-center items-end gap-8 overflow-x-auto hide-scrollbar pb-4">
-<div class="flex flex-col items-center gap-4 min-w-[100px]">
-<div class="w-16 h-16 rounded-full grayscale hover:grayscale-0 transition-all duration-500 overflow-hidden ring-1 ring-outline-variant/30">
-<img alt="Virginia Woolf" data-alt="vintage stylized portrait of a woman with elegant 1920s features in sepia tones and film grain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYpZYYyx2HfRMPnVu-jxtlgakZ2_gKZGGZ7i-1gP-Uueyo2sb-8dIszJola322NP_IJSy36WlGFM9ffOvKW6MkV4jD7ScQqeQg_mOkpYJ7ZAtio-e1uTsjtwAaYXgNbrkcMHLZxZGt6VkJTNIPjWBFRAlW1H9VvCg5gK8akq8bl0-TuM3OvPflpVjTRoaqwCVwV3sz9nMFJicfpRdl_ySWKjqkePTzdFAkwFaCeAd7CxWjZK7FMX1_zgLCo6L1c-vxFZ0KUEeKjhM"/>
-</div>
-<div class="text-center">
-<p class="font-headline text-sm italic">Virginia Woolf</p>
-<p class="font-label text-[10px] text-secondary">8 Books</p>
-</div>
-</div>
-<div class="flex flex-col items-center gap-4 min-w-[100px]">
-<div class="w-20 h-20 rounded-full grayscale hover:grayscale-0 transition-all duration-500 overflow-hidden ring-1 ring-primary/30 ring-offset-4 ring-offset-surface">
-<img alt="Franz Kafka" data-alt="noir style black and white portrait of a man with intense eyes and sharp features in formal vintage attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAch77mPg9o_Hg1E1oONUtNl_xNUwF_peih93kzfcA3a5D--AOQxP9TOYPfrLYX14IZ0-3kdKdVpJ87rE9iLo1f-5jZZZjfou8jqJtyzGRShZ5miGkw7CSW0cXCWEZxV81AS8lsfRNjzPmCuH5cgWAmu2cZjdX8nwiIwNrFbpKr_Qu2xZ8Vge69qPXEjC281tQVrRc2x6gsnnXT3duQ5lIV-oWvJxs7omKE8n0KIWw-m4shqz7PPKPzKUf37RX4nhTXll70TXohWg8"/>
-</div>
-<div class="text-center">
-<p class="font-headline text-base italic font-bold">Franz Kafka</p>
-<p class="font-label text-[10px] text-primary font-bold">12 Books</p>
-</div>
-</div>
-<div class="flex flex-col items-center gap-4 min-w-[100px]">
-<div class="w-16 h-16 rounded-full grayscale hover:grayscale-0 transition-all duration-500 overflow-hidden ring-1 ring-outline-variant/30">
-<img alt="Haruki Murakami" data-alt="moody cinematic portrait of a mature east asian man in low key lighting and soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPjuOV3_l_LIFP-M2SYcpf3kGwITTLYeEEuuaIQ4ppXazleTRgZq1VKMxkaC8vLcNKfpwECG0bcnzr4DRqn2rR3USd1lakkQNiRnc6n0r-UikLSI8EcqTKvMR5L72P-E5D1zPcb5ZYKanay5D6gWSKn_kQqtY_qAAtgdhT8XhthDgzou7s0dRMmDDAAfHdKQ--F2kFI11wgd-MtoZFNeByMXw4hhC2Qz31qncsi2vw_QrRZy6PyU6LGuaqNMSAWt6L_qHlcEKDJaE"/>
-</div>
-<div class="text-center">
-<p class="font-headline text-sm italic">Haruki Murakami</p>
-<p class="font-label text-[10px] text-secondary">6 Books</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Genre Spectrum -->
-<section class="bg-surface-container-low p-8 rounded-sm space-y-8">
-<div class="flex justify-between items-center">
-<h3 class="font-label text-[10px] uppercase tracking-widest text-secondary">Genre Spectrum</h3>
-<span class="font-body text-xs text-primary font-bold">지적 호기심의 분포</span>
-</div>
-<div class="space-y-6">
-<!-- Stacked Bar -->
-<div class="h-10 w-full flex rounded-sm overflow-hidden ring-1 ring-outline-variant/10">
-<div class="bg-primary-container h-full w-[45%]" title="Humanities"></div>
-<div class="bg-primary h-full w-[35%]" title="Fiction"></div>
-<div class="bg-secondary-container h-full w-[20%]" title="Art"></div>
-</div>
-<div class="grid grid-cols-3 gap-4">
-<div class="space-y-1">
-<div class="flex items-center gap-2">
-<div class="w-2 h-2 rounded-full bg-primary-container"></div>
-<span class="font-label text-[10px] font-bold">인문</span>
-</div>
-<p class="font-headline text-lg italic">45%</p>
-</div>
-<div class="space-y-1">
-<div class="flex items-center gap-2">
-<div class="w-2 h-2 rounded-full bg-primary"></div>
-<span class="font-label text-[10px] font-bold">소설</span>
-</div>
-<p class="font-headline text-lg italic">35%</p>
-</div>
-<div class="space-y-1">
-<div class="flex items-center gap-2">
-<div class="w-2 h-2 rounded-full bg-secondary-container"></div>
-<span class="font-label text-[10px] font-bold">예술</span>
-</div>
-<p class="font-headline text-lg italic">20%</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Actions -->
-<section class="flex flex-col gap-4 pt-6">
-<button class="w-full bg-primary text-on-primary py-4 rounded-sm font-label text-sm tracking-widest uppercase hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-sm">
-<span class="material-symbols-outlined text-sm">share</span>
-                공유하기
-            </button>
-<button class="w-full bg-secondary-container text-on-secondary-container py-4 rounded-sm font-label text-sm tracking-widest uppercase hover:bg-surface-container-high transition-colors">
-                상세 분석 보기
-            </button>
-</section>
-</main>
-<!-- BottomNavBar (Reports active) -->
-<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pt-3 pb-safe bg-[#fcf9f3]/80 dark:bg-stone-900/80 backdrop-blur-xl z-50 rounded-t-xl border-t border-stone-200/15 dark:border-stone-800/15 shadow-[0_-4px_24px_rgba(22,56,38,0.04)]">
-<a class="flex flex-col items-center gap-1 text-stone-400 dark:text-stone-500 hover:text-[#2D4F3C] dark:hover:text-stone-100 transition-colors" href="#">
-<span class="material-symbols-outlined">auto_stories</span>
-<span class="font-manrope text-[10px] uppercase tracking-widest font-semibold">Atelier</span>
-</a>
-<a class="flex flex-col items-center gap-1 text-stone-400 dark:text-stone-500 hover:text-[#2D4F3C] dark:hover:text-stone-100 transition-colors" href="#">
-<span class="material-symbols-outlined">library_books</span>
-<span class="font-manrope text-[10px] uppercase tracking-widest font-semibold">Archive</span>
-</a>
-<a class="flex flex-col items-center gap-1 text-[#2D4F3C] dark:text-[#4A7A5D] scale-90 transition-transform duration-300" href="#">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
-<span class="font-manrope text-[10px] uppercase tracking-widest font-semibold">Reports</span>
-</a>
-<a class="flex flex-col items-center gap-1 text-stone-400 dark:text-stone-500 hover:text-[#2D4F3C] dark:hover:text-stone-100 transition-colors" href="#">
-<span class="material-symbols-outlined">local_library</span>
-<span class="font-manrope text-[10px] uppercase tracking-widest font-semibold">Curation</span>
-</a>
-</nav>
-</body></html>
+  <body
+    class="bg-surface font-body text-on-surface paper-texture selection:bg-primary-fixed-dim/30"
+  >
+    <!-- TopAppBar -->
+    <header
+      class="w-full top-0 sticky z-50 bg-[#fcf9f3] dark:bg-stone-950 flex justify-between items-center px-6 py-4"
+    >
+      <button
+        class="hover:opacity-80 transition-opacity scale-95 duration-200 ease-in-out"
+      >
+        <span
+          class="material-symbols-outlined text-[#2D4F3C] dark:text-[#4A7A5D]"
+          >menu</span
+        >
+      </button>
+      <h1
+        class="font-newsreader italic font-bold text-[#2D4F3C] dark:text-stone-100 text-2xl tracking-tight"
+      >
+        Seogadam
+      </h1>
+      <div
+        class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/20 hover:opacity-80 transition-opacity cursor-pointer"
+      >
+        <img
+          alt="User profile photo"
+          data-alt="close-up portrait of a young woman with a thoughtful expression in soft natural lighting and warm tones"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdyNRSALQwez6osiDWnrwZhOD4vvH-dkI3CEpPWrOVUjXckQlEciYnqsh8uTTMNTHp2HvTPcZJklT4PUqNomOEcbH_xTufJgNcxLM17JLIykZMS7RwOxEJC43XPLuPJ88mRW1qGmxwyTWjVIhNIlwR2O7wHZJUXpK7J_Js5oWihOj7wM38HGfZPQlFtFEeWVQ3naNFBurTiQWJOeFsQrpOBsFtz23_mFtC4cp8XPLpbgrHEzoDr_ZIPUiqnDWWSwNNiwcgWHEdDVA"
+        />
+      </div>
+    </header>
+    <main class="max-w-2xl mx-auto px-6 pt-8 pb-32 space-y-12">
+      <!-- Hero Section -->
+      <section class="space-y-6">
+        <div
+          class="relative w-full aspect-[4/5] overflow-hidden rounded-sm group"
+        >
+          <img
+            alt="Annual report cover"
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            data-alt="stacks of antique books on a heavy oak table in a sun-drenched library with dust motes dancing in light beams"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeqoxFNnwMlJpFd_L2icShtY7Nb-AwcpWuuz7HopaB26WrULBurXdrkKLeGeqwRrEz2rKUbkwRvbHUWg7MkgdQ4nZG2A4qIa93R_wIRqoTfaiVP-SCVIM7Q67bclRrgrpwp3_LNNbzzJZIW76xcBDFUC3qW2Jg_Nrorun5xlDKUZ-8eOqQ9o0qhzoPKYWuloV0I5CZXu9ARWMkpOgMLEFZ9nhj-1To7uWCDuuaMpSh2GBvECNprUkd7mWG4mIbg_tm_Mr7GnLWSTQ"
+          />
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent"
+          ></div>
+          <div class="absolute bottom-8 left-8 right-8 text-on-primary">
+            <span
+              class="font-label text-xs uppercase tracking-[0.2em] opacity-80 mb-2 block"
+              >2025 Annual Reading Report</span
+            >
+            <h2 class="font-headline text-4xl leading-tight italic">
+              당신의 한 해를 채운<br />52권의 기록
+            </h2>
+          </div>
+        </div>
+        <p
+          class="font-headline text-lg text-secondary italic leading-relaxed px-2"
+        >
+          "책을 읽는다는 것은 타인의 온기를 자신의 서가로 옮겨오는 일입니다."
+        </p>
+      </section>
+      <!-- Achievements Bento Grid -->
+      <section class="grid grid-cols-2 gap-4">
+        <!-- Book Count -->
+        <div
+          class="col-span-1 bg-surface-container-low p-6 rounded-sm flex flex-col justify-between aspect-square"
+        >
+          <span
+            class="font-label text-[10px] uppercase tracking-widest text-secondary"
+            >Volume</span
+          >
+          <div>
+            <span class="font-headline text-5xl text-primary block mb-1"
+              >52</span
+            >
+            <span class="font-body text-sm font-medium">올해의 완독 수</span>
+          </div>
+        </div>
+        <!-- Longest Season -->
+        <div
+          class="col-span-1 bg-surface-container-low p-6 rounded-sm flex flex-col justify-between aspect-square relative overflow-hidden"
+        >
+          <span
+            class="font-label text-[10px] uppercase tracking-widest text-secondary"
+            >Peak Season</span
+          >
+          <div class="z-10">
+            <span class="font-headline text-3xl text-primary block mb-1 italic"
+              >가을</span
+            >
+            <span class="font-body text-sm font-medium"
+              >가장 깊게 머문 계절</span
+            >
+          </div>
+          <!-- Mini Line Chart Visualization -->
+          <div
+            class="absolute bottom-0 left-0 right-0 h-16 flex items-end px-2 gap-1 opacity-20"
+          >
+            <div class="w-full bg-primary h-[20%]"></div>
+            <div class="w-full bg-primary h-[40%]"></div>
+            <div class="w-full bg-primary h-[90%]"></div>
+            <div class="w-full bg-primary h-[30%]"></div>
+          </div>
+        </div>
+      </section>
+      <!-- Quote Block -->
+      <section
+        class="py-12 border-y border-outline-variant/15 text-center px-4"
+      >
+        <span class="material-symbols-outlined text-primary/30 mb-6 scale-150"
+          >format_quote</span
+        >
+        <p class="font-headline text-2xl text-primary leading-snug italic">
+          당신은 고요한 새벽,<br />
+          철학의 숲을 거니는 사색가였습니다.
+        </p>
+      </section>
+      <!-- Most Read Authors -->
+      <section class="space-y-8">
+        <h3
+          class="font-label text-[10px] uppercase tracking-[0.3em] text-secondary text-center"
+        >
+          가장 많이 만난 작가
+        </h3>
+        <div
+          class="flex justify-center items-end gap-8 overflow-x-auto hide-scrollbar pb-4"
+        >
+          <div class="flex flex-col items-center gap-4 min-w-[100px]">
+            <div
+              class="w-16 h-16 rounded-full grayscale hover:grayscale-0 transition-all duration-500 overflow-hidden ring-1 ring-outline-variant/30"
+            >
+              <img
+                alt="Virginia Woolf"
+                data-alt="vintage stylized portrait of a woman with elegant 1920s features in sepia tones and film grain"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYpZYYyx2HfRMPnVu-jxtlgakZ2_gKZGGZ7i-1gP-Uueyo2sb-8dIszJola322NP_IJSy36WlGFM9ffOvKW6MkV4jD7ScQqeQg_mOkpYJ7ZAtio-e1uTsjtwAaYXgNbrkcMHLZxZGt6VkJTNIPjWBFRAlW1H9VvCg5gK8akq8bl0-TuM3OvPflpVjTRoaqwCVwV3sz9nMFJicfpRdl_ySWKjqkePTzdFAkwFaCeAd7CxWjZK7FMX1_zgLCo6L1c-vxFZ0KUEeKjhM"
+              />
+            </div>
+            <div class="text-center">
+              <p class="font-headline text-sm italic">Virginia Woolf</p>
+              <p class="font-label text-[10px] text-secondary">8 Books</p>
+            </div>
+          </div>
+          <div class="flex flex-col items-center gap-4 min-w-[100px]">
+            <div
+              class="w-20 h-20 rounded-full grayscale hover:grayscale-0 transition-all duration-500 overflow-hidden ring-1 ring-primary/30 ring-offset-4 ring-offset-surface"
+            >
+              <img
+                alt="Franz Kafka"
+                data-alt="noir style black and white portrait of a man with intense eyes and sharp features in formal vintage attire"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAch77mPg9o_Hg1E1oONUtNl_xNUwF_peih93kzfcA3a5D--AOQxP9TOYPfrLYX14IZ0-3kdKdVpJ87rE9iLo1f-5jZZZjfou8jqJtyzGRShZ5miGkw7CSW0cXCWEZxV81AS8lsfRNjzPmCuH5cgWAmu2cZjdX8nwiIwNrFbpKr_Qu2xZ8Vge69qPXEjC281tQVrRc2x6gsnnXT3duQ5lIV-oWvJxs7omKE8n0KIWw-m4shqz7PPKPzKUf37RX4nhTXll70TXohWg8"
+              />
+            </div>
+            <div class="text-center">
+              <p class="font-headline text-base italic font-bold">
+                Franz Kafka
+              </p>
+              <p class="font-label text-[10px] text-primary font-bold">
+                12 Books
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col items-center gap-4 min-w-[100px]">
+            <div
+              class="w-16 h-16 rounded-full grayscale hover:grayscale-0 transition-all duration-500 overflow-hidden ring-1 ring-outline-variant/30"
+            >
+              <img
+                alt="Haruki Murakami"
+                data-alt="moody cinematic portrait of a mature east asian man in low key lighting and soft focus background"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPjuOV3_l_LIFP-M2SYcpf3kGwITTLYeEEuuaIQ4ppXazleTRgZq1VKMxkaC8vLcNKfpwECG0bcnzr4DRqn2rR3USd1lakkQNiRnc6n0r-UikLSI8EcqTKvMR5L72P-E5D1zPcb5ZYKanay5D6gWSKn_kQqtY_qAAtgdhT8XhthDgzou7s0dRMmDDAAfHdKQ--F2kFI11wgd-MtoZFNeByMXw4hhC2Qz31qncsi2vw_QrRZy6PyU6LGuaqNMSAWt6L_qHlcEKDJaE"
+              />
+            </div>
+            <div class="text-center">
+              <p class="font-headline text-sm italic">Haruki Murakami</p>
+              <p class="font-label text-[10px] text-secondary">6 Books</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Genre Spectrum -->
+      <section class="bg-surface-container-low p-8 rounded-sm space-y-8">
+        <div class="flex justify-between items-center">
+          <h3
+            class="font-label text-[10px] uppercase tracking-widest text-secondary"
+          >
+            Genre Spectrum
+          </h3>
+          <span class="font-body text-xs text-primary font-bold"
+            >지적 호기심의 분포</span
+          >
+        </div>
+        <div class="space-y-6">
+          <!-- Stacked Bar -->
+          <div
+            class="h-10 w-full flex rounded-sm overflow-hidden ring-1 ring-outline-variant/10"
+          >
+            <div
+              class="bg-primary-container h-full w-[45%]"
+              title="Humanities"
+            ></div>
+            <div class="bg-primary h-full w-[35%]" title="Fiction"></div>
+            <div
+              class="bg-secondary-container h-full w-[20%]"
+              title="Art"
+            ></div>
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-primary-container"></div>
+                <span class="font-label text-[10px] font-bold">인문</span>
+              </div>
+              <p class="font-headline text-lg italic">45%</p>
+            </div>
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-primary"></div>
+                <span class="font-label text-[10px] font-bold">소설</span>
+              </div>
+              <p class="font-headline text-lg italic">35%</p>
+            </div>
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-secondary-container"></div>
+                <span class="font-label text-[10px] font-bold">예술</span>
+              </div>
+              <p class="font-headline text-lg italic">20%</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Actions -->
+      <section class="flex flex-col gap-4 pt-6">
+        <button
+          class="w-full bg-primary text-on-primary py-4 rounded-sm font-label text-sm tracking-widest uppercase hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-sm"
+        >
+          <span class="material-symbols-outlined text-sm">share</span>
+          공유하기
+        </button>
+        <button
+          class="w-full bg-secondary-container text-on-secondary-container py-4 rounded-sm font-label text-sm tracking-widest uppercase hover:bg-surface-container-high transition-colors"
+        >
+          상세 분석 보기
+        </button>
+      </section>
+    </main>
+    <!-- BottomNavBar (Reports active) -->
+    <nav
+      class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pt-3 pb-safe bg-[#fcf9f3]/80 dark:bg-stone-900/80 backdrop-blur-xl z-50 rounded-t-xl border-t border-stone-200/15 dark:border-stone-800/15 shadow-[0_-4px_24px_rgba(22,56,38,0.04)]"
+    >
+      <a
+        class="flex flex-col items-center gap-1 text-stone-400 dark:text-stone-500 hover:text-[#2D4F3C] dark:hover:text-stone-100 transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">auto_stories</span>
+        <span
+          class="font-manrope text-[10px] uppercase tracking-widest font-semibold"
+          >Atelier</span
+        >
+      </a>
+      <a
+        class="flex flex-col items-center gap-1 text-stone-400 dark:text-stone-500 hover:text-[#2D4F3C] dark:hover:text-stone-100 transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">library_books</span>
+        <span
+          class="font-manrope text-[10px] uppercase tracking-widest font-semibold"
+          >Archive</span
+        >
+      </a>
+      <a
+        class="flex flex-col items-center gap-1 text-[#2D4F3C] dark:text-[#4A7A5D] scale-90 transition-transform duration-300"
+        href="#"
+      >
+        <span
+          class="material-symbols-outlined"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >analytics</span
+        >
+        <span
+          class="font-manrope text-[10px] uppercase tracking-widest font-semibold"
+          >Reports</span
+        >
+      </a>
+      <a
+        class="flex flex-col items-center gap-1 text-stone-400 dark:text-stone-500 hover:text-[#2D4F3C] dark:hover:text-stone-100 transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">local_library</span>
+        <span
+          class="font-manrope text-[10px] uppercase tracking-widest font-semibold"
+          >Curation</span
+        >
+      </a>
+    </nav>
+  </body>
+</html>

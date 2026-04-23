@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  *
  * @history
  * - 2026-04-05: `resolveActiveSubscription` — 스냅샷에 `features` 병합
- * - 2026-03-28: 신규 — 공동서재 생성·멤버 상한
+ * - 2026-03-28: 신규 — 공동서가 생성·멤버 상한
  */
 export type SubscriptionCaps = {
   shared_libraries_owned_max?: number;
@@ -33,16 +33,20 @@ export const SUBSCRIPTION_PLAN_FEATURE_KEYS = [
   "premium_themes_unlocked",
   "can_create_extra_shared_libraries_without_points",
   "reading_reports_unlocked",
-  "sns_share_unlocked"
+  "sns_share_unlocked",
 ] as const;
 
-export type SubscriptionPlanFeatureKey = (typeof SUBSCRIPTION_PLAN_FEATURE_KEYS)[number];
+export type SubscriptionPlanFeatureKey =
+  (typeof SUBSCRIPTION_PLAN_FEATURE_KEYS)[number];
 
-export const SUBSCRIPTION_PLAN_FEATURE_LABELS: Record<SubscriptionPlanFeatureKey, string> = {
+export const SUBSCRIPTION_PLAN_FEATURE_LABELS: Record<
+  SubscriptionPlanFeatureKey,
+  string
+> = {
   premium_themes_unlocked: "프리미엄 테마",
-  can_create_extra_shared_libraries_without_points: "추가 공동서재 포인트 면제",
+  can_create_extra_shared_libraries_without_points: "추가 공동서가 포인트 면제",
   reading_reports_unlocked: "독서 리포트",
-  sns_share_unlocked: "SNS 공유"
+  sns_share_unlocked: "SNS 공유",
 };
 
 function extractCapsFromPlanJson(capsJson: unknown): SubscriptionCaps {
@@ -58,7 +62,9 @@ function extractCapsFromPlanJson(capsJson: unknown): SubscriptionCaps {
 }
 
 /** `subscription_plans.caps_json` 루트에서 `features` 객체만 추출합니다. */
-export function extractFeaturesFromCapsJsonRoot(capsJson: unknown): SubscriptionPlanFeatures {
+export function extractFeaturesFromCapsJsonRoot(
+  capsJson: unknown,
+): SubscriptionPlanFeatures {
   if (!capsJson || typeof capsJson !== "object" || Array.isArray(capsJson)) {
     return {};
   }
@@ -78,10 +84,13 @@ export function extractFeaturesFromCapsJsonRoot(capsJson: unknown): Subscription
  */
 export function mergeKnownFeaturesIntoCapsJson(
   current: unknown,
-  updates: Partial<Record<SubscriptionPlanFeatureKey, boolean>>
+  updates: Partial<Record<SubscriptionPlanFeatureKey, boolean>>,
 ): Record<string, unknown> {
   const base =
-    current !== null && current !== undefined && typeof current === "object" && !Array.isArray(current)
+    current !== null &&
+    current !== undefined &&
+    typeof current === "object" &&
+    !Array.isArray(current)
       ? ({ ...current } as Record<string, unknown>)
       : {};
 
@@ -106,8 +115,12 @@ export function mergeKnownFeaturesIntoCapsJson(
 
 async function resolveActiveSubscription(
   supabase: SupabaseClient,
-  userId: string
-): Promise<{ planKey: string; caps: SubscriptionCaps; features: SubscriptionPlanFeatures } | null> {
+  userId: string,
+): Promise<{
+  planKey: string;
+  caps: SubscriptionCaps;
+  features: SubscriptionPlanFeatures;
+} | null> {
   const now = new Date().toISOString();
   const { data: sub, error: sErr } = await supabase
     .from("user_subscriptions")
@@ -140,9 +153,19 @@ async function resolveActiveSubscription(
   let features = extractFeaturesFromCapsJsonRoot(plan?.caps_json);
 
   const snap = sub.caps_snapshot_json;
-  if (snap !== null && snap !== undefined && typeof snap === "object" && !Array.isArray(snap)) {
+  if (
+    snap !== null &&
+    snap !== undefined &&
+    typeof snap === "object" &&
+    !Array.isArray(snap)
+  ) {
     const s = snap as Record<string, unknown>;
-    if (s.caps !== null && s.caps !== undefined && typeof s.caps === "object" && !Array.isArray(s.caps)) {
+    if (
+      s.caps !== null &&
+      s.caps !== undefined &&
+      typeof s.caps === "object" &&
+      !Array.isArray(s.caps)
+    ) {
       caps = s.caps as SubscriptionCaps;
     }
     if (
@@ -168,7 +191,7 @@ async function resolveActiveSubscription(
  */
 export async function getActiveSubscriptionCaps(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
 ): Promise<{ planKey: string; caps: SubscriptionCaps } | null> {
   const r = await resolveActiveSubscription(supabase, userId);
   if (!r) {
@@ -185,7 +208,7 @@ export async function getActiveSubscriptionCaps(
  */
 export async function getActiveSubscriptionFeatures(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
 ): Promise<{ planKey: string; features: SubscriptionPlanFeatures } | null> {
   const r = await resolveActiveSubscription(supabase, userId);
   if (!r) {

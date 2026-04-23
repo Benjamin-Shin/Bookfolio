@@ -32,11 +32,14 @@ type UserBookRef = {
 
 async function userBookRefStatsByBookIds(
   supabase: ReturnType<typeof createSupabaseAdminClient>,
-  bookIds: string[]
+  bookIds: string[],
 ): Promise<Map<string, { total: number; owned: number }>> {
   const map = new Map<string, { total: number; owned: number }>();
   if (bookIds.length === 0) return map;
-  const { data } = await supabase.from("user_books").select("book_id, is_owned").in("book_id", bookIds);
+  const { data } = await supabase
+    .from("user_books")
+    .select("book_id, is_owned")
+    .in("book_id", bookIds);
   for (const row of (data ?? []) as UserBookRef[]) {
     const cur = map.get(row.book_id) ?? { total: 0, owned: 0 };
     cur.total += 1;
@@ -56,7 +59,7 @@ function adminBooksListHref(
   q: string,
   genreMode: "all" | "missing",
   sortMode: "updated_desc" | "title_asc" | "title_desc" | "page_count_asc",
-  page: number
+  page: number,
 ): Route {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
@@ -64,7 +67,9 @@ function adminBooksListHref(
   if (sortMode !== "updated_desc") params.set("sort", sortMode);
   if (page > 1) params.set("page", String(page));
   const s = params.toString();
-  return (s ? `/dashboard/admin/books?${s}` : "/dashboard/admin/books") as Route;
+  return (
+    s ? `/dashboard/admin/books?${s}` : "/dashboard/admin/books"
+  ) as Route;
 }
 
 /**
@@ -79,9 +84,14 @@ function adminBooksListHref(
  * - 2026-03-24: 장르 `<select>`에 `suppressHydrationWarning`(확장 프로그램이 `data-sharkid` 등 주입 시 하이드레이션 경고 완화)
  */
 export default async function AdminBooksPage({
-  searchParams
+  searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; genre?: string; sort?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    page?: string;
+    genre?: string;
+    sort?: string;
+  }>;
 }) {
   await requireAdmin();
 
@@ -90,7 +100,9 @@ export default async function AdminBooksPage({
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const genreMode = sp.genre === "missing" ? "missing" : "all";
   const sortMode =
-    sp.sort === "title_asc" || sp.sort === "title_desc" || sp.sort === "page_count_asc"
+    sp.sort === "title_asc" ||
+    sp.sort === "title_desc" ||
+    sp.sort === "page_count_asc"
       ? sp.sort
       : "updated_desc";
   const from = (page - 1) * PAGE_SIZE;
@@ -101,12 +113,17 @@ export default async function AdminBooksPage({
 
   let query = supabase
     .from("books")
-    .select("id,isbn,title,authors,source,price_krw,genre_slugs,literature_region,original_language,updated_at", {
-      count: "exact"
-    });
+    .select(
+      "id,isbn,title,authors,source,price_krw,genre_slugs,literature_region,original_language,updated_at",
+      {
+        count: "exact",
+      },
+    );
 
   if (safeQ) {
-    query = query.or(`title.ilike.%${safeQ}%,isbn.ilike.%${safeQ}%,authors::text.ilike.%${safeQ}%`);
+    query = query.or(
+      `title.ilike.%${safeQ}%,isbn.ilike.%${safeQ}%,authors::text.ilike.%${safeQ}%`,
+    );
   }
 
   if (genreMode === "missing") {
@@ -115,19 +132,27 @@ export default async function AdminBooksPage({
     query = query.order("has_genre_slugs", { ascending: true });
   }
 
-  query = query.order("cover_hosted_on_cloudinary", { ascending: true }).order("page_count", {
-    ascending: true,
-    nullsFirst: true
-  });
+  query = query
+    .order("cover_hosted_on_cloudinary", { ascending: true })
+    .order("page_count", {
+      ascending: true,
+      nullsFirst: true,
+    });
 
   if (sortMode === "title_asc") {
-    query = query.order("title", { ascending: true }).order("updated_at", { ascending: false });
+    query = query
+      .order("title", { ascending: true })
+      .order("updated_at", { ascending: false });
   } else if (sortMode === "title_desc") {
-    query = query.order("title", { ascending: false }).order("updated_at", { ascending: false });
+    query = query
+      .order("title", { ascending: false })
+      .order("updated_at", { ascending: false });
   } else if (sortMode === "page_count_asc") {
-    query = query.order("page_count", { ascending: true, nullsFirst: true }).order("updated_at", {
-      ascending: false
-    });
+    query = query
+      .order("page_count", { ascending: true, nullsFirst: true })
+      .order("updated_at", {
+        ascending: false,
+      });
   } else {
     query = query.order("updated_at", { ascending: false });
   }
@@ -138,7 +163,9 @@ export default async function AdminBooksPage({
 
   if (error) {
     return (
-      <p className="text-sm text-destructive">도서 목록을 불러오지 못했습니다: {error.message}</p>
+      <p className="text-sm text-destructive">
+        도서 목록을 불러오지 못했습니다: {error.message}
+      </p>
     );
   }
 
@@ -147,7 +174,7 @@ export default async function AdminBooksPage({
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const refMap = await userBookRefStatsByBookIds(
     supabase,
-    books.map((b) => b.id)
+    books.map((b) => b.id),
   );
 
   const hasAladinConfig = Boolean(env.aladinApiBaseUrl);
@@ -158,18 +185,29 @@ export default async function AdminBooksPage({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">도서 관리</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            공유 서지(`books`)입니다. 제목·ISBN·저자 일부 검색이 가능합니다. 소장 서재에 포함된 도서는 삭제할 수 없습니다.
+            공유 서지(`books`)입니다. 제목·ISBN·저자 일부 검색이 가능합니다.
+            소장 서가에 포함된 도서는 삭제할 수 없습니다.
           </p>
         </div>
         <AdminBooksTopActions hasAladinConfig={hasAladinConfig} />
       </div>
 
-      <form className="flex flex-wrap items-end gap-2" method="get" action="/dashboard/admin/books">
+      <form
+        className="flex flex-wrap items-end gap-2"
+        method="get"
+        action="/dashboard/admin/books"
+      >
         <div className="min-w-[12rem] flex-1 space-y-1">
           <label htmlFor="q" className="text-xs text-muted-foreground">
             검색
           </label>
-          <Input id="q" name="q" type="search" placeholder="제목, ISBN 또는 저자" defaultValue={q} />
+          <Input
+            id="q"
+            name="q"
+            type="search"
+            placeholder="제목, ISBN 또는 저자"
+            defaultValue={q}
+          />
         </div>
         <div className="min-w-[11rem] space-y-1">
           <label htmlFor="genre" className="text-xs text-muted-foreground">
@@ -182,7 +220,7 @@ export default async function AdminBooksPage({
             suppressHydrationWarning
             className={cn(
               "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] md:text-sm dark:bg-input/30",
-              "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
             )}
           >
             <option value="all">전체 (장르 없음 먼저)</option>
@@ -200,7 +238,7 @@ export default async function AdminBooksPage({
             suppressHydrationWarning
             className={cn(
               "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] md:text-sm dark:bg-input/30",
-              "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
             )}
           >
             <option value="updated_desc">최신 수정순</option>
@@ -216,7 +254,9 @@ export default async function AdminBooksPage({
 
       <p className="text-xs text-muted-foreground">
         총 {total.toLocaleString("ko-KR")}권 · {page} / {totalPages} 페이지
-        {genreMode === "missing" ? " · 장르 없음만 표시" : " · 장르 없음 행이 목록 상단에 옵니다"}
+        {genreMode === "missing"
+          ? " · 장르 없음만 표시"
+          : " · 장르 없음 행이 목록 상단에 옵니다"}
       </p>
 
       <div className="overflow-x-auto rounded-lg border border-border/80">
@@ -230,27 +270,38 @@ export default async function AdminBooksPage({
               <th className="px-3 py-2 font-medium">장르</th>
               <th className="px-3 py-2 font-medium">출처</th>
               <th className="px-3 py-2 font-medium">수정일</th>
-              <th className="px-3 py-2 font-medium">서재</th>
+              <th className="px-3 py-2 font-medium">서가</th>
               <th className="px-3 py-2 text-right font-medium">작업</th>
             </tr>
           </thead>
           <tbody>
             {books.map((b) => (
-              <tr key={b.id} className="border-b border-border/40 last:border-0">
+              <tr
+                key={b.id}
+                className="border-b border-border/40 last:border-0"
+              >
                 <td className="max-w-[14rem] px-3 py-2 font-medium">
                   <span className="line-clamp-2">{b.title}</span>
                 </td>
-                <td className="whitespace-nowrap px-3 py-2 font-mono text-xs">{b.isbn ?? "—"}</td>
+                <td className="whitespace-nowrap px-3 py-2 font-mono text-xs">
+                  {b.isbn ?? "—"}
+                </td>
                 <td className="max-w-[10rem] truncate px-3 py-2 text-muted-foreground">
                   {(b.authors ?? []).join(", ") || "—"}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
-                  {b.price_krw != null ? `${b.price_krw.toLocaleString("ko-KR")}원` : "—"}
+                  {b.price_krw != null
+                    ? `${b.price_krw.toLocaleString("ko-KR")}원`
+                    : "—"}
                 </td>
                 <td className="max-w-[8rem] truncate px-3 py-2 text-xs text-muted-foreground">
-                  {(b.genre_slugs ?? []).length > 0 ? b.genre_slugs!.join(", ") : "—"}
+                  {(b.genre_slugs ?? []).length > 0
+                    ? b.genre_slugs!.join(", ")
+                    : "—"}
                 </td>
-                <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">{b.source}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
+                  {b.source}
+                </td>
                 <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
                   {new Date(b.updated_at).toLocaleDateString("ko-KR")}
                 </td>
@@ -260,7 +311,8 @@ export default async function AdminBooksPage({
                     if (!s || s.total === 0) return "—";
                     return (
                       <span title={`소장 ${s.owned}건 · 전체 ${s.total}건`}>
-                        {s.owned > 0 ? `소장 ${s.owned}` : "읽는 중만"} · {s.total}건
+                        {s.owned > 0 ? `소장 ${s.owned}` : "읽는 중만"} ·{" "}
+                        {s.total}건
                       </span>
                     );
                   })()}
@@ -268,7 +320,9 @@ export default async function AdminBooksPage({
                 <td className="px-3 py-2 text-right">
                   <div className="flex flex-wrap items-center justify-end gap-2">
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/dashboard/admin/books/${b.id}/edit`}>수정</Link>
+                      <Link href={`/dashboard/admin/books/${b.id}/edit`}>
+                        수정
+                      </Link>
                     </Button>
                     <AdminBookDeleteForm
                       bookId={b.id}
@@ -289,12 +343,16 @@ export default async function AdminBooksPage({
         <div className="flex flex-wrap gap-2">
           {page > 1 ? (
             <Button variant="outline" size="sm" asChild>
-              <Link href={adminBooksListHref(q, genreMode, sortMode, page - 1)}>이전</Link>
+              <Link href={adminBooksListHref(q, genreMode, sortMode, page - 1)}>
+                이전
+              </Link>
             </Button>
           ) : null}
           {page < totalPages ? (
             <Button variant="outline" size="sm" asChild>
-              <Link href={adminBooksListHref(q, genreMode, sortMode, page + 1)}>다음</Link>
+              <Link href={adminBooksListHref(q, genreMode, sortMode, page + 1)}>
+                다음
+              </Link>
             </Button>
           ) : null}
         </div>

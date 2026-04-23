@@ -10,7 +10,7 @@ import {
   type LibrarySummary,
   type ReadingStatus,
   type ShareToLibraryInput,
-  type UpdateLibraryInput
+  type UpdateLibraryInput,
 } from "@bookfolio/shared";
 
 import {
@@ -18,9 +18,12 @@ import {
   updateUserBook,
   UserBookAlreadyInShelfError,
   type DbCanonicalBook,
-  type RepositoryContext
+  type RepositoryContext,
 } from "@/lib/books/repository";
-import { appendUserBookMemoLine, fetchLatestMemoPreviewsForUserBookIds } from "@/lib/books/user-book-sidecars";
+import {
+  appendUserBookMemoLine,
+  fetchLatestMemoPreviewsForUserBookIds,
+} from "@/lib/books/user-book-sidecars";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { tryAwardPointsForEvent } from "@/lib/points/award-points";
@@ -30,7 +33,7 @@ import { hasActiveVipSubscription } from "@/lib/subscription/vip";
 import {
   SharedLibraryMemberCapError,
   SharedLibraryPointsRequiredError,
-  SharedLibraryVipOwnedCapError
+  SharedLibraryVipOwnedCapError,
 } from "@/lib/libraries/shared-library-policy";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -53,7 +56,10 @@ async function getClient(context?: RepositoryContext) {
   return createSupabaseAdminClient();
 }
 
-async function countLibrariesCreatedBy(supabase: SupabaseClient, userId: string): Promise<number> {
+async function countLibrariesCreatedBy(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<number> {
   const { count, error } = await supabase
     .from("libraries")
     .select("id", { count: "exact", head: true })
@@ -67,7 +73,7 @@ async function countLibrariesCreatedBy(supabase: SupabaseClient, userId: string)
 async function countLibraryMembersForLibrary(
   supabase: SupabaseClient,
   libraryId: string,
-  role?: LibraryMemberRole
+  role?: LibraryMemberRole,
 ): Promise<number> {
   let q = supabase
     .from("library_members")
@@ -83,22 +89,28 @@ async function countLibraryMembersForLibrary(
   return count ?? 0;
 }
 
-async function deleteLibraryCascade(supabase: SupabaseClient, libraryId: string): Promise<void> {
-  const { error } = await supabase.from("libraries").delete().eq("id", libraryId);
+async function deleteLibraryCascade(
+  supabase: SupabaseClient,
+  libraryId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("libraries")
+    .delete()
+    .eq("id", libraryId);
   if (error) {
     throw error;
   }
 }
 
 /**
- * `libraries.created_by` 기준, 해당 사용자가 소유자로 만든 공동서재 개수.
+ * `libraries.created_by` 기준, 해당 사용자가 소유자로 만든 공동서가 개수.
  *
  * @history
  * - 2026-03-25: `policies_json.sharedLibraryCreateLimit` 검증·UI용
  */
 export async function countLibrariesCreatedByUser(
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<number> {
   const supabase = await getClient(context);
   return countLibrariesCreatedBy(supabase, userId);
@@ -107,7 +119,7 @@ export async function countLibrariesCreatedByUser(
 async function getMemberRole(
   supabase: SupabaseClient,
   libraryId: string,
-  userId: string
+  userId: string,
 ): Promise<LibraryMemberRole | null> {
   const { data, error } = await supabase
     .from("library_members")
@@ -127,12 +139,12 @@ async function getMemberRole(
 export async function assertLibraryMember(
   libraryId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibraryMemberRole> {
   const supabase = await getClient(context);
   const role = await getMemberRole(supabase, libraryId, userId);
   if (!role) {
-    throw new Error("공동서재에 접근할 권한이 없습니다.");
+    throw new Error("공동서가에 접근할 권한이 없습니다.");
   }
   return role;
 }
@@ -140,7 +152,7 @@ export async function assertLibraryMember(
 export async function assertLibraryOwner(
   libraryId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<void> {
   const role = await assertLibraryMember(libraryId, userId, context);
   if (role !== "owner") {
@@ -148,7 +160,10 @@ export async function assertLibraryOwner(
   }
 }
 
-function mapLibraryRow(row: DbLibraryRow, myRole: LibraryMemberRole): LibrarySummary {
+function mapLibraryRow(
+  row: DbLibraryRow,
+  myRole: LibraryMemberRole,
+): LibrarySummary {
   return {
     id: row.id,
     name: row.name,
@@ -157,13 +172,13 @@ function mapLibraryRow(row: DbLibraryRow, myRole: LibraryMemberRole): LibrarySum
     createdBy: row.created_by,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    myRole
+    myRole,
   };
 }
 
 export async function listLibrariesForUser(
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibrarySummary[]> {
   const supabase = await getClient(context);
   const { data, error } = await supabase
@@ -180,7 +195,7 @@ export async function listLibrariesForUser(
         created_at,
         updated_at
       )
-    `
+    `,
     )
     .eq("user_id", userId);
 
@@ -204,7 +219,7 @@ export async function listLibrariesForUser(
 export async function createLibrary(
   input: CreateLibraryInput,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibrarySummary> {
   const supabase = await getClient(context);
   const name = input.name.trim();
@@ -212,12 +227,17 @@ export async function createLibrary(
     throw new Error("이름을 입력해 주세요.");
   }
 
-  const [{ data: policyRow }, createdCount, subCaps, vipActive] = await Promise.all([
-    supabase.from("app_users").select("policies_json").eq("id", userId).maybeSingle(),
-    countLibrariesCreatedBy(supabase, userId),
-    getActiveSubscriptionCaps(supabase, userId),
-    hasActiveVipSubscription(supabase, userId)
-  ]);
+  const [{ data: policyRow }, createdCount, subCaps, vipActive] =
+    await Promise.all([
+      supabase
+        .from("app_users")
+        .select("policies_json")
+        .eq("id", userId)
+        .maybeSingle(),
+      countLibrariesCreatedBy(supabase, userId),
+      getActiveSubscriptionCaps(supabase, userId),
+      hasActiveVipSubscription(supabase, userId),
+    ]);
   const policies = mergeAppUserPolicies(policyRow?.policies_json);
   const baseLimit = policies.sharedLibraryCreateLimit;
   const vipOwnedMax = subCaps?.caps.shared_libraries_owned_max;
@@ -232,7 +252,7 @@ export async function createLibrary(
       name,
       description: input.description?.trim() ? input.description.trim() : null,
       kind: input.kind,
-      created_by: userId
+      created_by: userId,
     })
     .select("id, name, description, kind, created_by, created_at, updated_at")
     .single();
@@ -245,7 +265,7 @@ export async function createLibrary(
       library_id: row.id,
       user_id: userId,
       role: "owner",
-      joined_at: new Date().toISOString()
+      joined_at: new Date().toISOString(),
     });
 
     if (memErr) throw memErr;
@@ -271,7 +291,7 @@ export async function createLibrary(
     eventCode: POINT_EVENT_CODES.shared_library_create_extra,
     idempotencyKey: `${POINT_EVENT_CODES.shared_library_create_extra}:${row.id}`,
     refType: "library",
-    refId: row.id
+    refId: row.id,
   });
 
   if (pt.ok && (pt.kind === "posted" || pt.kind === "vip_spend_exempt")) {
@@ -284,16 +304,20 @@ export async function createLibrary(
     throw new SharedLibraryPointsRequiredError();
   }
   if (!pt.ok && pt.kind === "no_rule_or_zero") {
-    throw new SharedLibraryPointsRequiredError("추가 공동서재에 필요한 포인트 규칙이 없습니다. 관리자에게 문의하세요.");
+    throw new SharedLibraryPointsRequiredError(
+      "추가 공동서가에 필요한 포인트 규칙이 없습니다. 관리자에게 문의하세요.",
+    );
   }
-  throw new SharedLibraryPointsRequiredError("추가 공동서재를 만들 수 없습니다. 포인트 또는 정책을 확인해 주세요.");
+  throw new SharedLibraryPointsRequiredError(
+    "추가 공동서가를 만들 수 없습니다. 포인트 또는 정책을 확인해 주세요.",
+  );
 }
 
-/** 공동서재 목록은 매핑된 user_books만 보이므로, 소유자 개인 서재 전체를 서재 생성 시 자동 연결한다. */
+/** 공동서가 목록은 매핑된 user_books만 보이므로, 소유자 개인 서가 전체를 서가 생성 시 자동 연결한다. */
 async function linkAllUserBooksToLibrary(
   supabase: SupabaseClient,
   libraryId: string,
-  ownerUserId: string
+  ownerUserId: string,
 ): Promise<void> {
   const { data: ubRows, error: ubErr } = await supabase
     .from("user_books")
@@ -311,22 +335,24 @@ async function linkAllUserBooksToLibrary(
     library_id: libraryId,
     user_book_id: userBookId,
     linked_by: ownerUserId,
-    linked_at: now
+    linked_at: now,
   }));
 
   const chunkSize = 200;
   for (let i = 0; i < payload.length; i += chunkSize) {
     const chunk = payload.slice(i, i + chunkSize);
-    const { error: linkErr } = await supabase.from("library_user_books").insert(chunk);
+    const { error: linkErr } = await supabase
+      .from("library_user_books")
+      .insert(chunk);
     if (linkErr) throw linkErr;
   }
 }
 
-/** 개인 서재에 책을 새로 넣었을 때, 내가 속한 모든 공동서재(소유자·멤버)에 동일 매핑을 둔다. */
+/** 개인 서가에 책을 새로 넣었을 때, 내가 속한 모든 공동서가(소유자·멤버)에 동일 매핑을 둔다. */
 export async function linkUserBookToOwnedLibraries(
   userBookId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<void> {
   const supabase = await getClient(context);
   const { data: libs, error } = await supabase
@@ -335,7 +361,9 @@ export async function linkUserBookToOwnedLibraries(
     .eq("user_id", userId);
 
   if (error) throw error;
-  const libraryIds = [...new Set((libs ?? []).map((r) => r.library_id as string))];
+  const libraryIds = [
+    ...new Set((libs ?? []).map((r) => r.library_id as string)),
+  ];
   if (libraryIds.length === 0) {
     return;
   }
@@ -345,20 +373,22 @@ export async function linkUserBookToOwnedLibraries(
     library_id: libraryId,
     user_book_id: userBookId,
     linked_by: userId,
-    linked_at: now
+    linked_at: now,
   }));
 
-  const { error: upErr } = await supabase.from("library_user_books").upsert(payload, {
-    onConflict: "library_id,user_book_id",
-    ignoreDuplicates: true
-  });
+  const { error: upErr } = await supabase
+    .from("library_user_books")
+    .upsert(payload, {
+      onConflict: "library_id,user_book_id",
+      ignoreDuplicates: true,
+    });
   if (upErr) throw upErr;
 }
 
 export async function getLibrary(
   libraryId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibrarySummary | null> {
   const supabase = await getClient(context);
   const role = await getMemberRole(supabase, libraryId, userId);
@@ -381,7 +411,7 @@ export async function updateLibrary(
   libraryId: string,
   input: UpdateLibraryInput,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibrarySummary> {
   await assertLibraryOwner(libraryId, userId, context);
   const supabase = await getClient(context);
@@ -393,7 +423,9 @@ export async function updateLibrary(
     patch.name = n;
   }
   if (input.description !== undefined) {
-    patch.description = input.description?.trim() ? input.description.trim() : null;
+    patch.description = input.description?.trim()
+      ? input.description.trim()
+      : null;
   }
   if (input.kind !== undefined) {
     patch.kind = input.kind;
@@ -419,25 +451,28 @@ export async function updateLibrary(
 export async function deleteLibrary(
   libraryId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<void> {
   await assertLibraryOwner(libraryId, userId, context);
   const supabase = await getClient(context);
-  const { error } = await supabase.from("libraries").delete().eq("id", libraryId);
+  const { error } = await supabase
+    .from("libraries")
+    .delete()
+    .eq("id", libraryId);
   if (error) throw error;
 }
 
 /**
- * 공동서재 소유권을 다른 멤버에게 이전합니다 (`libraries.created_by`, `library_members.role`).
+ * 공동서가 소유권을 다른 멤버에게 이전합니다 (`libraries.created_by`, `library_members.role`).
  *
  * @history
- * - 2026-03-26: 회원 탈투 전 소유 공동서재 정리(이전) 지원
+ * - 2026-03-26: 회원 탈투 전 소유 공동서가 정리(이전) 지원
  */
 export async function transferLibraryOwnership(
   libraryId: string,
   newOwnerUserId: string,
   actorUserId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<void> {
   await assertLibraryOwner(libraryId, actorUserId, context);
 
@@ -456,7 +491,7 @@ export async function transferLibraryOwnership(
 
   if (nmErr) throw nmErr;
   if (!newMember) {
-    throw new Error("선택한 사용자는 이 서재의 멤버가 아닙니다.");
+    throw new Error("선택한 사용자는 이 서가의 멤버가 아닙니다.");
   }
 
   const { error: libErr } = await supabase
@@ -490,7 +525,7 @@ export async function transferLibraryOwnership(
 export async function listLibraryMembers(
   libraryId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibraryMemberRow[]> {
   await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
@@ -524,7 +559,7 @@ export async function listLibraryMembers(
       name: (u?.name as string | null) ?? null,
       image: (u?.image as string | null) ?? null,
       role: r.role as LibraryMemberRole,
-      joinedAt: r.joined_at as string
+      joinedAt: r.joined_at as string,
     };
   });
 }
@@ -533,7 +568,7 @@ export async function addLibraryMemberByEmail(
   libraryId: string,
   emailRaw: string,
   actorUserId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibraryMemberRow> {
   await assertLibraryOwner(libraryId, actorUserId, context);
   const supabase = await getClient(context);
@@ -555,19 +590,23 @@ export async function addLibraryMemberByEmail(
 
   const targetId = userRow.id as string;
   if (targetId === actorUserId) {
-    throw new Error("이미 이 서재의 멤버입니다.");
+    throw new Error("이미 이 서가의 멤버입니다.");
   }
 
-  const [totalMembers, memberRoleCount, actorSub, actorVip] = await Promise.all([
-    countLibraryMembersForLibrary(supabase, libraryId),
-    countLibraryMembersForLibrary(supabase, libraryId, "member"),
-    getActiveSubscriptionCaps(supabase, actorUserId),
-    hasActiveVipSubscription(supabase, actorUserId)
-  ]);
+  const [totalMembers, memberRoleCount, actorSub, actorVip] = await Promise.all(
+    [
+      countLibraryMembersForLibrary(supabase, libraryId),
+      countLibraryMembersForLibrary(supabase, libraryId, "member"),
+      getActiveSubscriptionCaps(supabase, actorUserId),
+      hasActiveVipSubscription(supabase, actorUserId),
+    ],
+  );
 
   const maxMembersRaw = actorSub?.caps.shared_library_members_total_max;
   const maxM =
-    typeof maxMembersRaw === "number" && Number.isFinite(maxMembersRaw) && maxMembersRaw >= 0
+    typeof maxMembersRaw === "number" &&
+    Number.isFinite(maxMembersRaw) &&
+    maxMembersRaw >= 0
       ? Math.floor(maxMembersRaw)
       : null;
   if (maxM != null && totalMembers >= maxM) {
@@ -580,17 +619,24 @@ export async function addLibraryMemberByEmail(
       eventCode: POINT_EVENT_CODES.shared_library_invite_extra,
       idempotencyKey: `${POINT_EVENT_CODES.shared_library_invite_extra}:${libraryId}:${targetId}`,
       refType: "library",
-      refId: libraryId
+      refId: libraryId,
     });
 
-    if (!pt.ok || !(pt.ok && (pt.kind === "posted" || pt.kind === "vip_spend_exempt"))) {
+    if (
+      !pt.ok ||
+      !(pt.ok && (pt.kind === "posted" || pt.kind === "vip_spend_exempt"))
+    ) {
       if (!pt.ok && pt.kind === "insufficient_balance") {
         throw new SharedLibraryPointsRequiredError();
       }
       if (!pt.ok && pt.kind === "no_rule_or_zero") {
-        throw new SharedLibraryPointsRequiredError("초대에 필요한 포인트 규칙이 없습니다. 관리자에게 문의하세요.");
+        throw new SharedLibraryPointsRequiredError(
+          "초대에 필요한 포인트 규칙이 없습니다. 관리자에게 문의하세요.",
+        );
       }
-      throw new SharedLibraryPointsRequiredError("멤버를 추가할 수 없습니다. 포인트를 확인해 주세요.");
+      throw new SharedLibraryPointsRequiredError(
+        "멤버를 추가할 수 없습니다. 포인트를 확인해 주세요.",
+      );
     }
   }
 
@@ -598,12 +644,12 @@ export async function addLibraryMemberByEmail(
     library_id: libraryId,
     user_id: targetId,
     role: "member",
-    joined_at: new Date().toISOString()
+    joined_at: new Date().toISOString(),
   });
 
   if (insErr) {
     if (insErr.code === "23505") {
-      throw new Error("이미 이 서재의 멤버입니다.");
+      throw new Error("이미 이 서가의 멤버입니다.");
     }
     throw insErr;
   }
@@ -616,7 +662,7 @@ export async function addLibraryMemberByEmail(
     name: (userRow.name as string | null) ?? null,
     image: (userRow.image as string | null) ?? null,
     role: "member",
-    joinedAt: new Date().toISOString()
+    joinedAt: new Date().toISOString(),
   };
 }
 
@@ -624,12 +670,12 @@ export async function removeLibraryMember(
   libraryId: string,
   targetUserId: string,
   actorUserId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<void> {
   const supabase = await getClient(context);
   const actorRole = await getMemberRole(supabase, libraryId, actorUserId);
   if (!actorRole) {
-    throw new Error("공동서재에 접근할 권한이 없습니다.");
+    throw new Error("공동서가에 접근할 권한이 없습니다.");
   }
 
   if (targetUserId !== actorUserId) {
@@ -651,7 +697,9 @@ export async function removeLibraryMember(
   }
 
   if (targetRow.role === "owner") {
-    throw new Error("소유자는 멤버 목록에서 제거할 수 없습니다. 서재를 삭제하세요.");
+    throw new Error(
+      "소유자는 멤버 목록에서 제거할 수 없습니다. 서가를 삭제하세요.",
+    );
   }
 
   const { data: targetBooks, error: tbErr } = await supabase
@@ -695,10 +743,12 @@ type LinkedLibraryRow = {
   };
 };
 
-function pickBookFromNested(ub: LinkedLibraryRow["user_books"]): DbCanonicalBook | null {
+function pickBookFromNested(
+  ub: LinkedLibraryRow["user_books"],
+): DbCanonicalBook | null {
   const b = ub.books;
   if (!b) return null;
-  return Array.isArray(b) ? b[0] ?? null : b;
+  return Array.isArray(b) ? (b[0] ?? null) : b;
 }
 
 type FlatLinked = {
@@ -719,12 +769,18 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
     if (!book) continue;
     const st = r.user_books.reading_status;
     const rs: ReadingStatus =
-      st === "unread" || st === "reading" || st === "completed" || st === "paused" || st === "dropped"
+      st === "unread" ||
+      st === "reading" ||
+      st === "completed" ||
+      st === "paused" ||
+      st === "dropped"
         ? st
         : "unread";
     const rawRating = r.user_books.rating;
     const rating =
-      typeof rawRating === "number" && Number.isFinite(rawRating) ? rawRating : null;
+      typeof rawRating === "number" && Number.isFinite(rawRating)
+        ? rawRating
+        : null;
     out.push({
       userBookId: r.user_book_id,
       linkedAt: r.linked_at,
@@ -733,7 +789,7 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
       readingStatus: rs,
       rating,
       location: r.user_books.location,
-      book
+      book,
     });
   }
   return out;
@@ -743,14 +799,14 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
  * `book_id`별 소유자 묶음 → 집계 행.
  *
  * @history
- * - 2026-04-12: 소유자별 `rating` — 공동서재 Hall of Fame
+ * - 2026-04-12: 소유자별 `rating` — 공동서가 Hall of Fame
  * - 2026-03-24: 공유 서지 `genre_slugs`를 `genreSlugs`로 노출
  */
 function buildAggregatedList(
   libraryId: string,
   flat: FlatLinked[],
   profiles: Map<string, { email: string; name: string | null }>,
-  memoPreviewByUserBookId: Map<string, string | null>
+  memoPreviewByUserBookId: Map<string, string | null>,
 ): LibraryAggregatedBookRow[] {
   const byBook = new Map<string, FlatLinked[]>();
   for (const f of flat) {
@@ -779,11 +835,14 @@ function buildAggregatedList(
         rating: g.rating,
         location: g.location,
         memoPreview: memoPreviewByUserBookId.get(g.userBookId) ?? null,
-        linkedAt: g.linkedAt
+        linkedAt: g.linkedAt,
       };
     });
     owners.sort((a, b) => a.linkedAt.localeCompare(b.linkedAt));
-    const updatedAt = owners.reduce((m, o) => (o.linkedAt > m ? o.linkedAt : m), owners[0]?.linkedAt ?? "");
+    const updatedAt = owners.reduce(
+      (m, o) => (o.linkedAt > m ? o.linkedAt : m),
+      owners[0]?.linkedAt ?? "",
+    );
     const rawGenres = Array.isArray(book.genre_slugs) ? book.genre_slugs : [];
     const genreSlugs = rawGenres.map((x) => String(x).trim()).filter(Boolean);
     result.push({
@@ -795,7 +854,7 @@ function buildAggregatedList(
       coverUrl: normalizeCoverUrlForClient(book.cover_url),
       genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined,
       owners,
-      updatedAt
+      updatedAt,
     });
   }
 
@@ -805,7 +864,7 @@ function buildAggregatedList(
 
 async function fetchLinkedRowsForLibrary(
   supabase: SupabaseClient,
-  libraryId: string
+  libraryId: string,
 ): Promise<LinkedLibraryRow[]> {
   const { data, error } = await supabase
     .from("library_user_books")
@@ -840,7 +899,7 @@ async function fetchLinkedRowsForLibrary(
           updated_at
         )
       )
-    `
+    `,
     )
     .eq("library_id", libraryId);
 
@@ -850,19 +909,25 @@ async function fetchLinkedRowsForLibrary(
 
 async function loadProfilesForUserIds(
   supabase: SupabaseClient,
-  userIds: string[]
+  userIds: string[],
 ): Promise<Map<string, { email: string; name: string | null }>> {
   const unique = [...new Set(userIds)];
   if (unique.length === 0) {
     return new Map();
   }
-  const { data, error } = await supabase.from("app_users").select("id, email, name").in("id", unique);
+  const { data, error } = await supabase
+    .from("app_users")
+    .select("id, email, name")
+    .in("id", unique);
   if (error) throw error;
   return new Map(
     (data ?? []).map((u) => [
       u.id as string,
-      { email: (u.email as string) ?? "", name: (u.name as string | null) ?? null }
-    ])
+      {
+        email: (u.email as string) ?? "",
+        name: (u.name as string | null) ?? null,
+      },
+    ]),
   );
 }
 
@@ -873,7 +938,7 @@ async function loadProfilesForUserIds(
 export async function listLibraryBooks(
   libraryId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibraryAggregatedBookRow[]> {
   await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
@@ -881,11 +946,11 @@ export async function listLibraryBooks(
   const flat = flattenLinkedRows(rows);
   const previews = await fetchLatestMemoPreviewsForUserBookIds(
     supabase,
-    flat.map((f) => f.userBookId)
+    flat.map((f) => f.userBookId),
   );
   const profiles = await loadProfilesForUserIds(
     supabase,
-    flat.map((f) => f.userId)
+    flat.map((f) => f.userId),
   );
   return buildAggregatedList(libraryId, flat, profiles, previews);
 }
@@ -894,7 +959,7 @@ export async function getLibraryAggregatedBook(
   libraryId: string,
   bookId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibraryAggregatedBookRow | null> {
   await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
@@ -905,11 +970,11 @@ export async function getLibraryAggregatedBook(
   }
   const previews = await fetchLatestMemoPreviewsForUserBookIds(
     supabase,
-    flat.map((f) => f.userBookId)
+    flat.map((f) => f.userBookId),
   );
   const profiles = await loadProfilesForUserIds(
     supabase,
-    flat.map((f) => f.userId)
+    flat.map((f) => f.userId),
   );
   return buildAggregatedList(libraryId, flat, profiles, previews)[0] ?? null;
 }
@@ -918,13 +983,13 @@ export async function shareBookToLibrary(
   libraryId: string,
   input: ShareToLibraryInput,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibraryAggregatedBookRow> {
   await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
 
   let userBookIdToLink: string;
-  /** 공동서재 폼으로 새 user_books를 만든 경우에만, 내가 속한 다른 공동서재에도 같은 매핑을 둔다. */
+  /** 공동서가 폼으로 새 user_books를 만든 경우에만, 내가 속한 다른 공동서가에도 같은 매핑을 둔다. */
   let propagateNewBookToOwnedLibraries = false;
 
   if ("userBookId" in input && input.userBookId) {
@@ -936,7 +1001,7 @@ export async function shareBookToLibrary(
       .maybeSingle();
     if (error) throw error;
     if (!ub) {
-      throw new Error("내 서재에서 책을 찾을 수 없습니다.");
+      throw new Error("내 서가에서 책을 찾을 수 없습니다.");
     }
     userBookIdToLink = ub.id as string;
   } else if ("bookId" in input && input.bookId) {
@@ -950,26 +1015,39 @@ export async function shareBookToLibrary(
       .maybeSingle();
     if (error) throw error;
     if (!ub) {
-      throw new Error("개인 서재에 해당 책이 없습니다. 먼저 개인 서재에 추가해 주세요.");
+      throw new Error(
+        "개인 서가에 해당 책이 없습니다. 먼저 개인 서가에 추가해 주세요.",
+      );
     }
     userBookIdToLink = ub.id as string;
     if (input.location !== undefined) {
       await updateUserBook(
         userBookIdToLink,
         { location: input.location },
-        { userId, useAdmin: true }
+        { userId, useAdmin: true },
       );
     }
     if (input.memo !== undefined && String(input.memo).trim()) {
-      await appendUserBookMemoLine(userBookIdToLink, String(input.memo).trim(), {
-        userId,
-        useAdmin: true
-      });
+      await appendUserBookMemoLine(
+        userBookIdToLink,
+        String(input.memo).trim(),
+        {
+          userId,
+          useAdmin: true,
+        },
+      );
     }
   } else {
     const manual = input as Pick<
       CreateUserBookInput,
-      "isbn" | "title" | "authors" | "publisher" | "publishedDate" | "coverUrl" | "description" | "priceKrw"
+      | "isbn"
+      | "title"
+      | "authors"
+      | "publisher"
+      | "publishedDate"
+      | "coverUrl"
+      | "description"
+      | "priceKrw"
     > & { format?: BookFormat; location?: string | null; memo?: string | null };
     if (!manual.title?.trim()) {
       throw new Error("제목을 입력해 주세요.");
@@ -989,13 +1067,16 @@ export async function shareBookToLibrary(
           description: manual.description ?? null,
           priceKrw: manual.priceKrw ?? null,
           format: manual.format ?? "paper",
-          location: manual.location?.trim() ? manual.location.trim() : null
+          location: manual.location?.trim() ? manual.location.trim() : null,
         },
-        { userId, useAdmin: true }
+        { userId, useAdmin: true },
       );
       userBookIdToLink = created.id;
       if (manual.memo?.trim()) {
-        await appendUserBookMemoLine(created.id, manual.memo.trim(), { userId, useAdmin: true });
+        await appendUserBookMemoLine(created.id, manual.memo.trim(), {
+          userId,
+          useAdmin: true,
+        });
       }
       propagateNewBookToOwnedLibraries = true;
     } catch (e) {
@@ -1005,15 +1086,15 @@ export async function shareBookToLibrary(
           await updateUserBook(
             userBookIdToLink,
             {
-              location: manual.location?.trim() ? manual.location.trim() : null
+              location: manual.location?.trim() ? manual.location.trim() : null,
             },
-            { userId, useAdmin: true }
+            { userId, useAdmin: true },
           );
         }
         if (manual.memo !== undefined && manual.memo?.trim()) {
           await appendUserBookMemoLine(userBookIdToLink, manual.memo.trim(), {
             userId,
-            useAdmin: true
+            useAdmin: true,
           });
         }
       } else {
@@ -1026,12 +1107,12 @@ export async function shareBookToLibrary(
     library_id: libraryId,
     user_book_id: userBookIdToLink,
     linked_by: userId,
-    linked_at: new Date().toISOString()
+    linked_at: new Date().toISOString(),
   });
 
   if (insErr) {
     if (insErr.code === "23505") {
-      throw new Error("이미 이 서재에 올린 책입니다.");
+      throw new Error("이미 이 서가에 올린 책입니다.");
     }
     throw insErr;
   }
@@ -1058,7 +1139,7 @@ export async function unlinkMyBookFromSharedLibrary(
   libraryId: string,
   bookId: string,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<void> {
   await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
@@ -1089,7 +1170,7 @@ export async function updateMySharedLibraryReadingStatus(
   bookId: string,
   readingStatus: ReadingStatus,
   userId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<LibraryAggregatedBookRow> {
   await assertLibraryMember(libraryId, userId, context);
   const supabase = await getClient(context);
@@ -1116,7 +1197,7 @@ export async function updateMySharedLibraryReadingStatus(
   const linked = new Set((mapped ?? []).map((x) => x.user_book_id as string));
   const targetIds = myIds.filter((id) => linked.has(id));
   if (targetIds.length === 0) {
-    throw new Error("이 서재에 올리지 않은 책입니다.");
+    throw new Error("이 서가에 올리지 않은 책입니다.");
   }
 
   const now = new Date().toISOString();
@@ -1128,7 +1209,12 @@ export async function updateMySharedLibraryReadingStatus(
 
   if (upErr) throw upErr;
 
-  const agg = await getLibraryAggregatedBook(libraryId, bookId, userId, context);
+  const agg = await getLibraryAggregatedBook(
+    libraryId,
+    bookId,
+    userId,
+    context,
+  );
   if (!agg) {
     throw new Error("Not found");
   }

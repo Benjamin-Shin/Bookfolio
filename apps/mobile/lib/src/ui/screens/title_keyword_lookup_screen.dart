@@ -9,12 +9,13 @@ import 'package:provider/provider.dart';
 ///
 /// History:
 /// - 2026-04-12: 플레이스홀더 배경 — `surfaceContainerHigh`(회색 #E0E0E0 제거)
-/// - 2026-04-02: 메인 탭에서 분리 — 내 서재 검색·목록은 `LibraryScreen` 「내 책」
+/// - 2026-04-02: 메인 탭에서 분리 — 내 서가 검색·목록은 `LibraryScreen` 「내 책」
 class TitleKeywordLookupScreen extends StatefulWidget {
   const TitleKeywordLookupScreen({super.key});
 
   @override
-  State<TitleKeywordLookupScreen> createState() => _TitleKeywordLookupScreenState();
+  State<TitleKeywordLookupScreen> createState() =>
+      _TitleKeywordLookupScreenState();
 }
 
 class _TitleKeywordLookupScreenState extends State<TitleKeywordLookupScreen> {
@@ -100,7 +101,8 @@ class _TitleKeywordLookupScreenState extends State<TitleKeywordLookupScreen> {
                       ? const SizedBox(
                           width: 22,
                           height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
                       : const Text('검색'),
                 ),
@@ -123,14 +125,19 @@ class _TitleKeywordLookupScreenState extends State<TitleKeywordLookupScreen> {
               itemBuilder: (context, index) {
                 final r = _results[index];
                 final cover = resolveCoverImageUrl(r.coverUrl);
-                final authors = r.authors.isEmpty ? '저자 정보 없음' : r.authors.join(', ');
+                final authors =
+                    r.authors.isEmpty ? '저자 정보 없음' : r.authors.join(', ');
                 final sub = [
-                  if (r.publisher != null && r.publisher!.trim().isNotEmpty) r.publisher!.trim(),
+                  if (r.publisher != null && r.publisher!.trim().isNotEmpty)
+                    r.publisher!.trim(),
                   if (r.isbn.trim().isNotEmpty) 'ISBN ${r.isbn}',
                 ].join(' · ');
 
                 return Material(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
@@ -150,13 +157,16 @@ class _TitleKeywordLookupScreenState extends State<TitleKeywordLookupScreen> {
                                       cover,
                                       fit: BoxFit.cover,
                                       headers: kCoverImageRequestHeaders,
-                                      errorBuilder: (_, __, ___) => const ColoredBox(
-                                        color: BookfolioDesignTokens.surfaceContainerHigh,
+                                      errorBuilder: (_, __, ___) =>
+                                          const ColoredBox(
+                                        color: BookfolioDesignTokens
+                                            .surfaceContainerHigh,
                                         child: Icon(Icons.menu_book_outlined),
                                       ),
                                     )
                                   : const ColoredBox(
-                                      color: BookfolioDesignTokens.surfaceContainerHigh,
+                                      color: BookfolioDesignTokens
+                                          .surfaceContainerHigh,
                                       child: Icon(Icons.menu_book_outlined),
                                     ),
                             ),
@@ -168,7 +178,10 @@ class _TitleKeywordLookupScreenState extends State<TitleKeywordLookupScreen> {
                               children: [
                                 Text(
                                   r.title,
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
                                         fontWeight: FontWeight.w600,
                                       ),
                                 ),
@@ -181,8 +194,13 @@ class _TitleKeywordLookupScreenState extends State<TitleKeywordLookupScreen> {
                                   const SizedBox(height: 4),
                                   Text(
                                     sub,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
                                         ),
                                   ),
                                 ],

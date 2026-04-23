@@ -19,6 +19,7 @@ class LibraryController extends ChangeNotifier {
 
   AuthController? _auth;
   List<UserBook> _books = const [];
+
   /// 목록에 없을 때(필터·쪽) 상세 갱신용 스냅샷.
   final Map<String, UserBook> _bookDetailOverrides = {};
   bool _isLoading = false;
@@ -103,7 +104,8 @@ class LibraryController extends ChangeNotifier {
 
   void attach(AuthController auth) {
     _api.accessToken = () => auth.session?.accessToken;
-    final sessionChanged = _auth?.session?.accessToken != auth.session?.accessToken;
+    final sessionChanged =
+        _auth?.session?.accessToken != auth.session?.accessToken;
     _auth = auth;
     if (auth.isAuthenticated && sessionChanged) {
       _page = 1;
@@ -122,7 +124,8 @@ class LibraryController extends ChangeNotifier {
       _pendingBooksListTimeoutPrompt = false;
       _booksFromLocalCacheOnly = false;
       _localCacheLastSyncedAtMs = null;
-      LibraryOfflineStore.clearLibraryMirror().catchError((Object e, StackTrace st) {
+      LibraryOfflineStore.clearLibraryMirror()
+          .catchError((Object e, StackTrace st) {
         debugPrint('LibraryOfflineStore.clearLibraryMirror: $e\n$st');
       });
     }
@@ -203,7 +206,8 @@ class LibraryController extends ChangeNotifier {
       for (final b in _books) {
         _bookDetailOverrides.remove(b.id);
       }
-      final observedMin = (result.page - 1) * result.pageSize + result.items.length;
+      final observedMin =
+          (result.page - 1) * result.pageSize + result.items.length;
       _total = math.max(result.total, observedMin);
       _page = result.page;
       _pageSize = result.pageSize;
@@ -233,8 +237,7 @@ class LibraryController extends ChangeNotifier {
         _books = const [];
         _total = 0;
       } else {
-        _error =
-            '목록을 불러오는 데 시간이 너무 오래 걸립니다. 검색·필터를 끄고 다시 시도하거나 네트워크를 확인해 주세요.';
+        _error = '목록을 불러오는 데 시간이 너무 오래 걸립니다. 검색·필터를 끄고 다시 시도하거나 네트워크를 확인해 주세요.';
       }
       debugPrint('LibraryController loadBooksAtPage timeout: $e');
     } catch (error) {
@@ -273,7 +276,7 @@ class LibraryController extends ChangeNotifier {
         _pageSize = defaultPageSize;
         _localCacheLastSyncedAtMs = null;
         _error =
-            '이 기기에 저장된 서재 목록이 없습니다. 연결이 될 때 목록을 한 번 불러오면 이후 비슷한 상황에서 사용할 수 있습니다.';
+            '이 기기에 저장된 서가 목록이 없습니다. 연결이 될 때 목록을 한 번 불러오면 이후 비슷한 상황에서 사용할 수 있습니다.';
         return;
       }
 
@@ -360,4 +363,3 @@ class LibraryController extends ChangeNotifier {
     return r.items;
   }
 }
-

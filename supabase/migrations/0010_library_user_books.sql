@@ -1,4 +1,4 @@
--- 공동서재: 개인 소장(user_books)을 서재에 연결하는 매핑. library_books / library_book_member_states 제거.
+-- 공동서가: 개인 소장(user_books)을 서가에 연결하는 매핑. library_books / library_book_member_states 제거.
 
 create table if not exists public.library_user_books (
   library_id uuid not null references public.libraries (id) on delete cascade,
@@ -14,7 +14,7 @@ create index if not exists idx_library_user_books_library_id
 create index if not exists idx_library_user_books_user_book_id
   on public.library_user_books (user_book_id);
 
-comment on table public.library_user_books is '공동서재에 노출할 user_books 행(멤버별 선택 공유).';
+comment on table public.library_user_books is '공동서가에 노출할 user_books 행(멤버별 선택 공유).';
 
 -- 기존 library_books → 매핑 백필 (added_by + book_id로 개인 소장 행 매칭, 동일 다건 시 최근 updated_at 우선)
 insert into public.library_user_books (library_id, user_book_id, linked_at, linked_by)

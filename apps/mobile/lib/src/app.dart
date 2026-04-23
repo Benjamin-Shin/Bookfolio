@@ -9,7 +9,7 @@ import 'package:seogadam_mobile/src/ui/screens/auth_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-/// 루트 위젯: 테마·인증·서재 상태를 제공한다.
+/// 루트 위젯: 테마·인증·서가 상태를 제공한다.
 ///
 /// History:
 /// - 2026-04-06: `ConnectivityController` — 루트 네트워크 가드
@@ -25,14 +25,18 @@ class BookfolioApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeController()..restore()),
         ChangeNotifierProvider(create: (_) => ConnectivityController()),
-        ChangeNotifierProvider(create: (_) => AuthController()..restoreSession()),
+        ChangeNotifierProvider(
+            create: (_) => AuthController()..restoreSession()),
         ChangeNotifierProxyProvider<AuthController, LibraryController>(
           create: (_) => LibraryController(),
-          update: (_, auth, library) => (library ?? LibraryController())..attach(auth),
+          update: (_, auth, library) =>
+              (library ?? LibraryController())..attach(auth),
         ),
-        ChangeNotifierProxyProvider<AuthController, SharedLibraryInviteController>(
+        ChangeNotifierProxyProvider<AuthController,
+            SharedLibraryInviteController>(
           create: (_) => SharedLibraryInviteController(),
-          update: (_, auth, prev) => (prev ?? SharedLibraryInviteController())..attach(auth),
+          update: (_, auth, prev) =>
+              (prev ?? SharedLibraryInviteController())..attach(auth),
         ),
       ],
       child: Consumer<ThemeController>(
@@ -51,4 +55,3 @@ class BookfolioApp extends StatelessWidget {
     );
   }
 }
-

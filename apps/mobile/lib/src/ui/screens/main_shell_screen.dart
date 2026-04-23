@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 
 enum _ShelfMode { my, shared }
 
-/// 하단 5탭(홈·서재·발견·통계·프로필) + 상단 블러 앱바·드로어.
+/// 하단 5탭(홈·서가·발견·통계·프로필) + 상단 블러 앱바·드로어.
 ///
 /// @history
 /// - 2026-04-23: 상단 브레드크럼 내비게이션 추가 — 주요 페이지를 한 번에 이동
@@ -118,8 +118,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: BookfolioDesignTokens.surface
-                    .withValues(alpha: BookfolioDesignTokens.glassSurfaceOpacity),
+                color: BookfolioDesignTokens.surface.withValues(
+                    alpha: BookfolioDesignTokens.glassSurfaceOpacity),
               ),
               child: SafeArea(
                 bottom: false,
@@ -133,7 +133,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
                           children: [
                             IconButton(
                               onPressed: _openDrawer,
-                              icon: Icon(Icons.menu_rounded, color: BookfolioDesignTokens.primary),
+                              icon: Icon(Icons.menu_rounded,
+                                  color: BookfolioDesignTokens.primary),
                               tooltip: '메뉴',
                             ),
                             Expanded(
@@ -149,7 +150,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
                                 ),
                               ),
                             ),
-                            ProfileToolbarAvatar(imageUrl: _toolbarAvatarUrl, size: 40),
+                            ProfileToolbarAvatar(
+                                imageUrl: _toolbarAvatarUrl, size: 40),
                           ],
                         ),
                       ),
@@ -182,7 +184,9 @@ class _MainShellScreenState extends State<MainShellScreen> {
             onOpenMyLibrary: _goMyShelf,
             onOpenStats: () => setState(() => _tabIndex = 3),
           ),
-          _shelfMode == _ShelfMode.my ? const LibraryScreen() : const SharedLibrariesScreen(embeddedInShell: true),
+          _shelfMode == _ShelfMode.my
+              ? const LibraryScreen()
+              : const SharedLibrariesScreen(embeddedInShell: true),
           const DiscoverScreen(embeddedInShell: true),
           const LibraryAnalysisScreen(embeddedInShell: true),
           const ProfileScreen(embeddedInShell: true),
@@ -239,7 +243,7 @@ class _ShellBreadcrumbBar extends StatelessWidget {
             ),
             _BreadcrumbChevron(color: inactiveColor),
             _BreadcrumbItem(
-              label: '서재',
+              label: '서가',
               selected: shelfSelected && shelfMode == _ShelfMode.my,
               onTap: onTapMyShelf,
               activeColor: activeColor,
@@ -247,7 +251,7 @@ class _ShellBreadcrumbBar extends StatelessWidget {
             ),
             _BreadcrumbChevron(color: inactiveColor),
             _BreadcrumbItem(
-              label: '공유서재',
+              label: '공유서가',
               selected: sharedSelected,
               onTap: onTapSharedShelf,
               activeColor: activeColor,
@@ -319,7 +323,8 @@ class _BreadcrumbItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = selected ? activeColor : inactiveColor.withValues(alpha: 0.88);
+    final Color color =
+        selected ? activeColor : inactiveColor.withValues(alpha: 0.88);
     return TextButton(
       onPressed: onTap,
       style: TextButton.styleFrom(
@@ -388,7 +393,7 @@ class _BookfolioBottomNavBar extends StatelessWidget {
                     selected: currentIndex == 1,
                     iconOutlined: Icons.local_library_outlined,
                     iconFilled: Icons.local_library,
-                    label: '서재',
+                    label: '서가',
                     activeColor: active,
                     inactiveColor: inactive,
                     onTap: () => onChanged(1),

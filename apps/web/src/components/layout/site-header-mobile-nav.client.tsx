@@ -50,7 +50,7 @@ type SiteHeaderMobileNavProps = {
   user: { id: string; email: string; role?: string | null } | null;
   displayLabel: string;
   initialProfile: AppProfileView | null;
-  /** 소유 공동서재에 다른 멤버가 있어 탈퇴가 막히는 서재 이름(서버 `assertAccountDeleteAllowed`와 동일) */
+  /** 소유 공동서가에 다른 멤버가 있어 탈퇴가 막히는 서가 이름(서버 `assertAccountDeleteAllowed`와 동일) */
   sharedLibrariesBlockingWithdrawal: string[];
 };
 
@@ -71,7 +71,7 @@ function MobileNavLink({
       onClick={onNavigate}
       className={cn(
         "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted",
-        className
+        className,
       )}
     >
       {children}
@@ -141,7 +141,9 @@ export function SiteHeaderMobileNav({
                     email={user.email}
                     displayLabel={displayLabel}
                     initialProfile={initialProfile}
-                    sharedLibrariesBlockingWithdrawal={sharedLibrariesBlockingWithdrawal}
+                    sharedLibrariesBlockingWithdrawal={
+                      sharedLibrariesBlockingWithdrawal
+                    }
                   />
                 </div>
                 <Separator className="my-2" />
@@ -178,12 +180,9 @@ export function SiteHeaderMobileNav({
                     <Separator className="my-2" />
                   </>
                 ) : null}
-                <MobileNavLink
-                  href="/dashboard/libraries"
-                  onNavigate={close}
-                >
+                <MobileNavLink href="/dashboard/libraries" onNavigate={close}>
                   <UsersRoundIcon className="size-4 opacity-80" />
-                  공동서재
+                  공동서가
                 </MobileNavLink>
                 <MobileNavLink
                   href="/dashboard/bookfolio-aggregate"
@@ -192,10 +191,7 @@ export function SiteHeaderMobileNav({
                   <BarChart3Icon className="size-4 opacity-80" />
                   서가담 집계
                 </MobileNavLink>
-                <MobileNavLink
-                  href="/dashboard/bestsellers"
-                  onNavigate={close}
-                >
+                <MobileNavLink href="/dashboard/bestsellers" onNavigate={close}>
                   <FlameIcon className="size-4 opacity-80" />
                   베스트셀러
                 </MobileNavLink>
@@ -204,10 +200,13 @@ export function SiteHeaderMobileNav({
                   초이스 신간
                 </MobileNavLink>
                 <MobileNavLink href="/dashboard" onNavigate={close}>
-                  <LibraryBigIcon className="size-4 opacity-90" />
-                  내 서재
+                  <LibraryBigIcon className="size-4 opacity-90" />내 서가
                 </MobileNavLink>
-                <form action="/auth/signout" method="post" className="mt-2 px-1">
+                <form
+                  action="/auth/signout"
+                  method="post"
+                  className="mt-2 px-1"
+                >
                   <Button
                     type="submit"
                     variant="ghost"
@@ -225,8 +224,7 @@ export function SiteHeaderMobileNav({
                   로그인
                 </MobileNavLink>
                 <MobileNavLink href="/dashboard" onNavigate={close}>
-                  <LibraryBigIcon className="size-4 opacity-90" />
-                  내 서재
+                  <LibraryBigIcon className="size-4 opacity-90" />내 서가
                 </MobileNavLink>
               </>
             )}

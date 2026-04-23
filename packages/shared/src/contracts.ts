@@ -1,5 +1,5 @@
 /**
- * 카탈로그(`books`)·서재 표시용 매체 구분. 캐논 서지 1행(ISBN)당 하나.
+ * 카탈로그(`books`)·서가 표시용 매체 구분. 캐논 서지 1행(ISBN)당 하나.
  *
  * @history
  * - 2026-03-26: `audiobook`, `unknown` 추가 — DB `0021`·캐논 포맷 정렬
@@ -21,7 +21,7 @@ export const BOOK_FORMAT_LABEL_KO = {
   paper: "종이책",
   ebook: "전자책",
   audiobook: "오디오북",
-  unknown: "형식 미상"
+  unknown: "형식 미상",
 } as const satisfies Record<BookFormat, string>;
 
 export const READING_STATUS_LABEL_KO = {
@@ -29,7 +29,7 @@ export const READING_STATUS_LABEL_KO = {
   reading: "읽는 중",
   completed: "완독",
   paused: "일시중단",
-  dropped: "하차"
+  dropped: "하차",
 } as const satisfies Record<ReadingStatus, string>;
 
 export type EnvironmentName = "local" | "staging" | "production";
@@ -238,12 +238,12 @@ export interface ReadingLeaderboardResponse {
 
 /** DB `app_users.policies_json`과 맞춘 확장 가능 정책(알 수 없는 키는 무시). */
 export interface AppUserPolicies {
-  /** 내가 소유자로 새로 만든 공동서재(`libraries.created_by`) 최대 개수 */
+  /** 내가 소유자로 새로 만든 공동서가(`libraries.created_by`) 최대 개수 */
   sharedLibraryCreateLimit: number;
 }
 
 export const DEFAULT_APP_USER_POLICIES: AppUserPolicies = {
-  sharedLibraryCreateLimit: 1
+  sharedLibraryCreateLimit: 1,
 };
 
 /**
@@ -254,7 +254,12 @@ export const DEFAULT_APP_USER_POLICIES: AppUserPolicies = {
  */
 export function mergeAppUserPolicies(raw: unknown): AppUserPolicies {
   const out: AppUserPolicies = { ...DEFAULT_APP_USER_POLICIES };
-  if (raw === null || raw === undefined || typeof raw !== "object" || Array.isArray(raw)) {
+  if (
+    raw === null ||
+    raw === undefined ||
+    typeof raw !== "object" ||
+    Array.isArray(raw)
+  ) {
     return out;
   }
   const o = raw as Record<string, unknown>;
@@ -298,7 +303,7 @@ export interface LibrarySummary {
 }
 
 /**
- * 공동서재 멤버 한 줄.
+ * 공동서가 멤버 한 줄.
  *
  * @history
  * - 2026-04-12: `image` — `app_users.image`(OAuth 아바타 등) 목록 표시용
@@ -314,7 +319,7 @@ export interface LibraryMemberRow {
 }
 
 /**
- * 공동서재 집계 한 줄에 포함되는 소유자(개인 user_books 1행).
+ * 공동서가 집계 한 줄에 포함되는 소유자(개인 user_books 1행).
  *
  * @history
  * - 2026-04-12: `rating` — Hall of Fame(완독·개인 평점 4+) 판별용
@@ -333,7 +338,7 @@ export interface LibrarySharedOwnerRow {
   linkedAt: string;
 }
 
-/** book_id 기준으로 합친 공동서재 책 한 줄. */
+/** book_id 기준으로 합친 공동서가 책 한 줄. */
 export interface LibraryAggregatedBookRow {
   libraryId: string;
   bookId: string;
@@ -361,10 +366,10 @@ export interface UpdateLibraryInput {
 }
 
 /**
- * 공동서재에 개인 소장을 연결.
- * - userBookId: 이미 있는 내 user_books 행만 서재에 올림.
- * - bookId: 내 서재에 해당 books.id가 있으면 연결(없으면 400).
- * - 그 외: 개인 서재 등록과 동일 필드로 user_books 생성 후 연결(format 생략 시 paper).
+ * 공동서가에 개인 소장을 연결.
+ * - userBookId: 이미 있는 내 user_books 행만 서가에 올림.
+ * - bookId: 내 서가에 해당 books.id가 있으면 연결(없으면 400).
+ * - 그 외: 개인 서가 등록과 동일 필드로 user_books 생성 후 연결(format 생략 시 paper).
  */
 export type ShareToLibraryInput =
   | { userBookId: string }
@@ -374,10 +379,20 @@ export type ShareToLibraryInput =
       bookId?: undefined;
     } & Pick<
       CreateUserBookInput,
-      "isbn" | "title" | "authors" | "publisher" | "publishedDate" | "coverUrl" | "description" | "priceKrw"
-    > & { format?: BookFormat; location?: string | null; memo?: string | null });
+      | "isbn"
+      | "title"
+      | "authors"
+      | "publisher"
+      | "publishedDate"
+      | "coverUrl"
+      | "description"
+      | "priceKrw"
+    > & {
+        format?: BookFormat;
+        location?: string | null;
+        memo?: string | null;
+      });
 
 export interface SharedLibraryMyReadingInput {
   readingStatus: ReadingStatus;
 }
-

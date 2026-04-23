@@ -26,7 +26,7 @@ export function LibraryNewBookForm({ libraryId }: Props) {
     isbn: "",
     coverUrl: "",
     publisher: "",
-    publishedDate: ""
+    publishedDate: "",
   });
   const [priceKrwInput, setPriceKrwInput] = useState("");
   const [title, setTitle] = useState("");
@@ -56,7 +56,7 @@ export function LibraryNewBookForm({ libraryId }: Props) {
       const res = await fetch("/api/books/lookup-by-isbn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isbn: raw })
+        body: JSON.stringify({ isbn: raw }),
       });
 
       const data = (await res.json()) as BookLookupResult | { error?: string };
@@ -80,14 +80,16 @@ export function LibraryNewBookForm({ libraryId }: Props) {
         isbn: book.isbn,
         coverUrl: book.coverUrl ?? "",
         publisher: book.publisher ?? "",
-        publishedDate: book.publishedDate ?? ""
+        publishedDate: book.publishedDate ?? "",
       });
       setPriceKrwInput(book.priceKrw != null ? String(book.priceKrw) : "");
       setDescription(book.description ?? "");
       setCoverPreview(book.coverUrl);
       setLookupOk(true);
     } catch {
-      setLookupError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      setLookupError(
+        "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+      );
       setCoverPreview(null);
       setPriceKrwInput("");
     } finally {
@@ -123,7 +125,11 @@ export function LibraryNewBookForm({ libraryId }: Props) {
 
     const priceRaw = priceKrwInput.trim();
     const priceKrw =
-      priceRaw === "" ? null : Number.isFinite(Number(priceRaw)) ? Math.round(Number(priceRaw)) : null;
+      priceRaw === ""
+        ? null
+        : Number.isFinite(Number(priceRaw))
+          ? Math.round(Number(priceRaw))
+          : null;
 
     setSubmitting(true);
     try {
@@ -140,8 +146,8 @@ export function LibraryNewBookForm({ libraryId }: Props) {
           description: description.trim() || null,
           priceKrw,
           location: location.trim() || null,
-          memo: memo.trim() || null
-        })
+          memo: memo.trim() || null,
+        }),
       });
       const data = (await res.json()) as { bookId?: string; error?: string };
       if (!res.ok) {
@@ -149,7 +155,9 @@ export function LibraryNewBookForm({ libraryId }: Props) {
         return;
       }
       if (data.bookId) {
-        router.push(`/dashboard/libraries/${libraryId}/books/${data.bookId}` as Route);
+        router.push(
+          `/dashboard/libraries/${libraryId}/books/${data.bookId}` as Route,
+        );
         router.refresh();
       }
     } catch {
@@ -164,7 +172,9 @@ export function LibraryNewBookForm({ libraryId }: Props) {
       <div className="space-y-3 rounded-lg border border-border/80 bg-muted/30 p-4">
         <div className="space-y-1">
           <Label htmlFor="lib-isbn-lookup">ISBN으로 검색</Label>
-          <p className="text-xs text-muted-foreground">개인 서재와 동일한 출처로 메타데이터를 가져옵니다.</p>
+          <p className="text-xs text-muted-foreground">
+            개인 서가와 동일한 출처로 메타데이터를 가져옵니다.
+          </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
           <div className="min-w-0 flex-1 space-y-2">
@@ -186,7 +196,12 @@ export function LibraryNewBookForm({ libraryId }: Props) {
               }}
             />
           </div>
-          <Button type="button" variant="secondary" disabled={lookupLoading} onClick={() => void handleIsbnLookup()}>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={lookupLoading}
+            onClick={() => void handleIsbnLookup()}
+          >
             {lookupLoading ? "검색 중…" : "검색"}
           </Button>
         </div>
@@ -197,7 +212,9 @@ export function LibraryNewBookForm({ libraryId }: Props) {
           </Alert>
         ) : null}
         {lookupOk ? (
-          <p className="text-sm text-muted-foreground">메타데이터를 폼에 반영했습니다. 필요하면 수정한 뒤 등록하세요.</p>
+          <p className="text-sm text-muted-foreground">
+            메타데이터를 폼에 반영했습니다. 필요하면 수정한 뒤 등록하세요.
+          </p>
         ) : null}
         {coverPreview ? (
           <div className="flex justify-center pt-1">
@@ -210,7 +227,9 @@ export function LibraryNewBookForm({ libraryId }: Props) {
         ) : null}
       </div>
 
-      {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
+      {formError ? (
+        <p className="text-sm text-destructive">{formError}</p>
+      ) : null}
 
       <div className="space-y-2">
         <Label htmlFor="lib-price">가격 (원, 선택)</Label>
@@ -250,12 +269,24 @@ export function LibraryNewBookForm({ libraryId }: Props) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="lib-loc">위치 (선택)</Label>
-        <p className="text-xs text-muted-foreground">개인 소장(user_books)에 저장되며, 멤버에게 함께 표시됩니다.</p>
-        <Input id="lib-loc" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="예: 거실 책장" />
+        <p className="text-xs text-muted-foreground">
+          개인 소장(user_books)에 저장되며, 멤버에게 함께 표시됩니다.
+        </p>
+        <Input
+          id="lib-loc"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="예: 거실 책장"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="lib-memo">메모 (선택)</Label>
-        <Textarea id="lib-memo" value={memo} onChange={(e) => setMemo(e.target.value)} rows={3} />
+        <Textarea
+          id="lib-memo"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          rows={3}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="lib-desc">책 소개</Label>
@@ -269,7 +300,7 @@ export function LibraryNewBookForm({ libraryId }: Props) {
       </div>
 
       <Button type="submit" disabled={submitting}>
-        {submitting ? "등록 중…" : "공동서재에 추가"}
+        {submitting ? "등록 중…" : "공동서가에 추가"}
       </Button>
     </form>
   );

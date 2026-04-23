@@ -45,7 +45,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_submitting) return;
     setState(() => _submitting = true);
     try {
-      await context.read<LibraryController>().api.updateMeProfile({'onboardingCompleted': true});
+      await context
+          .read<LibraryController>()
+          .api
+          .updateMeProfile({'onboardingCompleted': true});
       if (!mounted) return;
       widget.onCompleted?.call();
     } catch (e) {
@@ -60,7 +63,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _next() {
     if (_page < _totalPages - 1) {
-      _pageController.nextPage(duration: const Duration(milliseconds: 280), curve: Curves.easeOutCubic);
+      _pageController.nextPage(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic);
     } else {
       _finish();
     }
@@ -106,14 +111,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 final on = i <= _page;
                 return Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(right: i == _totalPages - 1 ? 0 : 6),
+                    padding:
+                        EdgeInsets.only(right: i == _totalPages - 1 ? 0 : 6),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       height: 3,
                       decoration: BoxDecoration(
                         color: on
                             ? BookfolioDesignTokens.primary
-                            : BookfolioDesignTokens.outlineVariant.withValues(alpha: 0.35),
+                            : BookfolioDesignTokens.outlineVariant
+                                .withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -131,7 +138,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   icon: Icons.menu_book_rounded,
                   title: '서가담에 오신 것을 환영합니다',
                   body:
-                      '개인 서재에 책을 등록하고, 읽기 상태와 기록을 남길 수 있어요.\n다음 화면에서 책을 빠르게 넣는 방법을 안내할게요.',
+                      '개인 서가에 책을 등록하고, 읽기 상태와 기록을 남길 수 있어요.\n다음 화면에서 책을 빠르게 넣는 방법을 안내할게요.',
                 ),
                 _OnboardingPage(
                   icon: Icons.qr_code_scanner_rounded,
@@ -143,7 +150,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   icon: Icons.edit_note_rounded,
                   title: '직접 입력·검색도 가능해요',
                   body:
-                      '등록 화면에서 ISBN을 직접 입력하거나, 제목·키워드 검색으로 책을 찾을 수 있습니다.\n종이책 위주로 서재를 관리해 보세요.',
+                      '등록 화면에서 ISBN을 직접 입력하거나, 제목·키워드 검색으로 책을 찾을 수 있습니다.\n종이책 위주로 서가를 관리해 보세요.',
                 ),
               ],
             ),
@@ -161,11 +168,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ? const SizedBox(
                       height: 22,
                       width: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
                     )
                   : Text(
-                      _page < _totalPages - 1 ? '다음' : (widget.reviewOnly ? '닫기' : '시작하기'),
-                      style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 0.3),
+                      _page < _totalPages - 1
+                          ? '다음'
+                          : (widget.reviewOnly ? '닫기' : '시작하기'),
+                      style: GoogleFonts.manrope(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          letterSpacing: 0.3),
                     ),
             ),
           ),
@@ -197,15 +210,19 @@ class _OnboardingPage extends StatelessWidget {
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: BookfolioDesignTokens.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
-              border: Border.all(color: BookfolioDesignTokens.ghostOutline(0.12)),
+              borderRadius:
+                  BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+              border:
+                  Border.all(color: BookfolioDesignTokens.ghostOutline(0.12)),
             ),
             child: Icon(icon, size: 40, color: BookfolioDesignTokens.primary),
           ),
           const SizedBox(height: 28),
           Text(
             title,
-            style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal)
+            style: BookfolioDesignTokens.headlineMd(
+                    BookfolioDesignTokens.primary,
+                    fontStyle: FontStyle.normal)
                 .copyWith(fontSize: 26, height: 1.2),
           ),
           const SizedBox(height: 16),

@@ -8,7 +8,7 @@ export type AdminSession = Session & {
 };
 
 /**
- * 관리자 전용 라우트에서 호출합니다. 비로그인 → 로그인, USER → 내 서재로 보냅니다.
+ * 관리자 전용 라우트에서 호출합니다. 비로그인 → 로그인, USER → 내 서가로 보냅니다.
  */
 export async function requireAdmin(): Promise<AdminSession> {
   const session = await auth();

@@ -20,7 +20,7 @@ type LibraryBooksPaginationProps = {
 };
 
 /**
- * 공동서재 상세 — 탭별 책 목록 이전/다음.
+ * 공동서가 상세 — 탭별 책 목록 이전/다음.
  *
  * @history
  * - 2026-04-12: 신규
@@ -59,7 +59,12 @@ export function LibraryBooksPagination({
         {sectionLabel} {total.toLocaleString("ko-KR")}권 · {page}/{totalPages}쪽
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" disabled={!hasPrev} asChild={hasPrev}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!hasPrev}
+          asChild={hasPrev}
+        >
           {hasPrev ? (
             <Link href={href(page - 1)} prefetch={false}>
               이전
@@ -68,7 +73,12 @@ export function LibraryBooksPagination({
             <span>이전</span>
           )}
         </Button>
-        <Button variant="outline" size="sm" disabled={!hasNext} asChild={hasNext}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!hasNext}
+          asChild={hasNext}
+        >
           {hasNext ? (
             <Link href={href(page + 1)} prefetch={false}>
               다음

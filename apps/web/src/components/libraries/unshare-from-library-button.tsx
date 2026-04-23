@@ -16,12 +16,19 @@ export function UnshareFromLibraryButton({ libraryId, bookId }: Props) {
   const [loading, setLoading] = useState(false);
 
   async function handleUnshare() {
-    if (!window.confirm("이 서재에서 내 책만 빼시겠어요? 개인 서재에는 그대로 남습니다.")) {
+    if (
+      !window.confirm(
+        "이 서가에서 내 책만 빼시겠어요? 개인 서가에는 그대로 남습니다.",
+      )
+    ) {
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/me/libraries/${libraryId}/books/${bookId}`, { method: "DELETE" });
+      const res = await fetch(
+        `/api/me/libraries/${libraryId}/books/${bookId}`,
+        { method: "DELETE" },
+      );
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
         window.alert(data.error ?? "처리하지 못했습니다.");
@@ -37,8 +44,13 @@ export function UnshareFromLibraryButton({ libraryId, bookId }: Props) {
   }
 
   return (
-    <Button type="button" variant="outline" disabled={loading} onClick={() => void handleUnshare()}>
-      {loading ? "처리 중…" : "이 서재에서 내 책 빼기"}
+    <Button
+      type="button"
+      variant="outline"
+      disabled={loading}
+      onClick={() => void handleUnshare()}
+    >
+      {loading ? "처리 중…" : "이 서가에서 내 책 빼기"}
     </Button>
   );
 }

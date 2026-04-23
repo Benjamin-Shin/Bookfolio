@@ -5,10 +5,16 @@ import { BookCoverUploadFieldState } from "@/components/books/book-cover-upload-
 import {
   BookFormatChoiceFieldset,
   RatingChoiceFieldset,
-  ReadingStatusChoiceFieldset
+  ReadingStatusChoiceFieldset,
 } from "@/components/books/shelf-choice-fields";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getUserBookWithCanonical } from "@/lib/books/repository";
@@ -19,7 +25,11 @@ import { getUserBookWithCanonical } from "@/lib/books/repository";
  * - 2026-03-25: `BookCoverUploadFieldState` — `variant="edit"`(미리보기·비-Cloudinary 이관)
  * - 2026-03-25: `BookCoverUploadFieldState` — 표지 Cloudinary 업로드·저장
  */
-export default async function BookEditPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BookEditPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const row = await getUserBookWithCanonical(id);
 
@@ -35,11 +45,13 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
       <Card className="border-border/80">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className="text-xl">내 서재 기록 수정</CardTitle>
+            <CardTitle className="text-xl">내 서가 기록 수정</CardTitle>
             <CardDescription className="mt-1">
-              「{displayTitle}」의 내 서재 필드(형식·상태·위치·소장 여부·독서 진행 쪽), 참고 가격, 표지 이미지 URL을 바꿀 수
-              있습니다. 긴 메모는 상세 화면의 마크다운 메모에서 관리합니다. 가격·표지는 공유 도서(`books`)에 저장되어 같은 서지를
-              쓰는 경우에도 반영될 수 있습니다.
+              「{displayTitle}」의 내 서가 필드(형식·상태·위치·소장 여부·독서
+              진행 쪽), 참고 가격, 표지 이미지 URL을 바꿀 수 있습니다. 긴 메모는
+              상세 화면의 마크다운 메모에서 관리합니다. 가격·표지는 공유
+              도서(`books`)에 저장되어 같은 서지를 쓰는 경우에도 반영될 수
+              있습니다.
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" asChild>
@@ -47,16 +59,25 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
           </Button>
         </CardHeader>
         <CardContent>
-          <form action={`/api/me/books/${userBook.id}`} method="post" className="space-y-6">
-            <BookCoverUploadFieldState initialCoverUrl={userBook.coverUrl ?? ""} variant="edit" />
+          <form
+            action={`/api/me/books/${userBook.id}`}
+            method="post"
+            className="space-y-6"
+          >
+            <BookCoverUploadFieldState
+              initialCoverUrl={userBook.coverUrl ?? ""}
+              variant="edit"
+            />
             <BookFormatChoiceFieldset defaultFormat={userBook.format} />
-            <ReadingStatusChoiceFieldset defaultStatus={userBook.readingStatus} />
+            <ReadingStatusChoiceFieldset
+              defaultStatus={userBook.readingStatus}
+            />
             <RatingChoiceFieldset defaultRating={userBook.rating ?? null} />
             <div className="space-y-2">
               <Label htmlFor="priceKrw">가격 (원)</Label>
               <p className="text-xs text-muted-foreground">
-                공유 서지(`books`)의 참고 가격입니다. 비우면 지웁니다. 같은 ISBN을 쓰는 다른 사용자에게도
-                보일 수 있습니다.
+                공유 서지(`books`)의 참고 가격입니다. 비우면 지웁니다. 같은
+                ISBN을 쓰는 다른 사용자에게도 보일 수 있습니다.
               </p>
               <Input
                 id="priceKrw"
@@ -102,7 +123,8 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
               <div className="space-y-2">
                 <Label htmlFor="readingTotalPages">총 쪽(선택)</Label>
                 <p className="text-xs text-muted-foreground">
-                  서지 쪽수와 다를 때만 입력하세요. 비우면 서지(`books.page_count`)를 따릅니다.
+                  서지 쪽수와 다를 때만 입력하세요. 비우면
+                  서지(`books.page_count`)를 따릅니다.
                 </p>
                 <Input
                   id="readingTotalPages"
@@ -131,7 +153,9 @@ export default async function BookEditPage({ params }: { params: Promise<{ id: s
             <div className="flex flex-wrap gap-3">
               <Button type="submit">저장</Button>
               <Button type="button" variant="outline" asChild>
-                <Link href={`/dashboard/books/${userBook.id}`}>상세로 돌아가기</Link>
+                <Link href={`/dashboard/books/${userBook.id}`}>
+                  상세로 돌아가기
+                </Link>
               </Button>
             </div>
           </form>

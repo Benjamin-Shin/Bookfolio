@@ -1,6 +1,11 @@
 import type { Route } from "next";
 
-export type LibraryBookTab = "owned" | "reading" | "unread" | "completed" | "hall";
+export type LibraryBookTab =
+  | "owned"
+  | "reading"
+  | "unread"
+  | "completed"
+  | "hall";
 
 export type LibraryBooksListQuery = {
   genre?: string;
@@ -11,13 +16,16 @@ export type LibraryBooksListQuery = {
 };
 
 /**
- * 공동서재 상세 URL (`tab`·`genre`·`owner`·`page`).
+ * 공동서가 상세 URL (`tab`·`genre`·`owner`·`page`).
  *
  * @history
- * - 2026-04-12: `tab`·`page` — 내 서재형 컬렉션 탭·페이지네이션
+ * - 2026-04-12: `tab`·`page` — 내 서가형 컬렉션 탭·페이지네이션
  * - 2026-03-24: 신규 — 장르·소유자 필터가 상호 유지되도록 공통 빌더
  */
-export function libraryDetailHref(libraryId: string, next: LibraryBooksListQuery): Route {
+export function libraryDetailHref(
+  libraryId: string,
+  next: LibraryBooksListQuery,
+): Route {
   const sp = new URLSearchParams();
   const tab = next.tab ?? "owned";
   if (tab !== "owned") {
@@ -37,7 +45,10 @@ export function libraryDetailHref(libraryId: string, next: LibraryBooksListQuery
 /**
  * @deprecated `libraryDetailHref` 사용 권장
  */
-export function libraryBooksListHref(libraryId: string, next: Pick<LibraryBooksListQuery, "genre" | "owner">): Route {
+export function libraryBooksListHref(
+  libraryId: string,
+  next: Pick<LibraryBooksListQuery, "genre" | "owner">,
+): Route {
   return libraryDetailHref(libraryId, { ...next, tab: "owned", page: 1 });
 }
 
@@ -48,7 +59,12 @@ export function libraryBooksListHref(libraryId: string, next: Pick<LibraryBooksL
  * - 2026-04-12: 신규
  */
 export function parseLibraryBookTab(raw: string | undefined): LibraryBookTab {
-  if (raw === "reading" || raw === "unread" || raw === "completed" || raw === "hall") {
+  if (
+    raw === "reading" ||
+    raw === "unread" ||
+    raw === "completed" ||
+    raw === "hall"
+  ) {
     return raw;
   }
   return "owned";

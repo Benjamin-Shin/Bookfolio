@@ -1,151 +1,195 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="ko"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<html class="light" lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
-            "colors": {
-                    "tertiary": "#67081d",
-                    "surface": "#fcf9f3",
-                    "inverse-primary": "#a9cfb7",
-                    "surface-bright": "#fcf9f3",
-                    "on-secondary-fixed": "#211a13",
-                    "on-error-container": "#93000a",
-                    "tertiary-fixed": "#ffdadb",
-                    "on-tertiary-fixed-variant": "#842131",
-                    "on-surface": "#1c1c18",
-                    "inverse-on-surface": "#f3f0ea",
-                    "secondary-fixed": "#efe0d4",
-                    "on-secondary-container": "#6d6259",
-                    "tertiary-fixed-dim": "#ffb2b6",
-                    "surface-container-highest": "#e5e2dc",
-                    "surface-dim": "#dcdad4",
-                    "inverse-surface": "#31312d",
-                    "outline": "#727973",
-                    "on-tertiary": "#ffffff",
-                    "secondary-fixed-dim": "#d2c4b9",
-                    "on-primary-container": "#9ac0a7",
-                    "surface-container": "#f0eee8",
-                    "surface-container-high": "#ebe8e2",
-                    "secondary-container": "#efe0d4",
-                    "on-error": "#ffffff",
-                    "on-secondary": "#ffffff",
-                    "surface-container-lowest": "#ffffff",
-                    "primary-fixed-dim": "#a9cfb7",
-                    "outline-variant": "#c1c8c1",
-                    "surface-container-low": "#f6f3ed",
-                    "on-tertiary-container": "#ff9aa1",
-                    "on-secondary-fixed-variant": "#4e453c",
-                    "primary-fixed": "#c5ecd2",
-                    "surface-tint": "#436651",
-                    "tertiary-container": "#862232",
-                    "background": "#fcf9f3",
-                    "error": "#ba1a1a",
-                    "primary": "#163826",
-                    "primary-container": "#2d4f3c",
-                    "on-primary": "#ffffff",
-                    "on-tertiary-fixed": "#40000d",
-                    "on-background": "#1c1c18",
-                    "error-container": "#ffdad6",
-                    "on-surface-variant": "#424843",
-                    "on-primary-fixed": "#002112",
-                    "surface-variant": "#e5e2dc",
-                    "on-primary-fixed-variant": "#2c4e3b",
-                    "secondary": "#675d53"
+            colors: {
+              tertiary: "#67081d",
+              surface: "#fcf9f3",
+              "inverse-primary": "#a9cfb7",
+              "surface-bright": "#fcf9f3",
+              "on-secondary-fixed": "#211a13",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#ffdadb",
+              "on-tertiary-fixed-variant": "#842131",
+              "on-surface": "#1c1c18",
+              "inverse-on-surface": "#f3f0ea",
+              "secondary-fixed": "#efe0d4",
+              "on-secondary-container": "#6d6259",
+              "tertiary-fixed-dim": "#ffb2b6",
+              "surface-container-highest": "#e5e2dc",
+              "surface-dim": "#dcdad4",
+              "inverse-surface": "#31312d",
+              outline: "#727973",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed-dim": "#d2c4b9",
+              "on-primary-container": "#9ac0a7",
+              "surface-container": "#f0eee8",
+              "surface-container-high": "#ebe8e2",
+              "secondary-container": "#efe0d4",
+              "on-error": "#ffffff",
+              "on-secondary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "primary-fixed-dim": "#a9cfb7",
+              "outline-variant": "#c1c8c1",
+              "surface-container-low": "#f6f3ed",
+              "on-tertiary-container": "#ff9aa1",
+              "on-secondary-fixed-variant": "#4e453c",
+              "primary-fixed": "#c5ecd2",
+              "surface-tint": "#436651",
+              "tertiary-container": "#862232",
+              background: "#fcf9f3",
+              error: "#ba1a1a",
+              primary: "#163826",
+              "primary-container": "#2d4f3c",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed": "#40000d",
+              "on-background": "#1c1c18",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#424843",
+              "on-primary-fixed": "#002112",
+              "surface-variant": "#e5e2dc",
+              "on-primary-fixed-variant": "#2c4e3b",
+              secondary: "#675d53",
             },
-            "borderRadius": {
-                    "DEFAULT": "0.125rem",
-                    "lg": "0.25rem",
-                    "xl": "0.5rem",
-                    "full": "0.75rem"
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
             },
-            "fontFamily": {
-                    "headline": ["Newsreader", "serif"],
-                    "body": ["Manrope", "sans-serif"],
-                    "label": ["Manrope", "sans-serif"]
-            }
+            fontFamily: {
+              headline: ["Newsreader", "serif"],
+              body: ["Manrope", "sans-serif"],
+              label: ["Manrope", "sans-serif"],
+            },
           },
         },
-      }
+      };
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
-            font-size: 20px;
-        }
-        body {
-            background-color: #fcf9f3;
-            font-family: 'Manrope', sans-serif;
-            color: #1c1c18;
-        }
-        .serif-kr {
-            font-family: 'Newsreader', serif;
-            word-break: keep-all;
-        }
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 200,
+          "GRAD" 0,
+          "opsz" 24;
+        font-size: 20px;
+      }
+      body {
+        background-color: #fcf9f3;
+        font-family: "Manrope", sans-serif;
+        color: #1c1c18;
+      }
+      .serif-kr {
+        font-family: "Newsreader", serif;
+        word-break: keep-all;
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="flex flex-col min-h-screen">
-<!-- Top AppBar (Onboarding Context: Minimalist, just Brand) -->
-<header class="flex justify-between items-center w-full px-6 py-8">
-<h1 class="font-headline text-2xl font-bold tracking-tighter text-primary">서가담</h1>
-<div class="text-secondary font-label text-sm tracking-widest">SKIP</div>
-</header>
-<!-- Main Content: Editorial Onboarding Slide -->
-<main class="flex-grow flex flex-col px-6">
-<!-- Asymmetric Layout Container -->
-<div class="flex flex-col mt-4 space-y-12">
-<!-- Hero Image: The "Archivist's Ribbon" implemented as a visual accent -->
-<div class="relative w-full aspect-[4/5] overflow-hidden rounded-sm bg-surface-container-low group">
-<div class="absolute left-0 top-12 w-1.5 h-16 bg-tertiary z-10"></div>
-<img alt="Minimal book layout" class="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-1000 group-hover:scale-105" data-alt="Close-up of a single open hardcover book on a heavy cream paper background with long, soft morning shadows and elegant typography visible on pages" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC43Oopfg9Q7PgJcjlvMZHkFOsnbMvMEaGoeW-X8P7DKuIyNnckGXiYEhCNH-e2in2WcDHjBvvjI9mxxPX0W4iryHkFS6RLddoSSCKJLXcOTd87rYqFQJiCIDPvGtoHZfhNihtVhLoKMmEsRLtTOCO0Yj2R_H6XBf-BnF_fYbHcugzfEt8FngBzPffNwhseNKNG9P1d2DCuOsbBmNhAU-oJvs6lXB98w-ySkkt4hUeFpyawMQByveNhjzzUWFT3YlCFS1u1MXGpiCw"/>
-<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-60"></div>
-</div>
-<!-- Typography Content -->
-<section class="max-w-xs space-y-6">
-<h2 class="serif-kr text-3xl md:text-4xl leading-[1.3] text-primary font-medium">
-                    당신의 읽는 삶을<br/>
-                    차곡히 쌓아가는 곳
-                </h2>
-<p class="font-body text-secondary text-lg leading-relaxed opacity-80">
-                    단순한 기록을 넘어, 당신의 서재가 하나의 작품이 되는 공간. 서가담에서 당신만의 이야기를 큐레이션 하세요.
-                </p>
-</section>
-</div>
-</main>
-<!-- Navigation & Footer Actions -->
-<footer class="px-6 py-12 space-y-10">
-<!-- Pagination Indicator -->
-<div class="flex items-center space-x-3">
-<div class="h-1 w-12 bg-primary rounded-full"></div>
-<div class="h-1 w-2 bg-outline-variant rounded-full opacity-40"></div>
-<div class="h-1 w-2 bg-outline-variant rounded-full opacity-40"></div>
-</div>
-<!-- Button Section -->
-<div class="flex items-center justify-between">
-<div class="flex flex-col">
-<span class="font-label text-[10px] text-secondary tracking-widest mb-1 opacity-60">NEXT CHAPTER</span>
-<span class="font-headline italic text-lg text-primary">Discovery</span>
-</div>
-<!-- Primary Command: Tactile Button -->
-<button class="bg-primary text-on-primary h-16 w-16 rounded-lg flex items-center justify-center shadow-lg shadow-primary/5 hover:scale-95 transition-transform">
-<span class="material-symbols-outlined text-3xl">arrow_forward</span>
-</button>
-</div>
-</footer>
-<!-- Background Decoration: Subtle Tonal Layering -->
-<div class="fixed top-1/2 -right-24 w-64 h-64 bg-secondary-container/20 rounded-full blur-3xl -z-10"></div>
-<div class="fixed -bottom-12 -left-12 w-48 h-48 bg-primary-container/10 rounded-full blur-2xl -z-10"></div>
-</body></html>
+  <body class="flex flex-col min-h-screen">
+    <!-- Top AppBar (Onboarding Context: Minimalist, just Brand) -->
+    <header class="flex justify-between items-center w-full px-6 py-8">
+      <h1
+        class="font-headline text-2xl font-bold tracking-tighter text-primary"
+      >
+        서가담
+      </h1>
+      <div class="text-secondary font-label text-sm tracking-widest">SKIP</div>
+    </header>
+    <!-- Main Content: Editorial Onboarding Slide -->
+    <main class="flex-grow flex flex-col px-6">
+      <!-- Asymmetric Layout Container -->
+      <div class="flex flex-col mt-4 space-y-12">
+        <!-- Hero Image: The "Archivist's Ribbon" implemented as a visual accent -->
+        <div
+          class="relative w-full aspect-[4/5] overflow-hidden rounded-sm bg-surface-container-low group"
+        >
+          <div class="absolute left-0 top-12 w-1.5 h-16 bg-tertiary z-10"></div>
+          <img
+            alt="Minimal book layout"
+            class="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-1000 group-hover:scale-105"
+            data-alt="Close-up of a single open hardcover book on a heavy cream paper background with long, soft morning shadows and elegant typography visible on pages"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC43Oopfg9Q7PgJcjlvMZHkFOsnbMvMEaGoeW-X8P7DKuIyNnckGXiYEhCNH-e2in2WcDHjBvvjI9mxxPX0W4iryHkFS6RLddoSSCKJLXcOTd87rYqFQJiCIDPvGtoHZfhNihtVhLoKMmEsRLtTOCO0Yj2R_H6XBf-BnF_fYbHcugzfEt8FngBzPffNwhseNKNG9P1d2DCuOsbBmNhAU-oJvs6lXB98w-ySkkt4hUeFpyawMQByveNhjzzUWFT3YlCFS1u1MXGpiCw"
+          />
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-60"
+          ></div>
+        </div>
+        <!-- Typography Content -->
+        <section class="max-w-xs space-y-6">
+          <h2
+            class="serif-kr text-3xl md:text-4xl leading-[1.3] text-primary font-medium"
+          >
+            당신의 읽는 삶을<br />
+            차곡히 쌓아가는 곳
+          </h2>
+          <p
+            class="font-body text-secondary text-lg leading-relaxed opacity-80"
+          >
+            단순한 기록을 넘어, 당신의 서가가 하나의 작품이 되는 공간.
+            서가담에서 당신만의 이야기를 큐레이션 하세요.
+          </p>
+        </section>
+      </div>
+    </main>
+    <!-- Navigation & Footer Actions -->
+    <footer class="px-6 py-12 space-y-10">
+      <!-- Pagination Indicator -->
+      <div class="flex items-center space-x-3">
+        <div class="h-1 w-12 bg-primary rounded-full"></div>
+        <div class="h-1 w-2 bg-outline-variant rounded-full opacity-40"></div>
+        <div class="h-1 w-2 bg-outline-variant rounded-full opacity-40"></div>
+      </div>
+      <!-- Button Section -->
+      <div class="flex items-center justify-between">
+        <div class="flex flex-col">
+          <span
+            class="font-label text-[10px] text-secondary tracking-widest mb-1 opacity-60"
+            >NEXT CHAPTER</span
+          >
+          <span class="font-headline italic text-lg text-primary"
+            >Discovery</span
+          >
+        </div>
+        <!-- Primary Command: Tactile Button -->
+        <button
+          class="bg-primary text-on-primary h-16 w-16 rounded-lg flex items-center justify-center shadow-lg shadow-primary/5 hover:scale-95 transition-transform"
+        >
+          <span class="material-symbols-outlined text-3xl">arrow_forward</span>
+        </button>
+      </div>
+    </footer>
+    <!-- Background Decoration: Subtle Tonal Layering -->
+    <div
+      class="fixed top-1/2 -right-24 w-64 h-64 bg-secondary-container/20 rounded-full blur-3xl -z-10"
+    ></div>
+    <div
+      class="fixed -bottom-12 -left-12 w-48 h-48 bg-primary-container/10 rounded-full blur-2xl -z-10"
+    ></div>
+  </body>
+</html>

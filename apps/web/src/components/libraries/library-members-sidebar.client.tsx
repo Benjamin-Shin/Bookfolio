@@ -47,12 +47,17 @@ function MemberAvatar({ member }: { member: LibraryMemberRow }) {
 }
 
 /**
- * 공동서재 좌측 — 멤버 목록(이메일 비표시)·소유자 초대·관리 다이얼로그.
+ * 공동서가 좌측 — 멤버 목록(이메일 비표시)·소유자 초대·관리 다이얼로그.
  *
  * @history
  * - 2026-04-12: `LibraryMembersPanel` 대체 — 아바타·이름 우선, 초대는 팝업
  */
-export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId, isOwner }: Props) {
+export function LibraryMembersSidebar({
+  libraryId,
+  initialMembers,
+  currentUserId,
+  isOwner,
+}: Props) {
   const router = useRouter();
   const [members, setMembers] = useState(initialMembers);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -106,12 +111,15 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
   }
 
   async function handleRemove(targetUserId: string) {
-    if (!confirm("이 멤버를 서재에서 제거할까요?")) return;
+    if (!confirm("이 멤버를 서가에서 제거할까요?")) return;
     setError(null);
     try {
-      const res = await fetch(`/api/me/libraries/${libraryId}/members/${targetUserId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/me/libraries/${libraryId}/members/${targetUserId}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
         setError(data.error ?? "제거하지 못했습니다.");
@@ -128,7 +136,7 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
     if (!transferTargetId) return;
     if (
       !confirm(
-        "소유권을 이전하면 더 이상 이 서재의 소유자가 아닙니다(멤버로 남습니다). 계속할까요?"
+        "소유권을 이전하면 더 이상 이 서가의 소유자가 아닙니다(멤버로 남습니다). 계속할까요?",
       )
     ) {
       return;
@@ -136,11 +144,14 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
     setError(null);
     setTransferLoading(true);
     try {
-      const res = await fetch(`/api/me/libraries/${libraryId}/transfer-ownership`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newOwnerUserId: transferTargetId }),
-      });
+      const res = await fetch(
+        `/api/me/libraries/${libraryId}/transfer-ownership`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ newOwnerUserId: transferTargetId }),
+        },
+      );
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
         setError(data.error ?? "소유권을 이전하지 못했습니다.");
@@ -179,12 +190,19 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
             </DialogTrigger>
             <DialogContent className="max-w-md border-[#051b0e]/10">
               <DialogHeader>
-                <DialogTitle className="font-serif text-[#051b0e]">멤버 초대</DialogTitle>
+                <DialogTitle className="font-serif text-[#051b0e]">
+                  멤버 초대
+                </DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-1">
-                {error ? <p className="text-sm text-destructive">{error}</p> : null}
+                {error ? (
+                  <p className="text-sm text-destructive">{error}</p>
+                ) : null}
                 {inviteFormMounted ? (
-                  <form className="space-y-3" onSubmit={(e) => void handleAdd(e)}>
+                  <form
+                    className="space-y-3"
+                    onSubmit={(e) => void handleAdd(e)}
+                  >
                     <div className="space-y-1">
                       <Label htmlFor="lib-invite-email">가입 이메일</Label>
                       <input
@@ -197,7 +215,11 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
                         autoComplete="email"
                       />
                     </div>
-                    <Button type="submit" disabled={loading} className="w-full bg-[#1a3021] hover:bg-[#1a3021]/90">
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-[#1a3021] hover:bg-[#1a3021]/90"
+                    >
                       {loading ? "추가 중…" : "초대 보내기"}
                     </Button>
                   </form>
@@ -207,9 +229,12 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
                     className="space-y-2 border-t border-border/60 pt-4"
                     onSubmit={(e) => void handleTransferOwnership(e)}
                   >
-                    <p className="text-sm font-medium text-[#051b0e]">소유권 이전</p>
+                    <p className="text-sm font-medium text-[#051b0e]">
+                      소유권 이전
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      다른 멤버에게 소유자 권한을 넘깁니다. 탈퇴 전 처리가 필요할 수 있습니다.
+                      다른 멤버에게 소유자 권한을 넘깁니다. 탈퇴 전 처리가
+                      필요할 수 있습니다.
                     </p>
                     <select
                       className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
@@ -224,7 +249,11 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
                         </option>
                       ))}
                     </select>
-                    <Button type="submit" variant="secondary" disabled={transferLoading || !transferTargetId}>
+                    <Button
+                      type="submit"
+                      variant="secondary"
+                      disabled={transferLoading || !transferTargetId}
+                    >
                       {transferLoading ? "처리 중…" : "소유권 이전"}
                     </Button>
                   </form>
@@ -238,7 +267,9 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
         ) : null}
       </div>
 
-      {error && !inviteOpen ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error && !inviteOpen ? (
+        <p className="text-xs text-destructive">{error}</p>
+      ) : null}
 
       <ul className="space-y-2">
         {members.map((m) => {
@@ -250,7 +281,9 @@ export function LibraryMembersSidebar({ libraryId, initialMembers, currentUserId
             >
               <MemberAvatar member={m} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-[#051b0e]">{name}</p>
+                <p className="truncate text-sm font-medium text-[#051b0e]">
+                  {name}
+                </p>
                 <p className="text-[0.65rem] uppercase tracking-wider text-[#1a3021]/50">
                   {m.role === "owner" ? "소유자" : "멤버"}
                 </p>

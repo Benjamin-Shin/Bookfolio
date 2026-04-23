@@ -936,7 +936,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     onSubmitted: (_) => _submit(auth),
                     decoration: _underlineDecoration(
                       label: '이름',
-                      hint: '서재에 표시되는 이름',
+                      hint: '서가에 표시되는 이름',
                     ),
                   ),
                   const SizedBox(height: 28),

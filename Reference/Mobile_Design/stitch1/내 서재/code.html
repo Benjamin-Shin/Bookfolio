@@ -1,252 +1,454 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="ko"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<html class="light" lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
-            "colors": {
-                    "on-error": "#ffffff",
-                    "on-tertiary-fixed-variant": "#842131",
-                    "error-container": "#ffdad6",
-                    "on-surface-variant": "#424843",
-                    "secondary-fixed": "#efe0d4",
-                    "surface-tint": "#436651",
-                    "secondary": "#675d53",
-                    "outline-variant": "#c1c8c1",
-                    "tertiary": "#67081d",
-                    "surface-dim": "#dcdad4",
-                    "surface-container-highest": "#e5e2dc",
-                    "inverse-primary": "#a9cfb7",
-                    "on-secondary-container": "#6d6259",
-                    "tertiary-fixed-dim": "#ffb2b6",
-                    "inverse-surface": "#31312d",
-                    "surface-container-low": "#f6f3ed",
-                    "tertiary-fixed": "#ffdadb",
-                    "on-secondary-fixed": "#211a13",
-                    "primary-container": "#2d4f3c",
-                    "on-primary-fixed-variant": "#2c4e3b",
-                    "on-secondary-fixed-variant": "#4e453c",
-                    "surface-bright": "#fcf9f3",
-                    "surface-container-high": "#ebe8e2",
-                    "secondary-container": "#efe0d4",
-                    "on-tertiary-fixed": "#40000d",
-                    "on-primary-fixed": "#002112",
-                    "surface-variant": "#e5e2dc",
-                    "outline": "#727973",
-                    "on-tertiary-container": "#ff9aa1",
-                    "error": "#ba1a1a",
-                    "on-background": "#1c1c18",
-                    "surface-container-lowest": "#ffffff",
-                    "primary": "#163826",
-                    "surface-container": "#f0eee8",
-                    "on-tertiary": "#ffffff",
-                    "on-primary": "#ffffff",
-                    "on-secondary": "#ffffff",
-                    "surface": "#fcf9f3",
-                    "on-surface": "#1c1c18",
-                    "secondary-fixed-dim": "#d2c4b9",
-                    "tertiary-container": "#862232",
-                    "on-primary-container": "#9ac0a7",
-                    "primary-fixed-dim": "#a9cfb7",
-                    "inverse-on-surface": "#f3f0ea",
-                    "on-error-container": "#93000a",
-                    "primary-fixed": "#c5ecd2",
-                    "background": "#fcf9f3"
+            colors: {
+              "on-error": "#ffffff",
+              "on-tertiary-fixed-variant": "#842131",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#424843",
+              "secondary-fixed": "#efe0d4",
+              "surface-tint": "#436651",
+              secondary: "#675d53",
+              "outline-variant": "#c1c8c1",
+              tertiary: "#67081d",
+              "surface-dim": "#dcdad4",
+              "surface-container-highest": "#e5e2dc",
+              "inverse-primary": "#a9cfb7",
+              "on-secondary-container": "#6d6259",
+              "tertiary-fixed-dim": "#ffb2b6",
+              "inverse-surface": "#31312d",
+              "surface-container-low": "#f6f3ed",
+              "tertiary-fixed": "#ffdadb",
+              "on-secondary-fixed": "#211a13",
+              "primary-container": "#2d4f3c",
+              "on-primary-fixed-variant": "#2c4e3b",
+              "on-secondary-fixed-variant": "#4e453c",
+              "surface-bright": "#fcf9f3",
+              "surface-container-high": "#ebe8e2",
+              "secondary-container": "#efe0d4",
+              "on-tertiary-fixed": "#40000d",
+              "on-primary-fixed": "#002112",
+              "surface-variant": "#e5e2dc",
+              outline: "#727973",
+              "on-tertiary-container": "#ff9aa1",
+              error: "#ba1a1a",
+              "on-background": "#1c1c18",
+              "surface-container-lowest": "#ffffff",
+              primary: "#163826",
+              "surface-container": "#f0eee8",
+              "on-tertiary": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-secondary": "#ffffff",
+              surface: "#fcf9f3",
+              "on-surface": "#1c1c18",
+              "secondary-fixed-dim": "#d2c4b9",
+              "tertiary-container": "#862232",
+              "on-primary-container": "#9ac0a7",
+              "primary-fixed-dim": "#a9cfb7",
+              "inverse-on-surface": "#f3f0ea",
+              "on-error-container": "#93000a",
+              "primary-fixed": "#c5ecd2",
+              background: "#fcf9f3",
             },
-            "borderRadius": {
-                    "DEFAULT": "0.125rem",
-                    "lg": "0.25rem",
-                    "xl": "0.5rem",
-                    "full": "0.75rem"
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
             },
-            "fontFamily": {
-                    "headline": ["Newsreader", "serif"],
-                    "body": ["Manrope", "sans-serif"],
-                    "label": ["Manrope", "sans-serif"]
-            }
+            fontFamily: {
+              headline: ["Newsreader", "serif"],
+              body: ["Manrope", "sans-serif"],
+              label: ["Manrope", "sans-serif"],
+            },
           },
         },
-      }
+      };
     </script>
-<style>
-        body { font-family: 'Manrope', sans-serif; background-color: #fcf9f3; color: #1c1c18; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
-        .editorial-shadow { box-shadow: 0 10px 30px -10px rgba(22, 56, 38, 0.04); }
+    <style>
+      body {
+        font-family: "Manrope", sans-serif;
+        background-color: #fcf9f3;
+        color: #1c1c18;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 300,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .editorial-shadow {
+        box-shadow: 0 10px 30px -10px rgba(22, 56, 38, 0.04);
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-surface text-on-surface selection:bg-primary-fixed selection:text-primary">
-<!-- TopAppBar -->
-<header class="fixed top-0 left-0 w-full z-40 bg-surface/90 backdrop-blur-md">
-<div class="flex justify-between items-center w-full px-6 py-4">
-<button class="hover:bg-surface-container-low rounded-full p-2 transition-colors">
-<span class="material-symbols-outlined text-primary">menu</span>
-</button>
-<h1 class="font-headline text-2xl font-bold tracking-tighter text-primary">나의 서재</h1>
-<button class="hover:bg-surface-container-low rounded-full p-2 transition-colors">
-<span class="material-symbols-outlined text-primary">notifications</span>
-</button>
-</div>
-</header>
-<main class="pt-20 pb-32 px-6">
-<!-- Filter Chips -->
-<section class="flex gap-2 overflow-x-auto pb-6 no-scrollbar">
-<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-primary text-on-primary text-sm font-medium">전체</button>
-<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium">읽는 중</button>
-<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium">완독</button>
-<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium">위시리스트</button>
-</section>
-<!-- Sorting Options -->
-<div class="flex justify-between items-center mb-8 border-b border-outline-variant/10 pb-2">
-<div class="flex items-center gap-1 text-secondary">
-<span class="material-symbols-outlined text-lg">sort</span>
-<span class="text-xs font-medium">최근 읽은 순</span>
-</div>
-<button class="flex items-center gap-1 text-primary">
-<span class="material-symbols-outlined text-lg">add_circle</span>
-<span class="text-xs font-bold">책 추가</span>
-</button>
-</div>
-<!-- Book Grid -->
-<div class="grid grid-cols-3 gap-x-4 gap-y-10">
-<!-- Book Item 1 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Minimalist book cover design with soft cream paper texture and elegant serif typography titled The Archivist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr3HL_t3RrBtPPx8HY8NBBlZSn3znDW7_M5-lnp1Fkw_bCFHoGGahcnvED6W80GESE-LPdI2VLAJd03MhWIrs1zcleHYnw0N9mTcOv5BHzpJKqcvD7uTF1iLe2R6e1zNCD8xJUUG6660XtUS3kcfZy532B86xqV_tIGpw_GWvYr5SDKERyoYNTpueRSoYh8e5kKcullLS7P8FVmIHrrgBhkVckYMf-Fhij2W6Y_TufpLqlZBcVZXBKnVqHLmAiTpzwASqNaA_qgR4"/>
-<div class="absolute top-1 right-1 bg-primary/90 text-[8px] text-white px-1.5 py-0.5 rounded-sm font-bold backdrop-blur-sm">완독</div>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">참을 수 없는 존재의 가벼움</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">밀란 쿤데라</p>
-</div>
-</div>
-<!-- Book Item 2 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Deep forest green book cover with gold foil accents resting on a wooden desk with soft light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAUSTztKhwKLpj_Pt5tvwR1zs7ZnprQQN4OOKLdHF7iCVyjrt3u0ECHsTqf7lHHd4Gn4omlNwpMzFG5GAFvcrWek6srkczaiR12RV3sF47SpkplkI2XKffOGZ6bNXCE7qAGSNDtIgHsFkGR14MdCW-K08lMyPigq0e4VeM2mMMTUiiKcAlg2yTn1l-IZO-9_6h2jfJYBSQvazpqL7bQD74LEmxmk9iQe1s0boyK7a-ZAQ4iApHND_yRb3Hpl8_ohgm0H0wD7JcGFA"/>
-<div class="absolute left-0 top-0 h-full w-1 bg-tertiary"></div>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">쇼펜하우어 아포리즘</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">아서 쇼펜하우어</p>
-</div>
-</div>
-<!-- Book Item 3 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Stack of vintage books with worn leather spines in an old library setting with dusty sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiWK1030wjIJ0esFuA0iKKXX7tGyp9VadbUFI63jPp0G1C9jqTM4HRtQP0vY0apOCTd0hJx9E7mwFkdQOAyl8gfTdNf0Y6QI1qxzNRZMeKSzEl2aqe6mDM8pcm6XHo_FPX91cO_5eFtu36Ja0jO6wpcyqExmnkJfDYro6CpxMvqsxHUtvl38UoCTcDAD4jVgb8yMJaq45dQjgWI6djR1XRtS9_70Fm8HDpktIOD4zZXri65nn4r8_QCdBMUlRmWAWcQsHUBQ9iczQ"/>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">페스트</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">알베르 카뮈</p>
-</div>
-</div>
-<!-- Book Item 4 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Clean white book cover with a single minimalist line drawing of a face and sans serif font" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-mddQdeyfcd1gT7LAPvVmb45uGudImYm9W4PiJ3D9z-ebDD-6bmisa2vmthDKVgCuFnEpS1zgBjy0qGUaojWUYmS6meEU7tiPVcYvxheLsVdgzTj6K6oHZwoJrVwa8lqB8tiIjYvlpqbSRArOZ9QTMFM87ULvxPIU1lucomc_70UNnzEk7zmhWnY5RIAjWjexU7RD0Sul40Tqk78m3_AcpCCB4TDZboDQElXFddOd5kybgDU3ngt5vAWIJJvl4BAUn06eH4bNqnc"/>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">다정한 것이 살아남는다</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">브라이언 헤어</p>
-</div>
-</div>
-<!-- Book Item 5 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Rich burgundy book cover with elegant golden emblem in the center against a parchment background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC36JRJXqEliQpbSz1qtaG0IEN_u8WOz2ETgWpSMUXYWT8YJgPFI-V3QSYb-g-q3IZ6fno0oHoO5jmLl67Fu9EQt3PuFG_dVyfLBFnOLPbCkdrvpxKRUFEb68CkkDJeKTCpDBHnARGscauhjirrHQu-Ch74Sl4aPvubMzxvtLe6n-WrMoW3oA1pMLOxkBSkft0blukGg67lX_RScobG1srkiBjaP-rspcwUXOFOvm9EmtWBpiRPgfGlWpExzMO5An41EIhSkY4ntpE"/>
-<div class="absolute top-1 right-1 bg-primary/90 text-[8px] text-white px-1.5 py-0.5 rounded-sm font-bold backdrop-blur-sm">완독</div>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">어린 왕자</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">생텍쥐페리</p>
-</div>
-</div>
-<!-- Book Item 6 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Open book showing yellowed pages and fine print with a fountain pen resting on the spine" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3UURGQuFr4KXp0tjp198fgoQj2n0quQ5s1rtNBrggJrj4kpesP_YgQmfLVLfjlRFXBoMbY6RqOnoG5L5ZSXMiEhFzTBIZXUWDz_81XgPOevF_XFw_vTMhZ49nEDGfj-wYsRL2hW0msDASA82fecN9UBOZmLrNub5wzwATnyJ5lagcEWB4h_hh553W-PPgPlqoeyYH727wKcJ4CgslhmWu-n-jV_9Qn1N_j6fS91zUGpVAO4_eDtGbKjnL256UPQHPcOa2CGF45Yg"/>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">데미안</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">헤르만 헤세</p>
-</div>
-</div>
-<!-- Book Item 7 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Modern abstract book cover with muted terracotta and indigo geometric shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5pZg4B-s5okUj-YRr0B6BujQG7LCH_wbsGsf5WpAWLupFn6WFrqNkpnS_N8KN72j8z8hvWow58u10H71_OR1i6gNFDu-RR2ow8hAYEl9PZNkXcq-S-n4fhKAMUYzhrj514JrIKlxBvesXMCBo251h170G4SCjERjUckoeOYBJsJN-7JRJBaEOE2q_PA4i_lfJDW8EExNdrJtXoJ1sr7H0cvTllbUkn4PBEWiLkjpHHjV6iGISICZEYdnn9QWF4BetbZXExVc8i6E"/>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">도둑맞은 집중력</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">요한 하리</p>
-</div>
-</div>
-<!-- Book Item 8 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Deep blue hardcover book with silver foil starry constellation pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4ogfo8MgGOPXzpYm295kBLUOiBRlI5kVTWtsaA94i-Fe3FFHPJsIoptg7aROv4geidJSjiKlx714q8b7ER10dS8hjTiMJfS5JXLsZ4TSW4UjwILdpZdKwbp0Erwv0OG5Y18CxQZp_xRGV6y22Q9btKCScVZDzu5qXeNCtWSBiDKArpTF6rOBlAcJU741EQ4e6EyHDTI05FNNJrw8owKgJ26RZtdgTfvEOSIEe3oRjb9mwNOT3ATYXU1Ai4CXWJtjtGWohIMVt77o"/>
-<div class="absolute top-1 right-1 bg-primary/90 text-[8px] text-white px-1.5 py-0.5 rounded-sm font-bold backdrop-blur-sm">완독</div>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">코스모스</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">칼 세이건</p>
-</div>
-</div>
-<!-- Book Item 9 -->
-<div class="flex flex-col gap-2">
-<div class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group">
-<img class="w-full h-full object-cover border-[0.5px] border-outline-variant/10" data-alt="Textured paper book cover with a soft pencil sketch of an olive branch" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJY0IBKZLWpNG1eRyPhsaO_oDISM71y_ciO4VriNws0IwFqGZDN503dLZX7-9A6GW20bCfAqjoyCkivhKG0LTfrka_YUvc2jVxTLXeSkqwwKM6RmxiFHxRSBQJSFWfJxMi-L6gft37TF9_nw9gjnnI7AZviPnpz2DDUbDnupXfnGy-3qeuKLNJZS77ERZIhokXujvXmfOx9cYNgQRepg7EEuuIsoEYGBRcxpDQpyNTVDdaHfRpgmtRd6pbjTUWrsoHwIZyoB18m2k"/>
-</div>
-<div class="mt-1">
-<h3 class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2">어떤 날의 산책</h3>
-<p class="font-label text-[10px] text-secondary mt-0.5">김민아</p>
-</div>
-</div>
-</div>
-</main>
-<!-- FAB -->
-<button class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-xl z-50 group active:scale-95 transition-all">
-<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">add</span>
-</button>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#fcf9f3]/80 backdrop-blur-xl border-t border-[#163826]/10">
-<!-- 홈 -->
-<a class="flex flex-col items-center justify-center text-[#675d53] opacity-70 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined">home</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">홈</span>
-</a>
-<!-- 서재 (Active) -->
-<a class="flex flex-col items-center justify-center text-[#2D4F3C] font-bold scale-105 transition-transform" href="#">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">서재</span>
-</a>
-<!-- 발견 -->
-<a class="flex flex-col items-center justify-center text-[#675d53] opacity-70 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined">explore</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">발견</span>
-</a>
-<!-- 통계 -->
-<a class="flex flex-col items-center justify-center text-[#675d53] opacity-70 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined">bar_chart</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">통계</span>
-</a>
-<!-- 프로필 -->
-<a class="flex flex-col items-center justify-center text-[#675d53] opacity-70 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined">person</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">프로필</span>
-</a>
-</nav>
-</body></html>
+  <body
+    class="bg-surface text-on-surface selection:bg-primary-fixed selection:text-primary"
+  >
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 left-0 w-full z-40 bg-surface/90 backdrop-blur-md"
+    >
+      <div class="flex justify-between items-center w-full px-6 py-4">
+        <button
+          class="hover:bg-surface-container-low rounded-full p-2 transition-colors"
+        >
+          <span class="material-symbols-outlined text-primary">menu</span>
+        </button>
+        <h1
+          class="font-headline text-2xl font-bold tracking-tighter text-primary"
+        >
+          나의 서가
+        </h1>
+        <button
+          class="hover:bg-surface-container-low rounded-full p-2 transition-colors"
+        >
+          <span class="material-symbols-outlined text-primary"
+            >notifications</span
+          >
+        </button>
+      </div>
+    </header>
+    <main class="pt-20 pb-32 px-6">
+      <!-- Filter Chips -->
+      <section class="flex gap-2 overflow-x-auto pb-6 no-scrollbar">
+        <button
+          class="whitespace-nowrap px-4 py-1.5 rounded-full bg-primary text-on-primary text-sm font-medium"
+        >
+          전체
+        </button>
+        <button
+          class="whitespace-nowrap px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium"
+        >
+          읽는 중
+        </button>
+        <button
+          class="whitespace-nowrap px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium"
+        >
+          완독
+        </button>
+        <button
+          class="whitespace-nowrap px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium"
+        >
+          위시리스트
+        </button>
+      </section>
+      <!-- Sorting Options -->
+      <div
+        class="flex justify-between items-center mb-8 border-b border-outline-variant/10 pb-2"
+      >
+        <div class="flex items-center gap-1 text-secondary">
+          <span class="material-symbols-outlined text-lg">sort</span>
+          <span class="text-xs font-medium">최근 읽은 순</span>
+        </div>
+        <button class="flex items-center gap-1 text-primary">
+          <span class="material-symbols-outlined text-lg">add_circle</span>
+          <span class="text-xs font-bold">책 추가</span>
+        </button>
+      </div>
+      <!-- Book Grid -->
+      <div class="grid grid-cols-3 gap-x-4 gap-y-10">
+        <!-- Book Item 1 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Minimalist book cover design with soft cream paper texture and elegant serif typography titled The Archivist"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr3HL_t3RrBtPPx8HY8NBBlZSn3znDW7_M5-lnp1Fkw_bCFHoGGahcnvED6W80GESE-LPdI2VLAJd03MhWIrs1zcleHYnw0N9mTcOv5BHzpJKqcvD7uTF1iLe2R6e1zNCD8xJUUG6660XtUS3kcfZy532B86xqV_tIGpw_GWvYr5SDKERyoYNTpueRSoYh8e5kKcullLS7P8FVmIHrrgBhkVckYMf-Fhij2W6Y_TufpLqlZBcVZXBKnVqHLmAiTpzwASqNaA_qgR4"
+            />
+            <div
+              class="absolute top-1 right-1 bg-primary/90 text-[8px] text-white px-1.5 py-0.5 rounded-sm font-bold backdrop-blur-sm"
+            >
+              완독
+            </div>
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              참을 수 없는 존재의 가벼움
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">
+              밀란 쿤데라
+            </p>
+          </div>
+        </div>
+        <!-- Book Item 2 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Deep forest green book cover with gold foil accents resting on a wooden desk with soft light"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAUSTztKhwKLpj_Pt5tvwR1zs7ZnprQQN4OOKLdHF7iCVyjrt3u0ECHsTqf7lHHd4Gn4omlNwpMzFG5GAFvcrWek6srkczaiR12RV3sF47SpkplkI2XKffOGZ6bNXCE7qAGSNDtIgHsFkGR14MdCW-K08lMyPigq0e4VeM2mMMTUiiKcAlg2yTn1l-IZO-9_6h2jfJYBSQvazpqL7bQD74LEmxmk9iQe1s0boyK7a-ZAQ4iApHND_yRb3Hpl8_ohgm0H0wD7JcGFA"
+            />
+            <div class="absolute left-0 top-0 h-full w-1 bg-tertiary"></div>
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              쇼펜하우어 아포리즘
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">
+              아서 쇼펜하우어
+            </p>
+          </div>
+        </div>
+        <!-- Book Item 3 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Stack of vintage books with worn leather spines in an old library setting with dusty sunlight"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiWK1030wjIJ0esFuA0iKKXX7tGyp9VadbUFI63jPp0G1C9jqTM4HRtQP0vY0apOCTd0hJx9E7mwFkdQOAyl8gfTdNf0Y6QI1qxzNRZMeKSzEl2aqe6mDM8pcm6XHo_FPX91cO_5eFtu36Ja0jO6wpcyqExmnkJfDYro6CpxMvqsxHUtvl38UoCTcDAD4jVgb8yMJaq45dQjgWI6djR1XRtS9_70Fm8HDpktIOD4zZXri65nn4r8_QCdBMUlRmWAWcQsHUBQ9iczQ"
+            />
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              페스트
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">
+              알베르 카뮈
+            </p>
+          </div>
+        </div>
+        <!-- Book Item 4 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Clean white book cover with a single minimalist line drawing of a face and sans serif font"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-mddQdeyfcd1gT7LAPvVmb45uGudImYm9W4PiJ3D9z-ebDD-6bmisa2vmthDKVgCuFnEpS1zgBjy0qGUaojWUYmS6meEU7tiPVcYvxheLsVdgzTj6K6oHZwoJrVwa8lqB8tiIjYvlpqbSRArOZ9QTMFM87ULvxPIU1lucomc_70UNnzEk7zmhWnY5RIAjWjexU7RD0Sul40Tqk78m3_AcpCCB4TDZboDQElXFddOd5kybgDU3ngt5vAWIJJvl4BAUn06eH4bNqnc"
+            />
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              다정한 것이 살아남는다
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">
+              브라이언 헤어
+            </p>
+          </div>
+        </div>
+        <!-- Book Item 5 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Rich burgundy book cover with elegant golden emblem in the center against a parchment background"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuC36JRJXqEliQpbSz1qtaG0IEN_u8WOz2ETgWpSMUXYWT8YJgPFI-V3QSYb-g-q3IZ6fno0oHoO5jmLl67Fu9EQt3PuFG_dVyfLBFnOLPbCkdrvpxKRUFEb68CkkDJeKTCpDBHnARGscauhjirrHQu-Ch74Sl4aPvubMzxvtLe6n-WrMoW3oA1pMLOxkBSkft0blukGg67lX_RScobG1srkiBjaP-rspcwUXOFOvm9EmtWBpiRPgfGlWpExzMO5An41EIhSkY4ntpE"
+            />
+            <div
+              class="absolute top-1 right-1 bg-primary/90 text-[8px] text-white px-1.5 py-0.5 rounded-sm font-bold backdrop-blur-sm"
+            >
+              완독
+            </div>
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              어린 왕자
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">
+              생텍쥐페리
+            </p>
+          </div>
+        </div>
+        <!-- Book Item 6 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Open book showing yellowed pages and fine print with a fountain pen resting on the spine"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3UURGQuFr4KXp0tjp198fgoQj2n0quQ5s1rtNBrggJrj4kpesP_YgQmfLVLfjlRFXBoMbY6RqOnoG5L5ZSXMiEhFzTBIZXUWDz_81XgPOevF_XFw_vTMhZ49nEDGfj-wYsRL2hW0msDASA82fecN9UBOZmLrNub5wzwATnyJ5lagcEWB4h_hh553W-PPgPlqoeyYH727wKcJ4CgslhmWu-n-jV_9Qn1N_j6fS91zUGpVAO4_eDtGbKjnL256UPQHPcOa2CGF45Yg"
+            />
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              데미안
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">
+              헤르만 헤세
+            </p>
+          </div>
+        </div>
+        <!-- Book Item 7 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Modern abstract book cover with muted terracotta and indigo geometric shapes"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5pZg4B-s5okUj-YRr0B6BujQG7LCH_wbsGsf5WpAWLupFn6WFrqNkpnS_N8KN72j8z8hvWow58u10H71_OR1i6gNFDu-RR2ow8hAYEl9PZNkXcq-S-n4fhKAMUYzhrj514JrIKlxBvesXMCBo251h170G4SCjERjUckoeOYBJsJN-7JRJBaEOE2q_PA4i_lfJDW8EExNdrJtXoJ1sr7H0cvTllbUkn4PBEWiLkjpHHjV6iGISICZEYdnn9QWF4BetbZXExVc8i6E"
+            />
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              도둑맞은 집중력
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">
+              요한 하리
+            </p>
+          </div>
+        </div>
+        <!-- Book Item 8 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Deep blue hardcover book with silver foil starry constellation pattern"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4ogfo8MgGOPXzpYm295kBLUOiBRlI5kVTWtsaA94i-Fe3FFHPJsIoptg7aROv4geidJSjiKlx714q8b7ER10dS8hjTiMJfS5JXLsZ4TSW4UjwILdpZdKwbp0Erwv0OG5Y18CxQZp_xRGV6y22Q9btKCScVZDzu5qXeNCtWSBiDKArpTF6rOBlAcJU741EQ4e6EyHDTI05FNNJrw8owKgJ26RZtdgTfvEOSIEe3oRjb9mwNOT3ATYXU1Ai4CXWJtjtGWohIMVt77o"
+            />
+            <div
+              class="absolute top-1 right-1 bg-primary/90 text-[8px] text-white px-1.5 py-0.5 rounded-sm font-bold backdrop-blur-sm"
+            >
+              완독
+            </div>
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              코스모스
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">
+              칼 세이건
+            </p>
+          </div>
+        </div>
+        <!-- Book Item 9 -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="relative aspect-[2/3] bg-surface-container-lowest editorial-shadow overflow-hidden group"
+          >
+            <img
+              class="w-full h-full object-cover border-[0.5px] border-outline-variant/10"
+              data-alt="Textured paper book cover with a soft pencil sketch of an olive branch"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJY0IBKZLWpNG1eRyPhsaO_oDISM71y_ciO4VriNws0IwFqGZDN503dLZX7-9A6GW20bCfAqjoyCkivhKG0LTfrka_YUvc2jVxTLXeSkqwwKM6RmxiFHxRSBQJSFWfJxMi-L6gft37TF9_nw9gjnnI7AZviPnpz2DDUbDnupXfnGy-3qeuKLNJZS77ERZIhokXujvXmfOx9cYNgQRepg7EEuuIsoEYGBRcxpDQpyNTVDdaHfRpgmtRd6pbjTUWrsoHwIZyoB18m2k"
+            />
+          </div>
+          <div class="mt-1">
+            <h3
+              class="font-headline text-[13px] leading-tight font-bold text-primary line-clamp-2"
+            >
+              어떤 날의 산책
+            </h3>
+            <p class="font-label text-[10px] text-secondary mt-0.5">김민아</p>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- FAB -->
+    <button
+      class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-xl z-50 group active:scale-95 transition-all"
+    >
+      <span
+        class="material-symbols-outlined text-2xl"
+        style="font-variation-settings: &quot;FILL&quot; 1"
+        >add</span
+      >
+    </button>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#fcf9f3]/80 backdrop-blur-xl border-t border-[#163826]/10"
+    >
+      <!-- 홈 -->
+      <a
+        class="flex flex-col items-center justify-center text-[#675d53] opacity-70 hover:opacity-100 transition-opacity"
+        href="#"
+      >
+        <span class="material-symbols-outlined">home</span>
+        <span class="font-['Newsreader'] text-[10px] tracking-tight">홈</span>
+      </a>
+      <!-- 서가 (Active) -->
+      <a
+        class="flex flex-col items-center justify-center text-[#2D4F3C] font-bold scale-105 transition-transform"
+        href="#"
+      >
+        <span
+          class="material-symbols-outlined"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >menu_book</span
+        >
+        <span class="font-['Newsreader'] text-[10px] tracking-tight">서가</span>
+      </a>
+      <!-- 발견 -->
+      <a
+        class="flex flex-col items-center justify-center text-[#675d53] opacity-70 hover:opacity-100 transition-opacity"
+        href="#"
+      >
+        <span class="material-symbols-outlined">explore</span>
+        <span class="font-['Newsreader'] text-[10px] tracking-tight">발견</span>
+      </a>
+      <!-- 통계 -->
+      <a
+        class="flex flex-col items-center justify-center text-[#675d53] opacity-70 hover:opacity-100 transition-opacity"
+        href="#"
+      >
+        <span class="material-symbols-outlined">bar_chart</span>
+        <span class="font-['Newsreader'] text-[10px] tracking-tight">통계</span>
+      </a>
+      <!-- 프로필 -->
+      <a
+        class="flex flex-col items-center justify-center text-[#675d53] opacity-70 hover:opacity-100 transition-opacity"
+        href="#"
+      >
+        <span class="material-symbols-outlined">person</span>
+        <span class="font-['Newsreader'] text-[10px] tracking-tight"
+          >프로필</span
+        >
+      </a>
+    </nav>
+  </body>
+</html>

@@ -5,7 +5,7 @@ import type {
   CreateUserBookInput,
   UpdateUserBookInput,
   UserBookDetail,
-  UserBookSummary
+  UserBookSummary,
 } from "@bookfolio/shared";
 
 import { auth } from "@/auth";
@@ -106,7 +106,7 @@ function pickNestedBook(row: DbUserBookNestedSelect): DbCanonicalBook | null {
   if (!b) {
     return null;
   }
-  return Array.isArray(b) ? b[0] ?? null : b;
+  return Array.isArray(b) ? (b[0] ?? null) : b;
 }
 
 /**
@@ -143,14 +143,15 @@ function mapFlatRow(row: DbUserBook): UserBookDetail {
         ? Math.floor(Number(row.current_page))
         : null,
     readingTotalPages:
-      row.reading_total_pages != null && Number.isFinite(Number(row.reading_total_pages))
+      row.reading_total_pages != null &&
+      Number.isFinite(Number(row.reading_total_pages))
         ? Math.floor(Number(row.reading_total_pages))
         : null,
     isOwned: row.is_owned,
     location: row.location ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined
+    genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined,
   };
 }
 
@@ -180,14 +181,14 @@ function mapJoinedRow(row: DbUserBookNestedSelect): UserBookDetail {
     is_owned: row.is_owned,
     location: row.location,
     created_at: row.created_at,
-    updated_at: row.updated_at
+    updated_at: row.updated_at,
   };
   return {
     ...mapFlatRow(flat),
     catalogSource: book.source,
     genreSlugs: Array.isArray(book.genre_slugs) ? book.genre_slugs : [],
     literatureRegion: book.literature_region ?? null,
-    originalLanguage: book.original_language ?? null
+    originalLanguage: book.original_language ?? null,
   };
 }
 
@@ -205,7 +206,7 @@ async function getClientAndUser(context?: RepositoryContext) {
   if (context) {
     return {
       supabase: createSupabaseAdminClient(),
-      userId: context.userId
+      userId: context.userId,
     };
   }
 
@@ -247,9 +248,13 @@ const USER_BOOK_WITH_BOOKS_SELECT = `
 
 export async function findCanonicalBookByIsbn(
   supabase: SupabaseClient,
-  normalizedIsbn: string
+  normalizedIsbn: string,
 ): Promise<DbCanonicalBook | null> {
-  const { data, error } = await supabase.from("books").select("*").eq("isbn", normalizedIsbn).maybeSingle();
+  const { data, error } = await supabase
+    .from("books")
+    .select("*")
+    .eq("isbn", normalizedIsbn)
+    .maybeSingle();
 
   if (error) throw error;
   return data as DbCanonicalBook | null;
@@ -263,7 +268,7 @@ export async function findCanonicalBookByIsbn(
  */
 export function mapCanonicalBookToLookupResult(
   row: DbCanonicalBook,
-  opts?: { requireIsbn?: boolean }
+  opts?: { requireIsbn?: boolean },
 ): BookLookupResult | null {
   const requireIsbn = opts?.requireIsbn !== false;
   const isbn = row.isbn?.trim() ?? "";
@@ -285,7 +290,7 @@ export function mapCanonicalBookToLookupResult(
     source: "catalog",
     genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined,
     literatureRegion: row.literature_region ?? null,
-    originalLanguage: row.original_language ?? null
+    originalLanguage: row.original_language ?? null,
   };
 }
 
@@ -298,7 +303,7 @@ export function mapCanonicalBookToLookupResult(
 export async function searchCanonicalBooksByTitle(
   supabase: SupabaseClient,
   rawQuery: string,
-  limit = 20
+  limit = 20,
 ): Promise<BookLookupResult[]> {
   const q = rawQuery.trim();
   if (!q) {
@@ -346,7 +351,7 @@ async function insertCanonicalBook(
     price_krw: number | null;
     source: string;
     format?: BookFormat;
-  }
+  },
 ): Promise<DbCanonicalBook> {
   const { data, error } = await supabase
     .from("books")
@@ -359,7 +364,7 @@ async function insertCanonicalBook(
       description: row.description,
       price_krw: row.price_krw,
       source: row.source,
-      format: row.format ?? "paper"
+      format: row.format ?? "paper",
     })
     .select("*")
     .single();
@@ -372,13 +377,17 @@ async function insertCanonicalBook(
   if (error) throw error;
   const inserted = data as DbCanonicalBook;
   await replaceBookAuthorLinks(supabase, inserted.id, row.authors);
-  const { data: synced, error: syncErr } = await supabase.from("books").select("*").eq("id", inserted.id).single();
+  const { data: synced, error: syncErr } = await supabase
+    .from("books")
+    .select("*")
+    .eq("id", inserted.id)
+    .single();
   if (syncErr) throw syncErr;
   return synced as DbCanonicalBook;
 }
 
 /**
- * 공동서재 등 user_books 없이 `books` 행만 필요할 때 — ISBN·제목으로 카탈로그 행을 찾거나 만듭니다.
+ * 공동서가 등 user_books 없이 `books` 행만 필요할 때 — ISBN·제목으로 카탈로그 행을 찾거나 만듭니다.
  */
 export async function resolveCanonicalBookForSharedLibrary(
   supabase: SupabaseClient,
@@ -393,7 +402,7 @@ export async function resolveCanonicalBookForSharedLibrary(
     | "description"
     | "priceKrw"
     | "format"
-  >
+  >,
 ): Promise<DbCanonicalBook> {
   const normalized = input.isbn ? normalizeIsbn(input.isbn) : "";
   const isbnValue = normalized.length > 0 ? normalized : null;
@@ -410,12 +419,16 @@ export async function resolveCanonicalBookForSharedLibrary(
           cover_url: input.coverUrl ?? found.cover_url,
           description: input.description ?? null,
           price_krw: input.priceKrw ?? found.price_krw,
-          format: input.format ?? "paper"
+          format: input.format ?? "paper",
         })
         .eq("id", found.id);
       if (upErr) throw upErr;
       await replaceBookAuthorLinks(supabase, found.id, input.authors);
-      const { data: refreshed, error: refErr } = await supabase.from("books").select("*").eq("id", found.id).single();
+      const { data: refreshed, error: refErr } = await supabase
+        .from("books")
+        .select("*")
+        .eq("id", found.id)
+        .single();
       if (refErr) throw refErr;
       return refreshed as DbCanonicalBook;
     }
@@ -429,7 +442,7 @@ export async function resolveCanonicalBookForSharedLibrary(
       description: input.description ?? null,
       price_krw: input.priceKrw ?? null,
       source: "manual",
-      format: input.format ?? "paper"
+      format: input.format ?? "paper",
     });
   }
 
@@ -443,7 +456,7 @@ export async function resolveCanonicalBookForSharedLibrary(
     description: input.description ?? null,
     price_krw: input.priceKrw ?? null,
     source: "manual",
-    format: input.format ?? "paper"
+    format: input.format ?? "paper",
   });
 }
 
@@ -469,7 +482,10 @@ export type ListUserBooksPagedOptions = {
  * @history
  * - 2026-03-24: 신규 — 문자열 JSON·total 키 누락 등 방어
  */
-function parseListUserBooksPagedPayload(data: unknown): { rawItems: unknown[]; total: number } {
+function parseListUserBooksPagedPayload(data: unknown): {
+  rawItems: unknown[];
+  total: number;
+} {
   let raw: unknown = data;
   if (typeof data === "string") {
     try {
@@ -507,7 +523,7 @@ function parseListUserBooksPagedPayload(data: unknown): { rawItems: unknown[]; t
  */
 export async function listUserBooksPaged(
   opts: ListUserBooksPagedOptions,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<{ items: UserBookSummary[]; total: number }> {
   const { supabase, userId } = await getClientAndUser(context);
   const genreTrim = opts.genreSlug?.trim();
@@ -516,10 +532,11 @@ export async function listUserBooksPaged(
     p_search: opts.search?.trim() ? opts.search.trim() : null,
     p_limit: opts.limit,
     p_offset: opts.offset,
-    p_format:
-      opts.format && opts.format !== "all" ? opts.format : null,
+    p_format: opts.format && opts.format !== "all" ? opts.format : null,
     p_reading_status:
-      opts.readingStatus && opts.readingStatus !== "all" ? opts.readingStatus : null,
+      opts.readingStatus && opts.readingStatus !== "all"
+        ? opts.readingStatus
+        : null,
     p_is_owned: typeof opts.isOwned === "boolean" ? opts.isOwned : null,
     p_genre_slug: genreTrim ? genreTrim : null,
     ...(opts.sort === "title" ? { p_sort: "title" as const } : {}),
@@ -536,7 +553,7 @@ export async function listUserBooksPaged(
 
 export async function listUserBooks(
   query: BooksQuery,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<UserBookSummary[]> {
   const { items } = await listUserBooksPaged(
     {
@@ -544,16 +561,16 @@ export async function listUserBooks(
       limit: 50_000,
       offset: 0,
       format: query.format,
-      readingStatus: query.readingStatus
+      readingStatus: query.readingStatus,
     },
-    context
+    context,
   );
   return items;
 }
 
 export async function getUserBook(
   id: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<UserBookDetail | null> {
   const { supabase, userId } = await getClientAndUser(context);
   const { data, error } = await supabase
@@ -572,10 +589,14 @@ export async function getUserBook(
 
 export async function getCanonicalBookById(
   bookId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<DbCanonicalBook | null> {
   const { supabase } = await getClientAndUser(context);
-  const { data, error } = await supabase.from("books").select("*").eq("id", bookId).maybeSingle();
+  const { data, error } = await supabase
+    .from("books")
+    .select("*")
+    .eq("id", bookId)
+    .maybeSingle();
 
   if (error) throw error;
   return data as DbCanonicalBook | null;
@@ -584,7 +605,7 @@ export async function getCanonicalBookById(
 /** 상세 화면용: 서지는 `getUserBook` 결과에 포함됩니다. */
 export async function getUserBookWithCanonical(
   userBookId: string,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<{ userBook: UserBookDetail } | null> {
   const userBook = await getUserBook(userBookId, context);
   if (!userBook) {
@@ -598,20 +619,20 @@ export class UserBookAlreadyInShelfError extends Error {
   readonly code = "USER_BOOK_ALREADY_EXISTS" as const;
 
   constructor(public readonly existingUserBookId: string) {
-    super("이미 내 서재에 등록된 책입니다.");
+    super("이미 내 서가에 등록된 책입니다.");
     this.name = "UserBookAlreadyInShelfError";
   }
 }
 
 /**
- * 개인 서재에 도서를 등록합니다. 성공 시 `user_book_register` 포인트 규칙이 있으면 원장에 반영합니다.
+ * 개인 서가에 도서를 등록합니다. 성공 시 `user_book_register` 포인트 규칙이 있으면 원장에 반영합니다.
  *
  * @history
  * - 2026-03-26: `user_book_register` 포인트 지급 연동
  */
 export async function createUserBook(
   input: CreateUserBookInput,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<UserBookDetail> {
   const { supabase, userId } = await getClientAndUser(context);
 
@@ -632,12 +653,16 @@ export async function createUserBook(
           cover_url: input.coverUrl ?? found.cover_url,
           description: input.description ?? null,
           price_krw: input.priceKrw ?? found.price_krw,
-          format: input.format
+          format: input.format,
         })
         .eq("id", found.id);
       if (upErr) throw upErr;
       await replaceBookAuthorLinks(supabase, found.id, input.authors);
-      const { data: refreshed, error: refErr } = await supabase.from("books").select("*").eq("id", found.id).single();
+      const { data: refreshed, error: refErr } = await supabase
+        .from("books")
+        .select("*")
+        .eq("id", found.id)
+        .single();
       if (refErr) throw refErr;
       canonical = refreshed as DbCanonicalBook;
     } else {
@@ -651,7 +676,7 @@ export async function createUserBook(
         description: input.description ?? null,
         price_krw: input.priceKrw ?? null,
         source: "manual",
-        format: input.format
+        format: input.format,
       });
     }
   } else {
@@ -665,7 +690,7 @@ export async function createUserBook(
       description: input.description ?? null,
       price_krw: input.priceKrw ?? null,
       source: "manual",
-      format: input.format
+      format: input.format,
     });
   }
 
@@ -696,10 +721,14 @@ export async function createUserBook(
     reading_total_pages:
       input.readingTotalPages !== undefined && input.readingTotalPages !== null
         ? Math.floor(Math.min(Math.max(1, input.readingTotalPages), 50_000))
-        : null
+        : null,
   };
 
-  const { data: inserted, error } = await supabase.from("user_books").insert(payload).select("id").single();
+  const { data: inserted, error } = await supabase
+    .from("user_books")
+    .insert(payload)
+    .select("id")
+    .single();
 
   if (error) throw error;
 
@@ -732,7 +761,7 @@ export async function createUserBook(
 export async function updateUserBook(
   id: string,
   input: UpdateUserBookInput,
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<UserBookDetail> {
   const { supabase, userId } = await getClientAndUser(context);
 
@@ -752,22 +781,32 @@ export async function updateUserBook(
   if (input.title !== undefined) catalogPatch.title = input.title;
   if (input.coverUrl !== undefined) catalogPatch.cover_url = input.coverUrl;
   if (input.publisher !== undefined) catalogPatch.publisher = input.publisher;
-  if (input.publishedDate !== undefined) catalogPatch.published_date = input.publishedDate;
-  if (input.description !== undefined) catalogPatch.description = input.description;
+  if (input.publishedDate !== undefined)
+    catalogPatch.published_date = input.publishedDate;
+  if (input.description !== undefined)
+    catalogPatch.description = input.description;
   if (input.priceKrw !== undefined) catalogPatch.price_krw = input.priceKrw;
   if (input.format !== undefined) catalogPatch.format = input.format;
 
   if (Object.keys(catalogPatch).length > 0) {
-    const { error: cErr } = await supabase.from("books").update(catalogPatch).eq("id", existing.book_id);
+    const { error: cErr } = await supabase
+      .from("books")
+      .update(catalogPatch)
+      .eq("id", existing.book_id);
     if (cErr) throw cErr;
   }
 
   if (input.authors !== undefined) {
-    await replaceBookAuthorLinks(supabase, existing.book_id as string, input.authors);
+    await replaceBookAuthorLinks(
+      supabase,
+      existing.book_id as string,
+      input.authors,
+    );
   }
 
   const userPatch: Record<string, unknown> = {};
-  if (input.readingStatus !== undefined) userPatch.reading_status = input.readingStatus;
+  if (input.readingStatus !== undefined)
+    userPatch.reading_status = input.readingStatus;
   if (input.rating !== undefined) userPatch.rating = input.rating;
   if (input.isOwned !== undefined) userPatch.is_owned = input.isOwned;
   if (input.location !== undefined) userPatch.location = input.location;
@@ -785,7 +824,11 @@ export async function updateUserBook(
   }
 
   if (Object.keys(userPatch).length > 0) {
-    const { error: uErr } = await supabase.from("user_books").update(userPatch).eq("id", id).eq("user_id", userId);
+    const { error: uErr } = await supabase
+      .from("user_books")
+      .update(userPatch)
+      .eq("id", id)
+      .eq("user_id", userId);
     if (uErr) throw uErr;
   }
 
@@ -796,9 +839,16 @@ export async function updateUserBook(
   return detail;
 }
 
-export async function deleteUserBook(id: string, context?: RepositoryContext): Promise<void> {
+export async function deleteUserBook(
+  id: string,
+  context?: RepositoryContext,
+): Promise<void> {
   const { supabase, userId } = await getClientAndUser(context);
-  const { error } = await supabase.from("user_books").delete().eq("id", id).eq("user_id", userId);
+  const { error } = await supabase
+    .from("user_books")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
   if (error) throw error;
 }
 
@@ -809,11 +859,11 @@ export type UserOwnedBooksPriceStats = {
 };
 
 export async function getUserOwnedBooksPriceStats(
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<UserOwnedBooksPriceStats> {
   const { supabase, userId } = await getClientAndUser(context);
   const { data, error } = await supabase.rpc("user_owned_books_price_stats", {
-    p_user_id: userId
+    p_user_id: userId,
   });
   if (error) throw error;
   const row = data as {
@@ -824,7 +874,7 @@ export async function getUserOwnedBooksPriceStats(
   return {
     totalKrw: Number(row.totalKrw ?? 0),
     pricedOwnedCount: Number(row.pricedOwnedCount ?? 0),
-    ownedCount: Number(row.ownedCount ?? 0)
+    ownedCount: Number(row.ownedCount ?? 0),
   };
 }
 
@@ -835,11 +885,11 @@ export async function getUserOwnedBooksPriceStats(
  * - 2026-03-24: RPC `list_user_owned_genre_slugs` 연동(마이그레이션 0015)
  */
 export async function listUserOwnedGenreSlugs(
-  context?: RepositoryContext
+  context?: RepositoryContext,
 ): Promise<string[]> {
   const { supabase, userId } = await getClientAndUser(context);
   const { data, error } = await supabase.rpc("list_user_owned_genre_slugs", {
-    p_user_id: userId
+    p_user_id: userId,
   });
   if (error) throw error;
   let raw: unknown = data;

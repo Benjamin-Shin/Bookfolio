@@ -4,7 +4,7 @@ import 'package:seogadam_mobile/src/ui/mobile_scroll_padding.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
 
-/// 공동서재 한 권의 공유 서지·소유자별 상태(읽기 전용).
+/// 공동서가 한 권의 공유 서지·소유자별 상태(읽기 전용).
 ///
 /// History:
 /// - 2026-04-12: 표지 — 원본(논리 픽셀)보다 크게 확대되지 않도록 상한
@@ -76,11 +76,14 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             book.title,
-            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, height: 1.25),
+            style: theme.textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w700, height: 1.25),
           ),
           if (authors.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(authors, style: theme.textTheme.titleMedium?.copyWith(color: onSurfaceVar)),
+            Text(authors,
+                style:
+                    theme.textTheme.titleMedium?.copyWith(color: onSurfaceVar)),
           ],
           const SizedBox(height: 24),
           Text('도서 정보', style: sectionTitleStyle),
@@ -94,7 +97,7 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Text('이 서재의 소유자', style: sectionTitleStyle),
+          Text('이 서가의 소유자', style: sectionTitleStyle),
           const SizedBox(height: 10),
           if (book.owners.isEmpty)
             Text(
@@ -108,16 +111,21 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
                 child: _InfoCard(
                   children: [
                     _InfoRow(label: '이름', value: o.displayName),
-                    _InfoRow(label: '읽기 상태', value: readingStatusLabelFromApi(o.readingStatus)),
+                    _InfoRow(
+                        label: '읽기 상태',
+                        value: readingStatusLabelFromApi(o.readingStatus)),
                     if (o.location != null && o.location!.trim().isNotEmpty)
                       _InfoRow(label: '위치', value: o.location!.trim()),
-                    if (o.memoPreview != null && o.memoPreview!.trim().isNotEmpty)
+                    if (o.memoPreview != null &&
+                        o.memoPreview!.trim().isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('메모 미리보기', style: theme.textTheme.labelLarge?.copyWith(color: onSurfaceVar)),
+                            Text('메모 미리보기',
+                                style: theme.textTheme.labelLarge
+                                    ?.copyWith(color: onSurfaceVar)),
                             const SizedBox(height: 6),
                             Text(
                               o.memoPreview!.trim(),
@@ -136,19 +144,23 @@ class SharedLibraryBookDetailScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Card(
             elevation: 0,
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            color: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.35),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, color: theme.colorScheme.primary.withValues(alpha: 0.7)),
+                  Icon(Icons.info_outline,
+                      color: theme.colorScheme.primary.withValues(alpha: 0.7)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '책 추가·읽기 상태 변경은 웹의 공동서재 화면에서 할 수 있어요.',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: onSurfaceVar, height: 1.4),
+                      '책 추가·읽기 상태 변경은 웹의 공동서가 화면에서 할 수 있어요.',
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(color: onSurfaceVar, height: 1.4),
                     ),
                   ),
                 ],
@@ -176,7 +188,8 @@ class _SharedLibraryDetailCover extends StatefulWidget {
   final BorderRadius borderRadius;
 
   @override
-  State<_SharedLibraryDetailCover> createState() => _SharedLibraryDetailCoverState();
+  State<_SharedLibraryDetailCover> createState() =>
+      _SharedLibraryDetailCoverState();
 }
 
 class _SharedLibraryDetailCoverState extends State<_SharedLibraryDetailCover> {
@@ -212,7 +225,8 @@ class _SharedLibraryDetailCoverState extends State<_SharedLibraryDetailCover> {
     _tearDownStream();
     _listeningUrl = widget.url;
 
-    final provider = NetworkImage(widget.url, headers: kCoverImageRequestHeaders);
+    final provider =
+        NetworkImage(widget.url, headers: kCoverImageRequestHeaders);
     final stream = provider.resolve(createLocalImageConfiguration(context));
     _stream = stream;
     _listener = ImageStreamListener(
@@ -367,13 +381,15 @@ class _InfoRow extends StatelessWidget {
           width: 88,
           child: Text(
             label,
-            style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant),
+            style: theme.textTheme.labelLarge
+                ?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurface, height: 1.35),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: scheme.onSurface, height: 1.35),
           ),
         ),
       ],

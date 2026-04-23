@@ -1,189 +1,273 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="ko"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
+<html class="light" lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
-            "colors": {
-                    "surface-container": "#f0eee8",
-                    "on-secondary-fixed": "#211a13",
-                    "primary-container": "#2d4f3c",
-                    "on-background": "#1c1c18",
-                    "surface-variant": "#e5e2dc",
-                    "secondary-fixed": "#efe0d4",
-                    "on-surface-variant": "#424843",
-                    "surface-container-highest": "#e5e2dc",
-                    "tertiary-container": "#862232",
-                    "on-error": "#ffffff",
-                    "on-tertiary-container": "#ff9aa1",
-                    "surface-container-high": "#ebe8e2",
-                    "on-tertiary-fixed-variant": "#842131",
-                    "primary": "#163826",
-                    "inverse-on-surface": "#f3f0ea",
-                    "surface-dim": "#dcdad4",
-                    "primary-fixed-dim": "#a9cfb7",
-                    "inverse-surface": "#31312d",
-                    "on-primary-container": "#9ac0a7",
-                    "tertiary-fixed-dim": "#ffb2b6",
-                    "on-tertiary": "#ffffff",
-                    "on-surface": "#1c1c18",
-                    "tertiary": "#67081d",
-                    "on-secondary-container": "#6d6259",
-                    "on-tertiary-fixed": "#40000d",
-                    "on-secondary-fixed-variant": "#4e453c",
-                    "outline-variant": "#c1c8c1",
-                    "surface-tint": "#436651",
-                    "error-container": "#ffdad6",
-                    "secondary-container": "#efe0d4",
-                    "inverse-primary": "#a9cfb7",
-                    "tertiary-fixed": "#ffdadb",
-                    "on-primary": "#ffffff",
-                    "on-primary-fixed-variant": "#2c4e3b",
-                    "on-error-container": "#93000a",
-                    "surface-container-lowest": "#ffffff",
-                    "secondary": "#675d53",
-                    "surface-container-low": "#f6f3ed",
-                    "surface": "#fcf9f3",
-                    "secondary-fixed-dim": "#d2c4b9",
-                    "outline": "#727973",
-                    "on-primary-fixed": "#002112",
-                    "error": "#ba1a1a",
-                    "background": "#fcf9f3",
-                    "surface-bright": "#fcf9f3",
-                    "primary-fixed": "#c5ecd2",
-                    "on-secondary": "#ffffff"
+            colors: {
+              "surface-container": "#f0eee8",
+              "on-secondary-fixed": "#211a13",
+              "primary-container": "#2d4f3c",
+              "on-background": "#1c1c18",
+              "surface-variant": "#e5e2dc",
+              "secondary-fixed": "#efe0d4",
+              "on-surface-variant": "#424843",
+              "surface-container-highest": "#e5e2dc",
+              "tertiary-container": "#862232",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#ff9aa1",
+              "surface-container-high": "#ebe8e2",
+              "on-tertiary-fixed-variant": "#842131",
+              primary: "#163826",
+              "inverse-on-surface": "#f3f0ea",
+              "surface-dim": "#dcdad4",
+              "primary-fixed-dim": "#a9cfb7",
+              "inverse-surface": "#31312d",
+              "on-primary-container": "#9ac0a7",
+              "tertiary-fixed-dim": "#ffb2b6",
+              "on-tertiary": "#ffffff",
+              "on-surface": "#1c1c18",
+              tertiary: "#67081d",
+              "on-secondary-container": "#6d6259",
+              "on-tertiary-fixed": "#40000d",
+              "on-secondary-fixed-variant": "#4e453c",
+              "outline-variant": "#c1c8c1",
+              "surface-tint": "#436651",
+              "error-container": "#ffdad6",
+              "secondary-container": "#efe0d4",
+              "inverse-primary": "#a9cfb7",
+              "tertiary-fixed": "#ffdadb",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#2c4e3b",
+              "on-error-container": "#93000a",
+              "surface-container-lowest": "#ffffff",
+              secondary: "#675d53",
+              "surface-container-low": "#f6f3ed",
+              surface: "#fcf9f3",
+              "secondary-fixed-dim": "#d2c4b9",
+              outline: "#727973",
+              "on-primary-fixed": "#002112",
+              error: "#ba1a1a",
+              background: "#fcf9f3",
+              "surface-bright": "#fcf9f3",
+              "primary-fixed": "#c5ecd2",
+              "on-secondary": "#ffffff",
             },
-            "borderRadius": {
-                    "DEFAULT": "0.125rem",
-                    "lg": "0.25rem",
-                    "xl": "0.5rem",
-                    "full": "0.75rem"
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
             },
-            "fontFamily": {
-                    "headline": ["Newsreader", "serif"],
-                    "body": ["Manrope", "sans-serif"],
-                    "label": ["Manrope", "sans-serif"]
-            }
+            fontFamily: {
+              headline: ["Newsreader", "serif"],
+              body: ["Manrope", "sans-serif"],
+              label: ["Manrope", "sans-serif"],
+            },
           },
-        }
-      }
+        },
+      };
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
-        .editorial-shadow {
-            box-shadow: 0 20px 50px rgba(22, 56, 38, 0.05);
-        }
-        .canvas-bg {
-            background-image: radial-gradient(#e5e2dc 0.5px, transparent 0.5px);
-            background-size: 24px 24px;
-        }
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 300,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .editorial-shadow {
+        box-shadow: 0 20px 50px rgba(22, 56, 38, 0.05);
+      }
+      .canvas-bg {
+        background-image: radial-gradient(#e5e2dc 0.5px, transparent 0.5px);
+        background-size: 24px 24px;
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen overflow-x-hidden">
-<!-- Top Navigation (Conditional Suppression: Back button only for task-focused) -->
-<header class="fixed top-0 w-full z-50 bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl flex items-center justify-between px-6 py-4 w-full">
-<button class="hover:bg-[#f6f3ed] dark:hover:bg-stone-800 transition-colors scale-95 duration-300 ease-in-out p-2 rounded-full">
-<span class="material-symbols-outlined text-[#163826] dark:text-[#2D4F3C]">close</span>
-</button>
-<h1 class="font-['Newsreader'] italic font-medium tracking-tight text-xl font-serif text-[#163826] dark:text-[#fcf9f3]">Seogadam</h1>
-<div class="w-10"></div> <!-- Spacer for symmetry -->
-</header>
-<main class="pt-24 pb-32 px-6 flex flex-col items-center">
-<!-- Postcard Canvas -->
-<div class="w-full max-w-md bg-surface-container-lowest editorial-shadow overflow-hidden relative border-[0.5px] border-outline-variant/10">
-<!-- Background Texture -->
-<div class="absolute inset-0 canvas-bg opacity-30 pointer-events-none"></div>
-<!-- Header Section -->
-<div class="pt-12 px-8 pb-6 text-center">
-<span class="font-label text-[10px] uppercase tracking-[0.3em] text-secondary mb-3 block">Reading Preference Report</span>
-<h2 class="font-headline italic text-3xl text-primary leading-tight">나의 독서 취향</h2>
-</div>
-<!-- Visual Highlight: Artful Book Stack -->
-<div class="px-8 pb-8">
-<div class="aspect-[4/5] w-full relative overflow-hidden group">
-<img class="w-full h-full object-cover grayscale-[20%] sepia-[10%]" data-alt="Artistic close-up of aged book pages with dramatic natural light and soft shadows, creating a scholarly and timeless atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQelW4nHgyhUj88zuYMbFH4dZgysxXuXl_amHpp8HEW6b62uWntJOufVYa8txqulCtWZdNzVZwqPqkDsD-1u06jRArwb2g3aanO2wIF4skJ9zH-5h4oPQ6Tz6verKgy2ZpXvm3Zmfm5ub6ig0mH5UqyIfIetXRql7OYVLpc8RmWpqQtcI4Gcf5tXYotWqkrMeWaNfQjXX9eV_2vziUxoVPrSLLuIJ73RbQNNdgwAJOX_mFn_8CJIZ3DiHIUzQQGfRSRKdNckh0yfo"/>
-<div class="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
-<!-- Archivist's Ribbon -->
-<div class="absolute left-0 top-12 w-1.5 h-24 bg-tertiary"></div>
-</div>
-</div>
-<!-- Insights Section -->
-<div class="px-8 pb-12 space-y-10">
-<!-- Reading Style Summary -->
-<div class="border-l border-primary/20 pl-6 py-2">
-<p class="font-headline italic text-xl text-on-surface leading-relaxed">
-                        "당신은 새벽녘, 시대를 초월한 고전을 탐독하는 사색가입니다."
-                    </p>
-</div>
-<!-- Bento Grid Layout for Metadata -->
-<div class="grid grid-cols-2 gap-6">
-<!-- Top Genres -->
-<div class="col-span-1 space-y-4">
-<h3 class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary">Top Genres</h3>
-<ul class="space-y-2 font-headline italic text-base text-primary">
-<li>Humanistic</li>
-<li>World Literature</li>
-<li>Modern Arts</li>
-</ul>
-</div>
-<!-- Most Read Author -->
-<div class="col-span-1 space-y-4">
-<h3 class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary">Most Read</h3>
-<div class="space-y-1">
-<span class="font-headline text-2xl text-primary block">Virginia Woolf</span>
-<span class="font-label text-[11px] text-secondary">14 Books Read</span>
-</div>
-</div>
-</div>
-<!-- Footer Branding -->
-<div class="pt-8 mt-4 border-t border-surface-variant flex justify-between items-center">
-<div class="flex items-center gap-2">
-<div class="w-8 h-[1px] bg-primary-container"></div>
-<span class="font-['Newsreader'] italic text-sm text-primary">Seogadam Archive</span>
-</div>
-<span class="font-label text-[9px] text-secondary tracking-widest">EST. 2024</span>
-</div>
-</div>
-</div>
-<!-- Social Context Note -->
-<p class="mt-8 font-label text-xs text-secondary text-center px-12 leading-relaxed">
-            취향의 기록은 당신의 서재를 더욱 풍요롭게 만듭니다.<br/>
-            결과를 공유하고 다른 서가지기들과 연결해보세요.
-        </p>
-</main>
-<!-- BottomNavBar as Sharing Actions -->
-<nav class="fixed bottom-0 w-full z-50 rounded-t-lg bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl shadow-[0_-4px_24px_rgba(22,56,38,0.04)] flex justify-around items-center px-8 pb-8 pt-4 w-full">
-<!-- Instagram -->
-<button class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-500 hover:opacity-70 transition-opacity scale-98 active:translate-y-0.5 transition-all">
-<span class="material-symbols-outlined mb-1">share_reviews</span>
-<span class="font-['Manrope'] text-[11px] uppercase tracking-widest">Instagram</span>
-</button>
-<!-- KakaoTalk -->
-<button class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-500 hover:opacity-70 transition-opacity scale-98 active:translate-y-0.5 transition-all">
-<span class="material-symbols-outlined mb-1">chat</span>
-<span class="font-['Manrope'] text-[11px] uppercase tracking-widest">KakaoTalk</span>
-</button>
-<!-- Save (Active intent for the user) -->
-<button class="flex flex-col items-center justify-center text-[#163826] dark:text-[#fcf9f3] font-bold hover:opacity-70 transition-opacity scale-98 active:translate-y-0.5 transition-all">
-<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">download</span>
-<span class="font-['Manrope'] text-[11px] uppercase tracking-widest">Save</span>
-</button>
-</nav>
-</body></html>
+  <body
+    class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen overflow-x-hidden"
+  >
+    <!-- Top Navigation (Conditional Suppression: Back button only for task-focused) -->
+    <header
+      class="fixed top-0 w-full z-50 bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl flex items-center justify-between px-6 py-4 w-full"
+    >
+      <button
+        class="hover:bg-[#f6f3ed] dark:hover:bg-stone-800 transition-colors scale-95 duration-300 ease-in-out p-2 rounded-full"
+      >
+        <span
+          class="material-symbols-outlined text-[#163826] dark:text-[#2D4F3C]"
+          >close</span
+        >
+      </button>
+      <h1
+        class="font-['Newsreader'] italic font-medium tracking-tight text-xl font-serif text-[#163826] dark:text-[#fcf9f3]"
+      >
+        Seogadam
+      </h1>
+      <div class="w-10"></div>
+      <!-- Spacer for symmetry -->
+    </header>
+    <main class="pt-24 pb-32 px-6 flex flex-col items-center">
+      <!-- Postcard Canvas -->
+      <div
+        class="w-full max-w-md bg-surface-container-lowest editorial-shadow overflow-hidden relative border-[0.5px] border-outline-variant/10"
+      >
+        <!-- Background Texture -->
+        <div
+          class="absolute inset-0 canvas-bg opacity-30 pointer-events-none"
+        ></div>
+        <!-- Header Section -->
+        <div class="pt-12 px-8 pb-6 text-center">
+          <span
+            class="font-label text-[10px] uppercase tracking-[0.3em] text-secondary mb-3 block"
+            >Reading Preference Report</span
+          >
+          <h2 class="font-headline italic text-3xl text-primary leading-tight">
+            나의 독서 취향
+          </h2>
+        </div>
+        <!-- Visual Highlight: Artful Book Stack -->
+        <div class="px-8 pb-8">
+          <div class="aspect-[4/5] w-full relative overflow-hidden group">
+            <img
+              class="w-full h-full object-cover grayscale-[20%] sepia-[10%]"
+              data-alt="Artistic close-up of aged book pages with dramatic natural light and soft shadows, creating a scholarly and timeless atmosphere"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQelW4nHgyhUj88zuYMbFH4dZgysxXuXl_amHpp8HEW6b62uWntJOufVYa8txqulCtWZdNzVZwqPqkDsD-1u06jRArwb2g3aanO2wIF4skJ9zH-5h4oPQ6Tz6verKgy2ZpXvm3Zmfm5ub6ig0mH5UqyIfIetXRql7OYVLpc8RmWpqQtcI4Gcf5tXYotWqkrMeWaNfQjXX9eV_2vziUxoVPrSLLuIJ73RbQNNdgwAJOX_mFn_8CJIZ3DiHIUzQQGfRSRKdNckh0yfo"
+            />
+            <div
+              class="absolute inset-0 bg-primary/10 mix-blend-multiply"
+            ></div>
+            <!-- Archivist's Ribbon -->
+            <div class="absolute left-0 top-12 w-1.5 h-24 bg-tertiary"></div>
+          </div>
+        </div>
+        <!-- Insights Section -->
+        <div class="px-8 pb-12 space-y-10">
+          <!-- Reading Style Summary -->
+          <div class="border-l border-primary/20 pl-6 py-2">
+            <p
+              class="font-headline italic text-xl text-on-surface leading-relaxed"
+            >
+              "당신은 새벽녘, 시대를 초월한 고전을 탐독하는 사색가입니다."
+            </p>
+          </div>
+          <!-- Bento Grid Layout for Metadata -->
+          <div class="grid grid-cols-2 gap-6">
+            <!-- Top Genres -->
+            <div class="col-span-1 space-y-4">
+              <h3
+                class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary"
+              >
+                Top Genres
+              </h3>
+              <ul class="space-y-2 font-headline italic text-base text-primary">
+                <li>Humanistic</li>
+                <li>World Literature</li>
+                <li>Modern Arts</li>
+              </ul>
+            </div>
+            <!-- Most Read Author -->
+            <div class="col-span-1 space-y-4">
+              <h3
+                class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary"
+              >
+                Most Read
+              </h3>
+              <div class="space-y-1">
+                <span class="font-headline text-2xl text-primary block"
+                  >Virginia Woolf</span
+                >
+                <span class="font-label text-[11px] text-secondary"
+                  >14 Books Read</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- Footer Branding -->
+          <div
+            class="pt-8 mt-4 border-t border-surface-variant flex justify-between items-center"
+          >
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-[1px] bg-primary-container"></div>
+              <span class="font-['Newsreader'] italic text-sm text-primary"
+                >Seogadam Archive</span
+              >
+            </div>
+            <span class="font-label text-[9px] text-secondary tracking-widest"
+              >EST. 2024</span
+            >
+          </div>
+        </div>
+      </div>
+      <!-- Social Context Note -->
+      <p
+        class="mt-8 font-label text-xs text-secondary text-center px-12 leading-relaxed"
+      >
+        취향의 기록은 당신의 서가를 더욱 풍요롭게 만듭니다.<br />
+        결과를 공유하고 다른 서가지기들과 연결해보세요.
+      </p>
+    </main>
+    <!-- BottomNavBar as Sharing Actions -->
+    <nav
+      class="fixed bottom-0 w-full z-50 rounded-t-lg bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl shadow-[0_-4px_24px_rgba(22,56,38,0.04)] flex justify-around items-center px-8 pb-8 pt-4 w-full"
+    >
+      <!-- Instagram -->
+      <button
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-500 hover:opacity-70 transition-opacity scale-98 active:translate-y-0.5 transition-all"
+      >
+        <span class="material-symbols-outlined mb-1">share_reviews</span>
+        <span class="font-['Manrope'] text-[11px] uppercase tracking-widest"
+          >Instagram</span
+        >
+      </button>
+      <!-- KakaoTalk -->
+      <button
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-500 hover:opacity-70 transition-opacity scale-98 active:translate-y-0.5 transition-all"
+      >
+        <span class="material-symbols-outlined mb-1">chat</span>
+        <span class="font-['Manrope'] text-[11px] uppercase tracking-widest"
+          >KakaoTalk</span
+        >
+      </button>
+      <!-- Save (Active intent for the user) -->
+      <button
+        class="flex flex-col items-center justify-center text-[#163826] dark:text-[#fcf9f3] font-bold hover:opacity-70 transition-opacity scale-98 active:translate-y-0.5 transition-all"
+      >
+        <span
+          class="material-symbols-outlined mb-1"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >download</span
+        >
+        <span class="font-['Manrope'] text-[11px] uppercase tracking-widest"
+          >Save</span
+        >
+      </button>
+    </nav>
+  </body>
+</html>

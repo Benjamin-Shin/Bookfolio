@@ -1,228 +1,352 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="ko"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>서가담 - 공동서재 도서 상세</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-secondary": "#ffffff",
-                        "surface-bright": "#fcf9f3",
-                        "on-primary-container": "#9ac0a7",
-                        "inverse-primary": "#a9cfb7",
-                        "on-secondary-container": "#6d6259",
-                        "surface-container-lowest": "#ffffff",
-                        "secondary-fixed": "#efe0d4",
-                        "error-container": "#ffdad6",
-                        "tertiary-fixed": "#ffdadb",
-                        "on-primary-fixed": "#002112",
-                        "primary": "#163826",
-                        "surface-variant": "#e5e2dc",
-                        "primary-container": "#2d4f3c",
-                        "on-surface": "#1c1c18",
-                        "on-error": "#ffffff",
-                        "outline-variant": "#c1c8c1",
-                        "on-background": "#1c1c18",
-                        "surface-dim": "#dcdad4",
-                        "surface-container-low": "#f6f3ed",
-                        "inverse-on-surface": "#f3f0ea",
-                        "on-secondary-fixed": "#211a13",
-                        "on-secondary-fixed-variant": "#4e453c",
-                        "tertiary": "#67081d",
-                        "on-primary": "#ffffff",
-                        "on-tertiary-fixed": "#40000d",
-                        "on-tertiary-container": "#ff9aa1",
-                        "background": "#fcf9f3",
-                        "primary-fixed": "#c5ecd2",
-                        "on-error-container": "#93000a",
-                        "outline": "#727973",
-                        "secondary-fixed-dim": "#d2c4b9",
-                        "tertiary-container": "#862232",
-                        "surface-container-high": "#ebe8e2",
-                        "secondary-container": "#efe0d4",
-                        "on-primary-fixed-variant": "#2c4e3b",
-                        "tertiary-fixed-dim": "#ffb2b6",
-                        "primary-fixed-dim": "#a9cfb7",
-                        "surface-tint": "#436651",
-                        "surface-container-highest": "#e5e2dc",
-                        "surface": "#fcf9f3",
-                        "inverse-surface": "#31312d",
-                        "surface-container": "#f0eee8",
-                        "secondary": "#675d53",
-                        "error": "#ba1a1a",
-                        "on-tertiary-fixed-variant": "#842131",
-                        "on-surface-variant": "#424843",
-                        "on-tertiary": "#ffffff"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "fontFamily": {
-                        "headline": ["Newsreader"],
-                        "body": ["Manrope"],
-                        "label": ["Manrope"]
-                    }
-                },
+<html class="light" lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>서가담 - 공동서가 도서 상세</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Manrope:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary": "#ffffff",
+              "surface-bright": "#fcf9f3",
+              "on-primary-container": "#9ac0a7",
+              "inverse-primary": "#a9cfb7",
+              "on-secondary-container": "#6d6259",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#efe0d4",
+              "error-container": "#ffdad6",
+              "tertiary-fixed": "#ffdadb",
+              "on-primary-fixed": "#002112",
+              primary: "#163826",
+              "surface-variant": "#e5e2dc",
+              "primary-container": "#2d4f3c",
+              "on-surface": "#1c1c18",
+              "on-error": "#ffffff",
+              "outline-variant": "#c1c8c1",
+              "on-background": "#1c1c18",
+              "surface-dim": "#dcdad4",
+              "surface-container-low": "#f6f3ed",
+              "inverse-on-surface": "#f3f0ea",
+              "on-secondary-fixed": "#211a13",
+              "on-secondary-fixed-variant": "#4e453c",
+              tertiary: "#67081d",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed": "#40000d",
+              "on-tertiary-container": "#ff9aa1",
+              background: "#fcf9f3",
+              "primary-fixed": "#c5ecd2",
+              "on-error-container": "#93000a",
+              outline: "#727973",
+              "secondary-fixed-dim": "#d2c4b9",
+              "tertiary-container": "#862232",
+              "surface-container-high": "#ebe8e2",
+              "secondary-container": "#efe0d4",
+              "on-primary-fixed-variant": "#2c4e3b",
+              "tertiary-fixed-dim": "#ffb2b6",
+              "primary-fixed-dim": "#a9cfb7",
+              "surface-tint": "#436651",
+              "surface-container-highest": "#e5e2dc",
+              surface: "#fcf9f3",
+              "inverse-surface": "#31312d",
+              "surface-container": "#f0eee8",
+              secondary: "#675d53",
+              error: "#ba1a1a",
+              "on-tertiary-fixed-variant": "#842131",
+              "on-surface-variant": "#424843",
+              "on-tertiary": "#ffffff",
             },
-        }
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            fontFamily: {
+              headline: ["Newsreader"],
+              body: ["Manrope"],
+              label: ["Manrope"],
+            },
+          },
+        },
+      };
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
-        body { font-family: 'Manrope', sans-serif; }
-        .serif { font-family: 'Newsreader', serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 300,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        font-family: "Manrope", sans-serif;
+      }
+      .serif {
+        font-family: "Newsreader", serif;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-surface text-on-surface antialiased min-h-screen">
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl flex items-center justify-between px-6 py-4 w-full">
-<button class="flex items-center text-[#163826] hover:opacity-70 transition-opacity">
-<span class="material-symbols-outlined">arrow_back</span>
-</button>
-<h1 class="text-xl font-serif text-[#163826] dark:text-[#fcf9f3] italic tracking-tight">공동서재</h1>
-<button class="flex items-center text-[#163826] hover:opacity-70 transition-opacity">
-<span class="material-symbols-outlined">more_vert</span>
-</button>
-</header>
-<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto space-y-12">
-<!-- Book Hero Section -->
-<section class="flex flex-col items-center space-y-6">
-<div class="relative group">
-<div class="w-48 aspect-[2/3] bg-surface-container-highest shadow-2xl rounded-sm overflow-hidden border border-outline-variant/10">
-<img class="w-full h-full object-cover" data-alt="Elegant classic book cover of Demian by Hermann Hesse on aged paper with minimal typography and clean design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATjl5r9xbV0gxlMXv7y7DgDatzGnijGRT1prgyEiSTpIOoZ8Ae49X5OarZ3e1Rm_zHzYSyilUq9Ti1FWdmwPULC-6lPX8XkhzrGIhU_jsSWCT10KiWDyVgEPX3J5UkKGQRcbJAjMte6B_29CABlyq82vaqWDJJvDFd2ag64om5oQSiLT4gONAwbj28YJ_veBEkfXao66J1EkRtbDfsu4cD0G-dyW5DXVA8sN-lIuuarKos9LcfxYEtdh7dQFVGp6oGkOjUxuh7tm4"/>
-</div>
-<!-- Archivist's Ribbon -->
-<div class="absolute -left-1 top-4 w-1.5 h-12 bg-tertiary shadow-sm"></div>
-</div>
-<div class="text-center space-y-2">
-<h2 class="serif text-4xl font-bold text-primary tracking-tight">데미안</h2>
-<p class="text-secondary text-sm font-medium tracking-widest uppercase">Hermann Hesse</p>
-</div>
-</section>
-<!-- Shared Reading Status Section -->
-<section class="space-y-4">
-<h3 class="serif italic text-xl text-primary px-1">함께 읽는 사람들</h3>
-<div class="bg-surface-container-low rounded-xl p-6 flex items-center gap-6 overflow-x-auto no-scrollbar">
-<div class="flex flex-col items-center space-y-2 shrink-0">
-<div class="relative">
-<img class="w-14 h-14 rounded-full object-cover border-2 border-primary" data-alt="Portrait of a young Korean man with a calm expression in soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzSKi4YprKV-nuUyed2dJEUci4O6TowFaKcbkJHEcJMS5CNJ0-OmNzwxL6YOA21MAIBZ0DhXxMBV2Dd1Xqzta8Q5kxa3E1XCyafS8-4bFRk6EmjeAYBenjY9Qs8kx8doTFJ7CqL84bFybcHeE5Jnm1SsS6wM_B0R-i0K5NWYMwxQb_mdrM_0E1y-br6kx3Xu-_t58_re8U9J1ITLa7GjJ6mf1J7dKTXdtIhf8MSUsHLqH_Bu_gBYOVrWDVSvSaV7gt4NFGBl05IWg"/>
-<div class="absolute -bottom-1 -right-1 bg-primary text-on-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">85%</div>
-</div>
-<span class="text-xs font-bold text-on-surface">도윤</span>
-</div>
-<div class="flex flex-col items-center space-y-2 shrink-0">
-<div class="relative">
-<img class="w-14 h-14 rounded-full object-cover border-2 border-primary/20" data-alt="Portrait of a smiling young woman with professional lighting and blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKZZy-XjPw9dKlvyLQHHJbF38n6SmsNcPp1GyS532WbAN_ykfHz4qor3sKU05bPYDzh0hfgu8R2YAXEPh1Fg7F2Ho4PdEVHEwSalJUR2vQYlbTRRw-kclj7PwwJEYUoCNyzEY7CI1K5uf6mqcx_wspdeDycjYPTITLvtfqNu7jMTNpCxVDgEvF4W2KuJ1-cgQ4AampWL3r-CSt258mmKvRmLiNns6m7vV5JpXkmpm7pKAItEQdKdue4qIEhsPef-lNkU7Wz1eZ7u4"/>
-<div class="absolute -bottom-1 -right-1 bg-primary-container text-on-primary-container text-[10px] font-bold px-1.5 py-0.5 rounded-full">40%</div>
-</div>
-<span class="text-xs font-bold text-on-surface">민서</span>
-</div>
-<div class="flex flex-col items-center space-y-2 shrink-0 opacity-60">
-<div class="relative">
-<img class="w-14 h-14 rounded-full object-cover border-2 border-transparent" data-alt="Portrait of a man in casual attire looking away from the camera in a soft outdoor setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFap-Gecly29IzjGlfCc_nP-M_51iUmSGu_a0lzErBJynE-GhdVgSv3cwf8l-_jLWHxeDMHVtIvRybDA0rCppWzNiCEo-Srt5F5xVOnaA4ItQ6o5A8aD0krd92Cr3WIpxiBTavWP35C-7x01bA5-IFrawIzxluWXzBm8irJvfKq45ToPdTkvSClzQA9O-NaVr1nDjr95jVCq_WEFRhLrDBvcNonmVNtBtHxpoA-OQwdGtm-ZzQ7uteV2VlWDvtnSvTli9oKxpud5s"/>
-<div class="absolute -bottom-1 -right-1 bg-surface-container-highest text-secondary text-[10px] font-bold px-1.5 py-0.5 rounded-full">12%</div>
-</div>
-<span class="text-xs font-bold text-on-surface">지호</span>
-</div>
-<div class="flex flex-col items-center justify-center w-14 h-14 rounded-full bg-surface-container-high border-2 border-dashed border-outline-variant shrink-0">
-<span class="material-symbols-outlined text-secondary">add</span>
-</div>
-</div>
-</section>
-<!-- Collective Notes (The Focus) -->
-<section class="space-y-8">
-<div class="flex justify-between items-baseline px-1">
-<h3 class="serif italic text-xl text-primary">기록의 서가</h3>
-<span class="text-xs text-secondary font-medium">총 24개의 기록</span>
-</div>
-<div class="space-y-12">
-<!-- Note Card 1 -->
-<article class="space-y-4">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-3">
-<img class="w-8 h-8 rounded-full object-cover" data-alt="Close-up headshot of a person for a user avatar profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV5_QZt7UNn8FYUBbNhjKrze5LafM4SFxw0z4M5bfmO3QFI02UpH_mHwTo2gTRLNIwV0PEc2U86BilDv-XRDY4f4es-g-njZiNnmWBGY3GZ-Xy9AHp3RcdoG17tIdXBeiZGvp55sQDIcvNEpap6Ig4dXTUx9sz9KlVtWEI_15d_h37ufl4B3sNFVNUzVtvhLTpnwfVBP6rPsXmC7dfyfbS0Pm5YbL-F2ZUrWpQVPUCB4RPj3cnlkFX464gCTVTzURWZnQ5IyPBG5o"/>
-<span class="text-sm font-bold text-on-surface">도윤</span>
-</div>
-<span class="text-xs text-secondary">p.42 · 2024.05.20</span>
-</div>
-<div class="bg-surface-container-lowest p-8 border-l-2 border-primary relative overflow-hidden">
-<span class="material-symbols-outlined absolute -top-2 -right-2 text-primary/5 text-8xl">format_quote</span>
-<blockquote class="serif text-xl leading-relaxed text-on-surface italic mb-6">
-                            "새는 알을 깨고 나오려고 투쟁한다. 알은 세계이다. 태어나려는 자는 하나의 세계를 깨뜨려야 한다."
-                        </blockquote>
-<div class="pt-6 border-t border-outline-variant/20">
-<p class="text-sm text-on-surface-variant leading-relaxed">
-                                성장이란 늘 고통스러운 과정을 수반한다는 것을 잊고 살았습니다. 지금 제가 겪고 있는 변화들도 결국 새로운 세계로 나아가기 위한 껍질 깨기가 아닐까 생각해 봅니다.
-                            </p>
-</div>
-</div>
-</article>
-<!-- Note Card 2 -->
-<article class="space-y-4">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-3">
-<img class="w-8 h-8 rounded-full object-cover" data-alt="User avatar of a young woman with soft features" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCnJEWr45ZiicbIsXw_lwUXSKmFrnoqXh66lT0sdm9FWZW3htmSGTA6c6Z-TJP8rM4a7z3wC32xK-qjSjrJYr-n-q_c9QHMgVdAnsNxXoXu9Xr5n64JF62fmNxbTdPKVj8c7DcAUa_VRU2vBI1LcjPYX8Sgs0mA7ySIDLA4USJT0QmadgGoOuX1DeOMB0Ke-lNsIh3eeV_n69HixMocw-GseRkN-cshq7AnFlRPaiR9CbEGp4OhRH_Ek1NrIM5L2LbGSxNl_8mE-U"/>
-<span class="text-sm font-bold text-on-surface">민서</span>
-</div>
-<span class="text-xs text-secondary">p.156 · 2024.05.18</span>
-</div>
-<div class="bg-surface-container-low p-8 border-l-2 border-secondary/30 relative">
-<blockquote class="serif text-xl leading-relaxed text-on-surface italic mb-6">
-                            "누구든 자기 자신에게로 가는 길을 가야 한다."
-                        </blockquote>
-<div class="pt-6 border-t border-outline-variant/20">
-<p class="text-sm text-on-surface-variant leading-relaxed">
-                                타인의 시선에 맞춰 살아가던 제 자신을 돌아보게 만드는 문장이네요. 진정한 자아를 찾는 여정은 고독하지만 꼭 필요한 길임을 느낍니다.
-                            </p>
-</div>
-</div>
-</article>
-</div>
-</section>
-</main>
-<!-- Floating Action Button -->
-<div class="fixed bottom-24 right-6 z-50">
-<button class="bg-primary text-on-primary flex items-center gap-2 px-6 py-4 rounded-full shadow-2xl hover:scale-95 transition-all duration-200">
-<span class="material-symbols-outlined">edit_note</span>
-<span class="font-bold tracking-tight">기록하기</span>
-</button>
-</div>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl border-t border-[#675d53]/10 shadow-[0_-4px_24px_rgba(22,56,38,0.04)]">
-<div class="flex flex-col items-center justify-center text-[#163826] dark:text-[#fcf9f3] bg-[#efe0d4]/40 dark:bg-white/5 rounded-lg px-3 py-1 tap-highlight-none transition-all duration-300">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
-<span class="font-sans text-[10px] tracking-wide uppercase mt-1">Library</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-60 hover:bg-[#efe0d4]/20 transition-all duration-300">
-<span class="material-symbols-outlined">collections_bookmark</span>
-<span class="font-sans text-[10px] tracking-wide uppercase mt-1">Archive</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-60 hover:bg-[#efe0d4]/20 transition-all duration-300">
-<span class="material-symbols-outlined">edit_note</span>
-<span class="font-sans text-[10px] tracking-wide uppercase mt-1">Curations</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-60 hover:bg-[#efe0d4]/20 transition-all duration-300">
-<span class="material-symbols-outlined">person</span>
-<span class="font-sans text-[10px] tracking-wide uppercase mt-1">Profile</span>
-</div>
-</nav>
-</body></html>
+  <body class="bg-surface text-on-surface antialiased min-h-screen">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl flex items-center justify-between px-6 py-4 w-full"
+    >
+      <button
+        class="flex items-center text-[#163826] hover:opacity-70 transition-opacity"
+      >
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h1
+        class="text-xl font-serif text-[#163826] dark:text-[#fcf9f3] italic tracking-tight"
+      >
+        공동서가
+      </h1>
+      <button
+        class="flex items-center text-[#163826] hover:opacity-70 transition-opacity"
+      >
+        <span class="material-symbols-outlined">more_vert</span>
+      </button>
+    </header>
+    <main class="pt-24 pb-32 px-6 max-w-2xl mx-auto space-y-12">
+      <!-- Book Hero Section -->
+      <section class="flex flex-col items-center space-y-6">
+        <div class="relative group">
+          <div
+            class="w-48 aspect-[2/3] bg-surface-container-highest shadow-2xl rounded-sm overflow-hidden border border-outline-variant/10"
+          >
+            <img
+              class="w-full h-full object-cover"
+              data-alt="Elegant classic book cover of Demian by Hermann Hesse on aged paper with minimal typography and clean design"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuATjl5r9xbV0gxlMXv7y7DgDatzGnijGRT1prgyEiSTpIOoZ8Ae49X5OarZ3e1Rm_zHzYSyilUq9Ti1FWdmwPULC-6lPX8XkhzrGIhU_jsSWCT10KiWDyVgEPX3J5UkKGQRcbJAjMte6B_29CABlyq82vaqWDJJvDFd2ag64om5oQSiLT4gONAwbj28YJ_veBEkfXao66J1EkRtbDfsu4cD0G-dyW5DXVA8sN-lIuuarKos9LcfxYEtdh7dQFVGp6oGkOjUxuh7tm4"
+            />
+          </div>
+          <!-- Archivist's Ribbon -->
+          <div
+            class="absolute -left-1 top-4 w-1.5 h-12 bg-tertiary shadow-sm"
+          ></div>
+        </div>
+        <div class="text-center space-y-2">
+          <h2 class="serif text-4xl font-bold text-primary tracking-tight">
+            데미안
+          </h2>
+          <p
+            class="text-secondary text-sm font-medium tracking-widest uppercase"
+          >
+            Hermann Hesse
+          </p>
+        </div>
+      </section>
+      <!-- Shared Reading Status Section -->
+      <section class="space-y-4">
+        <h3 class="serif italic text-xl text-primary px-1">함께 읽는 사람들</h3>
+        <div
+          class="bg-surface-container-low rounded-xl p-6 flex items-center gap-6 overflow-x-auto no-scrollbar"
+        >
+          <div class="flex flex-col items-center space-y-2 shrink-0">
+            <div class="relative">
+              <img
+                class="w-14 h-14 rounded-full object-cover border-2 border-primary"
+                data-alt="Portrait of a young Korean man with a calm expression in soft natural lighting"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzSKi4YprKV-nuUyed2dJEUci4O6TowFaKcbkJHEcJMS5CNJ0-OmNzwxL6YOA21MAIBZ0DhXxMBV2Dd1Xqzta8Q5kxa3E1XCyafS8-4bFRk6EmjeAYBenjY9Qs8kx8doTFJ7CqL84bFybcHeE5Jnm1SsS6wM_B0R-i0K5NWYMwxQb_mdrM_0E1y-br6kx3Xu-_t58_re8U9J1ITLa7GjJ6mf1J7dKTXdtIhf8MSUsHLqH_Bu_gBYOVrWDVSvSaV7gt4NFGBl05IWg"
+              />
+              <div
+                class="absolute -bottom-1 -right-1 bg-primary text-on-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              >
+                85%
+              </div>
+            </div>
+            <span class="text-xs font-bold text-on-surface">도윤</span>
+          </div>
+          <div class="flex flex-col items-center space-y-2 shrink-0">
+            <div class="relative">
+              <img
+                class="w-14 h-14 rounded-full object-cover border-2 border-primary/20"
+                data-alt="Portrait of a smiling young woman with professional lighting and blurred background"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKZZy-XjPw9dKlvyLQHHJbF38n6SmsNcPp1GyS532WbAN_ykfHz4qor3sKU05bPYDzh0hfgu8R2YAXEPh1Fg7F2Ho4PdEVHEwSalJUR2vQYlbTRRw-kclj7PwwJEYUoCNyzEY7CI1K5uf6mqcx_wspdeDycjYPTITLvtfqNu7jMTNpCxVDgEvF4W2KuJ1-cgQ4AampWL3r-CSt258mmKvRmLiNns6m7vV5JpXkmpm7pKAItEQdKdue4qIEhsPef-lNkU7Wz1eZ7u4"
+              />
+              <div
+                class="absolute -bottom-1 -right-1 bg-primary-container text-on-primary-container text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              >
+                40%
+              </div>
+            </div>
+            <span class="text-xs font-bold text-on-surface">민서</span>
+          </div>
+          <div class="flex flex-col items-center space-y-2 shrink-0 opacity-60">
+            <div class="relative">
+              <img
+                class="w-14 h-14 rounded-full object-cover border-2 border-transparent"
+                data-alt="Portrait of a man in casual attire looking away from the camera in a soft outdoor setting"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFap-Gecly29IzjGlfCc_nP-M_51iUmSGu_a0lzErBJynE-GhdVgSv3cwf8l-_jLWHxeDMHVtIvRybDA0rCppWzNiCEo-Srt5F5xVOnaA4ItQ6o5A8aD0krd92Cr3WIpxiBTavWP35C-7x01bA5-IFrawIzxluWXzBm8irJvfKq45ToPdTkvSClzQA9O-NaVr1nDjr95jVCq_WEFRhLrDBvcNonmVNtBtHxpoA-OQwdGtm-ZzQ7uteV2VlWDvtnSvTli9oKxpud5s"
+              />
+              <div
+                class="absolute -bottom-1 -right-1 bg-surface-container-highest text-secondary text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              >
+                12%
+              </div>
+            </div>
+            <span class="text-xs font-bold text-on-surface">지호</span>
+          </div>
+          <div
+            class="flex flex-col items-center justify-center w-14 h-14 rounded-full bg-surface-container-high border-2 border-dashed border-outline-variant shrink-0"
+          >
+            <span class="material-symbols-outlined text-secondary">add</span>
+          </div>
+        </div>
+      </section>
+      <!-- Collective Notes (The Focus) -->
+      <section class="space-y-8">
+        <div class="flex justify-between items-baseline px-1">
+          <h3 class="serif italic text-xl text-primary">기록의 서가</h3>
+          <span class="text-xs text-secondary font-medium">총 24개의 기록</span>
+        </div>
+        <div class="space-y-12">
+          <!-- Note Card 1 -->
+          <article class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <img
+                  class="w-8 h-8 rounded-full object-cover"
+                  data-alt="Close-up headshot of a person for a user avatar profile"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV5_QZt7UNn8FYUBbNhjKrze5LafM4SFxw0z4M5bfmO3QFI02UpH_mHwTo2gTRLNIwV0PEc2U86BilDv-XRDY4f4es-g-njZiNnmWBGY3GZ-Xy9AHp3RcdoG17tIdXBeiZGvp55sQDIcvNEpap6Ig4dXTUx9sz9KlVtWEI_15d_h37ufl4B3sNFVNUzVtvhLTpnwfVBP6rPsXmC7dfyfbS0Pm5YbL-F2ZUrWpQVPUCB4RPj3cnlkFX464gCTVTzURWZnQ5IyPBG5o"
+                />
+                <span class="text-sm font-bold text-on-surface">도윤</span>
+              </div>
+              <span class="text-xs text-secondary">p.42 · 2024.05.20</span>
+            </div>
+            <div
+              class="bg-surface-container-lowest p-8 border-l-2 border-primary relative overflow-hidden"
+            >
+              <span
+                class="material-symbols-outlined absolute -top-2 -right-2 text-primary/5 text-8xl"
+                >format_quote</span
+              >
+              <blockquote
+                class="serif text-xl leading-relaxed text-on-surface italic mb-6"
+              >
+                "새는 알을 깨고 나오려고 투쟁한다. 알은 세계이다. 태어나려는
+                자는 하나의 세계를 깨뜨려야 한다."
+              </blockquote>
+              <div class="pt-6 border-t border-outline-variant/20">
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                  성장이란 늘 고통스러운 과정을 수반한다는 것을 잊고 살았습니다.
+                  지금 제가 겪고 있는 변화들도 결국 새로운 세계로 나아가기 위한
+                  껍질 깨기가 아닐까 생각해 봅니다.
+                </p>
+              </div>
+            </div>
+          </article>
+          <!-- Note Card 2 -->
+          <article class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <img
+                  class="w-8 h-8 rounded-full object-cover"
+                  data-alt="User avatar of a young woman with soft features"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCnJEWr45ZiicbIsXw_lwUXSKmFrnoqXh66lT0sdm9FWZW3htmSGTA6c6Z-TJP8rM4a7z3wC32xK-qjSjrJYr-n-q_c9QHMgVdAnsNxXoXu9Xr5n64JF62fmNxbTdPKVj8c7DcAUa_VRU2vBI1LcjPYX8Sgs0mA7ySIDLA4USJT0QmadgGoOuX1DeOMB0Ke-lNsIh3eeV_n69HixMocw-GseRkN-cshq7AnFlRPaiR9CbEGp4OhRH_Ek1NrIM5L2LbGSxNl_8mE-U"
+                />
+                <span class="text-sm font-bold text-on-surface">민서</span>
+              </div>
+              <span class="text-xs text-secondary">p.156 · 2024.05.18</span>
+            </div>
+            <div
+              class="bg-surface-container-low p-8 border-l-2 border-secondary/30 relative"
+            >
+              <blockquote
+                class="serif text-xl leading-relaxed text-on-surface italic mb-6"
+              >
+                "누구든 자기 자신에게로 가는 길을 가야 한다."
+              </blockquote>
+              <div class="pt-6 border-t border-outline-variant/20">
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                  타인의 시선에 맞춰 살아가던 제 자신을 돌아보게 만드는
+                  문장이네요. 진정한 자아를 찾는 여정은 고독하지만 꼭 필요한
+                  길임을 느낍니다.
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-24 right-6 z-50">
+      <button
+        class="bg-primary text-on-primary flex items-center gap-2 px-6 py-4 rounded-full shadow-2xl hover:scale-95 transition-all duration-200"
+      >
+        <span class="material-symbols-outlined">edit_note</span>
+        <span class="font-bold tracking-tight">기록하기</span>
+      </button>
+    </div>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#fcf9f3]/80 dark:bg-stone-950/80 backdrop-blur-xl border-t border-[#675d53]/10 shadow-[0_-4px_24px_rgba(22,56,38,0.04)]"
+    >
+      <div
+        class="flex flex-col items-center justify-center text-[#163826] dark:text-[#fcf9f3] bg-[#efe0d4]/40 dark:bg-white/5 rounded-lg px-3 py-1 tap-highlight-none transition-all duration-300"
+      >
+        <span
+          class="material-symbols-outlined"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >auto_stories</span
+        >
+        <span class="font-sans text-[10px] tracking-wide uppercase mt-1"
+          >Library</span
+        >
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-60 hover:bg-[#efe0d4]/20 transition-all duration-300"
+      >
+        <span class="material-symbols-outlined">collections_bookmark</span>
+        <span class="font-sans text-[10px] tracking-wide uppercase mt-1"
+          >Archive</span
+        >
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-60 hover:bg-[#efe0d4]/20 transition-all duration-300"
+      >
+        <span class="material-symbols-outlined">edit_note</span>
+        <span class="font-sans text-[10px] tracking-wide uppercase mt-1"
+          >Curations</span
+        >
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-60 hover:bg-[#efe0d4]/20 transition-all duration-300"
+      >
+        <span class="material-symbols-outlined">person</span>
+        <span class="font-sans text-[10px] tracking-wide uppercase mt-1"
+          >Profile</span
+        >
+      </div>
+    </nav>
+  </body>
+</html>

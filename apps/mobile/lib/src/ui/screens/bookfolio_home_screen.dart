@@ -24,7 +24,7 @@ import 'package:provider/provider.dart';
 /// - 2026-04-07: 환영 헤더 타이포 Newsreader(Stitch1·DESIGN headline 계열)
 /// - 2026-04-05: 환영 인사 — 프로필 `displayName`/이메일 기준(로딩 중·무표시, 폴백 `회원`)
 /// - 2026-04-06: 독서 진행 쪽·프로필 연간 목표 반영
-/// - 2026-04-05: 초기 구현 — 읽기 전 목록을 「추천」 그리드로, 공동서재 CTA·빠른 이동
+/// - 2026-04-05: 초기 구현 — 읽기 전 목록을 「추천」 그리드로, 공동서가 CTA·빠른 이동
 class BookfolioHomeScreen extends StatefulWidget {
   const BookfolioHomeScreen({
     super.key,
@@ -216,7 +216,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
               if (_error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(_error!, style: TextStyle(color: scheme.error, fontSize: 13)),
+                  child: Text(_error!,
+                      style: TextStyle(color: scheme.error, fontSize: 13)),
                 ),
               Text(
                 '현재 읽고 있는 도서',
@@ -285,7 +286,7 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          '개인 서재 · $dateLine',
+          '개인 서가 · $dateLine',
           style: GoogleFonts.manrope(
             fontSize: 11,
             fontWeight: FontWeight.w600,
@@ -308,12 +309,15 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             backgroundColor: BookfolioDesignTokens.primary,
             foregroundColor: BookfolioDesignTokens.onPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd)),
+            shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(BookfolioDesignTokens.radiusMd)),
           ),
           icon: const Icon(Icons.add, size: 18),
           label: Text(
             '도서 추가',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 14),
+            style:
+                GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 14),
           ),
         ),
         OutlinedButton.icon(
@@ -322,12 +326,15 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             foregroundColor: BookfolioDesignTokens.primary,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             side: BookfolioDesignTokens.ghostBorderSide(opacity: 0.35),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd)),
+            shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(BookfolioDesignTokens.radiusMd)),
           ),
           icon: const Icon(Icons.people_outline, size: 18),
           label: Text(
-            '공동 서재',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 14),
+            '공동 서가',
+            style:
+                GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 14),
           ),
         ),
       ],
@@ -367,13 +374,19 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
               spacing: 16,
               runSpacing: 8,
               children: [
-                _TextLink(label: '내 서재', onTap: widget.onOpenMyLibrary, style: linkStyle(BookfolioDesignTokens.primary)),
                 _TextLink(
-                  label: '공동 서재',
+                    label: '내 서가',
+                    onTap: widget.onOpenMyLibrary,
+                    style: linkStyle(BookfolioDesignTokens.primary)),
+                _TextLink(
+                  label: '공동 서가',
                   onTap: widget.onOpenSharedLibraries,
                   style: linkStyle(BookfolioDesignTokens.primary),
                 ),
-                _TextLink(label: '통계', onTap: widget.onOpenStats, style: linkStyle(BookfolioDesignTokens.onSurfaceVariant)),
+                _TextLink(
+                    label: '통계',
+                    onTap: widget.onOpenStats,
+                    style: linkStyle(BookfolioDesignTokens.onSurfaceVariant)),
               ],
             ),
           ],
@@ -395,11 +408,13 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
               const SizedBox(height: 16),
               Text(
                 '읽는 중인 책이 없습니다',
-                style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal),
+                style: BookfolioDesignTokens.headlineMd(
+                    BookfolioDesignTokens.primary,
+                    fontStyle: FontStyle.normal),
               ),
               const SizedBox(height: 8),
               Text(
-                '서재에서 상태를 「읽는 중」으로 바꾸면 이곳에 표시됩니다.',
+                '서가에서 상태를 「읽는 중」으로 바꾸면 이곳에 표시됩니다.',
                 style: BookfolioDesignTokens.bodyLg(
                   BookfolioDesignTokens.onSurface.withValues(alpha: 0.75),
                 ),
@@ -408,7 +423,7 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
               TextButton(
                 onPressed: widget.onOpenMyLibrary,
                 child: Text(
-                  '내 서재 열기',
+                  '내 서가 열기',
                   style: GoogleFonts.manrope(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -437,7 +452,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                  borderRadius:
+                      BorderRadius.circular(BookfolioDesignTokens.radiusSm),
                   child: SizedBox(
                     width: 112,
                     child: AspectRatio(
@@ -447,7 +463,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                               cover,
                               fit: BoxFit.cover,
                               headers: kCoverImageRequestHeaders,
-                              errorBuilder: (_, __, ___) => _coverPlaceholder(context),
+                              errorBuilder: (_, __, ___) =>
+                                  _coverPlaceholder(context),
                             )
                           : _coverPlaceholder(context),
                     ),
@@ -462,7 +479,9 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                       const SizedBox(height: 10),
                       Text(
                         b.title,
-                        style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal),
+                        style: BookfolioDesignTokens.headlineMd(
+                            BookfolioDesignTokens.primary,
+                            fontStyle: FontStyle.normal),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -523,7 +542,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                       child: LinearProgressIndicator(
                         value: ratio,
                         minHeight: 4,
-                        backgroundColor: BookfolioDesignTokens.surfaceContainerLow,
+                        backgroundColor:
+                            BookfolioDesignTokens.surfaceContainerLow,
                         color: BookfolioDesignTokens.primary,
                       ),
                     ),
@@ -564,8 +584,11 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '서재 현황',
-              style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal).copyWith(fontSize: 24),
+              '서가 현황',
+              style: BookfolioDesignTokens.headlineMd(
+                      BookfolioDesignTokens.primary,
+                      fontStyle: FontStyle.normal)
+                  .copyWith(fontSize: 24),
             ),
             const SizedBox(height: 20),
             _statRow('다 읽은 권수', s != null ? '${s.completedCount}' : '—'),
@@ -573,17 +596,22 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             _statRow(
               '올해 목표',
               s != null
-                  ? (_profile?.annualReadingGoal != null && _profile!.annualReadingGoal! >= 1
+                  ? (_profile?.annualReadingGoal != null &&
+                          _profile!.annualReadingGoal! >= 1
                       ? '${s.readCompleteThisYearCount}/${_profile!.annualReadingGoal}'
                       : '${s.readCompleteThisYearCount}권')
                   : '—',
             ),
             const SizedBox(height: 6),
             Text(
-              _profile?.annualReadingGoal != null && _profile!.annualReadingGoal! >= 1
+              _profile?.annualReadingGoal != null &&
+                      _profile!.annualReadingGoal! >= 1
                   ? '완독 ${s?.readCompleteThisYearCount ?? 0}권 · 목표 ${_profile!.annualReadingGoal}권'
                   : '목표는 프로필 편집에서 설정할 수 있습니다.',
-              style: GoogleFonts.manrope(fontSize: 11, color: BookfolioDesignTokens.onSurfaceVariant, height: 1.35),
+              style: GoogleFonts.manrope(
+                  fontSize: 11,
+                  color: BookfolioDesignTokens.onSurfaceVariant,
+                  height: 1.35),
             ),
             const SizedBox(height: 18),
             _statRow('큐레이터 포인트', _formatInt(pts)),
@@ -591,7 +619,9 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             Container(
               padding: const EdgeInsets.only(top: 18),
               decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: BookfolioDesignTokens.ghostOutline(0.2))),
+                border: Border(
+                    top: BorderSide(
+                        color: BookfolioDesignTokens.ghostOutline(0.2))),
               ),
               child: Text(
                 s != null && s.totalPagesRead > 0
@@ -621,7 +651,10 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             Expanded(
               child: Text(
                 '내 취향 추천',
-                style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal).copyWith(fontSize: 26),
+                style: BookfolioDesignTokens.headlineMd(
+                        BookfolioDesignTokens.primary,
+                        fontStyle: FontStyle.normal)
+                    .copyWith(fontSize: 26),
               ),
             ),
             TextButton(
@@ -639,7 +672,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                   letterSpacing: 0.8,
                   color: BookfolioDesignTokens.primary,
                   decoration: TextDecoration.underline,
-                  decorationColor: BookfolioDesignTokens.tertiary.withValues(alpha: 0.4),
+                  decorationColor:
+                      BookfolioDesignTokens.tertiary.withValues(alpha: 0.4),
                 ),
               ),
             ),
@@ -648,7 +682,10 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
         const SizedBox(height: 8),
         Text(
           '최근 평점·독서 상태·장르 선호를 기반으로 추천합니다.',
-          style: GoogleFonts.manrope(fontSize: 12, color: BookfolioDesignTokens.onSurfaceVariant, height: 1.35),
+          style: GoogleFonts.manrope(
+              fontSize: 12,
+              color: BookfolioDesignTokens.onSurfaceVariant,
+              height: 1.35),
         ),
         const SizedBox(height: 18),
         if (_recommendationError != null)
@@ -662,7 +699,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
         else if (_recommendations.isEmpty)
           Text(
             '추천할 책이 아직 없습니다. 평점/완독 데이터가 쌓이면 더 정확해집니다.',
-            style: BookfolioDesignTokens.bodyLg(BookfolioDesignTokens.onSurfaceVariant),
+            style: BookfolioDesignTokens.bodyLg(
+                BookfolioDesignTokens.onSurfaceVariant),
           )
         else
           LayoutBuilder(
@@ -722,7 +760,10 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
               children: [
                 Text(
                   '$month월의 통계',
-                  style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal).copyWith(fontSize: 26),
+                  style: BookfolioDesignTokens.headlineMd(
+                          BookfolioDesignTokens.primary,
+                          fontStyle: FontStyle.normal)
+                      .copyWith(fontSize: 26),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -737,7 +778,9 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                 if (authors.isEmpty || total <= 0)
                   Text(
                     '저자별 비율을 계산할 데이터가 부족합니다.',
-                    style: GoogleFonts.manrope(fontSize: 12, color: BookfolioDesignTokens.onSurfaceVariant),
+                    style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        color: BookfolioDesignTokens.onSurfaceVariant),
                   )
                 else
                   ...authors.take(3).toList().asMap().entries.map((e) {
@@ -831,7 +874,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
               height: 120 * h,
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(BookfolioDesignTokens.radiusSm)),
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(BookfolioDesignTokens.radiusSm)),
               ),
             ),
           ),
@@ -903,7 +947,9 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
   Widget _coverPlaceholder(BuildContext context) {
     return ColoredBox(
       color: BookfolioDesignTokens.surfaceContainerHigh,
-      child: Icon(Icons.menu_book_rounded, color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.45), size: 40),
+      child: Icon(Icons.menu_book_rounded,
+          color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.45),
+          size: 40),
     );
   }
 
@@ -923,7 +969,9 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.0,
-            color: emphasized ? BookfolioDesignTokens.primary : BookfolioDesignTokens.onSurfaceVariant,
+            color: emphasized
+                ? BookfolioDesignTokens.primary
+                : BookfolioDesignTokens.onSurfaceVariant,
             decoration: TextDecoration.underline,
             decorationColor: emphasized
                 ? BookfolioDesignTokens.primary.withValues(alpha: 0.25)
@@ -946,7 +994,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
 }
 
 class _TextLink extends StatelessWidget {
-  const _TextLink({required this.label, required this.onTap, required this.style});
+  const _TextLink(
+      {required this.label, required this.onTap, required this.style});
 
   final String label;
   final VoidCallback onTap;
@@ -961,7 +1010,8 @@ class _TextLink extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
         child: Text(
           label,
-          style: style.copyWith(decoration: TextDecoration.underline, decorationThickness: 1),
+          style: style.copyWith(
+              decoration: TextDecoration.underline, decorationThickness: 1),
         ),
       ),
     );
@@ -1018,12 +1068,10 @@ class _RecommendationCard extends StatelessWidget {
                     rec.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: BookfolioDesignTokens
-                        .headlineMd(
-                          BookfolioDesignTokens.primary,
-                          fontStyle: FontStyle.normal,
-                        )
-                        .copyWith(fontSize: 18),
+                    style: BookfolioDesignTokens.headlineMd(
+                      BookfolioDesignTokens.primary,
+                      fontStyle: FontStyle.normal,
+                    ).copyWith(fontSize: 18),
                   ),
                   const SizedBox(height: 4),
                   Text(

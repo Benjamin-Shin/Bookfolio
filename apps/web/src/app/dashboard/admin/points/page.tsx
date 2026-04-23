@@ -1,6 +1,9 @@
 import { AdminPointRulesEditor } from "@/app/dashboard/admin/points/admin-point-rules-editor.client";
 import { SubscriptionPlanFeaturesEditor } from "@/app/dashboard/admin/points/subscription-plan-features-editor.client";
-import { fetchAdminPointPolicyOverview, fetchAdminRecentLedger } from "@/lib/points/admin-points";
+import {
+  fetchAdminPointPolicyOverview,
+  fetchAdminRecentLedger,
+} from "@/lib/points/admin-points";
 import { fetchAdminSubscriptionPlansForFeatures } from "@/lib/subscription/admin-subscription-plans";
 
 /**
@@ -12,11 +15,17 @@ import { fetchAdminSubscriptionPlansForFeatures } from "@/lib/subscription/admin
  * - 2026-03-26: 신규 — `0021` 테이블 연동·내비 노출
  */
 export default async function AdminPointsPage() {
-  let versions: Awaited<ReturnType<typeof fetchAdminPointPolicyOverview>>["versions"] = [];
-  let rules: Awaited<ReturnType<typeof fetchAdminPointPolicyOverview>>["rules"] = [];
+  let versions: Awaited<
+    ReturnType<typeof fetchAdminPointPolicyOverview>
+  >["versions"] = [];
+  let rules: Awaited<
+    ReturnType<typeof fetchAdminPointPolicyOverview>
+  >["rules"] = [];
   let ledger: Awaited<ReturnType<typeof fetchAdminRecentLedger>> = [];
   let loadError: string | null = null;
-  let subscriptionPlans: Awaited<ReturnType<typeof fetchAdminSubscriptionPlansForFeatures>> = [];
+  let subscriptionPlans: Awaited<
+    ReturnType<typeof fetchAdminSubscriptionPlansForFeatures>
+  > = [];
   let subscriptionPlansError: string | null = null;
 
   try {
@@ -25,7 +34,8 @@ export default async function AdminPointsPage() {
     rules = overview.rules;
     ledger = await fetchAdminRecentLedger(150);
   } catch (e) {
-    loadError = e instanceof Error ? e.message : "데이터를 불러오지 못했습니다.";
+    loadError =
+      e instanceof Error ? e.message : "데이터를 불러오지 못했습니다.";
   }
 
   try {
@@ -36,7 +46,7 @@ export default async function AdminPointsPage() {
   }
 
   const versionLabel: Record<string, string> = Object.fromEntries(
-    versions.map((v) => [v.id, `v${v.version}`])
+    versions.map((v) => [v.id, `v${v.version}`]),
   );
 
   return (
@@ -44,18 +54,28 @@ export default async function AdminPointsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">포인트 · 정책</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          정책 버전·이벤트 규칙(점수·일·월 한도)을 편집하고 원장을 봅니다. 구독 플랜의 기능 해금은{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">subscription_plans.caps_json.features</code>로
-          관리합니다. 가입·서재 등록 지급은{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">0022</code> 시드 및 앱 로직과 연동됩니다.
+          정책 버전·이벤트 규칙(점수·일·월 한도)을 편집하고 원장을 봅니다. 구독
+          플랜의 기능 해금은{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">
+            subscription_plans.caps_json.features
+          </code>
+          로 관리합니다. 가입·서가 등록 지급은{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">0022</code>{" "}
+          시드 및 앱 로직과 연동됩니다.
         </p>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">구독 플랜 기능 (정책 CMS)</h2>
+        <h2 className="text-lg font-semibold tracking-tight">
+          구독 플랜 기능 (정책 CMS)
+        </h2>
         <p className="max-w-2xl text-xs text-muted-foreground">
-          VIP 등 플랜별로 리포트·SNS 공유·테마 등 해금 여부를 저장합니다. 앱에서는{" "}
-          <code className="rounded bg-muted px-1">getActiveSubscriptionFeatures</code>로 활성 구독 기준을 읽습니다.
+          VIP 등 플랜별로 리포트·SNS 공유·테마 등 해금 여부를 저장합니다.
+          앱에서는{" "}
+          <code className="rounded bg-muted px-1">
+            getActiveSubscriptionFeatures
+          </code>
+          로 활성 구독 기준을 읽습니다.
         </p>
         {subscriptionPlansError ? (
           <p className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
@@ -75,7 +95,9 @@ export default async function AdminPointsPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold tracking-tight">정책 버전</h2>
         {versions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">등록된 정책 버전이 없습니다.</p>
+          <p className="text-sm text-muted-foreground">
+            등록된 정책 버전이 없습니다.
+          </p>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-border/80">
             <table className="w-full min-w-[520px] text-left text-sm">
@@ -88,12 +110,19 @@ export default async function AdminPointsPage() {
               </thead>
               <tbody>
                 {versions.map((v) => (
-                  <tr key={v.id} className="border-b border-border/40 last:border-0">
-                    <td className="px-3 py-2 font-mono text-xs">v{v.version}</td>
+                  <tr
+                    key={v.id}
+                    className="border-b border-border/40 last:border-0"
+                  >
+                    <td className="px-3 py-2 font-mono text-xs">
+                      v{v.version}
+                    </td>
                     <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                       {new Date(v.effective_from).toLocaleString("ko-KR")}
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">{v.notes ?? "—"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {v.notes ?? "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -105,9 +134,15 @@ export default async function AdminPointsPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold tracking-tight">이벤트 규칙</h2>
         {!loadError && versions.length > 0 ? (
-          <AdminPointRulesEditor versions={versions} rules={rules} versionLabel={versionLabel} />
+          <AdminPointRulesEditor
+            versions={versions}
+            rules={rules}
+            versionLabel={versionLabel}
+          />
         ) : loadError ? null : (
-          <p className="text-sm text-muted-foreground">정책 버전이 없어 규칙을 편집할 수 없습니다.</p>
+          <p className="text-sm text-muted-foreground">
+            정책 버전이 없어 규칙을 편집할 수 없습니다.
+          </p>
         )}
       </section>
 
@@ -131,7 +166,10 @@ export default async function AdminPointsPage() {
               </thead>
               <tbody>
                 {ledger.map((row) => (
-                  <tr key={row.id} className="border-b border-border/40 last:border-0">
+                  <tr
+                    key={row.id}
+                    className="border-b border-border/40 last:border-0"
+                  >
                     <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                       {new Date(row.created_at).toLocaleString("ko-KR")}
                     </td>
@@ -147,8 +185,13 @@ export default async function AdminPointsPage() {
                     >
                       {row.delta >= 0 ? `+${row.delta}` : row.delta}
                     </td>
-                    <td className="px-3 py-2 tabular-nums">{row.balance_after}</td>
-                    <td className="max-w-[240px] truncate px-3 py-2" title={row.reason}>
+                    <td className="px-3 py-2 tabular-nums">
+                      {row.balance_after}
+                    </td>
+                    <td
+                      className="max-w-[240px] truncate px-3 py-2"
+                      title={row.reason}
+                    >
                       {row.reason}
                     </td>
                     <td className="max-w-[160px] truncate px-3 py-2 font-mono text-xs text-muted-foreground">

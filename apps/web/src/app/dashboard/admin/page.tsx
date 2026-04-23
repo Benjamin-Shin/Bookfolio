@@ -2,13 +2,19 @@
  * @history
  * - 2026-04-10: 클라이언트 오류 수집 카드
  * - 2026-03-29: 상단 플랫폼 통계 카드(`fetchAdminDashboardStats`) 추가
- * - 2026-03-29: 공동서재 관리 카드 추가
+ * - 2026-03-29: 공동서가 관리 카드 추가
  * - 2026-03-26: 포인트·정책 카드 추가
  */
 import Link from "next/link";
 import type { Route } from "next";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { fetchAdminDashboardStats } from "@/lib/admin/admin-dashboard-stats";
 
 const koInt = new Intl.NumberFormat("ko-KR");
@@ -17,7 +23,7 @@ function StatTile({
   title,
   description,
   value,
-  footnote
+  footnote,
 }: {
   title: string;
   description: string;
@@ -27,9 +33,15 @@ function StatTile({
   return (
     <div className="rounded-lg border border-border/80 bg-card px-4 py-3 shadow-sm">
       <p className="text-xs font-medium text-muted-foreground">{title}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{koInt.format(value)}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
+        {koInt.format(value)}
+      </p>
       <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-      {footnote ? <p className="mt-0.5 text-[11px] text-muted-foreground/90">{footnote}</p> : null}
+      {footnote ? (
+        <p className="mt-0.5 text-[11px] text-muted-foreground/90">
+          {footnote}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -41,11 +53,15 @@ export default async function AdminHomePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">관리자</h1>
-        <p className="mt-1 text-sm text-muted-foreground">계정·공유 도서 메타데이터를 관리합니다.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          계정·공유 도서 메타데이터를 관리합니다.
+        </p>
       </div>
 
       <section aria-label="플랫폼 통계">
-        <h2 className="mb-3 text-sm font-semibold text-foreground">플랫폼 통계</h2>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">
+          플랫폼 통계
+        </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <StatTile
             title="가입 사용자"
@@ -53,8 +69,8 @@ export default async function AdminHomePage() {
             value={stats.userCount}
           />
           <StatTile
-            title="공동서재"
-            description="모임·공유 서재(libraries) 개수"
+            title="공동서가"
+            description="모임·공유 서가(libraries) 개수"
             value={stats.sharedLibraryCount}
           />
           <StatTile
@@ -85,10 +101,15 @@ export default async function AdminHomePage() {
         <Card className="border-border/80">
           <CardHeader>
             <CardTitle className="text-lg">사용자 관리</CardTitle>
-            <CardDescription>가입 계정 목록과 ADMIN / USER 권한을 변경합니다.</CardDescription>
+            <CardDescription>
+              가입 계정 목록과 ADMIN / USER 권한을 변경합니다.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/dashboard/admin/users" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+            <Link
+              href="/dashboard/admin/users"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
               사용자 목록 열기
             </Link>
           </CardContent>
@@ -96,10 +117,15 @@ export default async function AdminHomePage() {
         <Card className="border-border/80">
           <CardHeader>
             <CardTitle className="text-lg">도서 관리</CardTitle>
-            <CardDescription>공유 서지(`books`) 테이블을 검색·열람합니다.</CardDescription>
+            <CardDescription>
+              공유 서지(`books`) 테이블을 검색·열람합니다.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/dashboard/admin/books" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+            <Link
+              href="/dashboard/admin/books"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
               도서 목록 열기
             </Link>
           </CardContent>
@@ -107,7 +133,10 @@ export default async function AdminHomePage() {
         <Card className="border-border/80">
           <CardHeader>
             <CardTitle className="text-lg">저자 관리</CardTitle>
-            <CardDescription>저자 마스터(`authors`)와 도서 연결(`book_authors`) 데이터를 봅니다.</CardDescription>
+            <CardDescription>
+              저자 마스터(`authors`)와 도서 연결(`book_authors`) 데이터를
+              봅니다.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
@@ -122,8 +151,8 @@ export default async function AdminHomePage() {
           <CardHeader>
             <CardTitle className="text-lg">포인트 · 정책</CardTitle>
             <CardDescription>
-              정책 버전·이벤트 규칙(`point_rule_versions` / `point_rules`)과 원장(`user_points_ledger`)을
-              조회합니다.
+              정책 버전·이벤트 규칙(`point_rule_versions` / `point_rules`)과
+              원장(`user_points_ledger`)을 조회합니다.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -138,7 +167,9 @@ export default async function AdminHomePage() {
         <Card className="border-border/80">
           <CardHeader>
             <CardTitle className="text-lg">클라이언트 오류</CardTitle>
-            <CardDescription>앱·웹이 전송한 오류 로그를 최신순으로 봅니다.</CardDescription>
+            <CardDescription>
+              앱·웹이 전송한 오류 로그를 최신순으로 봅니다.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
@@ -151,15 +182,17 @@ export default async function AdminHomePage() {
         </Card>
         <Card className="border-border/80">
           <CardHeader>
-            <CardTitle className="text-lg">공동서재</CardTitle>
-            <CardDescription>공동서재 목록, 참여 회원, 연결 도서 권수를 확인합니다.</CardDescription>
+            <CardTitle className="text-lg">공동서가</CardTitle>
+            <CardDescription>
+              공동서가 목록, 참여 회원, 연결 도서 권수를 확인합니다.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link
               href={"/dashboard/admin/shared-libraries" as Route}
               className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
-              공동서재 목록 열기
+              공동서가 목록 열기
             </Link>
           </CardContent>
         </Card>

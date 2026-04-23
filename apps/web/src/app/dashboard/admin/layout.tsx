@@ -1,7 +1,7 @@
 /**
  * @history
  * - 2026-04-10: 클라이언트 오류 수집 관리 링크
- * - 2026-03-29: 공동서재 관리 내비 링크 추가
+ * - 2026-03-29: 공동서가 관리 내비 링크 추가
  * - 2026-03-26: 상단 내비에 포인트·정책 링크 추가
  */
 import Link from "next/link";
@@ -9,7 +9,11 @@ import type { Route } from "next";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   await requireAdmin();
 
   return (
@@ -49,7 +53,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           href={"/dashboard/admin/shared-libraries" as Route}
           className="rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
-          공동서재
+          공동서가
         </Link>
         <Link
           href={"/dashboard/admin/authors" as Route}
@@ -61,7 +65,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           href="/dashboard"
           className="ml-auto rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
-          내 서재로
+          내 서가로
         </Link>
       </nav>
       {children}

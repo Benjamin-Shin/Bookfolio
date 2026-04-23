@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-/// 내 서재 종이책 목록: 검색·읽기 상태 탭·그리드·페이지네이션 (`LibraryScreen` 「내 책」).
+/// 내 서가 종이책 목록: 검색·읽기 상태 탭·그리드·페이지네이션 (`LibraryScreen` 「내 책」).
 ///
 /// History:
-/// - 2026-04-05: 메인 「발견」탭과 분리 — 본 위젯은 서재 탭 전용
+/// - 2026-04-05: 메인 「발견」탭과 분리 — 본 위젯은 서가 탭 전용
 /// - 2026-04-05: 그리드 열 수 `bookfolioGridCrossAxisCount`(가용 폭·최소 타일 너비 기준)
 /// - 2026-04-02: 그리드 `childAspectRatio` 가산(+0.12)으로 카드 하단 빈 여백 축소
 /// - 2026-04-02: 검색 탭에서 소장 책 가격 합계 UI 제거
@@ -88,12 +88,14 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
               children: [
                 Text(
                   '서버 응답이 너무 늦거나, 지금은 오프라인에 가깝습니다. '
-                  '이 기기에 저장된 서재 목록을 불러올까요?',
-                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4),
+                  '이 기기에 저장된 서가 목록을 불러올까요?',
+                  style:
+                      Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4),
                 ),
                 const SizedBox(height: 8),
                 Theme(
-                  data: Theme.of(ctx).copyWith(dividerColor: Colors.transparent),
+                  data:
+                      Theme.of(ctx).copyWith(dividerColor: Colors.transparent),
                   child: ExpansionTile(
                     tilePadding: EdgeInsets.zero,
                     title: Text(
@@ -243,16 +245,19 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
                         hintText: '제목·저자·ISBN',
                         border: OutlineInputBorder(),
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       ),
                       onSubmitted: (_) => _applySearch(library),
                     ),
                   ),
                   const SizedBox(width: 6),
                   FilledButton.tonal(
-                    onPressed: library.isLoading ? null : () => _applySearch(library),
+                    onPressed:
+                        library.isLoading ? null : () => _applySearch(library),
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
                     ),
                     child: const Text('검색'),
                   ),
@@ -265,7 +270,8 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _readingStatusFilterChips(library, colorScheme, textTheme),
+              children:
+                  _readingStatusFilterChips(library, colorScheme, textTheme),
             ),
           ),
           if (library.booksFromLocalCacheOnly)
@@ -298,7 +304,8 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
                             _localCacheSubtitle(library),
                             style: textTheme.bodySmall?.copyWith(
                               height: 1.35,
-                              color: colorScheme.onSecondaryContainer.withValues(alpha: 0.92),
+                              color: colorScheme.onSecondaryContainer
+                                  .withValues(alpha: 0.92),
                             ),
                           ),
                         ],
@@ -315,10 +322,12 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
                 color: colorScheme.errorContainer.withValues(alpha: 0.85),
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   child: Text(
                     library.error!,
-                    style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 13),
+                    style: TextStyle(
+                        color: colorScheme.onErrorContainer, fontSize: 13),
                   ),
                 ),
               ),
@@ -331,7 +340,8 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
                         library,
                         () async {
                           await Navigator.of(context).push(
-                            MaterialPageRoute<void>(builder: (_) => const BookFormScreen()),
+                            MaterialPageRoute<void>(
+                                builder: (_) => const BookFormScreen()),
                           );
                           if (mounted) await library.loadBooks();
                         },
@@ -344,7 +354,8 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
                           slivers: [
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(10, 8, 10, 6),
+                                padding:
+                                    const EdgeInsets.fromLTRB(10, 8, 10, 6),
                                 child: Text(
                                   library.booksFromLocalCacheOnly
                                       ? (library.books.isEmpty
@@ -370,12 +381,15 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
                                     crossAxisSpacing: 10,
                                   );
                                   return SliverGrid(
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: columns,
                                       mainAxisSpacing: 10,
                                       crossAxisSpacing: 10,
                                       // 표지·텍스트 높이에 맞춰 셀을 낮춤(하단 빈 여백 완화)
-                                      childAspectRatio: bookGridCardAspectRatio(columns) + 0.12,
+                                      childAspectRatio:
+                                          bookGridCardAspectRatio(columns) +
+                                              0.12,
                                     ),
                                     delegate: SliverChildBuilderDelegate(
                                       (context, index) {
@@ -387,7 +401,8 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
                                           gradientSeedA: book.title,
                                           gradientSeedB: book.id,
                                           coverScale: 0.88,
-                                          coverBadge: ReadingStatusCoverBadge(status: book.readingStatus),
+                                          coverBadge: ReadingStatusCoverBadge(
+                                              status: book.readingStatus),
                                           onTap: () => _openBook(book),
                                         );
                                       },
@@ -406,10 +421,12 @@ class _LibraryBrowseTabState extends State<LibraryBrowseTab> {
               library.error == null &&
               !library.booksFromLocalCacheOnly)
             Material(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.95),
+              color:
+                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.95),
               child: Padding(
                 padding: EdgeInsets.only(
-                  bottom: MediaQuery.viewPaddingOf(context).bottom + kBookfolioShellBottomNavClearance,
+                  bottom: MediaQuery.viewPaddingOf(context).bottom +
+                      kBookfolioShellBottomNavClearance,
                 ),
                 child: _BooksPagerBar(
                   page: library.booksPage,
@@ -501,7 +518,10 @@ class _EmptyLibrary extends StatelessWidget {
                 Icon(
                   Icons.collections_bookmark_rounded,
                   size: 52,
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.85),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.85),
                 ),
                 const SizedBox(height: 16),
                 Text(

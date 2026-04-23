@@ -60,7 +60,7 @@ export default async function HomePage() {
           </h1>
           <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">
             ISBN·바코드로 빠르게 찾고, 읽기 상태와 메모를 남기세요. 웹과 앱에서
-            같은 서재를 이어갑니다.
+            같은 서가를 이어갑니다.
           </p>
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
             <Button size="lg" className="rounded-sm shadow-none" asChild>

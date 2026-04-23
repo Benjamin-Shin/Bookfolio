@@ -1,281 +1,437 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="ko"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-        }
-        body {
-            font-family: 'Manrope', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-        h1, h2, h3, .serif {
-            font-family: 'Newsreader', serif;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+<html class="light" lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 300,
+          "GRAD" 0,
+          "opsz" 24;
+        vertical-align: middle;
+      }
+      body {
+        font-family: "Manrope", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1,
+      h2,
+      h3,
+      .serif {
+        font-family: "Newsreader", serif;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     </style>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-error": "#ffffff",
-                        "on-tertiary-fixed-variant": "#842131",
-                        "error-container": "#ffdad6",
-                        "on-surface-variant": "#424843",
-                        "secondary-fixed": "#efe0d4",
-                        "surface-tint": "#436651",
-                        "secondary": "#675d53",
-                        "outline-variant": "#c1c8c1",
-                        "tertiary": "#67081d",
-                        "surface-dim": "#dcdad4",
-                        "surface-container-highest": "#e5e2dc",
-                        "inverse-primary": "#a9cfb7",
-                        "on-secondary-container": "#6d6259",
-                        "tertiary-fixed-dim": "#ffb2b6",
-                        "inverse-surface": "#31312d",
-                        "surface-container-low": "#f6f3ed",
-                        "tertiary-fixed": "#ffdadb",
-                        "on-secondary-fixed": "#211a13",
-                        "primary-container": "#2d4f3c",
-                        "on-primary-fixed-variant": "#2c4e3b",
-                        "on-secondary-fixed-variant": "#4e453c",
-                        "surface-bright": "#fcf9f3",
-                        "surface-container-high": "#ebe8e2",
-                        "secondary-container": "#efe0d4",
-                        "on-tertiary-fixed": "#40000d",
-                        "on-primary-fixed": "#002112",
-                        "surface-variant": "#e5e2dc",
-                        "outline": "#727973",
-                        "on-tertiary-container": "#ff9aa1",
-                        "error": "#ba1a1a",
-                        "on-background": "#1c1c18",
-                        "surface-container-lowest": "#ffffff",
-                        "primary": "#163826",
-                        "surface-container": "#f0eee8",
-                        "on-tertiary": "#ffffff",
-                        "on-primary": "#ffffff",
-                        "on-secondary": "#ffffff",
-                        "surface": "#fcf9f3",
-                        "on-surface": "#1c1c18",
-                        "secondary-fixed-dim": "#d2c4b9",
-                        "tertiary-container": "#862232",
-                        "on-primary-container": "#9ac0a7",
-                        "primary-fixed-dim": "#a9cfb7",
-                        "inverse-on-surface": "#f3f0ea",
-                        "on-error-container": "#93000a",
-                        "primary-fixed": "#c5ecd2",
-                        "background": "#fcf9f3"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    }
-                }
-            }
-        }
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffffff",
+              "on-tertiary-fixed-variant": "#842131",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#424843",
+              "secondary-fixed": "#efe0d4",
+              "surface-tint": "#436651",
+              secondary: "#675d53",
+              "outline-variant": "#c1c8c1",
+              tertiary: "#67081d",
+              "surface-dim": "#dcdad4",
+              "surface-container-highest": "#e5e2dc",
+              "inverse-primary": "#a9cfb7",
+              "on-secondary-container": "#6d6259",
+              "tertiary-fixed-dim": "#ffb2b6",
+              "inverse-surface": "#31312d",
+              "surface-container-low": "#f6f3ed",
+              "tertiary-fixed": "#ffdadb",
+              "on-secondary-fixed": "#211a13",
+              "primary-container": "#2d4f3c",
+              "on-primary-fixed-variant": "#2c4e3b",
+              "on-secondary-fixed-variant": "#4e453c",
+              "surface-bright": "#fcf9f3",
+              "surface-container-high": "#ebe8e2",
+              "secondary-container": "#efe0d4",
+              "on-tertiary-fixed": "#40000d",
+              "on-primary-fixed": "#002112",
+              "surface-variant": "#e5e2dc",
+              outline: "#727973",
+              "on-tertiary-container": "#ff9aa1",
+              error: "#ba1a1a",
+              "on-background": "#1c1c18",
+              "surface-container-lowest": "#ffffff",
+              primary: "#163826",
+              "surface-container": "#f0eee8",
+              "on-tertiary": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-secondary": "#ffffff",
+              surface: "#fcf9f3",
+              "on-surface": "#1c1c18",
+              "secondary-fixed-dim": "#d2c4b9",
+              "tertiary-container": "#862232",
+              "on-primary-container": "#9ac0a7",
+              "primary-fixed-dim": "#a9cfb7",
+              "inverse-on-surface": "#f3f0ea",
+              "on-error-container": "#93000a",
+              "primary-fixed": "#c5ecd2",
+              background: "#fcf9f3",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+          },
+        },
+      };
     </script>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-surface text-on-surface min-h-screen pb-32">
-<!-- TopAppBar -->
-<header class="fixed top-0 left-0 w-full z-40 bg-[#fcf9f3] dark:bg-stone-950">
-<div class="flex justify-between items-center w-full px-6 py-4">
-<div class="flex items-center gap-4">
-<button class="hover:bg-[#f6f3ed] dark:hover:bg-stone-900 rounded-full p-2 transition-colors">
-<span class="material-symbols-outlined text-[#2D4F3C] dark:text-[#4A7C61]" style="font-variation-settings: 'FILL' 0;">menu</span>
-</button>
-<h1 class="font-['Newsreader'] text-2xl font-bold tracking-tighter text-[#2D4F3C] dark:text-[#fcf9f3]">독서 통계</h1>
-</div>
-<button class="hover:bg-[#f6f3ed] dark:hover:bg-stone-900 rounded-full p-2 transition-colors">
-<span class="material-symbols-outlined text-[#2D4F3C] dark:text-[#4A7C61]" style="font-variation-settings: 'FILL' 0;">notifications</span>
-</button>
-</div>
-</header>
-<main class="pt-24 px-6 max-w-md mx-auto space-y-8">
-<!-- Emotional Summary Card -->
-<section class="relative overflow-hidden bg-surface-container-low rounded-xl p-8 border-l-4 border-tertiary">
-<div class="relative z-10">
-<h2 class="text-secondary text-sm font-medium tracking-wide mb-2">나의 독서 세계</h2>
-<p class="serif text-2xl leading-relaxed text-primary">
-                    지금까지 <span class="font-bold underline decoration-tertiary/30 decoration-4 underline-offset-4">42권</span>의 책이<br/>당신의 서가에 담겼습니다.
-                </p>
-</div>
-<div class="absolute -right-4 -bottom-4 opacity-10 text-primary">
-<span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
-</div>
-</section>
-<!-- Monthly Reading Volume (Bar Chart) -->
-<section class="space-y-6">
-<div class="flex justify-between items-end">
-<h3 class="serif text-xl text-primary font-semibold">월별 독서량</h3>
-<span class="text-xs text-secondary font-medium uppercase tracking-widest">Last 6 Months</span>
-</div>
-<div class="bg-surface-container-lowest rounded-xl p-6 flex flex-col items-center">
-<div class="flex items-end justify-between w-full h-40 px-2 gap-4">
-<!-- Aug -->
-<div class="flex flex-col items-center flex-1 space-y-2">
-<div class="w-full bg-secondary-fixed-dim rounded-t-sm h-[30%]"></div>
-<span class="text-[10px] text-secondary font-bold">8월</span>
-</div>
-<!-- Sep -->
-<div class="flex flex-col items-center flex-1 space-y-2">
-<div class="w-full bg-secondary-fixed-dim rounded-t-sm h-[45%]"></div>
-<span class="text-[10px] text-secondary font-bold">9월</span>
-</div>
-<!-- Oct -->
-<div class="flex flex-col items-center flex-1 space-y-2">
-<div class="w-full bg-secondary-fixed-dim rounded-t-sm h-[20%]"></div>
-<span class="text-[10px] text-secondary font-bold">10월</span>
-</div>
-<!-- Nov -->
-<div class="flex flex-col items-center flex-1 space-y-2">
-<div class="w-full bg-primary/40 rounded-t-sm h-[60%]"></div>
-<span class="text-[10px] text-secondary font-bold">11월</span>
-</div>
-<!-- Dec -->
-<div class="flex flex-col items-center flex-1 space-y-2">
-<div class="w-full bg-primary/60 rounded-t-sm h-[85%]"></div>
-<span class="text-[10px] text-secondary font-bold">12월</span>
-</div>
-<!-- Jan -->
-<div class="flex flex-col items-center flex-1 space-y-2">
-<div class="w-full bg-primary rounded-t-sm h-[70%]"></div>
-<span class="text-[10px] text-primary font-bold">1월</span>
-</div>
-</div>
-</div>
-</section>
-<!-- Favorite Authors & Genre Grid -->
-<div class="grid grid-cols-1 gap-8">
-<!-- Favorite Authors -->
-<section class="space-y-4">
-<h3 class="serif text-xl text-primary font-semibold">자주 찾는 작가</h3>
-<div class="space-y-3">
-<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg group">
-<div class="flex items-center gap-4">
-<span class="serif text-lg text-tertiary font-bold w-4">1</span>
-<span class="text-on-surface font-medium">헤르만 헤세</span>
-</div>
-<span class="text-xs text-secondary bg-surface-container-high px-2 py-1 rounded">8권</span>
-</div>
-<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg">
-<div class="flex items-center gap-4">
-<span class="serif text-lg text-secondary font-bold w-4">2</span>
-<span class="text-on-surface font-medium">김연수</span>
-</div>
-<span class="text-xs text-secondary bg-surface-container-high px-2 py-1 rounded">5권</span>
-</div>
-<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg">
-<div class="flex items-center gap-4">
-<span class="serif text-lg text-secondary font-bold w-4">3</span>
-<span class="text-on-surface font-medium">박완서</span>
-</div>
-<span class="text-xs text-secondary bg-surface-container-high px-2 py-1 rounded">4권</span>
-</div>
-</div>
-</section>
-<!-- Genre Composition (Doughnut) -->
-<section class="space-y-4">
-<h3 class="serif text-xl text-primary font-semibold">선호 장르</h3>
-<div class="bg-surface-container-lowest rounded-xl p-8 flex flex-col items-center">
-<div class="relative w-48 h-48 flex items-center justify-center">
-<!-- Custom CSS SVG Donut with Muted Tones -->
-<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 100 100">
-<!-- Beige -->
-<circle cx="50" cy="50" fill="transparent" r="40" stroke="#efe0d4" stroke-dasharray="251.2" stroke-dashoffset="0" stroke-width="12"></circle>
-<!-- Taupe -->
-<circle cx="50" cy="50" fill="transparent" r="40" stroke="#d2c4b9" stroke-dasharray="251.2" stroke-dashoffset="180" stroke-width="12"></circle>
-<!-- Green (Primary) -->
-<circle cx="50" cy="50" fill="transparent" r="40" stroke="#2D4F3C" stroke-dasharray="251.2" stroke-dashoffset="210" stroke-width="12"></circle>
-</svg>
-<div class="absolute inset-0 flex flex-col items-center justify-center">
-<span class="text-xs text-secondary">주요 장르</span>
-<span class="serif text-lg font-bold text-primary">한국 소설</span>
-</div>
-</div>
-<div class="mt-6 flex flex-wrap justify-center gap-4">
-<div class="flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-[#2D4F3C]"></span>
-<span class="text-xs text-on-surface-variant">소설 42%</span>
-</div>
-<div class="flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-[#d2c4b9]"></span>
-<span class="text-xs text-on-surface-variant">에세이 28%</span>
-</div>
-<div class="flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-[#efe0d4]"></span>
-<span class="text-xs text-on-surface-variant">인문 30%</span>
-</div>
-</div>
-</div>
-</section>
-</div>
-<!-- Library Value Card -->
-<section class="bg-primary text-on-primary rounded-xl p-8 shadow-xl shadow-primary/5">
-<div class="flex items-start justify-between mb-6">
-<div>
-<h3 class="serif text-lg opacity-80">서재의 가치</h3>
-<p class="text-xs font-light uppercase tracking-[0.2em] mt-1">Accumulated Worth</p>
-</div>
-<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">payments</span>
-</div>
-<div class="flex flex-col">
-<span class="text-3xl serif font-light">소장 도서 정가 총액</span>
-<span class="text-4xl font-bold tracking-tight mt-2">648,000원</span>
-</div>
-<div class="mt-6 pt-6 border-t border-white/10 flex justify-between items-center">
-<span class="text-[10px] uppercase opacity-60">Calculated by Seogadam AI</span>
-<span class="material-symbols-outlined text-sm">trending_up</span>
-</div>
-</section>
-</main>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 w-full z-50 border-t border-[#163826]/10 bg-[#fcf9f3]/80 dark:bg-stone-900/80 backdrop-blur-xl flex justify-around items-center px-4 pb-6 pt-2">
-<!-- 홈 -->
-<a class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-70 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined" data-icon="home">home</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">홈</span>
-</a>
-<!-- 서재 -->
-<a class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-70 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">서재</span>
-</a>
-<!-- 발견 -->
-<a class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-70 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined" data-icon="explore">explore</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">발견</span>
-</a>
-<!-- 통계 (Active) -->
-<a class="flex flex-col items-center justify-center text-[#2D4F3C] dark:text-[#fcf9f3] font-bold scale-105 transition-transform" href="#">
-<span class="material-symbols-outlined" data-icon="bar_chart" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">통계</span>
-</a>
-<!-- 프로필 -->
-<a class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-70 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined" data-icon="person">person</span>
-<span class="font-['Newsreader'] text-[10px] tracking-tight">프로필</span>
-</a>
-</nav>
-</body></html>
+  <body class="bg-surface text-on-surface min-h-screen pb-32">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 left-0 w-full z-40 bg-[#fcf9f3] dark:bg-stone-950"
+    >
+      <div class="flex justify-between items-center w-full px-6 py-4">
+        <div class="flex items-center gap-4">
+          <button
+            class="hover:bg-[#f6f3ed] dark:hover:bg-stone-900 rounded-full p-2 transition-colors"
+          >
+            <span
+              class="material-symbols-outlined text-[#2D4F3C] dark:text-[#4A7C61]"
+              style="font-variation-settings: &quot;FILL&quot; 0"
+              >menu</span
+            >
+          </button>
+          <h1
+            class="font-['Newsreader'] text-2xl font-bold tracking-tighter text-[#2D4F3C] dark:text-[#fcf9f3]"
+          >
+            독서 통계
+          </h1>
+        </div>
+        <button
+          class="hover:bg-[#f6f3ed] dark:hover:bg-stone-900 rounded-full p-2 transition-colors"
+        >
+          <span
+            class="material-symbols-outlined text-[#2D4F3C] dark:text-[#4A7C61]"
+            style="font-variation-settings: &quot;FILL&quot; 0"
+            >notifications</span
+          >
+        </button>
+      </div>
+    </header>
+    <main class="pt-24 px-6 max-w-md mx-auto space-y-8">
+      <!-- Emotional Summary Card -->
+      <section
+        class="relative overflow-hidden bg-surface-container-low rounded-xl p-8 border-l-4 border-tertiary"
+      >
+        <div class="relative z-10">
+          <h2 class="text-secondary text-sm font-medium tracking-wide mb-2">
+            나의 독서 세계
+          </h2>
+          <p class="serif text-2xl leading-relaxed text-primary">
+            지금까지
+            <span
+              class="font-bold underline decoration-tertiary/30 decoration-4 underline-offset-4"
+              >42권</span
+            >의 책이<br />당신의 서가에 담겼습니다.
+          </p>
+        </div>
+        <div class="absolute -right-4 -bottom-4 opacity-10 text-primary">
+          <span
+            class="material-symbols-outlined text-[120px]"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >auto_stories</span
+          >
+        </div>
+      </section>
+      <!-- Monthly Reading Volume (Bar Chart) -->
+      <section class="space-y-6">
+        <div class="flex justify-between items-end">
+          <h3 class="serif text-xl text-primary font-semibold">월별 독서량</h3>
+          <span
+            class="text-xs text-secondary font-medium uppercase tracking-widest"
+            >Last 6 Months</span
+          >
+        </div>
+        <div
+          class="bg-surface-container-lowest rounded-xl p-6 flex flex-col items-center"
+        >
+          <div class="flex items-end justify-between w-full h-40 px-2 gap-4">
+            <!-- Aug -->
+            <div class="flex flex-col items-center flex-1 space-y-2">
+              <div
+                class="w-full bg-secondary-fixed-dim rounded-t-sm h-[30%]"
+              ></div>
+              <span class="text-[10px] text-secondary font-bold">8월</span>
+            </div>
+            <!-- Sep -->
+            <div class="flex flex-col items-center flex-1 space-y-2">
+              <div
+                class="w-full bg-secondary-fixed-dim rounded-t-sm h-[45%]"
+              ></div>
+              <span class="text-[10px] text-secondary font-bold">9월</span>
+            </div>
+            <!-- Oct -->
+            <div class="flex flex-col items-center flex-1 space-y-2">
+              <div
+                class="w-full bg-secondary-fixed-dim rounded-t-sm h-[20%]"
+              ></div>
+              <span class="text-[10px] text-secondary font-bold">10월</span>
+            </div>
+            <!-- Nov -->
+            <div class="flex flex-col items-center flex-1 space-y-2">
+              <div class="w-full bg-primary/40 rounded-t-sm h-[60%]"></div>
+              <span class="text-[10px] text-secondary font-bold">11월</span>
+            </div>
+            <!-- Dec -->
+            <div class="flex flex-col items-center flex-1 space-y-2">
+              <div class="w-full bg-primary/60 rounded-t-sm h-[85%]"></div>
+              <span class="text-[10px] text-secondary font-bold">12월</span>
+            </div>
+            <!-- Jan -->
+            <div class="flex flex-col items-center flex-1 space-y-2">
+              <div class="w-full bg-primary rounded-t-sm h-[70%]"></div>
+              <span class="text-[10px] text-primary font-bold">1월</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Favorite Authors & Genre Grid -->
+      <div class="grid grid-cols-1 gap-8">
+        <!-- Favorite Authors -->
+        <section class="space-y-4">
+          <h3 class="serif text-xl text-primary font-semibold">
+            자주 찾는 작가
+          </h3>
+          <div class="space-y-3">
+            <div
+              class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg group"
+            >
+              <div class="flex items-center gap-4">
+                <span class="serif text-lg text-tertiary font-bold w-4">1</span>
+                <span class="text-on-surface font-medium">헤르만 헤세</span>
+              </div>
+              <span
+                class="text-xs text-secondary bg-surface-container-high px-2 py-1 rounded"
+                >8권</span
+              >
+            </div>
+            <div
+              class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg"
+            >
+              <div class="flex items-center gap-4">
+                <span class="serif text-lg text-secondary font-bold w-4"
+                  >2</span
+                >
+                <span class="text-on-surface font-medium">김연수</span>
+              </div>
+              <span
+                class="text-xs text-secondary bg-surface-container-high px-2 py-1 rounded"
+                >5권</span
+              >
+            </div>
+            <div
+              class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg"
+            >
+              <div class="flex items-center gap-4">
+                <span class="serif text-lg text-secondary font-bold w-4"
+                  >3</span
+                >
+                <span class="text-on-surface font-medium">박완서</span>
+              </div>
+              <span
+                class="text-xs text-secondary bg-surface-container-high px-2 py-1 rounded"
+                >4권</span
+              >
+            </div>
+          </div>
+        </section>
+        <!-- Genre Composition (Doughnut) -->
+        <section class="space-y-4">
+          <h3 class="serif text-xl text-primary font-semibold">선호 장르</h3>
+          <div
+            class="bg-surface-container-lowest rounded-xl p-8 flex flex-col items-center"
+          >
+            <div class="relative w-48 h-48 flex items-center justify-center">
+              <!-- Custom CSS SVG Donut with Muted Tones -->
+              <svg
+                class="w-full h-full -rotate-90 transform"
+                viewbox="0 0 100 100"
+              >
+                <!-- Beige -->
+                <circle
+                  cx="50"
+                  cy="50"
+                  fill="transparent"
+                  r="40"
+                  stroke="#efe0d4"
+                  stroke-dasharray="251.2"
+                  stroke-dashoffset="0"
+                  stroke-width="12"
+                ></circle>
+                <!-- Taupe -->
+                <circle
+                  cx="50"
+                  cy="50"
+                  fill="transparent"
+                  r="40"
+                  stroke="#d2c4b9"
+                  stroke-dasharray="251.2"
+                  stroke-dashoffset="180"
+                  stroke-width="12"
+                ></circle>
+                <!-- Green (Primary) -->
+                <circle
+                  cx="50"
+                  cy="50"
+                  fill="transparent"
+                  r="40"
+                  stroke="#2D4F3C"
+                  stroke-dasharray="251.2"
+                  stroke-dashoffset="210"
+                  stroke-width="12"
+                ></circle>
+              </svg>
+              <div
+                class="absolute inset-0 flex flex-col items-center justify-center"
+              >
+                <span class="text-xs text-secondary">주요 장르</span>
+                <span class="serif text-lg font-bold text-primary"
+                  >한국 소설</span
+                >
+              </div>
+            </div>
+            <div class="mt-6 flex flex-wrap justify-center gap-4">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#2D4F3C]"></span>
+                <span class="text-xs text-on-surface-variant">소설 42%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#d2c4b9]"></span>
+                <span class="text-xs text-on-surface-variant">에세이 28%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#efe0d4]"></span>
+                <span class="text-xs text-on-surface-variant">인문 30%</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <!-- Library Value Card -->
+      <section
+        class="bg-primary text-on-primary rounded-xl p-8 shadow-xl shadow-primary/5"
+      >
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <h3 class="serif text-lg opacity-80">서가의 가치</h3>
+            <p class="text-xs font-light uppercase tracking-[0.2em] mt-1">
+              Accumulated Worth
+            </p>
+          </div>
+          <span
+            class="material-symbols-outlined text-on-primary-container"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >payments</span
+          >
+        </div>
+        <div class="flex flex-col">
+          <span class="text-3xl serif font-light">소장 도서 정가 총액</span>
+          <span class="text-4xl font-bold tracking-tight mt-2">648,000원</span>
+        </div>
+        <div
+          class="mt-6 pt-6 border-t border-white/10 flex justify-between items-center"
+        >
+          <span class="text-[10px] uppercase opacity-60"
+            >Calculated by Seogadam AI</span
+          >
+          <span class="material-symbols-outlined text-sm">trending_up</span>
+        </div>
+      </section>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 w-full z-50 border-t border-[#163826]/10 bg-[#fcf9f3]/80 dark:bg-stone-900/80 backdrop-blur-xl flex justify-around items-center px-4 pb-6 pt-2"
+    >
+      <!-- 홈 -->
+      <a
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-70 hover:opacity-100 transition-opacity"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="home">home</span>
+        <span class="font-['Newsreader'] text-[10px] tracking-tight">홈</span>
+      </a>
+      <!-- 서가 -->
+      <a
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-70 hover:opacity-100 transition-opacity"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="menu_book"
+          >menu_book</span
+        >
+        <span class="font-['Newsreader'] text-[10px] tracking-tight">서가</span>
+      </a>
+      <!-- 발견 -->
+      <a
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-70 hover:opacity-100 transition-opacity"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="explore"
+          >explore</span
+        >
+        <span class="font-['Newsreader'] text-[10px] tracking-tight">발견</span>
+      </a>
+      <!-- 통계 (Active) -->
+      <a
+        class="flex flex-col items-center justify-center text-[#2D4F3C] dark:text-[#fcf9f3] font-bold scale-105 transition-transform"
+        href="#"
+      >
+        <span
+          class="material-symbols-outlined"
+          data-icon="bar_chart"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >bar_chart</span
+        >
+        <span class="font-['Newsreader'] text-[10px] tracking-tight">통계</span>
+      </a>
+      <!-- 프로필 -->
+      <a
+        class="flex flex-col items-center justify-center text-[#675d53] dark:text-stone-400 opacity-70 hover:opacity-100 transition-opacity"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="person">person</span>
+        <span class="font-['Newsreader'] text-[10px] tracking-tight"
+          >프로필</span
+        >
+      </a>
+    </nav>
+  </body>
+</html>

@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 공동서재 초대를 **앱이 포그라운드일 때만** 폴링으로 감지하고 SnackBar로 알립니다.
+/// 공동서가 초대를 **앱이 포그라운드일 때만** 폴링으로 감지하고 SnackBar로 알립니다.
 ///
 /// @history 2026-03-20 MVP: FCM 없이 `/api/me/libraries` 스냅샷 diff + SharedPreferences.
 class SharedLibraryInviteController extends ChangeNotifier {
@@ -145,14 +145,14 @@ class SharedLibraryInviteController extends ChangeNotifier {
   }
 
   void _showInviteSnackBar(Set<String> newIds, Map<String, String> idToName) {
-    final names = newIds.map((id) => idToName[id] ?? '서재').toList();
+    final names = newIds.map((id) => idToName[id] ?? '서가').toList();
     final message = _formatInviteMessage(names);
 
     final messenger = bookfolioRootScaffoldMessengerKey.currentState;
     if (messenger == null) return;
 
     final firstId = newIds.first;
-    final firstName = idToName[firstId] ?? '공동서재';
+    final firstName = idToName[firstId] ?? '공동서가';
 
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(
@@ -170,12 +170,12 @@ class SharedLibraryInviteController extends ChangeNotifier {
 
   String _formatInviteMessage(List<String> names) {
     if (names.length == 1) {
-      return '「${names[0]}」 공동서재에 초대되었습니다.';
+      return '「${names[0]}」 공동서가에 초대되었습니다.';
     }
     if (names.length == 2) {
-      return '「${names[0]}」, 「${names[1]}」 공동서재에 초대되었습니다.';
+      return '「${names[0]}」, 「${names[1]}」 공동서가에 초대되었습니다.';
     }
-    return '「${names[0]}」 외 ${names.length - 1}곳의 공동서재에 초대되었습니다.';
+    return '「${names[0]}」 외 ${names.length - 1}곳의 공동서가에 초대되었습니다.';
   }
 
   void _openSharedLibrary(String libraryId, String libraryName) {

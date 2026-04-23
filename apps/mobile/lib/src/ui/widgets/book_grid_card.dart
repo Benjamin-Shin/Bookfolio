@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 /// History:
 /// - 2026-04-12: 읽는 중 상태색 — `DESIGN.md` tertiary(Archivist's Ribbon)
 /// - 2026-04-05: 4열(넓은 폰·폴드) 대응 비율
-/// - 2026-03-25: `library_screen`에서 분리해 공동서재 그리드와 공유
+/// - 2026-03-25: `library_screen`에서 분리해 공동서가 그리드와 공유
 double bookGridCardAspectRatio(int columns) {
   return switch (columns) {
     4 => 0.53,
@@ -25,7 +25,7 @@ double bookGridCardAspectRatio(int columns) {
 /// `minTileWidth`·`crossAxisSpacing`을 만족하도록 [minColumns]~[maxColumns]로 클램프한다.
 ///
 /// History:
-/// - 2026-04-05: 폰·태블릿 폭 가변 그리드(내 서재·공동서재 공통)
+/// - 2026-04-05: 폰·태블릿 폭 가변 그리드(내 서가·공동서가 공통)
 int bookfolioGridCrossAxisCount(
   double crossAxisExtent, {
   double crossAxisSpacing = 10,
@@ -33,7 +33,9 @@ int bookfolioGridCrossAxisCount(
   int minColumns = 2,
   int maxColumns = 4,
 }) {
-  if (crossAxisExtent.isNaN || !crossAxisExtent.isFinite || crossAxisExtent <= 0) {
+  if (crossAxisExtent.isNaN ||
+      !crossAxisExtent.isFinite ||
+      crossAxisExtent <= 0) {
     return minColumns;
   }
   final unit = minTileWidth + crossAxisSpacing;
@@ -41,7 +43,7 @@ int bookfolioGridCrossAxisCount(
   return math.min(maxColumns, math.max(minColumns, raw));
 }
 
-/// 내 서재·공동서재 공통 표지 카드.
+/// 내 서가·공동서가 공통 표지 카드.
 ///
 /// History:
 /// - 2026-04-03: 그리드 셀 높이 한계에서 표지 높이 상한 — 하단 메타 `Column` bottom overflow 방지
@@ -70,7 +72,8 @@ class BookGridCard extends StatelessWidget {
   final String? coverUrl;
   final VoidCallback onTap;
   final Widget? coverBadge;
-  /// 공동서재 등 — 표지 아래 웹 `Badge`와 유사한 소유자 이름 칩.
+
+  /// 공동서가 등 — 표지 아래 웹 `Badge`와 유사한 소유자 이름 칩.
   final List<String>? ownerBadgeLabels;
   final String gradientSeedA;
   final String gradientSeedB;
@@ -106,7 +109,8 @@ class BookGridCard extends StatelessWidget {
             final maxH = cellConstraints.maxHeight;
             final targetCoverW = maxW * coverScale.clamp(0.5, 1.0);
             final naturalCoverH = targetCoverW / _coverAspect;
-            final hasOwnerRow = ownerBadgeLabels != null && ownerBadgeLabels!.isNotEmpty;
+            final hasOwnerRow =
+                ownerBadgeLabels != null && ownerBadgeLabels!.isNotEmpty;
 
             final coverStack = Stack(
               fit: StackFit.expand,
@@ -189,9 +193,11 @@ class BookGridCard extends StatelessWidget {
                           .map(
                             (name) => Chip(
                               visualDensity: VisualDensity.compact,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                               padding: EdgeInsets.zero,
-                              labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+                              labelPadding:
+                                  const EdgeInsets.symmetric(horizontal: 6),
                               label: Text(
                                 name,
                                 maxLines: 1,
@@ -201,7 +207,8 @@ class BookGridCard extends StatelessWidget {
                                 ),
                               ),
                               side: BorderSide(color: scheme.outlineVariant),
-                              backgroundColor: scheme.secondaryContainer.withValues(alpha: 0.65),
+                              backgroundColor: scheme.secondaryContainer
+                                  .withValues(alpha: 0.65),
                             ),
                           )
                           .toList(),
@@ -224,7 +231,8 @@ class BookGridCard extends StatelessWidget {
                             color: scheme.onSurface,
                           ),
                         ),
-                      if (hasCover && authorsLine.isNotEmpty) const SizedBox(height: 3),
+                      if (hasCover && authorsLine.isNotEmpty)
+                        const SizedBox(height: 3),
                       if (authorsLine.isNotEmpty)
                         Text(
                           authorsLine,
@@ -264,7 +272,8 @@ class ReadingStatusCoverBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xD9000000),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.38), width: 1),
+          border:
+              Border.all(color: Colors.white.withValues(alpha: 0.38), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.35),
@@ -280,7 +289,10 @@ class ReadingStatusCoverBadge extends StatelessWidget {
             size: 19,
             color: Color.lerp(Colors.white, accent, 0.2)!,
             shadows: const [
-              Shadow(offset: Offset(0, 0.5), blurRadius: 2.5, color: Colors.black54),
+              Shadow(
+                  offset: Offset(0, 0.5),
+                  blurRadius: 2.5,
+                  color: Colors.black54),
             ],
           ),
         ),
@@ -309,7 +321,7 @@ Color readingStatusColor(ReadingStatus s) {
   };
 }
 
-/// 공동서재 등 소유자가 여러 명일 때 표지 좌상단 인원 뱃지.
+/// 공동서가 등 소유자가 여러 명일 때 표지 좌상단 인원 뱃지.
 ///
 /// History:
 /// - 2026-03-25: 신규
@@ -326,14 +338,16 @@ class OwnerCountCoverBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xD9000000),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.38), width: 1),
+          border:
+              Border.all(color: Colors.white.withValues(alpha: 0.38), width: 1),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.people_alt_outlined, size: 16, color: Color(0xF2FFFFFF)),
+              const Icon(Icons.people_alt_outlined,
+                  size: 16, color: Color(0xF2FFFFFF)),
               const SizedBox(width: 4),
               Text(
                 '$count',
@@ -396,7 +410,8 @@ class GradientTitlePanel extends StatelessWidget {
               height: 1.3,
               color: Color(0xF2FFFFFF),
               shadows: [
-                Shadow(offset: Offset(0, 1), blurRadius: 3, color: Colors.black38),
+                Shadow(
+                    offset: Offset(0, 1), blurRadius: 3, color: Colors.black38),
               ],
             ),
           ),

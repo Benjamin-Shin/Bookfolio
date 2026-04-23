@@ -1,4 +1,4 @@
--- 도서·내 서재 가격(원, 선택). ISBN 조회·수동 입력.
+-- 도서·내 서가 가격(원, 선택). ISBN 조회·수동 입력.
 alter table public.books
   add column if not exists price_krw integer
   check (price_krw is null or price_krw >= 0);

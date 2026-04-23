@@ -41,11 +41,11 @@ const PRESET_GROUPS: PresetGroup[] = [
     description:
       "iframe 너비가 모바일이라 상단 오른쪽 햄버거(≡)도 실제와 같이 보입니다. 아래 버튼은 그 메뉴·항목과 같은 주소입니다.",
     items: [
-      { label: "공동서재", path: "/dashboard/libraries" },
+      { label: "공동서가", path: "/dashboard/libraries" },
       { label: "서가담 집계", path: "/dashboard/bookfolio-aggregate" },
       { label: "베스트셀러", path: "/dashboard/bestsellers" },
       { label: "초이스 신간", path: "/dashboard/choice-new" },
-      { label: "내 서재", path: "/dashboard" },
+      { label: "내 서가", path: "/dashboard" },
     ],
   },
   {
@@ -83,7 +83,7 @@ interface MobileDevicePreviewProps {
  * @history
  * - 2026-04-13: 계정·데이터 삭제 프리셋 → `/terms#article-20-withdrawal`
  * - 2026-04-05: 프리셋·툴팁 서가담 표기
- * - 2026-03-29: 햄버거(`SiteHeaderMobileNav`)와 동일 프리셋·법적 고지·내/공동 상세·공동서재 서재 홈(UUID).
+ * - 2026-03-29: 햄버거(`SiteHeaderMobileNav`)와 동일 프리셋·법적 고지·내/공동 상세·공동서가 서가 홈(UUID).
  * - 2026-03-29: 초기 구현(프리셋 경로·갱신·안내 카드).
  */
 export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
@@ -109,11 +109,11 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
   const openMyBookDetail = useCallback(() => {
     const id = trimId(myBookId);
     if (!id) {
-      setDetailError("내 서재 소장 ID를 입력하세요.");
+      setDetailError("내 서가 소장 ID를 입력하세요.");
       return;
     }
     if (!isUuidLike(id)) {
-      setDetailError("내 서재 소장 ID는 UUID 형식이어야 합니다.");
+      setDetailError("내 서가 소장 ID는 UUID 형식이어야 합니다.");
       return;
     }
     setDetailError(null);
@@ -124,11 +124,11 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
   const openSharedLibraryHome = useCallback(() => {
     const lib = trimId(sharedLibraryId);
     if (!lib) {
-      setDetailError("공동서재 ID를 입력하세요.");
+      setDetailError("공동서가 ID를 입력하세요.");
       return;
     }
     if (!isUuidLike(lib)) {
-      setDetailError("공동서재 ID는 UUID 형식이어야 합니다.");
+      setDetailError("공동서가 ID는 UUID 형식이어야 합니다.");
       return;
     }
     setDetailError(null);
@@ -140,11 +140,11 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
     const lib = trimId(sharedLibraryId);
     const book = trimId(sharedBookId);
     if (!lib || !book) {
-      setDetailError("공동서재 ID와 도서 ID를 모두 입력하세요.");
+      setDetailError("공동서가 ID와 도서 ID를 모두 입력하세요.");
       return;
     }
     if (!isUuidLike(lib) || !isUuidLike(book)) {
-      setDetailError("공동서재·도서 ID는 UUID 형식이어야 합니다.");
+      setDetailError("공동서가·도서 ID는 UUID 형식이어야 합니다.");
       return;
     }
     setDetailError(null);
@@ -157,16 +157,20 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
       <div className="mb-8 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex size-9 items-center justify-center rounded-full bg-muted">
-            <SmartphoneIcon className="size-5 text-muted-foreground" aria-hidden />
+            <SmartphoneIcon
+              className="size-5 text-muted-foreground"
+              aria-hidden
+            />
           </span>
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
             모바일 웹 미리보기
           </h1>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground text-pretty md:text-base">
-          가로 {IFRAME_WIDTH}px·세로 {IFRAME_HEIGHT}px iframe으로 같은 사이트를 불러 옵니다.
-          Flutter 앱 UI와는 다를 수 있고, 로그인 쿠키는 브라우저와 공유됩니다. 상단
-          햄버거 메뉴는 모바일 뷰에서만 쓰이므로 이 프레임 안에서도 앱과 같이 표시됩니다.
+          가로 {IFRAME_WIDTH}px·세로 {IFRAME_HEIGHT}px iframe으로 같은 사이트를
+          불러 옵니다. Flutter 앱 UI와는 다를 수 있고, 로그인 쿠키는 브라우저와
+          공유됩니다. 상단 햄버거 메뉴는 모바일 뷰에서만 쓰이므로 이 프레임
+          안에서도 앱과 같이 표시됩니다.
         </p>
       </div>
 
@@ -212,12 +216,12 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                 상세 화면 (ID)
               </p>
               <p className="text-xs text-muted-foreground text-pretty">
-                목록에서 책을 누르면 되지만, URL의 UUID를 알 때는 여기서 바로 열 수
-                있습니다. 내 서재는{" "}
+                목록에서 책을 누르면 되지만, URL의 UUID를 알 때는 여기서 바로 열
+                수 있습니다. 내 서가는{" "}
                 <code className="rounded bg-muted px-1 py-0.5 text-[11px]">
                   /dashboard/books/…
                 </code>
-                , 공동서재 서재 홈은{" "}
+                , 공동서가 서가 홈은{" "}
                 <code className="rounded bg-muted px-1 py-0.5 text-[11px]">
                   /dashboard/libraries/…
                 </code>
@@ -231,7 +235,7 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="pv-my-book" className="text-xs">
-                    내 서재 — 소장 책 ID
+                    내 서가 — 소장 책 ID
                   </Label>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                     <Input
@@ -254,7 +258,7 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">공동서재 — 서재 ID</Label>
+                  <Label className="text-xs">공동서가 — 서가 ID</Label>
                   <Input
                     value={sharedLibraryId}
                     onChange={(e) => setSharedLibraryId(e.target.value)}
@@ -269,11 +273,11 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                       variant="secondary"
                       onClick={openSharedLibraryHome}
                     >
-                      서재 홈
+                      서가 홈
                     </Button>
                   </div>
                   <Label className="text-xs text-muted-foreground">
-                    공동서재 도서 상세 — 캐논 도서 ID
+                    공동서가 도서 상세 — 캐논 도서 ID
                   </Label>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                     <Input
@@ -326,7 +330,7 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
             <div
               className={cn(
                 "rounded-[2.75rem] border border-zinc-700/90 bg-gradient-to-b from-zinc-700 to-zinc-900 p-3 shadow-2xl",
-                "max-w-full"
+                "max-w-full",
               )}
             >
               <div className="relative overflow-hidden rounded-[2.1rem] bg-black shadow-inner ring-1 ring-white/10">
@@ -357,8 +361,9 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
           </div>
 
           <p className="max-w-md text-center text-xs text-muted-foreground">
-            iframe 안에서 링크로 이동하거나, 상단 햄버거로 메뉴를 열어 공동서재·집계 등으로
-            갈 수 있습니다. 프리셋 버튼은 밖에서 경로를 바꿀 때만 씁니다.
+            iframe 안에서 링크로 이동하거나, 상단 햄버거로 메뉴를 열어
+            공동서가·집계 등으로 갈 수 있습니다. 프리셋 버튼은 밖에서 경로를
+            바꿀 때만 씁니다.
           </p>
         </div>
 
@@ -366,14 +371,16 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">이 페이지에 대해</CardTitle>
             <CardDescription className="text-pretty">
-              데스크톱에서 모바일 레이아웃을 확인할 때 쓰는 보조 화면입니다. 실제 앱 스토어
-              빌드와는 별개입니다.
+              데스크톱에서 모바일 레이아웃을 확인할 때 쓰는 보조 화면입니다.
+              실제 앱 스토어 빌드와는 별개입니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p className="text-pretty">
               빠른 이동 버튼은 전역 헤더의 모바일 햄버거(
-              <code className="rounded bg-muted px-1 text-xs">SiteHeaderMobileNav</code>
+              <code className="rounded bg-muted px-1 text-xs">
+                SiteHeaderMobileNav
+              </code>
               )와 같은 링크 묶음입니다.
             </p>
             <p className="text-pretty">
@@ -383,7 +390,8 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
               >
                 랜딩 홈
               </Link>
-              으로 돌아가거나, 휴대폰 브라우저에서 같은 주소를 여는 것이 가장 정확합니다.
+              으로 돌아가거나, 휴대폰 브라우저에서 같은 주소를 여는 것이 가장
+              정확합니다.
             </p>
           </CardContent>
         </Card>

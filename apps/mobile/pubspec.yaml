@@ -1,5 +1,5 @@
 name: seogadam_mobile
-description: 서가담(Seogadam) — 개인 서재 Flutter 앱. 패키지 식별자 seogadam_mobile 유지.
+description: 서가담(Seogadam) — 개인 서가 Flutter 앱. 패키지 식별자 seogadam_mobile 유지.
 publish_to: "none"
 version: 1.0.0+3
 

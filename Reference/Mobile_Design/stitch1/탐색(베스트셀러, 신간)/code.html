@@ -1,265 +1,479 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="light" lang="ko"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Seogadam - 발견</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<html class="light" lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Seogadam - 발견</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Manrope:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
-            "colors": {
-                "secondary-fixed-dim": "#d2c4b9",
-                "surface": "#fcf9f3",
-                "on-tertiary-fixed-variant": "#842131",
-                "error-container": "#ffdad6",
-                "surface-container-highest": "#e5e2dc",
-                "outline-variant": "#c1c8c1",
-                "inverse-on-surface": "#f3f0ea",
-                "inverse-primary": "#a9cfb7",
-                "error": "#ba1a1a",
-                "on-secondary": "#ffffff",
-                "primary-fixed-dim": "#a9cfb7",
-                "on-tertiary": "#ffffff",
-                "tertiary-container": "#862232",
-                "tertiary-fixed": "#ffdadb",
-                "on-tertiary-fixed": "#40000d",
-                "on-secondary-fixed-variant": "#4e453c",
-                "on-secondary-container": "#6d6259",
-                "surface-dim": "#dcdad4",
-                "surface-container-low": "#f6f3ed",
-                "surface-bright": "#fcf9f3",
-                "on-secondary-fixed": "#211a13",
-                "surface-container-high": "#ebe8e2",
-                "secondary-fixed": "#efe0d4",
-                "primary-fixed": "#c5ecd2",
-                "on-primary-container": "#9ac0a7",
-                "on-surface-variant": "#424843",
-                "on-surface": "#1c1c18",
-                "on-primary-fixed-variant": "#2c4e3b",
-                "primary-container": "#2d4f3c",
-                "surface-container-lowest": "#ffffff",
-                "on-error-container": "#93000a",
-                "primary": "#163826",
-                "outline": "#727973",
-                "surface-variant": "#e5e2dc",
-                "on-primary-fixed": "#002112",
-                "on-background": "#1c1c18",
-                "secondary-container": "#efe0d4",
-                "background": "#fcf9f3",
-                "surface-tint": "#436651",
-                "on-tertiary-container": "#ff9aa1",
-                "on-primary": "#ffffff",
-                "secondary": "#675d53",
-                "tertiary-fixed-dim": "#ffb2b6",
-                "on-error": "#ffffff",
-                "inverse-surface": "#31312d",
-                "surface-container": "#f0eee8",
-                "tertiary": "#67081d"
+            colors: {
+              "secondary-fixed-dim": "#d2c4b9",
+              surface: "#fcf9f3",
+              "on-tertiary-fixed-variant": "#842131",
+              "error-container": "#ffdad6",
+              "surface-container-highest": "#e5e2dc",
+              "outline-variant": "#c1c8c1",
+              "inverse-on-surface": "#f3f0ea",
+              "inverse-primary": "#a9cfb7",
+              error: "#ba1a1a",
+              "on-secondary": "#ffffff",
+              "primary-fixed-dim": "#a9cfb7",
+              "on-tertiary": "#ffffff",
+              "tertiary-container": "#862232",
+              "tertiary-fixed": "#ffdadb",
+              "on-tertiary-fixed": "#40000d",
+              "on-secondary-fixed-variant": "#4e453c",
+              "on-secondary-container": "#6d6259",
+              "surface-dim": "#dcdad4",
+              "surface-container-low": "#f6f3ed",
+              "surface-bright": "#fcf9f3",
+              "on-secondary-fixed": "#211a13",
+              "surface-container-high": "#ebe8e2",
+              "secondary-fixed": "#efe0d4",
+              "primary-fixed": "#c5ecd2",
+              "on-primary-container": "#9ac0a7",
+              "on-surface-variant": "#424843",
+              "on-surface": "#1c1c18",
+              "on-primary-fixed-variant": "#2c4e3b",
+              "primary-container": "#2d4f3c",
+              "surface-container-lowest": "#ffffff",
+              "on-error-container": "#93000a",
+              primary: "#163826",
+              outline: "#727973",
+              "surface-variant": "#e5e2dc",
+              "on-primary-fixed": "#002112",
+              "on-background": "#1c1c18",
+              "secondary-container": "#efe0d4",
+              background: "#fcf9f3",
+              "surface-tint": "#436651",
+              "on-tertiary-container": "#ff9aa1",
+              "on-primary": "#ffffff",
+              secondary: "#675d53",
+              "tertiary-fixed-dim": "#ffb2b6",
+              "on-error": "#ffffff",
+              "inverse-surface": "#31312d",
+              "surface-container": "#f0eee8",
+              tertiary: "#67081d",
             },
-            "borderRadius": {
-                "DEFAULT": "0.125rem",
-                "lg": "0.25rem",
-                "xl": "0.5rem",
-                "full": "0.75rem"
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
             },
-            "fontFamily": {
-                "headline": ["Newsreader"],
-                "body": ["Manrope"],
-                "label": ["Manrope"]
-            }
+            fontFamily: {
+              headline: ["Newsreader"],
+              body: ["Manrope"],
+              label: ["Manrope"],
+            },
           },
         },
-      }
+      };
     </script>
-<style>
-        body { font-family: 'Manrope', sans-serif; background-color: #fcf9f3; }
-        .font-newsreader { font-family: 'Newsreader', serif; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    <style>
+      body {
+        font-family: "Manrope", sans-serif;
+        background-color: #fcf9f3;
+      }
+      .font-newsreader {
+        font-family: "Newsreader", serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 300,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
   </head>
-<body class="bg-surface text-on-surface antialiased pb-24">
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-[#fcf9f3]/80 backdrop-blur-md flex justify-between items-center px-6 h-16">
-<div class="flex items-center gap-4">
-<span class="material-symbols-outlined text-[#163826] hover:opacity-70 transition-opacity cursor-pointer">menu</span>
-<h1 class="font-['Newsreader'] italic text-2xl tracking-tight text-[#163826]">발견</h1>
-</div>
-<div class="flex items-center gap-4">
-<span class="material-symbols-outlined text-[#163826] hover:opacity-70 transition-opacity cursor-pointer">search</span>
-</div>
-</header>
-<main class="pt-20 px-6 max-w-4xl mx-auto space-y-16">
-<!-- Editor's Choice Section -->
-<section class="relative">
-<div class="flex flex-col md:flex-row gap-8 items-start">
-<div class="w-full md:w-3/5">
-<span class="font-label text-secondary uppercase tracking-[0.2em] text-[10px] mb-4 block">THIS MONTH'S CURATION</span>
-<h2 class="font-headline text-4xl md:text-5xl text-primary leading-tight mb-6">고요의 세계, 그 이면의 기록</h2>
-<p class="font-body text-secondary text-lg leading-relaxed mb-8 max-w-md">
-                        우리가 잊고 지냈던 일상의 소음 뒤에 숨겨진 진정한 평온에 대하여. 편집자가 엄선한 이달의 책을 만나보세요.
-                    </p>
-<button class="bg-primary text-on-primary px-8 py-3 rounded-sm font-label text-sm tracking-wide hover:opacity-90 transition-all">
-                        자세히 읽기
-                    </button>
-</div>
-<div class="w-full md:w-2/5 flex justify-end">
-<div class="relative group">
-<div class="absolute -inset-2 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-all"></div>
-<img alt="Book Cover" class="relative w-64 md:w-72 shadow-2xl border-[0.5px] border-outline-variant/20" data-alt="a minimalist book cover titled Silence in elegant typography resting on a rustic wooden table with soft morning sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0S9OlYAK5qdXhSI003BJBkpx1HTg_VS2HJGls9kmxPpRum5GwqVpIgzN6fuIaoNV4VyzvEMvrHIJMQMzl26JSZspMJTQvBAYfqV5sU-g4f-QyUNB3c6uwaPabJoty4N0N-ZR3lqYouAToj66TARE3jnsw78BOwQUIBjD-xW5EU0Pk6YTj6MVe8nFxFlhb_Zu_mnsMjQ2NlqRfXFFPfEwHQqCvyKOBzbQVzgmLuKFNo61T5S_EbixmpTNFBJzxfD5fRfU_NY8rxeA"/>
-</div>
-</div>
-</div>
-</section>
-<!-- Bestsellers Section -->
-<section>
-<div class="flex justify-between items-end mb-8">
-<h3 class="font-headline text-3xl text-primary italic">Bestsellers</h3>
-<span class="font-label text-secondary text-xs border-b border-secondary/30 pb-1 cursor-pointer">전체보기</span>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-<!-- Rank 1 -->
-<div class="flex flex-col gap-4">
-<div class="relative aspect-[3/4] bg-surface-container-low overflow-hidden">
-<span class="absolute top-4 left-4 z-10 font-headline italic text-5xl text-primary/20">01</span>
-<img alt="Book" class="w-full h-full object-cover" data-alt="vertical book cover with abstract art in earthy tones and elegant serif font title displayed in a high-end bookstore gallery" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqrSISWcZUcthNmE8f3CvJxv9ocVj2sq0QDKmnvMQD8P4Ec0UeBZngwtyIUC68rch8R3-vC5FMQpLpUmsYGFVCO4DqrKY6zD6xmBL0PFb-7jAbpSpRoS2NgQwmraWts_M_0QQcRx24pVC_AjYj06fbmDd_adG7oI6fbouiMzzFpR2rrNOkctNp5f_GMlSLVNRmWc5eGfOjth96Sr_b406n4G01R2z154mnDgUC3pLT28Dpk5VA3wIRyTQB_07sR1kwS5GvQMDnZLU"/>
-</div>
-<div>
-<h4 class="font-headline text-xl text-on-surface mb-1">시간의 궤적</h4>
-<p class="font-body text-sm text-secondary">한지원 저 | 문학동네</p>
-</div>
-</div>
-<!-- Rank 2 -->
-<div class="flex flex-col gap-4">
-<div class="relative aspect-[3/4] bg-surface-container-low overflow-hidden">
-<span class="absolute top-4 left-4 z-10 font-headline italic text-5xl text-primary/20">02</span>
-<img alt="Book" class="w-full h-full object-cover" data-alt="classic hardbound book with leather texture spine and gold foil lettering on a neutral studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-hYUxm2JSzuwnrEClWJdpZNr3u-DoDJEjXapRorHvTxSI7wgxWd8sBc3YXMiviGjAY3vfuJaYEE5GhWrHks9kVz1Cx32FcAjH9URe6wQMpxXdN2uxFbyvw2wB9uWcNqp3c8sjB9wEqNdFKOjW1ESC2Balcp_hx9rSEOWx12tQg4AqXP_dmrsa51FNxNt4L4utJFk-uE-HU-wu46MkdhUaU006y0rvoWnm5Sjz7m1Y2gcgUf2pey5iiuYWWEnFcDayvDA_hMK4YeM"/>
-</div>
-<div>
-<h4 class="font-headline text-xl text-on-surface mb-1">무위의 미학</h4>
-<p class="font-body text-sm text-secondary">로버트 웰스 저 | 민음사</p>
-</div>
-</div>
-<!-- Rank 3 -->
-<div class="flex flex-col gap-4">
-<div class="relative aspect-[3/4] bg-surface-container-low overflow-hidden">
-<span class="absolute top-4 left-4 z-10 font-headline italic text-5xl text-primary/20">03</span>
-<img alt="Book" class="w-full h-full object-cover" data-alt="modern paperback book with minimalist layout and sage green cover standing on an ivory surface with soft shadow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMbXRhYkFxvgX2NYkHFQENUB6kLn8KoscxKY6uqauMIAIS4eAGXNV_rkvM6Svd-m0zG5E2CTo9ifhhIpBxdVjMPKbqC4XucNMhXNynEWUOVw19lWthcpXp214HygIOlHAF0HiETxAMz_z1r--83xS0_fuzp5k1J4dZXa43kuBXj1nQJZS1OIy4YERFCbA5gLoppBt5XGoPpe_pKIvhd_rnU49wD2hplDzrRJ9m8re7SGvf_L1dFheYzUtqPOdHa0IF3TSM3fIy1dI"/>
-</div>
-<div>
-<h4 class="font-headline text-xl text-on-surface mb-1">상실의 기록</h4>
-<p class="font-body text-sm text-secondary">김서연 저 | 창비</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Editorial Quote Card -->
-<section class="bg-surface-container-low py-16 px-8 md:px-24 text-center relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-tertiary opacity-80"></div> <!-- Archivist's Ribbon -->
-<span class="material-symbols-outlined text-primary/30 text-4xl mb-6">format_quote</span>
-<blockquote class="font-headline text-2xl md:text-3xl text-primary leading-relaxed mb-8">
-                "책을 읽는다는 것은 타인의 삶을 <br class="hidden md:block"/> 빌려와 나의 세상을 넓히는 가장 정중한 방식이다."
-            </blockquote>
-<cite class="font-body text-sm text-secondary italic">— 에세이 「서가의 온기」 중에서</cite>
-</section>
-<!-- New Releases Section (Asymmetric Grid) -->
-<section>
-<div class="flex items-center gap-4 mb-8">
-<h3 class="font-headline text-3xl text-primary">초이스 신간</h3>
-<div class="h-[1px] flex-grow bg-outline-variant/30"></div>
-</div>
-<div class="flex overflow-x-auto gap-8 hide-scrollbar pb-4 -mx-6 px-6">
-<!-- New Book 1 -->
-<div class="flex-none w-48 group cursor-pointer">
-<div class="aspect-[2/3] mb-4 overflow-hidden bg-surface-container-highest">
-<img alt="New Release" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="a new book release with vibrant indigo cover and white minimalist title against a soft linen background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8fkZibKnpprJGFDZvPSE4lthHLLj1sXwTkzA-3rj_cEBFKRbf7qyCltABQL-Jj4bZzQ0cbWxShVENP2c1srmxHMhKB0rv8zxP2neyd4ylOF1YiYy34e9BOuzB0hyRKpMJL4BrV9QYnDCLh6gojMkCMBvKrqA9vf3LWZxvmJQBsRAZHNDyB2XVFtddmaSzxmsvH-SWrTizD7OP0W27herYHqsqowBEme6-feoy3Wyne_GUKlAFibKNqmT3hhFAQdbjYdfZH5q4Gtg"/>
-</div>
-<h5 class="font-headline text-lg text-on-surface line-clamp-1">심연의 파도</h5>
-<p class="font-body text-xs text-secondary mt-1">데이비드 미첼</p>
-</div>
-<!-- New Book 2 -->
-<div class="flex-none w-48 group cursor-pointer">
-<div class="aspect-[2/3] mb-4 overflow-hidden bg-surface-container-highest">
-<img alt="New Release" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="collection of poetry books with soft pastel covers and thin elegant typography stacked on a light beige cloth" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARYYohf-qeHxDTSXib3oUW4hrZis2Z9bTx5J_SxbtjZ_y8F-x_wFYLmIcEWOJIIHZ75mcH0iNjK54fI_x0x14yx10h6PYI0rdUYmVDH40j5cT84ffKbubz2dpGGFcwNxHtFbzXYlYkhHluOEJCCmnqv2Ym5ykhP7tgzvDV-lAjMqPoVX9JnpO8Cu0yGeQ0G15MSoDafNTZtl_d-LrGk9r8N0taEehWA5bO0wXpRmOVGH1aHcb6ulWSrbEP0nYQlq9V90fe08OSZAA"/>
-</div>
-<h5 class="font-headline text-lg text-on-surface line-clamp-1">오후의 숲에서</h5>
-<p class="font-body text-xs text-secondary mt-1">이정윤</p>
-</div>
-<!-- New Book 3 -->
-<div class="flex-none w-48 group cursor-pointer">
-<div class="aspect-[2/3] mb-4 overflow-hidden bg-surface-container-highest">
-<img alt="New Release" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="minimalist book design featuring a clean white cover with a single botanical illustration in fine black line" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABQfbTxMUJVDrbWvaZYujKffndzYmM_ePNva_6ynmtylRmDN5j24TKVQhRvznsjUlCr7s2RIq9QI_DyTy4HxlrO2kkacZANpU50E8_90pxE3WwRusbMsMOPPbZ4drNmTxF8xoXK8tiKbw0BJM2i0LvZ5n29oKZQ2YSxyaGav19bMjWRfFagIPbdYq4yzx4PqPtXOi5v8FHD4xOWpwNbLYsR_LAoV23dnYoOXJx54PiYgyrrRiQx9mZUNeIFsXbgBF5IIsgIkobiLc"/>
-</div>
-<h5 class="font-headline text-lg text-on-surface line-clamp-1">식물의 언어</h5>
-<p class="font-body text-xs text-secondary mt-1">안나 파브르</p>
-</div>
-<!-- New Book 4 -->
-<div class="flex-none w-48 group cursor-pointer">
-<div class="aspect-[2/3] mb-4 overflow-hidden bg-surface-container-highest">
-<img alt="New Release" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="scholarly book with deep burgundy spine and ivory paper edges on a dark oak desk in a dim library setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgZX8aua8pUFib-5p4J2-msZy9BfwWh_3VUootO_zFpamOjgJ5Yg6kVOtPPsGeXxweB3iOmy5Uxel02QoASDlA8S3LVvkpF5903RIfr4KHY9BAEzgYJR2ln2_ACPSB0aEHGj2ZcwEuhreKZ6xWaMNwt6BrEBTXuJc2El2hcp1itscQAmVz2o9q8b7H4qaMMEX_nwS3shnRugJiGZN-G87YP8hyECgoTg03K2FjI63rpI1s0HvtuNryFbM0fVu6_RuxHOHFN8_YSck"/>
-</div>
-<h5 class="font-headline text-lg text-on-surface line-clamp-1">철학의 계단</h5>
-<p class="font-body text-xs text-secondary mt-1">박영준</p>
-</div>
-</div>
-</section>
-<!-- Theme Recommendation Section -->
-<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="bg-primary text-on-primary p-10 flex flex-col justify-between aspect-square md:aspect-auto">
-<div>
-<h3 class="font-headline text-3xl mb-4 leading-tight">가을 밤, <br/> 사색을 돕는 고전문학</h3>
-<p class="font-body text-sm opacity-80 leading-relaxed max-w-xs">깊어가는 계절, 세월이 증명한 문장들로 마음을 채워보세요.</p>
-</div>
-<div class="flex justify-between items-center">
-<span class="font-label text-xs tracking-widest">VIEW COLLECTION</span>
-<span class="material-symbols-outlined">arrow_forward</span>
-</div>
-</div>
-<div class="bg-secondary-container text-on-secondary-container p-10 flex flex-col justify-between aspect-square md:aspect-auto">
-<div>
-<h3 class="font-headline text-3xl mb-4 leading-tight">건축과 책, <br/> 공간의 철학</h3>
-<p class="font-body text-sm text-secondary leading-relaxed max-w-xs">아름다운 공간을 만드는 것은 벽이 아니라 그 안에 담긴 이야기입니다.</p>
-</div>
-<div class="flex justify-between items-center">
-<span class="font-label text-xs tracking-widest">EXPLORE THEME</span>
-<span class="material-symbols-outlined">arrow_forward</span>
-</div>
-</div>
-</section>
-</main>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pt-3 pb-6 bg-[#fcf9f3]/80 backdrop-blur-md border-t-[0.5px] border-stone-200/10 shadow-2xl shadow-stone-900/5 z-50">
-<div class="flex flex-col items-center justify-center text-[#675d53] opacity-60 hover:text-[#163826] transition-colors cursor-pointer group">
-<span class="material-symbols-outlined text-2xl group-hover:scale-110 duration-300 ease-out">home</span>
-<span class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1">홈</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#675d53] opacity-60 hover:text-[#163826] transition-colors cursor-pointer group">
-<span class="material-symbols-outlined text-2xl group-hover:scale-110 duration-300 ease-out">import_contacts</span>
-<span class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1">서재</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#163826] font-bold group">
-<span class="material-symbols-outlined text-2xl scale-110 duration-300 ease-out" style="font-variation-settings: 'FILL' 1;">explore</span>
-<span class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1">발견</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#675d53] opacity-60 hover:text-[#163826] transition-colors cursor-pointer group">
-<span class="material-symbols-outlined text-2xl group-hover:scale-110 duration-300 ease-out">analytics</span>
-<span class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1">통계</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#675d53] opacity-60 hover:text-[#163826] transition-colors cursor-pointer group">
-<span class="material-symbols-outlined text-2xl group-hover:scale-110 duration-300 ease-out">person</span>
-<span class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1">프로필</span>
-</div>
-</nav>
-</body></html>
+  <body class="bg-surface text-on-surface antialiased pb-24">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 bg-[#fcf9f3]/80 backdrop-blur-md flex justify-between items-center px-6 h-16"
+    >
+      <div class="flex items-center gap-4">
+        <span
+          class="material-symbols-outlined text-[#163826] hover:opacity-70 transition-opacity cursor-pointer"
+          >menu</span
+        >
+        <h1
+          class="font-['Newsreader'] italic text-2xl tracking-tight text-[#163826]"
+        >
+          발견
+        </h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <span
+          class="material-symbols-outlined text-[#163826] hover:opacity-70 transition-opacity cursor-pointer"
+          >search</span
+        >
+      </div>
+    </header>
+    <main class="pt-20 px-6 max-w-4xl mx-auto space-y-16">
+      <!-- Editor's Choice Section -->
+      <section class="relative">
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+          <div class="w-full md:w-3/5">
+            <span
+              class="font-label text-secondary uppercase tracking-[0.2em] text-[10px] mb-4 block"
+              >THIS MONTH'S CURATION</span
+            >
+            <h2
+              class="font-headline text-4xl md:text-5xl text-primary leading-tight mb-6"
+            >
+              고요의 세계, 그 이면의 기록
+            </h2>
+            <p
+              class="font-body text-secondary text-lg leading-relaxed mb-8 max-w-md"
+            >
+              우리가 잊고 지냈던 일상의 소음 뒤에 숨겨진 진정한 평온에 대하여.
+              편집자가 엄선한 이달의 책을 만나보세요.
+            </p>
+            <button
+              class="bg-primary text-on-primary px-8 py-3 rounded-sm font-label text-sm tracking-wide hover:opacity-90 transition-all"
+            >
+              자세히 읽기
+            </button>
+          </div>
+          <div class="w-full md:w-2/5 flex justify-end">
+            <div class="relative group">
+              <div
+                class="absolute -inset-2 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-all"
+              ></div>
+              <img
+                alt="Book Cover"
+                class="relative w-64 md:w-72 shadow-2xl border-[0.5px] border-outline-variant/20"
+                data-alt="a minimalist book cover titled Silence in elegant typography resting on a rustic wooden table with soft morning sunlight"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0S9OlYAK5qdXhSI003BJBkpx1HTg_VS2HJGls9kmxPpRum5GwqVpIgzN6fuIaoNV4VyzvEMvrHIJMQMzl26JSZspMJTQvBAYfqV5sU-g4f-QyUNB3c6uwaPabJoty4N0N-ZR3lqYouAToj66TARE3jnsw78BOwQUIBjD-xW5EU0Pk6YTj6MVe8nFxFlhb_Zu_mnsMjQ2NlqRfXFFPfEwHQqCvyKOBzbQVzgmLuKFNo61T5S_EbixmpTNFBJzxfD5fRfU_NY8rxeA"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Bestsellers Section -->
+      <section>
+        <div class="flex justify-between items-end mb-8">
+          <h3 class="font-headline text-3xl text-primary italic">
+            Bestsellers
+          </h3>
+          <span
+            class="font-label text-secondary text-xs border-b border-secondary/30 pb-1 cursor-pointer"
+            >전체보기</span
+          >
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <!-- Rank 1 -->
+          <div class="flex flex-col gap-4">
+            <div
+              class="relative aspect-[3/4] bg-surface-container-low overflow-hidden"
+            >
+              <span
+                class="absolute top-4 left-4 z-10 font-headline italic text-5xl text-primary/20"
+                >01</span
+              >
+              <img
+                alt="Book"
+                class="w-full h-full object-cover"
+                data-alt="vertical book cover with abstract art in earthy tones and elegant serif font title displayed in a high-end bookstore gallery"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqrSISWcZUcthNmE8f3CvJxv9ocVj2sq0QDKmnvMQD8P4Ec0UeBZngwtyIUC68rch8R3-vC5FMQpLpUmsYGFVCO4DqrKY6zD6xmBL0PFb-7jAbpSpRoS2NgQwmraWts_M_0QQcRx24pVC_AjYj06fbmDd_adG7oI6fbouiMzzFpR2rrNOkctNp5f_GMlSLVNRmWc5eGfOjth96Sr_b406n4G01R2z154mnDgUC3pLT28Dpk5VA3wIRyTQB_07sR1kwS5GvQMDnZLU"
+              />
+            </div>
+            <div>
+              <h4 class="font-headline text-xl text-on-surface mb-1">
+                시간의 궤적
+              </h4>
+              <p class="font-body text-sm text-secondary">
+                한지원 저 | 문학동네
+              </p>
+            </div>
+          </div>
+          <!-- Rank 2 -->
+          <div class="flex flex-col gap-4">
+            <div
+              class="relative aspect-[3/4] bg-surface-container-low overflow-hidden"
+            >
+              <span
+                class="absolute top-4 left-4 z-10 font-headline italic text-5xl text-primary/20"
+                >02</span
+              >
+              <img
+                alt="Book"
+                class="w-full h-full object-cover"
+                data-alt="classic hardbound book with leather texture spine and gold foil lettering on a neutral studio background"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-hYUxm2JSzuwnrEClWJdpZNr3u-DoDJEjXapRorHvTxSI7wgxWd8sBc3YXMiviGjAY3vfuJaYEE5GhWrHks9kVz1Cx32FcAjH9URe6wQMpxXdN2uxFbyvw2wB9uWcNqp3c8sjB9wEqNdFKOjW1ESC2Balcp_hx9rSEOWx12tQg4AqXP_dmrsa51FNxNt4L4utJFk-uE-HU-wu46MkdhUaU006y0rvoWnm5Sjz7m1Y2gcgUf2pey5iiuYWWEnFcDayvDA_hMK4YeM"
+              />
+            </div>
+            <div>
+              <h4 class="font-headline text-xl text-on-surface mb-1">
+                무위의 미학
+              </h4>
+              <p class="font-body text-sm text-secondary">
+                로버트 웰스 저 | 민음사
+              </p>
+            </div>
+          </div>
+          <!-- Rank 3 -->
+          <div class="flex flex-col gap-4">
+            <div
+              class="relative aspect-[3/4] bg-surface-container-low overflow-hidden"
+            >
+              <span
+                class="absolute top-4 left-4 z-10 font-headline italic text-5xl text-primary/20"
+                >03</span
+              >
+              <img
+                alt="Book"
+                class="w-full h-full object-cover"
+                data-alt="modern paperback book with minimalist layout and sage green cover standing on an ivory surface with soft shadow"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMbXRhYkFxvgX2NYkHFQENUB6kLn8KoscxKY6uqauMIAIS4eAGXNV_rkvM6Svd-m0zG5E2CTo9ifhhIpBxdVjMPKbqC4XucNMhXNynEWUOVw19lWthcpXp214HygIOlHAF0HiETxAMz_z1r--83xS0_fuzp5k1J4dZXa43kuBXj1nQJZS1OIy4YERFCbA5gLoppBt5XGoPpe_pKIvhd_rnU49wD2hplDzrRJ9m8re7SGvf_L1dFheYzUtqPOdHa0IF3TSM3fIy1dI"
+              />
+            </div>
+            <div>
+              <h4 class="font-headline text-xl text-on-surface mb-1">
+                상실의 기록
+              </h4>
+              <p class="font-body text-sm text-secondary">김서연 저 | 창비</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Editorial Quote Card -->
+      <section
+        class="bg-surface-container-low py-16 px-8 md:px-24 text-center relative overflow-hidden"
+      >
+        <div
+          class="absolute top-0 left-0 w-1 h-full bg-tertiary opacity-80"
+        ></div>
+        <!-- Archivist's Ribbon -->
+        <span class="material-symbols-outlined text-primary/30 text-4xl mb-6"
+          >format_quote</span
+        >
+        <blockquote
+          class="font-headline text-2xl md:text-3xl text-primary leading-relaxed mb-8"
+        >
+          "책을 읽는다는 것은 타인의 삶을 <br class="hidden md:block" />
+          빌려와 나의 세상을 넓히는 가장 정중한 방식이다."
+        </blockquote>
+        <cite class="font-body text-sm text-secondary italic"
+          >— 에세이 「서가의 온기」 중에서</cite
+        >
+      </section>
+      <!-- New Releases Section (Asymmetric Grid) -->
+      <section>
+        <div class="flex items-center gap-4 mb-8">
+          <h3 class="font-headline text-3xl text-primary">초이스 신간</h3>
+          <div class="h-[1px] flex-grow bg-outline-variant/30"></div>
+        </div>
+        <div class="flex overflow-x-auto gap-8 hide-scrollbar pb-4 -mx-6 px-6">
+          <!-- New Book 1 -->
+          <div class="flex-none w-48 group cursor-pointer">
+            <div
+              class="aspect-[2/3] mb-4 overflow-hidden bg-surface-container-highest"
+            >
+              <img
+                alt="New Release"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                data-alt="a new book release with vibrant indigo cover and white minimalist title against a soft linen background"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8fkZibKnpprJGFDZvPSE4lthHLLj1sXwTkzA-3rj_cEBFKRbf7qyCltABQL-Jj4bZzQ0cbWxShVENP2c1srmxHMhKB0rv8zxP2neyd4ylOF1YiYy34e9BOuzB0hyRKpMJL4BrV9QYnDCLh6gojMkCMBvKrqA9vf3LWZxvmJQBsRAZHNDyB2XVFtddmaSzxmsvH-SWrTizD7OP0W27herYHqsqowBEme6-feoy3Wyne_GUKlAFibKNqmT3hhFAQdbjYdfZH5q4Gtg"
+              />
+            </div>
+            <h5 class="font-headline text-lg text-on-surface line-clamp-1">
+              심연의 파도
+            </h5>
+            <p class="font-body text-xs text-secondary mt-1">데이비드 미첼</p>
+          </div>
+          <!-- New Book 2 -->
+          <div class="flex-none w-48 group cursor-pointer">
+            <div
+              class="aspect-[2/3] mb-4 overflow-hidden bg-surface-container-highest"
+            >
+              <img
+                alt="New Release"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                data-alt="collection of poetry books with soft pastel covers and thin elegant typography stacked on a light beige cloth"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuARYYohf-qeHxDTSXib3oUW4hrZis2Z9bTx5J_SxbtjZ_y8F-x_wFYLmIcEWOJIIHZ75mcH0iNjK54fI_x0x14yx10h6PYI0rdUYmVDH40j5cT84ffKbubz2dpGGFcwNxHtFbzXYlYkhHluOEJCCmnqv2Ym5ykhP7tgzvDV-lAjMqPoVX9JnpO8Cu0yGeQ0G15MSoDafNTZtl_d-LrGk9r8N0taEehWA5bO0wXpRmOVGH1aHcb6ulWSrbEP0nYQlq9V90fe08OSZAA"
+              />
+            </div>
+            <h5 class="font-headline text-lg text-on-surface line-clamp-1">
+              오후의 숲에서
+            </h5>
+            <p class="font-body text-xs text-secondary mt-1">이정윤</p>
+          </div>
+          <!-- New Book 3 -->
+          <div class="flex-none w-48 group cursor-pointer">
+            <div
+              class="aspect-[2/3] mb-4 overflow-hidden bg-surface-container-highest"
+            >
+              <img
+                alt="New Release"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                data-alt="minimalist book design featuring a clean white cover with a single botanical illustration in fine black line"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuABQfbTxMUJVDrbWvaZYujKffndzYmM_ePNva_6ynmtylRmDN5j24TKVQhRvznsjUlCr7s2RIq9QI_DyTy4HxlrO2kkacZANpU50E8_90pxE3WwRusbMsMOPPbZ4drNmTxF8xoXK8tiKbw0BJM2i0LvZ5n29oKZQ2YSxyaGav19bMjWRfFagIPbdYq4yzx4PqPtXOi5v8FHD4xOWpwNbLYsR_LAoV23dnYoOXJx54PiYgyrrRiQx9mZUNeIFsXbgBF5IIsgIkobiLc"
+              />
+            </div>
+            <h5 class="font-headline text-lg text-on-surface line-clamp-1">
+              식물의 언어
+            </h5>
+            <p class="font-body text-xs text-secondary mt-1">안나 파브르</p>
+          </div>
+          <!-- New Book 4 -->
+          <div class="flex-none w-48 group cursor-pointer">
+            <div
+              class="aspect-[2/3] mb-4 overflow-hidden bg-surface-container-highest"
+            >
+              <img
+                alt="New Release"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                data-alt="scholarly book with deep burgundy spine and ivory paper edges on a dark oak desk in a dim library setting"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgZX8aua8pUFib-5p4J2-msZy9BfwWh_3VUootO_zFpamOjgJ5Yg6kVOtPPsGeXxweB3iOmy5Uxel02QoASDlA8S3LVvkpF5903RIfr4KHY9BAEzgYJR2ln2_ACPSB0aEHGj2ZcwEuhreKZ6xWaMNwt6BrEBTXuJc2El2hcp1itscQAmVz2o9q8b7H4qaMMEX_nwS3shnRugJiGZN-G87YP8hyECgoTg03K2FjI63rpI1s0HvtuNryFbM0fVu6_RuxHOHFN8_YSck"
+              />
+            </div>
+            <h5 class="font-headline text-lg text-on-surface line-clamp-1">
+              철학의 계단
+            </h5>
+            <p class="font-body text-xs text-secondary mt-1">박영준</p>
+          </div>
+        </div>
+      </section>
+      <!-- Theme Recommendation Section -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div
+          class="bg-primary text-on-primary p-10 flex flex-col justify-between aspect-square md:aspect-auto"
+        >
+          <div>
+            <h3 class="font-headline text-3xl mb-4 leading-tight">
+              가을 밤, <br />
+              사색을 돕는 고전문학
+            </h3>
+            <p class="font-body text-sm opacity-80 leading-relaxed max-w-xs">
+              깊어가는 계절, 세월이 증명한 문장들로 마음을 채워보세요.
+            </p>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-label text-xs tracking-widest"
+              >VIEW COLLECTION</span
+            >
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </div>
+        </div>
+        <div
+          class="bg-secondary-container text-on-secondary-container p-10 flex flex-col justify-between aspect-square md:aspect-auto"
+        >
+          <div>
+            <h3 class="font-headline text-3xl mb-4 leading-tight">
+              건축과 책, <br />
+              공간의 철학
+            </h3>
+            <p
+              class="font-body text-sm text-secondary leading-relaxed max-w-xs"
+            >
+              아름다운 공간을 만드는 것은 벽이 아니라 그 안에 담긴 이야기입니다.
+            </p>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-label text-xs tracking-widest"
+              >EXPLORE THEME</span
+            >
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pt-3 pb-6 bg-[#fcf9f3]/80 backdrop-blur-md border-t-[0.5px] border-stone-200/10 shadow-2xl shadow-stone-900/5 z-50"
+    >
+      <div
+        class="flex flex-col items-center justify-center text-[#675d53] opacity-60 hover:text-[#163826] transition-colors cursor-pointer group"
+      >
+        <span
+          class="material-symbols-outlined text-2xl group-hover:scale-110 duration-300 ease-out"
+          >home</span
+        >
+        <span
+          class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1"
+          >홈</span
+        >
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-[#675d53] opacity-60 hover:text-[#163826] transition-colors cursor-pointer group"
+      >
+        <span
+          class="material-symbols-outlined text-2xl group-hover:scale-110 duration-300 ease-out"
+          >import_contacts</span
+        >
+        <span
+          class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1"
+          >서가</span
+        >
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-[#163826] font-bold group"
+      >
+        <span
+          class="material-symbols-outlined text-2xl scale-110 duration-300 ease-out"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >explore</span
+        >
+        <span
+          class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1"
+          >발견</span
+        >
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-[#675d53] opacity-60 hover:text-[#163826] transition-colors cursor-pointer group"
+      >
+        <span
+          class="material-symbols-outlined text-2xl group-hover:scale-110 duration-300 ease-out"
+          >analytics</span
+        >
+        <span
+          class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1"
+          >통계</span
+        >
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-[#675d53] opacity-60 hover:text-[#163826] transition-colors cursor-pointer group"
+      >
+        <span
+          class="material-symbols-outlined text-2xl group-hover:scale-110 duration-300 ease-out"
+          >person</span
+        >
+        <span
+          class="font-['Manrope'] text-[10px] uppercase tracking-widest mt-1"
+          >프로필</span
+        >
+      </div>
+    </nav>
+  </body>
+</html>

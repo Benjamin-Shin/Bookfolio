@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// 햄버거 메뉴(내 서재·프로필·통계·집계·공동서재·법적 고지).
+/// 햄버거 메뉴(내 서가·프로필·통계·집계·공동서가·법적 고지).
 ///
 /// History:
 /// - 2026-04-07: 법적 고지 상단 `Divider` 제거·「통계·서가담 집계」라벨·스낵바 카피
@@ -22,10 +22,10 @@ class BookfolioNavigationDrawer extends StatelessWidget {
     this.onTapSharedLibrary,
   });
 
-  /// 「내 서재」 — 하단 탭 0·내 서재 모드.
+  /// 「내 서가」 — 하단 탭 0·내 서가 모드.
   final VoidCallback? onTapMyLibrary;
 
-  /// 「공동서재」 — 하단 탭 0·공동 서재 모드.
+  /// 「공동서가」 — 하단 탭 0·공동 서가 모드.
   final VoidCallback? onTapSharedLibrary;
 
   Future<void> _openBookfolioWebPath(BuildContext context, String path) async {
@@ -89,9 +89,10 @@ class BookfolioNavigationDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '나만의 서재와 독서 기록을 한곳에서.',
+                    '나만의 서가와 독서 기록을 한곳에서.',
                     style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onPrimaryContainer.withValues(alpha: 0.9),
+                      color:
+                          colorScheme.onPrimaryContainer.withValues(alpha: 0.9),
                       height: 1.35,
                     ),
                   ),
@@ -101,7 +102,7 @@ class BookfolioNavigationDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.collections_bookmark_outlined),
-            title: const Text('내 서재'),
+            title: const Text('내 서가'),
             onTap: () {
               Navigator.pop(context);
               onTapMyLibrary?.call();
@@ -133,7 +134,8 @@ class BookfolioNavigationDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const LibraryAnalysisScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const LibraryAnalysisScreen()),
               );
             },
           ),
@@ -159,7 +161,7 @@ class BookfolioNavigationDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.groups_2_outlined),
-            title: const Text('공동서재'),
+            title: const Text('공동서가'),
             onTap: () {
               Navigator.pop(context);
               onTapSharedLibrary?.call();
@@ -183,7 +185,8 @@ class BookfolioNavigationDrawer extends StatelessWidget {
           ListTile(
             dense: true,
             visualDensity: VisualDensity.compact,
-            leading: Icon(Icons.privacy_tip_outlined, size: 20, color: onSurfaceVar),
+            leading:
+                Icon(Icons.privacy_tip_outlined, size: 20, color: onSurfaceVar),
             title: Text(
               '개인정보처리방침',
               style: textTheme.bodySmall?.copyWith(fontSize: 13),
@@ -196,7 +199,8 @@ class BookfolioNavigationDrawer extends StatelessWidget {
           ListTile(
             dense: true,
             visualDensity: VisualDensity.compact,
-            leading: Icon(Icons.article_outlined, size: 20, color: onSurfaceVar),
+            leading:
+                Icon(Icons.article_outlined, size: 20, color: onSurfaceVar),
             title: Text(
               '서비스 약관',
               style: textTheme.bodySmall?.copyWith(fontSize: 13),

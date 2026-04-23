@@ -31,7 +31,11 @@ type BookRow = {
   description: string | null;
 };
 
-export default async function AdminEditBookPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AdminEditBookPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   await requireAdmin();
   const { id } = await params;
 
@@ -39,7 +43,7 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
   const { data: row, error } = await supabase
     .from("books")
     .select(
-      "id,isbn,title,authors,translators,source,api_source,price_krw,page_count,genre_slugs,literature_region,original_language,publisher,published_date,cover_url,description"
+      "id,isbn,title,authors,translators,source,api_source,price_krw,page_count,genre_slugs,literature_region,original_language,publisher,published_date,cover_url,description",
     )
     .eq("id", id)
     .single();
@@ -51,7 +55,10 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
   const book = row as BookRow;
   const translators = Array.isArray(book.translators) ? book.translators : [];
 
-  const { data: refRows } = await supabase.from("user_books").select("is_owned").eq("book_id", id);
+  const { data: refRows } = await supabase
+    .from("user_books")
+    .select("is_owned")
+    .eq("book_id", id);
 
   let totalRefs = 0;
   let ownedRefs = 0;
@@ -63,8 +70,8 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
   const deleteDisabled = totalRefs > 0;
   const deleteTitle =
     ownedRefs > 0
-      ? "사용자 소장 서재에 포함된 도서는 삭제할 수 없습니다."
-      : "사용자 서재(읽는 중 등)에 연결된 도서는 삭제할 수 없습니다.";
+      ? "사용자 소장 서가에 포함된 도서는 삭제할 수 없습니다."
+      : "사용자 서가(읽는 중 등)에 연결된 도서는 삭제할 수 없습니다.";
 
   const defaultValues = {
     title: book.title,
@@ -80,7 +87,7 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
     genreSlugs: (book.genre_slugs ?? []).join(", "),
     literatureRegion: book.literature_region ?? "",
     originalLanguage: book.original_language ?? "",
-    apiSource: book.api_source ?? ""
+    apiSource: book.api_source ?? "",
   };
 
   return (
@@ -89,7 +96,7 @@ export default async function AdminEditBookPage({ params }: { params: Promise<{ 
         id: book.id,
         title: book.title,
         source: book.source,
-        api_source: book.api_source
+        api_source: book.api_source,
       }}
       metaLine={{ totalRefs, ownedRefs }}
       defaultValues={defaultValues}

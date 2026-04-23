@@ -49,18 +49,21 @@ class OfflineMessageScreen extends StatelessWidget {
               Icon(
                 Icons.wifi_off_rounded,
                 size: 56,
-                color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.75),
+                color: BookfolioDesignTokens.onSurfaceVariant
+                    .withValues(alpha: 0.75),
               ),
               const SizedBox(height: 24),
               Text(
                 '인터넷 연결이 필요합니다',
                 textAlign: TextAlign.center,
-                style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal)
+                style: BookfolioDesignTokens.headlineMd(
+                        BookfolioDesignTokens.primary,
+                        fontStyle: FontStyle.normal)
                     .copyWith(fontSize: 22),
               ),
               const SizedBox(height: 12),
               Text(
-                '서가담은 개인 서재와 목록을 서버와 동기화합니다.\n와이파이 또는 모바일 데이터를 켠 뒤 다시 시도해 주세요.',
+                '서가담은 개인 서가와 목록을 서버와 동기화합니다.\n와이파이 또는 모바일 데이터를 켠 뒤 다시 시도해 주세요.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.manrope(
                   fontSize: 14,
@@ -78,7 +81,8 @@ class OfflineMessageScreen extends StatelessWidget {
                 ),
                 child: Text(
                   '연결 상태 다시 확인',
-                  style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 15),
+                  style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.w700, fontSize: 15),
                 ),
               ),
             ],

@@ -2,7 +2,7 @@
  * 전역 테마·폰트 변수. 서가담 에디토리얼 팔레트(`#Reference/Web_Design/.../DESIGN.md` 정렬).
  *
  * @history
- * - 2026-04-12: 대시보드 내 서재 목업 — `.wood-shelf`·`.book-shadow`·`.archival-stamp`
+ * - 2026-04-12: 대시보드 내 서가 목업 — `.wood-shelf`·`.book-shadow`·`.archival-stamp`
  * - 2026-04-05: 서가담 서피스·프라이머리(#163826), 고스트 보더용 보더 토큰; Manrope·Newsreader CSS 변수와 `--font-serif` 매핑
  */
 @import "tailwindcss";
@@ -102,10 +102,10 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-manrope), "Pretendard", ui-sans-serif, system-ui,
-    sans-serif;
-  --font-serif: var(--font-newsreader), ui-serif, Georgia, "Times New Roman",
-    serif;
+  --font-sans:
+    var(--font-manrope), "Pretendard", ui-sans-serif, system-ui, sans-serif;
+  --font-serif:
+    var(--font-newsreader), ui-serif, Georgia, "Times New Roman", serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

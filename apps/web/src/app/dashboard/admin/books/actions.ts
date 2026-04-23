@@ -8,7 +8,7 @@ import type { AladinFeedItem } from "@/lib/aladin/bestseller-feed";
 import {
   aladinFeedItemDbIsbnKeys,
   authorsFromAladinAuthorField,
-  canonicalStoredIsbnFromAladinItem
+  canonicalStoredIsbnFromAladinItem,
 } from "@/lib/aladin/admin-book-prefill";
 import { fetchAladinItemList } from "@/lib/aladin/item-list";
 import { mergeAladinFeedItemsDeduped } from "@/lib/aladin/merge-feed-items";
@@ -19,7 +19,10 @@ import { env } from "@/lib/env";
 import { linkUserBookToOwnedLibraries } from "@/lib/libraries/repository";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
-import { initialAladinBulkImportState, type AladinBulkImportState } from "./admin-aladin-bulk-import-state";
+import {
+  initialAladinBulkImportState,
+  type AladinBulkImportState,
+} from "./admin-aladin-bulk-import-state";
 
 export type AdminBookActionState = { error: string | null };
 
@@ -64,24 +67,37 @@ function parseOptionalPageCount(raw: string | null): number | null {
 function readCanonicalFields(formData: FormData) {
   const title = formData.get("title")?.toString().trim() ?? "";
   const authors = parseAuthorsCsv(formData.get("authorsCsv")?.toString() ?? "");
-  const translators = parseAuthorsCsv(formData.get("translatorsCsv")?.toString() ?? "");
+  const translators = parseAuthorsCsv(
+    formData.get("translatorsCsv")?.toString() ?? "",
+  );
   const isbnRaw = formData.get("isbn")?.toString() ?? "";
   const normalizedIsbn = normalizeIsbn(isbnRaw);
   const isbn = normalizedIsbn.length > 0 ? normalizedIsbn : null;
 
   const publisher = formData.get("publisher")?.toString().trim() || null;
-  const publishedDate = formData.get("publishedDate")?.toString().trim() || null;
+  const publishedDate =
+    formData.get("publishedDate")?.toString().trim() || null;
   const coverUrl = formData.get("coverUrl")?.toString().trim() || null;
   const description = formData.get("description")?.toString().trim() || null;
-  const literatureRegion = formData.get("literatureRegion")?.toString().trim() || null;
-  const originalLanguage = formData.get("originalLanguage")?.toString().trim() || null;
+  const literatureRegion =
+    formData.get("literatureRegion")?.toString().trim() || null;
+  const originalLanguage =
+    formData.get("originalLanguage")?.toString().trim() || null;
   const apiSourceRaw = formData.get("apiSource")?.toString().trim() ?? "";
   const apiSource = apiSourceRaw.length > 0 ? apiSourceRaw : null;
-  const priceKrw = parseOptionalInt(formData.get("priceKrw")?.toString() ?? null);
-  const pageCount = parseOptionalPageCount(formData.get("pageCount")?.toString() ?? null);
-  const genreSlugs = parseGenreSlugs(formData.get("genreSlugs")?.toString() ?? "");
+  const priceKrw = parseOptionalInt(
+    formData.get("priceKrw")?.toString() ?? null,
+  );
+  const pageCount = parseOptionalPageCount(
+    formData.get("pageCount")?.toString() ?? null,
+  );
+  const genreSlugs = parseGenreSlugs(
+    formData.get("genreSlugs")?.toString() ?? "",
+  );
   const shelfLocationRaw = formData.get("location")?.toString() ?? "";
-  const shelfLocation = shelfLocationRaw.trim() ? shelfLocationRaw.trim() : null;
+  const shelfLocation = shelfLocationRaw.trim()
+    ? shelfLocationRaw.trim()
+    : null;
 
   return {
     title,
@@ -98,20 +114,20 @@ function readCanonicalFields(formData: FormData) {
     priceKrw,
     pageCount,
     genreSlugs,
-    shelfLocation
+    shelfLocation,
   };
 }
 
 /**
  * @history
- * - 2026-03-26: 관리자 서재 자동 추가 시 `user_books.format` 제거 — DB `0021`은 `books.format`만 사용
+ * - 2026-03-26: 관리자 서가 자동 추가 시 `user_books.format` 제거 — DB `0021`은 `books.format`만 사용
  * - 2026-03-26: `page_count` insert
  * - 2026-03-24: `translators`, `api_source` insert 반영
  * - 2026-03-24: 저자는 `replace_book_author_links` 로 `book_authors`·`books.authors` 동기화
  */
 export async function createAdminCanonicalBook(
   _prev: AdminBookActionState | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<AdminBookActionState> {
   const session = await requireAdmin();
 
@@ -137,7 +153,7 @@ export async function createAdminCanonicalBook(
       literature_region: f.literatureRegion,
       original_language: f.originalLanguage,
       api_source: f.apiSource,
-      source: "admin"
+      source: "admin",
     })
     .select("id")
     .single();
@@ -154,7 +170,8 @@ export async function createAdminCanonicalBook(
   try {
     await replaceBookAuthorLinks(supabase, bookId, f.authors);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "저자 정보를 저장하지 못했습니다.";
+    const message =
+      e instanceof Error ? e.message : "저자 정보를 저장하지 못했습니다.";
     return { error: message };
   }
 
@@ -188,7 +205,7 @@ export async function createAdminCanonicalBook(
           book_id: bookId,
           reading_status: "unread",
           is_owned: true,
-          location: f.shelfLocation
+          location: f.shelfLocation,
         })
         .select("id")
         .single();
@@ -197,7 +214,10 @@ export async function createAdminCanonicalBook(
         return { error: ubErr.message };
       }
       const newUbId = insertedUb?.id as string;
-      await linkUserBookToOwnedLibraries(newUbId, adminId, { userId: adminId, useAdmin: true });
+      await linkUserBookToOwnedLibraries(newUbId, adminId, {
+        userId: adminId,
+        useAdmin: true,
+      });
     }
   }
 
@@ -214,7 +234,7 @@ export async function createAdminCanonicalBook(
  */
 export async function updateAdminCanonicalBook(
   _prev: AdminBookActionState | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<AdminBookActionState> {
   await requireAdmin();
 
@@ -244,7 +264,7 @@ export async function updateAdminCanonicalBook(
       genre_slugs: f.genreSlugs.length > 0 ? f.genreSlugs : [],
       literature_region: f.literatureRegion,
       original_language: f.originalLanguage,
-      api_source: f.apiSource
+      api_source: f.apiSource,
     })
     .eq("id", id);
 
@@ -258,7 +278,8 @@ export async function updateAdminCanonicalBook(
   try {
     await replaceBookAuthorLinks(supabase, id, f.authors);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "저자 정보를 저장하지 못했습니다.";
+    const message =
+      e instanceof Error ? e.message : "저자 정보를 저장하지 못했습니다.";
     return { error: message };
   }
 
@@ -269,7 +290,7 @@ export async function updateAdminCanonicalBook(
 
 export async function deleteAdminCanonicalBook(
   _prev: AdminBookActionState | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<AdminBookActionState> {
   await requireAdmin();
 
@@ -290,7 +311,7 @@ export async function deleteAdminCanonicalBook(
     return { error: ownedErr.message };
   }
   if (ownedCount && ownedCount > 0) {
-    return { error: "사용자 소장 서재에 포함된 도서는 삭제할 수 없습니다." };
+    return { error: "사용자 소장 서가에 포함된 도서는 삭제할 수 없습니다." };
   }
 
   const { count: anyCount, error: anyErr } = await supabase
@@ -302,7 +323,9 @@ export async function deleteAdminCanonicalBook(
     return { error: anyErr.message };
   }
   if (anyCount && anyCount > 0) {
-    return { error: "사용자 서재(읽는 중 등)에 연결된 도서는 삭제할 수 없습니다." };
+    return {
+      error: "사용자 서가(읽는 중 등)에 연결된 도서는 삭제할 수 없습니다.",
+    };
   }
 
   const { error } = await supabase.from("books").delete().eq("id", bookId);
@@ -325,7 +348,7 @@ export async function deleteAdminCanonicalBook(
  */
 export async function bulkImportAladinCatalogNotInBooks(
   _prev: AladinBulkImportState | null,
-  _formData: FormData
+  _formData: FormData,
 ): Promise<AladinBulkImportState> {
   await requireAdmin();
 
@@ -334,7 +357,7 @@ export async function bulkImportAladinCatalogNotInBooks(
   if (!apiBaseUrl) {
     return {
       ...initialAladinBulkImportState,
-      error: "ALADIN_API_BASE_URL을 설정해 주세요."
+      error: "ALADIN_API_BASE_URL을 설정해 주세요.",
     };
   }
 
@@ -345,21 +368,25 @@ export async function bulkImportAladinCatalogNotInBooks(
   try {
     const feed = await fetchAladinItemList(apiBaseUrl, {
       queryType: "Bestseller",
-      categoryId: 0
+      categoryId: 0,
     });
     bestsellerItems = feed.items;
   } catch (e) {
-    feedErrors.push(`오늘 베스트셀러 목록: ${e instanceof Error ? e.message : "불러오기 실패"}`);
+    feedErrors.push(
+      `오늘 베스트셀러 목록: ${e instanceof Error ? e.message : "불러오기 실패"}`,
+    );
   }
 
   try {
     const feed = await fetchAladinItemList(apiBaseUrl, {
       queryType: "ItemNewSpecial",
-      categoryId: 0
+      categoryId: 0,
     });
     itemNewItems = feed.items;
   } catch (e) {
-    feedErrors.push(`초이스·신간 목록: ${e instanceof Error ? e.message : "불러오기 실패"}`);
+    feedErrors.push(
+      `초이스·신간 목록: ${e instanceof Error ? e.message : "불러오기 실패"}`,
+    );
   }
 
   const merged = mergeAladinFeedItemsDeduped(bestsellerItems, itemNewItems);
@@ -371,7 +398,7 @@ export async function bulkImportAladinCatalogNotInBooks(
         feedErrors.length > 0
           ? `알라딘 목록을 가져오지 못했습니다. ${feedErrors.join(" ")}`
           : "가져온 목록에 도서가 없습니다.",
-      feedErrors
+      feedErrors,
     };
   }
 
@@ -383,8 +410,9 @@ export async function bulkImportAladinCatalogNotInBooks(
   } catch (e) {
     return {
       ...initialAladinBulkImportState,
-      error: e instanceof Error ? e.message : "기존 서지 ISBN 조회에 실패했습니다.",
-      feedErrors
+      error:
+        e instanceof Error ? e.message : "기존 서지 ISBN 조회에 실패했습니다.",
+      feedErrors,
     };
   }
 
@@ -421,11 +449,15 @@ export async function bulkImportAladinCatalogNotInBooks(
     const publisher = item.publisher?.trim() || null;
     const publishedDate = item.pubDate?.trim() || null;
     const standardPriceKrw =
-      item.priceStandard != null && Number.isFinite(item.priceStandard) && item.priceStandard >= 0
+      item.priceStandard != null &&
+      Number.isFinite(item.priceStandard) &&
+      item.priceStandard >= 0
         ? Math.floor(item.priceStandard)
         : null;
     const salePriceKrw =
-      item.priceSales != null && Number.isFinite(item.priceSales) && item.priceSales >= 0
+      item.priceSales != null &&
+      Number.isFinite(item.priceSales) &&
+      item.priceSales >= 0
         ? Math.floor(item.priceSales)
         : null;
     const priceKrw = standardPriceKrw ?? salePriceKrw;
@@ -452,7 +484,7 @@ export async function bulkImportAladinCatalogNotInBooks(
         literature_region: null,
         original_language: null,
         api_source: "aladin",
-        source: "aladin"
+        source: "aladin",
       })
       .select("id")
       .single();
@@ -470,7 +502,7 @@ export async function bulkImportAladinCatalogNotInBooks(
         skippedExisting,
         skippedNoIsbn,
         skippedInvalid,
-        feedErrors
+        feedErrors,
       };
     }
 
@@ -483,7 +515,7 @@ export async function bulkImportAladinCatalogNotInBooks(
         skippedExisting,
         skippedNoIsbn,
         skippedInvalid,
-        feedErrors
+        feedErrors,
       };
     }
 
@@ -492,12 +524,13 @@ export async function bulkImportAladinCatalogNotInBooks(
     } catch (e) {
       return {
         ...initialAladinBulkImportState,
-        error: e instanceof Error ? e.message : "저자 정보를 저장하지 못했습니다.",
+        error:
+          e instanceof Error ? e.message : "저자 정보를 저장하지 못했습니다.",
         inserted,
         skippedExisting,
         skippedNoIsbn,
         skippedInvalid,
-        feedErrors
+        feedErrors,
       };
     }
 
@@ -514,7 +547,8 @@ export async function bulkImportAladinCatalogNotInBooks(
   } else {
     parts.push("신규로 넣을 도서가 없었습니다.");
   }
-  if (skippedExisting > 0) parts.push(`이미 등록된 ISBN ${skippedExisting}건 생략`);
+  if (skippedExisting > 0)
+    parts.push(`이미 등록된 ISBN ${skippedExisting}건 생략`);
   if (skippedNoIsbn > 0) parts.push(`ISBN 없음 ${skippedNoIsbn}건 생략`);
   if (skippedInvalid > 0) parts.push(`제목 없음 ${skippedInvalid}건 생략`);
   if (feedErrors.length > 0) parts.push(`참고: ${feedErrors.join(" · ")}`);
@@ -526,6 +560,6 @@ export async function bulkImportAladinCatalogNotInBooks(
     skippedExisting,
     skippedNoIsbn,
     skippedInvalid,
-    feedErrors
+    feedErrors,
   };
 }

@@ -11,7 +11,7 @@ import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-/// 공동서재 한 곳 — Stitch `모임서재` 목업에 가깝게(인용·멤버 스트립·2열 표지·활동·검색/필터).
+/// 공동서가 한 곳 — Stitch `모임서가` 목업에 가깝게(인용·멤버 스트립·2열 표지·활동·검색/필터).
 ///
 /// History:
 /// - 2026-04-12: 모임 표지 — 셀 2:3·클리핑·`BoxFit.contain`·소유자 전체 이름 칩
@@ -31,7 +31,8 @@ class SharedLibraryBooksScreen extends StatefulWidget {
   final String libraryName;
 
   @override
-  State<SharedLibraryBooksScreen> createState() => _SharedLibraryBooksScreenState();
+  State<SharedLibraryBooksScreen> createState() =>
+      _SharedLibraryBooksScreenState();
 }
 
 class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
@@ -109,7 +110,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
         map[o.userId] = o.displayName;
       }
     }
-    final out = map.entries.map((e) => (userId: e.key, label: e.value)).toList();
+    final out =
+        map.entries.map((e) => (userId: e.key, label: e.value)).toList();
     out.sort((a, b) => a.label.compareTo(b.label));
     return out;
   }
@@ -175,7 +177,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
 
   bool _isActiveReader(String userId) {
     return _all.any(
-      (b) => b.owners.any((o) => o.userId == userId && o.readingStatus == 'reading'),
+      (b) => b.owners
+          .any((o) => o.userId == userId && o.readingStatus == 'reading'),
     );
   }
 
@@ -224,7 +227,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
   }
 
   List<_MoimActivity> _activitiesForFeed() {
-    final sorted = _filtered()..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    final sorted = _filtered()
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     final out = <_MoimActivity>[];
     for (final b in sorted.take(8)) {
       if (b.owners.isEmpty) continue;
@@ -237,7 +241,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
       }
       if (memoOwner != null) {
         final snippet = memoOwner.memoPreview!.trim();
-        final short = snippet.length > 42 ? '${snippet.substring(0, 42)}…' : snippet;
+        final short =
+            snippet.length > 42 ? '${snippet.substring(0, 42)}…' : snippet;
         out.add(
           _MoimActivity(
             kind: _MoimActivityKind.memo,
@@ -281,7 +286,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
     final bottomSafe = MediaQuery.viewPaddingOf(context).bottom;
     final pagerBottomPad = 24 + bottomSafe + 16;
     final filtered = _filtered();
-    final totalPages = math.max(1, (filtered.length + _pageSize - 1) ~/ _pageSize);
+    final totalPages =
+        math.max(1, (filtered.length + _pageSize - 1) ~/ _pageSize);
     final page = math.min(_page, totalPages);
     final start = (page - 1) * _pageSize;
     final pageItems = start >= filtered.length
@@ -318,7 +324,9 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 6,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd)),
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(BookfolioDesignTokens.radiusMd)),
         child: const Icon(Icons.edit_note_rounded, size: 28),
       ),
       appBar: AppBar(
@@ -330,7 +338,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
           widget.libraryName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: BookfolioDesignTokens.headlineMd(colorScheme.onSurface).copyWith(
+          style:
+              BookfolioDesignTokens.headlineMd(colorScheme.onSurface).copyWith(
             fontSize: 22,
             fontWeight: FontWeight.w600,
           ),
@@ -342,13 +351,15 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
         flexibleSpace: ClipRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: ColoredBox(color: colorScheme.surface.withValues(alpha: 0.65)),
+            child:
+                ColoredBox(color: colorScheme.surface.withValues(alpha: 0.65)),
           ),
         ),
         actions: [
           IconButton(
             tooltip: '검색·필터',
-            icon: Icon(_filtersOpen ? Icons.filter_alt : Icons.filter_alt_outlined),
+            icon: Icon(
+                _filtersOpen ? Icons.filter_alt : Icons.filter_alt_outlined),
             onPressed: () => setState(() => _filtersOpen = !_filtersOpen),
           ),
           PopupMenuButton<String>(
@@ -372,7 +383,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
       ),
       body: Stack(
         children: [
-          Positioned.fill(child: _PaperBackdrop(color: colorScheme.outlineVariant)),
+          Positioned.fill(
+              child: _PaperBackdrop(color: colorScheme.outlineVariant)),
           RefreshIndicator(
             onRefresh: _load,
             color: colorScheme.primary,
@@ -381,7 +393,11 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                 ? CustomScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
-                      SliverToBoxAdapter(child: SizedBox(height: kToolbarHeight + MediaQuery.paddingOf(context).top + 80)),
+                      SliverToBoxAdapter(
+                          child: SizedBox(
+                              height: kToolbarHeight +
+                                  MediaQuery.paddingOf(context).top +
+                                  80)),
                       const SliverFillRemaining(
                         hasScrollBody: false,
                         child: Center(child: CircularProgressIndicator()),
@@ -392,11 +408,16 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                     ? CustomScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         slivers: [
-                          SliverToBoxAdapter(child: SizedBox(height: kToolbarHeight + MediaQuery.paddingOf(context).top + 24)),
+                          SliverToBoxAdapter(
+                              child: SizedBox(
+                                  height: kToolbarHeight +
+                                      MediaQuery.paddingOf(context).top +
+                                      24)),
                           SliverToBoxAdapter(
                             child: Padding(
                               padding: const EdgeInsets.all(24),
-                              child: Text(_error!, style: TextStyle(color: colorScheme.error)),
+                              child: Text(_error!,
+                                  style: TextStyle(color: colorScheme.error)),
                             ),
                           ),
                         ],
@@ -405,12 +426,16 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                         physics: const AlwaysScrollableScrollPhysics(),
                         slivers: [
                           SliverToBoxAdapter(
-                            child: SizedBox(height: kToolbarHeight + MediaQuery.paddingOf(context).top + 8),
+                            child: SizedBox(
+                                height: kToolbarHeight +
+                                    MediaQuery.paddingOf(context).top +
+                                    8),
                           ),
                           if (_filtersOpen) ...[
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                                padding:
+                                    const EdgeInsets.fromLTRB(24, 0, 24, 8),
                                 child: SearchBar(
                                   controller: _searchCtrl,
                                   hintText: '제목·저자·ISBN·소유자 검색',
@@ -418,7 +443,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                                   trailing: [
                                     IconButton(
                                       onPressed: _applySearchField,
-                                      icon: const Icon(Icons.check_circle_outline),
+                                      icon: const Icon(
+                                          Icons.check_circle_outline),
                                       tooltip: '검색 적용',
                                     ),
                                   ],
@@ -429,13 +455,17 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                             if (genres.isNotEmpty)
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 0, 20, 8),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '장르',
-                                        style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                                        style: textTheme.labelLarge?.copyWith(
+                                            color:
+                                                colorScheme.onSurfaceVariant),
                                       ),
                                       const SizedBox(height: 6),
                                       SingleChildScrollView(
@@ -443,24 +473,29 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                                         child: Row(
                                           children: [
                                             Padding(
-                                              padding: const EdgeInsets.only(right: 6),
+                                              padding: const EdgeInsets.only(
+                                                  right: 6),
                                               child: FilterChip(
                                                 label: const Text('전체'),
                                                 selected: _genreSlug == null,
                                                 onSelected: (v) {
                                                   if (v) _setGenre(null);
                                                 },
-                                                selectedColor: colorScheme.secondaryContainer,
+                                                selectedColor: colorScheme
+                                                    .secondaryContainer,
                                               ),
                                             ),
                                             ...genres.map(
                                               (g) => Padding(
-                                                padding: const EdgeInsets.only(right: 6),
+                                                padding: const EdgeInsets.only(
+                                                    right: 6),
                                                 child: FilterChip(
                                                   label: Text(g),
                                                   selected: _genreSlug == g,
-                                                  onSelected: (v) => _setGenre(v ? g : null),
-                                                  selectedColor: colorScheme.secondaryContainer,
+                                                  onSelected: (v) =>
+                                                      _setGenre(v ? g : null),
+                                                  selectedColor: colorScheme
+                                                      .secondaryContainer,
                                                 ),
                                               ),
                                             ),
@@ -474,13 +509,17 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                             if (owners.length > 1 || _ownerUserId != null)
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 0, 20, 12),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '소유자',
-                                        style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                                        style: textTheme.labelLarge?.copyWith(
+                                            color:
+                                                colorScheme.onSurfaceVariant),
                                       ),
                                       const SizedBox(height: 6),
                                       SingleChildScrollView(
@@ -488,24 +527,30 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                                         child: Row(
                                           children: [
                                             Padding(
-                                              padding: const EdgeInsets.only(right: 6),
+                                              padding: const EdgeInsets.only(
+                                                  right: 6),
                                               child: FilterChip(
                                                 label: const Text('전체'),
                                                 selected: _ownerUserId == null,
                                                 onSelected: (v) {
                                                   if (v) _setOwner(null);
                                                 },
-                                                selectedColor: colorScheme.secondaryContainer,
+                                                selectedColor: colorScheme
+                                                    .secondaryContainer,
                                               ),
                                             ),
                                             ...owners.map(
                                               (o) => Padding(
-                                                padding: const EdgeInsets.only(right: 6),
+                                                padding: const EdgeInsets.only(
+                                                    right: 6),
                                                 child: FilterChip(
                                                   label: Text(o.label),
-                                                  selected: _ownerUserId == o.userId,
-                                                  onSelected: (v) => _setOwner(v ? o.userId : null),
-                                                  selectedColor: colorScheme.secondaryContainer,
+                                                  selected:
+                                                      _ownerUserId == o.userId,
+                                                  onSelected: (v) => _setOwner(
+                                                      v ? o.userId : null),
+                                                  selectedColor: colorScheme
+                                                      .secondaryContainer,
                                                 ),
                                               ),
                                             ),
@@ -520,7 +565,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                           if (quoteBody != null && quoteMeta != null)
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                                padding:
+                                    const EdgeInsets.fromLTRB(24, 16, 24, 0),
                                 child: _MoimQuoteHero(
                                   quote: quoteBody,
                                   memberName: quoteMeta.name,
@@ -530,7 +576,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                             ),
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: EdgeInsets.fromLTRB(24, quoteBody != null ? 28 : 16, 24, 0),
+                              padding: EdgeInsets.fromLTRB(
+                                  24, quoteBody != null ? 28 : 16, 24, 0),
                               child: _MoimMembersSection(
                                 members: owners
                                     .map(
@@ -544,7 +591,8 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                                 onInvite: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('멤버 초대는 웹 서가담에서 진행할 수 있어요.'),
+                                      content:
+                                          Text('멤버 초대는 웹 서가담에서 진행할 수 있어요.'),
                                       behavior: SnackBarBehavior.floating,
                                     ),
                                   );
@@ -554,43 +602,51 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                           ),
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
+                              padding:
+                                  const EdgeInsets.fromLTRB(24, 28, 24, 12),
                               child: Text(
-                                '공동의 서재',
-                                style: BookfolioDesignTokens.headlineMd(colorScheme.onSurface),
+                                '공동의 서가',
+                                style: BookfolioDesignTokens.headlineMd(
+                                    colorScheme.onSurface),
                               ),
                             ),
                           ),
                           if (filtered.isEmpty && _all.isEmpty)
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 32),
                                 child: Text(
-                                  '이 서재에 등록된 책이 없습니다.',
+                                  '이 서가에 등록된 책이 없습니다.',
                                   textAlign: TextAlign.center,
-                                  style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                                  style: textTheme.bodyLarge?.copyWith(
+                                      color: colorScheme.onSurfaceVariant),
                                 ),
                               ),
                             )
                           else if (filtered.isEmpty)
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 32),
                                 child: Text(
                                   '조건에 맞는 책이 없습니다.',
                                   textAlign: TextAlign.center,
-                                  style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                                  style: textTheme.bodyLarge?.copyWith(
+                                      color: colorScheme.onSurfaceVariant),
                                 ),
                               ),
                             )
                           else
                             SliverLayoutBuilder(
                               builder: (context, constraints) {
-                                final columns = _gridCrossAxisCount(constraints.crossAxisExtent);
+                                final columns = _gridCrossAxisCount(
+                                    constraints.crossAxisExtent);
                                 final aspect = _moimTileAspect(columns);
                                 final tileCount = pageItems.length + 1;
                                 return SliverGrid(
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: columns,
                                     mainAxisSpacing: 28,
                                     crossAxisSpacing: 24,
@@ -601,10 +657,13 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                                       if (index == pageItems.length) {
                                         return _MoimAddBookTile(
                                           onTap: () {
-                                            ScaffoldMessenger.of(context).showSnackBar(
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
                                               const SnackBar(
-                                                content: Text('책 등록은 웹 서가담 또는 내 서재에서 이어서 할 수 있어요.'),
-                                                behavior: SnackBarBehavior.floating,
+                                                content: Text(
+                                                    '책 등록은 웹 서가담 또는 내 서가에서 이어서 할 수 있어요.'),
+                                                behavior:
+                                                    SnackBarBehavior.floating,
                                               ),
                                             );
                                           },
@@ -627,20 +686,29 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(24, 8, 24, 8),
                                 child: Material(
-                                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
-                                  borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd),
+                                  color: colorScheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.9),
+                                  borderRadius: BorderRadius.circular(
+                                      BookfolioDesignTokens.radiusMd),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         IconButton(
-                                          onPressed: page > 1 ? () => setState(() => _page -= 1) : null,
+                                          onPressed: page > 1
+                                              ? () => setState(() => _page -= 1)
+                                              : null,
                                           icon: const Icon(Icons.chevron_left),
                                         ),
-                                        Text('$page / $totalPages', style: textTheme.titleSmall),
+                                        Text('$page / $totalPages',
+                                            style: textTheme.titleSmall),
                                         IconButton(
-                                          onPressed: page < totalPages ? () => setState(() => _page += 1) : null,
+                                          onPressed: page < totalPages
+                                              ? () => setState(() => _page += 1)
+                                              : null,
                                           icon: const Icon(Icons.chevron_right),
                                         ),
                                       ],
@@ -651,20 +719,25 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                             ),
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
+                              padding:
+                                  const EdgeInsets.fromLTRB(24, 28, 24, 12),
                               child: Text(
                                 '최근 활동',
-                                style: BookfolioDesignTokens.headlineMd(colorScheme.onSurface),
+                                style: BookfolioDesignTokens.headlineMd(
+                                    colorScheme.onSurface),
                               ),
                             ),
                           ),
                           if (activities.isEmpty)
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                                padding:
+                                    const EdgeInsets.fromLTRB(24, 0, 24, 24),
                                 child: Text(
                                   '아직 표시할 활동이 없어요. 책에 메모를 남기면 여기에 모여요.',
-                                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.35),
+                                  style: textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                      height: 1.35),
                                 ),
                               ),
                             )
@@ -678,19 +751,23 @@ class _SharedLibraryBooksScreenState extends State<SharedLibraryBooksScreen> {
                                     1 => colorScheme.tertiary,
                                     _ => colorScheme.secondary,
                                   };
-                                  final faded = i == activities.length - 1 && activities.length > 2;
+                                  final faded = i == activities.length - 1 &&
+                                      activities.length > 2;
                                   return Padding(
-                                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        24, 0, 24, 20),
                                     child: Opacity(
                                       opacity: faded ? 0.72 : 1,
-                                      child: _MoimActivityTile(activity: a, dotColor: dotColor),
+                                      child: _MoimActivityTile(
+                                          activity: a, dotColor: dotColor),
                                     ),
                                   );
                                 },
                                 childCount: activities.length,
                               ),
                             ),
-                          SliverToBoxAdapter(child: SizedBox(height: pagerBottomPad + 72)),
+                          SliverToBoxAdapter(
+                              child: SizedBox(height: pagerBottomPad + 72)),
                         ],
                       ),
           ),
@@ -750,7 +827,8 @@ class _DotGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DotGridPainter oldDelegate) => oldDelegate.dotColor != dotColor;
+  bool shouldRepaint(covariant _DotGridPainter oldDelegate) =>
+      oldDelegate.dotColor != dotColor;
 }
 
 class _MoimQuoteHero extends StatelessWidget {
@@ -772,7 +850,9 @@ class _MoimQuoteHero extends StatelessWidget {
       children: [
         Text(
           '함께 쌓아가는 문장들',
-          style: BookfolioDesignTokens.headlineMd(scheme.primary, fontStyle: FontStyle.normal).copyWith(
+          style: BookfolioDesignTokens.headlineMd(scheme.primary,
+                  fontStyle: FontStyle.normal)
+              .copyWith(
             fontSize: 26,
             fontWeight: FontWeight.w700,
             height: 1.15,
@@ -810,8 +890,10 @@ class _MoimQuoteHero extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
               decoration: BoxDecoration(
                 color: scheme.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusMd),
-                border: Border.all(color: BookfolioDesignTokens.ghostOutline(0.12)),
+                borderRadius:
+                    BorderRadius.circular(BookfolioDesignTokens.radiusMd),
+                border:
+                    Border.all(color: BookfolioDesignTokens.ghostOutline(0.12)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -835,7 +917,9 @@ class _MoimQuoteHero extends StatelessWidget {
                     offset: const Offset(0, -8),
                     child: Text(
                       '"$quote"',
-                      style: BookfolioDesignTokens.headlineMd(scheme.onSurface, fontStyle: FontStyle.italic).copyWith(
+                      style: BookfolioDesignTokens.headlineMd(scheme.onSurface,
+                              fontStyle: FontStyle.italic)
+                          .copyWith(
                         fontSize: 19,
                         height: 1.45,
                       ),
@@ -846,9 +930,12 @@ class _MoimQuoteHero extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundColor: scheme.primaryContainer.withValues(alpha: 0.35),
+                        backgroundColor:
+                            scheme.primaryContainer.withValues(alpha: 0.35),
                         child: Text(
-                          memberName.isNotEmpty ? memberName.characters.first : '?',
+                          memberName.isNotEmpty
+                              ? memberName.characters.first
+                              : '?',
                           style: TextStyle(
                             color: scheme.primary,
                             fontWeight: FontWeight.w700,
@@ -874,7 +961,10 @@ class _MoimQuoteHero extends StatelessWidget {
                               bookLine,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: BookfolioDesignTokens.labelMd(scheme.onSurfaceVariant, opacity: 0.85).copyWith(
+                              style: BookfolioDesignTokens.labelMd(
+                                      scheme.onSurfaceVariant,
+                                      opacity: 0.85)
+                                  .copyWith(
                                 fontSize: 10,
                                 letterSpacing: 1.0,
                               ),
@@ -924,7 +1014,8 @@ class _MoimMembersSection extends StatelessWidget {
             ),
             TextButton.icon(
               onPressed: onInvite,
-              icon: Icon(Icons.person_add_alt_1_outlined, size: 18, color: scheme.primary),
+              icon: Icon(Icons.person_add_alt_1_outlined,
+                  size: 18, color: scheme.primary),
               label: Text(
                 '초대하기',
                 style: TextStyle(
@@ -945,7 +1036,10 @@ class _MoimMembersSection extends StatelessWidget {
         if (members.isEmpty)
           Text(
             '등록된 책에서 멤버가 보여요. 책을 추가해 보세요.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: scheme.onSurfaceVariant),
           )
         else
           SizedBox(
@@ -956,7 +1050,9 @@ class _MoimMembersSection extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(width: 16),
               itemBuilder: (context, i) {
                 final m = members[i];
-                final initial = m.label.trim().isNotEmpty ? m.label.trim().characters.first : '?';
+                final initial = m.label.trim().isNotEmpty
+                    ? m.label.trim().characters.first
+                    : '?';
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -969,17 +1065,22 @@ class _MoimMembersSection extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(
                               width: 2,
-                              color: m.active ? scheme.primary : Colors.transparent,
+                              color: m.active
+                                  ? scheme.primary
+                                  : Colors.transparent,
                             ),
                           ),
                           child: CircleAvatar(
                             radius: 26,
-                            backgroundColor: scheme.secondaryContainer.withValues(alpha: 0.65),
+                            backgroundColor: scheme.secondaryContainer
+                                .withValues(alpha: 0.65),
                             child: Text(
                               initial,
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
-                                color: m.active ? scheme.onSurface : scheme.onSurfaceVariant,
+                                color: m.active
+                                    ? scheme.onSurface
+                                    : scheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -994,7 +1095,8 @@ class _MoimMembersSection extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: const Color(0xFF22C55E),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: scheme.surface, width: 2),
+                                border:
+                                    Border.all(color: scheme.surface, width: 2),
                               ),
                             ),
                           ),
@@ -1011,7 +1113,9 @@ class _MoimMembersSection extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: m.active ? scheme.onSurface : scheme.onSurfaceVariant,
+                          color: m.active
+                              ? scheme.onSurface
+                              : scheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -1040,7 +1144,10 @@ class _MoimBookTile extends StatelessWidget {
 
   /// 표지(2:3)를 그리드 셀의 가용 영역 안에 맞춘 크기. 틸트 여유를 위해 약간 축소한다.
   static Size _coverSizeForCell(double maxWidth, double maxHeight) {
-    if (maxWidth <= 0 || maxHeight <= 0 || !maxWidth.isFinite || !maxHeight.isFinite) {
+    if (maxWidth <= 0 ||
+        maxHeight <= 0 ||
+        !maxWidth.isFinite ||
+        !maxHeight.isFinite) {
       return Size.zero;
     }
     var w = maxWidth;
@@ -1083,7 +1190,8 @@ class _MoimBookTile extends StatelessWidget {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final sz = _coverSizeForCell(constraints.maxWidth, constraints.maxHeight);
+                final sz = _coverSizeForCell(
+                    constraints.maxWidth, constraints.maxHeight);
                 final ownerChips = <Widget>[];
                 for (final o in owners) {
                   final name = o.displayName.trim();
@@ -1101,7 +1209,8 @@ class _MoimBookTile extends StatelessWidget {
                           color: scheme.surface.withValues(alpha: 0.92),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: scheme.outlineVariant.withValues(alpha: 0.45),
+                            color:
+                                scheme.outlineVariant.withValues(alpha: 0.45),
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -1112,7 +1221,8 @@ class _MoimBookTile extends StatelessWidget {
                           ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 3),
                           child: Text(
                             name,
                             maxLines: 1,
@@ -1135,7 +1245,8 @@ class _MoimBookTile extends StatelessWidget {
                     width: sz.width,
                     height: sz.height,
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                      borderRadius:
+                          BorderRadius.circular(BookfolioDesignTokens.radiusSm),
                       child: Stack(
                         fit: StackFit.expand,
                         clipBehavior: Clip.hardEdge,
@@ -1146,7 +1257,8 @@ class _MoimBookTile extends StatelessWidget {
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   color: wash,
-                                  borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                                  borderRadius: BorderRadius.circular(
+                                      BookfolioDesignTokens.radiusSm),
                                 ),
                                 child: const SizedBox.expand(),
                               ),
@@ -1154,13 +1266,17 @@ class _MoimBookTile extends StatelessWidget {
                           ),
                           Positioned.fill(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 1),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 1),
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: BookfolioDesignTokens.ghostOutline(0.1)),
+                                  border: Border.all(
+                                      color: BookfolioDesignTokens.ghostOutline(
+                                          0.1)),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.12),
+                                      color:
+                                          Colors.black.withValues(alpha: 0.12),
                                       blurRadius: 6,
                                       offset: const Offset(0, 3),
                                     ),
@@ -1173,7 +1289,8 @@ class _MoimBookTile extends StatelessWidget {
                                         seedB: book.bookId,
                                       )
                                     : ColoredBox(
-                                        color: scheme.surfaceContainerLow.withValues(alpha: 0.65),
+                                        color: scheme.surfaceContainerLow
+                                            .withValues(alpha: 0.65),
                                         child: Image.network(
                                           cover,
                                           fit: BoxFit.contain,
@@ -1181,7 +1298,8 @@ class _MoimBookTile extends StatelessWidget {
                                           width: double.infinity,
                                           height: double.infinity,
                                           headers: kCoverImageRequestHeaders,
-                                          errorBuilder: (_, __, ___) => GradientTitlePanel(
+                                          errorBuilder: (_, __, ___) =>
+                                              GradientTitlePanel(
                                             title: book.title,
                                             seedA: book.title,
                                             seedB: book.bookId,
@@ -1252,7 +1370,8 @@ class _MoimAddBookTile extends StatelessWidget {
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+              borderRadius:
+                  BorderRadius.circular(BookfolioDesignTokens.radiusSm),
               child: Stack(
                 clipBehavior: Clip.hardEdge,
                 children: [
@@ -1262,7 +1381,8 @@ class _MoimAddBookTile extends StatelessWidget {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                           color: scheme.secondary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                              BookfolioDesignTokens.radiusSm),
                         ),
                         child: const SizedBox.expand(),
                       ),
@@ -1272,8 +1392,10 @@ class _MoimAddBookTile extends StatelessWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: scheme.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
-                        border: Border.all(color: BookfolioDesignTokens.ghostOutline(0.2)),
+                        borderRadius: BorderRadius.circular(
+                            BookfolioDesignTokens.radiusSm),
+                        border: Border.all(
+                            color: BookfolioDesignTokens.ghostOutline(0.2)),
                       ),
                       child: Icon(
                         Icons.add_circle_outline_rounded,
@@ -1319,7 +1441,9 @@ class _MoimActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final bookSerif = BookfolioDesignTokens.headlineMd(scheme.onSurface, fontStyle: FontStyle.italic).copyWith(
+    final bookSerif = BookfolioDesignTokens.headlineMd(scheme.onSurface,
+            fontStyle: FontStyle.italic)
+        .copyWith(
       fontSize: 15,
       fontWeight: FontWeight.w500,
     );
@@ -1350,9 +1474,15 @@ class _MoimActivityTile extends StatelessWidget {
                       TextSpan(
                         style: textStyle,
                         children: [
-                          TextSpan(text: activity.actor, style: TextStyle(fontWeight: FontWeight.w800, color: scheme.primary)),
+                          TextSpan(
+                              text: activity.actor,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: scheme.primary)),
                           const TextSpan(text: '님이 문장을 공유했습니다: '),
-                          TextSpan(text: '"${activity.detail}"', style: bookSerif.copyWith(fontSize: 14)),
+                          TextSpan(
+                              text: '"${activity.detail}"',
+                              style: bookSerif.copyWith(fontSize: 14)),
                         ],
                       ),
                     )
@@ -1360,9 +1490,15 @@ class _MoimActivityTile extends StatelessWidget {
                       TextSpan(
                         style: textStyle,
                         children: [
-                          TextSpan(text: activity.actor, style: TextStyle(fontWeight: FontWeight.w800, color: scheme.primary)),
-                          const TextSpan(text: '님이 서재에 '),
-                          TextSpan(text: '[${activity.bookTitle}]', style: bookSerif),
+                          TextSpan(
+                              text: activity.actor,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: scheme.primary)),
+                          const TextSpan(text: '님이 서가에 '),
+                          TextSpan(
+                              text: '[${activity.bookTitle}]',
+                              style: bookSerif),
                           const TextSpan(text: '을 추가했습니다.'),
                         ],
                       ),
@@ -1370,7 +1506,9 @@ class _MoimActivityTile extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 activity.timeLabel.toUpperCase(),
-                style: BookfolioDesignTokens.labelMd(scheme.onSurfaceVariant, opacity: 0.85).copyWith(fontSize: 10),
+                style: BookfolioDesignTokens.labelMd(scheme.onSurfaceVariant,
+                        opacity: 0.85)
+                    .copyWith(fontSize: 10),
               ),
             ],
           ),

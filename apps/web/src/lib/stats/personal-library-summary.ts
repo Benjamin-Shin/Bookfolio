@@ -48,7 +48,7 @@ export type PersonalLibrarySummary = {
  * 제목 기반 시리즈 그룹 키(휴리스틱). 동일 시리즈 권수를 1작품으로 근사할 때 사용.
  *
  * @history
- * - 2026-04-02: 모바일 「내 서재 분석」 소장 작품 수 집계용
+ * - 2026-04-02: 모바일 「내 서가 분석」 소장 작품 수 집계용
  */
 export function normalizeWorkTitleKey(title: string): string {
   let t = title.toLowerCase().trim();
@@ -63,13 +63,15 @@ function getAdminContext(context: RepositoryContext) {
 }
 
 /**
- * 종이책 서재 기준 개인 요약 지표(모바일 허브·분석 화면).
+ * 종이책 서가 기준 개인 요약 지표(모바일 허브·분석 화면).
  *
  * @history
  * - 2026-04-02: `topAuthorsByOwnedCount`, `profileForStats` 추가
  * - 2026-04-02: 신규 — `GET /api/me/stats/personal-library-summary`
  */
-export async function getPersonalLibrarySummary(context: RepositoryContext): Promise<PersonalLibrarySummary> {
+export async function getPersonalLibrarySummary(
+  context: RepositoryContext,
+): Promise<PersonalLibrarySummary> {
   const { supabase, userId } = getAdminContext(context);
 
   const { data: profRow } = await supabase
@@ -81,10 +83,12 @@ export async function getPersonalLibrarySummary(context: RepositoryContext): Pro
   const prof = profRow as Record<string, unknown> | null;
   const profileForStats: PersonalLibraryProfileForStats = {
     gender:
-      prof?.gender_public === true && typeof prof?.gender === "string" && prof.gender.trim()
+      prof?.gender_public === true &&
+      typeof prof?.gender === "string" &&
+      prof.gender.trim()
         ? (prof.gender as string).trim()
         : null,
-    birthYear: null
+    birthYear: null,
   };
   if (prof?.birth_date_public === true && prof?.birth_date != null) {
     const raw = prof.birth_date as string;
@@ -110,7 +114,7 @@ export async function getPersonalLibrarySummary(context: RepositoryContext): Pro
         page_count,
         price_krw
       )
-    `
+    `,
     )
     .eq("user_id", userId)
     .eq("books.format", "paper");
@@ -172,7 +176,10 @@ export async function getPersonalLibrarySummary(context: RepositoryContext): Pro
       .from("user_book_memos")
       .select("id, user_books!inner(user_id)", { count: "exact", head: true })
       .eq("user_books.user_id", userId),
-    supabase.from("book_one_liners").select("id", { count: "exact", head: true }).eq("user_id", userId)
+    supabase
+      .from("book_one_liners")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId),
   ]);
 
   const now = new Date();
@@ -181,11 +188,19 @@ export async function getPersonalLibrarySummary(context: RepositoryContext): Pro
   const yearStart = `${y}-01-01T00:00:00.000Z`;
   const yearEnd = `${y + 1}-01-01T00:00:00.000Z`;
   const monthStart = `${y}-${String(m + 1).padStart(2, "0")}-01T00:00:00.000Z`;
-  const nextMonth = m === 11 ? `${y + 1}-01-01T00:00:00.000Z` : `${y}-${String(m + 2).padStart(2, "0")}-01T00:00:00.000Z`;
+  const nextMonth =
+    m === 11
+      ? `${y + 1}-01-01T00:00:00.000Z`
+      : `${y}-${String(m + 2).padStart(2, "0")}-01T00:00:00.000Z`;
 
-  const userBookIds = list.map((x) => String((x as Record<string, unknown>).id));
+  const userBookIds = list.map((x) =>
+    String((x as Record<string, unknown>).id),
+  );
 
-  async function distinctReadCompletes(fromIso: string, toIso: string): Promise<number> {
+  async function distinctReadCompletes(
+    fromIso: string,
+    toIso: string,
+  ): Promise<number> {
     if (userBookIds.length === 0) {
       return 0;
     }
@@ -210,12 +225,15 @@ export async function getPersonalLibrarySummary(context: RepositoryContext): Pro
     return set.size;
   }
 
-  const [readCompleteThisYearCount, readCompleteThisMonthCount] = await Promise.all([
-    distinctReadCompletes(yearStart, yearEnd),
-    distinctReadCompletes(monthStart, nextMonth)
-  ]);
+  const [readCompleteThisYearCount, readCompleteThisMonthCount] =
+    await Promise.all([
+      distinctReadCompletes(yearStart, yearEnd),
+      distinctReadCompletes(monthStart, nextMonth),
+    ]);
 
-  const topAuthorsByOwnedCount: PersonalLibraryAuthorTop[] = [...authorHits.entries()]
+  const topAuthorsByOwnedCount: PersonalLibraryAuthorTop[] = [
+    ...authorHits.entries(),
+  ]
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ko"))
     .slice(0, 3);
@@ -234,6 +252,6 @@ export async function getPersonalLibrarySummary(context: RepositoryContext): Pro
     readCompleteThisMonthCount,
     totalPagesRead,
     topAuthorsByOwnedCount,
-    profileForStats
+    profileForStats,
   };
 }

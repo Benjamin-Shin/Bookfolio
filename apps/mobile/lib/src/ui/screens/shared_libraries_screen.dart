@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
-/// 참여 중인 공동서재 목록(내 서재와 같은 그리드·그라데이션 배경).
+/// 참여 중인 공동서가 목록(내 서가와 같은 그리드·그라데이션 배경).
 ///
 /// History:
 /// - 2026-04-05: 그리드 열 수 `bookfolioGridCrossAxisCount`(가용 폭 기준)
@@ -74,149 +74,168 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
     final onSurfaceVar = colorScheme.onSurfaceVariant;
 
     final panel = DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color.lerp(colorScheme.surface, colorScheme.primaryContainer, 0.12)!,
-                    colorScheme.surfaceContainerLow,
-                  ],
-                ),
-              ),
-              child: RefreshIndicator(
-                onRefresh: _load,
-                color: colorScheme.primary,
-                child: _loading
-              ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(height: 120),
-                    Center(child: CircularProgressIndicator()),
-                  ],
-                )
-              : _error != null
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(24),
-                      children: [
-                        Material(
-                          color: colorScheme.errorContainer.withValues(alpha: 0.85),
-                          borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              _error!,
-                              style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 14),
-                            ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.lerp(
+                colorScheme.surface, colorScheme.primaryContainer, 0.12)!,
+            colorScheme.surfaceContainerLow,
+          ],
+        ),
+      ),
+      child: RefreshIndicator(
+        onRefresh: _load,
+        color: colorScheme.primary,
+        child: _loading
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 120),
+                  Center(child: CircularProgressIndicator()),
+                ],
+              )
+            : _error != null
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(24),
+                    children: [
+                      Material(
+                        color:
+                            colorScheme.errorContainer.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            _error!,
+                            style: TextStyle(
+                                color: colorScheme.onErrorContainer,
+                                fontSize: 14),
                           ),
                         ),
-                      ],
-                    )
-                  : _items.isEmpty
-                      ? ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(24),
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: colorScheme.surfaceContainerHigh,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: colorScheme.outlineVariant),
-                              ),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.groups_2_outlined,
-                                    size: 48,
-                                    color: colorScheme.primary.withValues(alpha: 0.85),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    '참여 중인 공동서재가 없어요',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: colorScheme.onSurface,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '웹에서 서재를 만든 뒤 아래로 당겨 새로고침하세요.',
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: colorScheme.onSurfaceVariant,
-                                          height: 1.35,
-                                        ),
-                                  ),
-                                ],
-                              ),
+                      ),
+                    ],
+                  )
+                : _items.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(24),
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(20),
+                              border:
+                                  Border.all(color: colorScheme.outlineVariant),
                             ),
-                          ],
-                        )
-                      : CustomScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          slivers: [
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                                child: Text(
-                                  '총 ${_items.length}곳',
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600,
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.groups_2_outlined,
+                                  size: 48,
+                                  color: colorScheme.primary
+                                      .withValues(alpha: 0.85),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  '참여 중인 공동서가가 없어요',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: colorScheme.onSurface,
                                       ),
                                 ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '웹에서 서가를 만든 뒤 아래로 당겨 새로고침하세요.',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                        height: 1.35,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : CustomScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                              child: Text(
+                                '총 ${_items.length}곳',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ),
-                            SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                              sliver: SliverLayoutBuilder(
-                                builder: (context, constraints) {
-                                  final width = constraints.crossAxisExtent;
-                                  final columns = bookfolioGridCrossAxisCount(
-                                    width,
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                            sliver: SliverLayoutBuilder(
+                              builder: (context, constraints) {
+                                final width = constraints.crossAxisExtent;
+                                final columns = bookfolioGridCrossAxisCount(
+                                  width,
+                                  crossAxisSpacing: 12,
+                                );
+                                return SliverGrid(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: columns,
+                                    mainAxisSpacing: 12,
                                     crossAxisSpacing: 12,
-                                  );
-                                  return SliverGrid(
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: columns,
-                                      mainAxisSpacing: 12,
-                                      crossAxisSpacing: 12,
-                                      childAspectRatio: bookGridCardAspectRatio(columns),
-                                    ),
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, i) {
-                                        final lib = _items[i];
-                                        final meta = '${lib.kindLabel} · ${_roleLabel(lib.myRole)}';
-                                        return BookGridCard(
-                                          title: lib.name,
-                                          authorsLine: meta,
-                                          coverUrl: null,
-                                          gradientSeedA: lib.id,
-                                          gradientSeedB: lib.name,
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute<void>(
-                                                builder: (_) => SharedLibraryBooksScreen(
-                                                  libraryId: lib.id,
-                                                  libraryName: lib.name,
-                                                ),
+                                    childAspectRatio:
+                                        bookGridCardAspectRatio(columns),
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, i) {
+                                      final lib = _items[i];
+                                      final meta =
+                                          '${lib.kindLabel} · ${_roleLabel(lib.myRole)}';
+                                      return BookGridCard(
+                                        title: lib.name,
+                                        authorsLine: meta,
+                                        coverUrl: null,
+                                        gradientSeedA: lib.id,
+                                        gradientSeedB: lib.name,
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute<void>(
+                                              builder: (_) =>
+                                                  SharedLibraryBooksScreen(
+                                                libraryId: lib.id,
+                                                libraryName: lib.name,
                                               ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                      childCount: _items.length,
-                                    ),
-                                  );
-                                },
-                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                    childCount: _items.length,
+                                  ),
+                                );
+                              },
                             ),
-                          ],
-                        ),
-              ),
-            );
+                          ),
+                        ],
+                      ),
+      ),
+    );
 
     if (widget.embeddedInShell) {
       return SizedBox.expand(child: panel);
@@ -249,7 +268,7 @@ class _SharedLibrariesScreenState extends State<SharedLibrariesScreen> {
                         color: onSurfaceVar,
                       ),
                     ),
-                    const TextSpan(text: '공동서재'),
+                    const TextSpan(text: '공동서가'),
                   ],
                 ),
                 overflow: TextOverflow.ellipsis,

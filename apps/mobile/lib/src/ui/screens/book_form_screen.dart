@@ -71,7 +71,8 @@ class _BookFormScreenState extends State<BookFormScreen> {
     } else {
       _isbnController = TextEditingController(text: p?.isbn ?? '');
       _titleController = TextEditingController(text: p?.title ?? '');
-      _authorsController = TextEditingController(text: p?.authors.join(', ') ?? '');
+      _authorsController =
+          TextEditingController(text: p?.authors.join(', ') ?? '');
       _locationController = TextEditingController();
       _coverUrl = p?.coverUrl;
       _publisher = p?.publisher;
@@ -140,7 +141,8 @@ class _BookFormScreenState extends State<BookFormScreen> {
     final normalized = normalizeIsbnInput(_isbnController.text);
     if (normalized == null || !isPlausibleIsbn(normalized)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ISBN을 입력해 주세요. (10자리 또는 13자리, 하이픈은 무시됩니다)')),
+        const SnackBar(
+            content: Text('ISBN을 입력해 주세요. (10자리 또는 13자리, 하이픈은 무시됩니다)')),
       );
       return;
     }
@@ -172,7 +174,11 @@ class _BookFormScreenState extends State<BookFormScreen> {
     final loc = _locationController.text.trim();
     return {
       'title': _titleController.text.trim(),
-      'authors': _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+      'authors': _authorsController.text
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList(),
       'format': _format.name,
       'readingStatus': _status.name,
       'rating': _rating,
@@ -197,7 +203,9 @@ class _BookFormScreenState extends State<BookFormScreen> {
       color: colorScheme.onSurface,
     );
     final coverResolved = resolveCoverImageUrl(_coverUrl);
-    final previewTitle = _titleController.text.trim().isEmpty ? '새 책' : _titleController.text.trim();
+    final previewTitle = _titleController.text.trim().isEmpty
+        ? '새 책'
+        : _titleController.text.trim();
 
     return Scaffold(
       appBar: AppBar(
@@ -220,7 +228,8 @@ class _BookFormScreenState extends State<BookFormScreen> {
                 _SectionTitleRow(
                   icon: Icons.auto_stories_outlined,
                   title: '서지 불러오기',
-                  subtitle: editing ? null : 'ISBN 입력 후 조회하거나 바코드·제목으로 채울 수 있어요',
+                  subtitle:
+                      editing ? null : 'ISBN 입력 후 조회하거나 바코드·제목으로 채울 수 있어요',
                 ),
                 const SizedBox(height: 14),
                 TextField(
@@ -233,8 +242,10 @@ class _BookFormScreenState extends State<BookFormScreen> {
                     hintText: editing ? null : '9788936434267',
                     border: const OutlineInputBorder(),
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
-                    helperText: editing ? '수정 시 ISBN 변경은 지원하지 않아요.' : '하이픈은 자동으로 무시돼요',
+                    fillColor: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.25),
+                    helperText:
+                        editing ? '수정 시 ISBN 변경은 지원하지 않아요.' : '하이픈은 자동으로 무시돼요',
                   ),
                 ),
                 if (!editing) ...[
@@ -289,7 +300,8 @@ class _BookFormScreenState extends State<BookFormScreen> {
                     labelText: '제목',
                     border: const OutlineInputBorder(),
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+                    fillColor: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.25),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -301,35 +313,44 @@ class _BookFormScreenState extends State<BookFormScreen> {
                     hintText: '쉼표로 구분',
                     border: const OutlineInputBorder(),
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+                    fillColor: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.25),
                   ),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<BookFormat>(
                   initialValue: _format,
                   items: [
-                    DropdownMenuItem(value: BookFormat.paper, child: Text(bookFormatLabelKo(BookFormat.paper))),
+                    DropdownMenuItem(
+                        value: BookFormat.paper,
+                        child: Text(bookFormatLabelKo(BookFormat.paper))),
                   ],
-                  onChanged: (value) => setState(() => _format = value ?? BookFormat.paper),
+                  onChanged: (value) =>
+                      setState(() => _format = value ?? BookFormat.paper),
                   decoration: InputDecoration(
                     labelText: '형식(종이책만)',
                     border: const OutlineInputBorder(),
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+                    fillColor: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.25),
                   ),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<ReadingStatus>(
                   initialValue: _status,
                   items: ReadingStatus.values
-                      .map((status) => DropdownMenuItem(value: status, child: Text(readingStatusLabelKo(status))))
+                      .map((status) => DropdownMenuItem(
+                          value: status,
+                          child: Text(readingStatusLabelKo(status))))
                       .toList(),
-                  onChanged: (value) => setState(() => _status = value ?? ReadingStatus.unread),
+                  onChanged: (value) =>
+                      setState(() => _status = value ?? ReadingStatus.unread),
                   decoration: InputDecoration(
                     labelText: '읽기 상태',
                     border: const OutlineInputBorder(),
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+                    fillColor: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.25),
                   ),
                 ),
               ],
@@ -344,7 +365,8 @@ class _BookFormScreenState extends State<BookFormScreen> {
                 const SizedBox(height: 6),
                 Text(
                   '별을 눌러 1~5점, 같은 점수를 다시 누르면 해제돼요',
-                  style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 10),
                 _StarRatingRow(
@@ -379,10 +401,11 @@ class _BookFormScreenState extends State<BookFormScreen> {
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     labelText: '직접 입력',
-                    hintText: '서재, 친구집 등',
+                    hintText: '서가, 친구집 등',
                     border: const OutlineInputBorder(),
                     filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+                    fillColor: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.25),
                   ),
                 ),
               ],
@@ -392,19 +415,26 @@ class _BookFormScreenState extends State<BookFormScreen> {
           FilledButton.icon(
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () async {
               try {
                 if (editing) {
-                  await library.updateBook(widget.existingBook!.id, _buildUpdatePayload());
+                  await library.updateBook(
+                      widget.existingBook!.id, _buildUpdatePayload());
                 } else {
-                  final normalizedIsbn = normalizeIsbnInput(_isbnController.text);
+                  final normalizedIsbn =
+                      normalizeIsbnInput(_isbnController.text);
                   final book = UserBook(
                     id: '',
                     bookId: '',
                     title: _titleController.text.trim(),
-                    authors: _authorsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+                    authors: _authorsController.text
+                        .split(',')
+                        .map((e) => e.trim())
+                        .where((e) => e.isNotEmpty)
+                        .toList(),
                     format: _format,
                     readingStatus: _status,
                     rating: _rating,
@@ -415,7 +445,9 @@ class _BookFormScreenState extends State<BookFormScreen> {
                     isbn: normalizedIsbn,
                     isOwned: true,
                     priceKrw: _priceKrw,
-                    location: _locationController.text.trim().isEmpty ? null : _locationController.text.trim(),
+                    location: _locationController.text.trim().isEmpty
+                        ? null
+                        : _locationController.text.trim(),
                   );
                   await library.createBook(book);
                 }
@@ -433,8 +465,10 @@ class _BookFormScreenState extends State<BookFormScreen> {
                 );
               }
             },
-            icon: Icon(editing ? Icons.save_outlined : Icons.library_add_check_rounded),
-            label: Text(editing ? '수정 저장' : '서재에 저장'),
+            icon: Icon(editing
+                ? Icons.save_outlined
+                : Icons.library_add_check_rounded),
+            label: Text(editing ? '수정 저장' : '서가에 저장'),
           ),
         ],
       ),
@@ -465,13 +499,15 @@ class _CoverPreviewHero extends StatelessWidget {
             coverUrl!,
             fit: BoxFit.cover,
             headers: kCoverImageRequestHeaders,
-            errorBuilder: (_, __, ___) => _CoverPlaceholder(title: titleFallback, colorScheme: colorScheme, theme: theme),
+            errorBuilder: (_, __, ___) => _CoverPlaceholder(
+                title: titleFallback, colorScheme: colorScheme, theme: theme),
           ),
         ),
       );
     }
 
-    return _CoverPlaceholder(title: titleFallback, colorScheme: colorScheme, theme: theme);
+    return _CoverPlaceholder(
+        title: titleFallback, colorScheme: colorScheme, theme: theme);
   }
 }
 
@@ -506,7 +542,9 @@ class _CoverPlaceholder extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.menu_book_rounded, size: 48, color: colorScheme.onPrimaryContainer.withValues(alpha: 0.9)),
+          Icon(Icons.menu_book_rounded,
+              size: 48,
+              color: colorScheme.onPrimaryContainer.withValues(alpha: 0.9)),
           const SizedBox(height: 12),
           Text(
             title,
@@ -620,18 +658,23 @@ class _QuickActionTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: fullWidth ? 16 : 10, vertical: fullWidth ? 14 : 12),
+        padding: EdgeInsets.symmetric(
+            horizontal: fullWidth ? 16 : 10, vertical: fullWidth ? 14 : 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: emphasized ? colorScheme.primary.withValues(alpha: disabled ? 0.2 : 0.55) : colorScheme.outlineVariant,
+            color: emphasized
+                ? colorScheme.primary.withValues(alpha: disabled ? 0.2 : 0.55)
+                : colorScheme.outlineVariant,
           ),
           color: emphasized
-              ? colorScheme.primaryContainer.withValues(alpha: disabled ? 0.12 : 0.35)
+              ? colorScheme.primaryContainer
+                  .withValues(alpha: disabled ? 0.12 : 0.35)
               : colorScheme.surface.withValues(alpha: 0.4),
         ),
         child: Row(
-          mainAxisAlignment: fullWidth ? MainAxisAlignment.start : MainAxisAlignment.center,
+          mainAxisAlignment:
+              fullWidth ? MainAxisAlignment.start : MainAxisAlignment.center,
           children: [
             if (busy)
               SizedBox(
@@ -639,11 +682,17 @@ class _QuickActionTile extends StatelessWidget {
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: emphasized ? colorScheme.onPrimaryContainer : colorScheme.primary,
+                  color: emphasized
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.primary,
                 ),
               )
             else
-              Icon(icon, size: 22, color: emphasized ? colorScheme.onPrimaryContainer : colorScheme.primary),
+              Icon(icon,
+                  size: 22,
+                  color: emphasized
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.primary),
             const SizedBox(width: 10),
             Flexible(
               child: Text(
@@ -652,7 +701,9 @@ class _QuickActionTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: emphasized ? colorScheme.onSurface : colorScheme.onSurface,
+                  color: emphasized
+                      ? colorScheme.onSurface
+                      : colorScheme.onSurface,
                 ),
               ),
             ),
@@ -686,9 +737,13 @@ class _StarRatingRow extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
             onPressed: () => onChanged(rating == i ? null : i),
             icon: Icon(
-              rating != null && i <= rating! ? Icons.star_rounded : Icons.star_border_rounded,
+              rating != null && i <= rating!
+                  ? Icons.star_rounded
+                  : Icons.star_border_rounded,
               size: 32,
-              color: rating != null && i <= rating! ? colorScheme.primary : colorScheme.outline,
+              color: rating != null && i <= rating!
+                  ? colorScheme.primary
+                  : colorScheme.outline,
             ),
           ),
         TextButton(

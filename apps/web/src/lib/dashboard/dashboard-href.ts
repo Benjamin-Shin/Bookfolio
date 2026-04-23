@@ -1,6 +1,6 @@
 import type { Route } from "next";
 
-/** 대시보드 서재 탭(읽기 상태·소장·Hall of Fame). 완독은 도메인 값 `completed`. */
+/** 대시보드 서가 탭(읽기 상태·소장·Hall of Fame). 완독은 도메인 값 `completed`. */
 export type DashboardTab =
   | "reading"
   | "unread"
@@ -16,7 +16,7 @@ export type DashboardOwnedSort = "recent" | "title";
  *
  * @history
  * - 2026-04-12: `hall` — Hall of Fame 전용 목록
- * - 2026-03-26: 신규 — 서재 탭 URL 공통화
+ * - 2026-03-26: 신규 — 서가 탭 URL 공통화
  */
 export function parseDashboardTab(raw: string | undefined): DashboardTab {
   if (

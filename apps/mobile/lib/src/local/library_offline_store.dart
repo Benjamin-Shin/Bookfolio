@@ -5,7 +5,7 @@ import 'package:seogadam_mobile/src/models/book_models.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 
-/// Drift DB 싱글톤 — 서재 목록 미러·아웃박스(후속).
+/// Drift DB 싱글톤 — 서가 목록 미러·아웃박스(후속).
 ///
 /// @history
 /// - 2026-04-12: `clearLibraryMirror` 문서 — 예약된 작업 메모 표기 제거(도구·lint 오탐 방지)
@@ -24,7 +24,8 @@ class LibraryOfflineStore {
   static LibraryOfflineDatabase get _requireDb {
     final d = _db;
     if (d == null) {
-      throw StateError('LibraryOfflineStore.ensureInitialized() was not called');
+      throw StateError(
+          'LibraryOfflineStore.ensureInitialized() was not called');
     }
     return d;
   }
@@ -36,12 +37,14 @@ class LibraryOfflineStore {
   ///
   /// @history
   /// - 2026-04-08: 타임아웃 후 로컬 목록 표시 시 total·동기 시각
-  static Future<DefaultPaperCacheMeta?> readDefaultPaperCacheMeta(String ownerUserId) async {
+  static Future<DefaultPaperCacheMeta?> readDefaultPaperCacheMeta(
+      String ownerUserId) async {
     final db = _requireDb;
     final row = await (db.select(db.libraryCacheMeta)
           ..where(
             (t) =>
-                t.ownerUserId.equals(ownerUserId) & t.scopeKey.equals(defaultPaperListScope),
+                t.ownerUserId.equals(ownerUserId) &
+                t.scopeKey.equals(defaultPaperListScope),
           ))
         .getSingleOrNull();
     if (row == null) return null;
@@ -57,7 +60,8 @@ class LibraryOfflineStore {
   ///
   /// @history
   /// - 2026-04-08: 추가
-  static Future<DefaultPaperCacheBundle> readDefaultPaperCacheBundle(String ownerUserId) async {
+  static Future<DefaultPaperCacheBundle> readDefaultPaperCacheBundle(
+      String ownerUserId) async {
     final books = await readCachedDefaultPaperList(ownerUserId);
     final meta = await readDefaultPaperCacheMeta(ownerUserId);
     return DefaultPaperCacheBundle(books: books, meta: meta);
@@ -107,7 +111,8 @@ class LibraryOfflineStore {
   }
 
   /// 오프라인 UI(후속)용: 기본 스코프에 캐시된 책 목록.
-  static Future<List<UserBook>> readCachedDefaultPaperList(String ownerUserId) async {
+  static Future<List<UserBook>> readCachedDefaultPaperList(
+      String ownerUserId) async {
     final db = _requireDb;
     final rows = await (db.select(db.cachedUserBooks)
           ..where((t) => t.ownerUserId.equals(ownerUserId))
@@ -119,7 +124,8 @@ class LibraryOfflineStore {
         final map = jsonDecode(r.payloadJson) as Map<String, dynamic>;
         out.add(UserBook.fromJson(map));
       } catch (e, st) {
-        debugPrint('LibraryOfflineStore: skip bad cache row ${r.userBookId}: $e\n$st');
+        debugPrint(
+            'LibraryOfflineStore: skip bad cache row ${r.userBookId}: $e\n$st');
       }
     }
     return out;

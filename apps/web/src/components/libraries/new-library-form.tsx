@@ -22,7 +22,11 @@ export type NewLibraryFormProps = {
  * @history
  * - 2026-03-25: `canCreateMore`·상한 안내 — `policies_json.sharedLibraryCreateLimit`
  */
-export function NewLibraryForm({ canCreateMore, createLimit, createdCount }: NewLibraryFormProps) {
+export function NewLibraryForm({
+  canCreateMore,
+  createLimit,
+  createdCount,
+}: NewLibraryFormProps) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -41,8 +45,8 @@ export function NewLibraryForm({ canCreateMore, createLimit, createdCount }: New
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim() || null,
-          kind
-        })
+          kind,
+        }),
       });
       const data = (await res.json()) as { id?: string; error?: string };
       if (!res.ok) {
@@ -67,9 +71,10 @@ export function NewLibraryForm({ canCreateMore, createLimit, createdCount }: New
     <form className="space-y-6" onSubmit={(e) => void handleSubmit(e)}>
       {!canCreateMore ? (
         <Alert variant="destructive">
-          <AlertTitle>새 공동서재를 더 만들 수 없습니다</AlertTitle>
+          <AlertTitle>새 공동서가를 더 만들 수 없습니다</AlertTitle>
           <AlertDescription>
-            회원 정책상 소유 공동서재는 최대 {createLimit}개입니다. (현재 {createdCount}개)
+            회원 정책상 소유 공동서가는 최대 {createLimit}개입니다. (현재{" "}
+            {createdCount}개)
           </AlertDescription>
         </Alert>
       ) : null}
@@ -92,7 +97,9 @@ export function NewLibraryForm({ canCreateMore, createLimit, createdCount }: New
           className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={kind}
           disabled={!canCreateMore}
-          onChange={(e) => setKind(e.target.value as (typeof LIBRARY_KINDS)[number])}
+          onChange={(e) =>
+            setKind(e.target.value as (typeof LIBRARY_KINDS)[number])
+          }
         >
           {LIBRARY_KINDS.map((k) => (
             <option key={k} value={k}>
@@ -109,11 +116,11 @@ export function NewLibraryForm({ canCreateMore, createLimit, createdCount }: New
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           disabled={!canCreateMore}
-          placeholder="이 서재를 어떻게 쓸지 적어 두세요."
+          placeholder="이 서가를 어떻게 쓸지 적어 두세요."
         />
       </div>
       <Button type="submit" disabled={loading || !canCreateMore}>
-        {loading ? "만드는 중…" : "공동서재 만들기"}
+        {loading ? "만드는 중…" : "공동서가 만들기"}
       </Button>
     </form>
   );

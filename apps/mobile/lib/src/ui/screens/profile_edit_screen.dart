@@ -96,22 +96,25 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   const SizedBox(height: 12),
                   Text(
                     '· 보유 포인트 및 포인트 원장 전체\n'
-                    '· 내 서재(소장 도서), 메모, 독서 이벤트 기록, 한줄평\n'
-                    '· 내가 만든 공동서재 — 다른 멤버가 없으면 탈퇴와 함께 삭제되고, 있으면 탈퇴 전 소유권 이전 필요\n'
-                    '· 다른 사람 서재에 참여 중이던 멤버십\n'
+                    '· 내 서가(소장 도서), 메모, 독서 이벤트 기록, 한줄평\n'
+                    '· 내가 만든 공동서가 — 다른 멤버가 없으면 탈퇴와 함께 삭제되고, 있으면 탈퇴 전 소유권 이전 필요\n'
+                    '· 다른 사람 서가에 참여 중이던 멤버십\n'
                     '· 프로필·계정(로그인) 정보',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 12),
                   Material(
-                    color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.65),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .tertiaryContainer
+                        .withValues(alpha: 0.65),
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                        '소유한 공동서재에 다른 멤버가 있으면 탈퇴할 수 없습니다. '
-                        '해당 서재 화면에서 소유권을 다른 멤버에게 이전한 뒤 탈퇴해 주세요. '
-                        '본인만 남은 공동서재는 별도 삭제 없이 탈퇴 시 함께 정리됩니다.',
+                        '소유한 공동서가에 다른 멤버가 있으면 탈퇴할 수 없습니다. '
+                        '해당 서가 화면에서 소유권을 다른 멤버에게 이전한 뒤 탈퇴해 주세요. '
+                        '본인만 남은 공동서가는 별도 삭제 없이 탈퇴 시 함께 정리됩니다.',
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ),
@@ -179,7 +182,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           _genderPublic = prof.genderPublic;
           _birthDatePublic = prof.birthDatePublic;
           _annualGoalCtrl.text =
-              prof.annualReadingGoal != null && prof.annualReadingGoal! >= 1 ? '${prof.annualReadingGoal}' : '';
+              prof.annualReadingGoal != null && prof.annualReadingGoal! >= 1
+                  ? '${prof.annualReadingGoal}'
+                  : '';
         }
         _loading = false;
       });
@@ -245,7 +250,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         _demographicsSaving = false;
       });
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('프로필을 저장했습니다.')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('프로필을 저장했습니다.')));
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -277,11 +283,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text('화면 설정', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+          Text('화면 설정',
+              style:
+                  textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Text(
             '화면 모드',
-            style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+            style: textTheme.labelLarge
+                ?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 6),
           SegmentedButton<ThemeMode>(
@@ -317,11 +326,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             )
           else ...[
             if (_meProfile != null) ...[
-              Text('통계·프로필(선택)', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              Text('통계·프로필(선택)',
+                  style: textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Text(
                 '아래 정보는 저장만 되며, 「통계에 포함」을 켠 항목만 서버 집계에 활용될 수 있습니다.',
-                style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.35),
+                style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant, height: 1.35),
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String?>(
@@ -347,7 +359,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
                     '저장된 성별 값이 목록에 없어 「선택 안 함」으로 표시 중입니다. 저장 시 현재 목록 값으로 덮어씁니다.',
-                    style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                    style: textTheme.labelSmall
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ),
               const SizedBox(height: 12),
@@ -390,15 +403,19 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               const SizedBox(height: 6),
               Text(
                 '홈·통계에서 올해 완독 수와 함께 표시됩니다. 1~500 권.',
-                style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.35),
+                style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant, height: 1.35),
               ),
               if (_demographicsError != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(_demographicsError!, style: TextStyle(color: colorScheme.error, fontSize: 13)),
+                  child: Text(_demographicsError!,
+                      style: TextStyle(color: colorScheme.error, fontSize: 13)),
                 ),
               FilledButton.tonal(
-                onPressed: _demographicsSaving ? null : () => _saveDemographics(context),
+                onPressed: _demographicsSaving
+                    ? null
+                    : () => _saveDemographics(context),
                 child: Text(_demographicsSaving ? '저장 중…' : '프로필·목표 저장'),
               ),
               const SizedBox(height: 28),
@@ -415,7 +432,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 color: colorScheme.errorContainer.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   child: Text(
                     _loadError!,
                     style: TextStyle(
@@ -428,7 +446,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             else if (_points != null) ...[
               Card(
                 child: ListTile(
-                  leading: Icon(Icons.stars_outlined, color: colorScheme.primary),
+                  leading:
+                      Icon(Icons.stars_outlined, color: colorScheme.primary),
                   title: const Text('포인트'),
                   subtitle: Text(
                     '${_points!.balance} P',
@@ -442,7 +461,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               Card(
                 child: ListTile(
                   leading: Icon(
-                    _points!.vipActive ? Icons.workspace_premium : Icons.workspace_premium_outlined,
+                    _points!.vipActive
+                        ? Icons.workspace_premium
+                        : Icons.workspace_premium_outlined,
                     color: colorScheme.primary,
                   ),
                   title: const Text('VIP'),
@@ -453,7 +474,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             const SizedBox(height: 24),
             Text(
               '계정을 삭제하면 데이터가 모두 사라집니다.',
-              style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+              style: textTheme.bodySmall
+                  ?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 4),
             TextButton(

@@ -21,7 +21,7 @@ type LibraryOwnerFilterProps = {
 };
 
 /**
- * 공동서재 상세 소유자(멤버) 필터 — `owner` 쿼리는 `userId`.
+ * 공동서가 상세 소유자(멤버) 필터 — `owner` 쿼리는 `userId`.
  *
  * @history
  * - 2026-04-12: `tab`·`libraryDetailHref`로 탭 유지
@@ -44,13 +44,18 @@ export function LibraryOwnerFilter({
   return (
     <div
       className="flex flex-wrap items-center gap-2"
-      aria-label="공동서재 도서 소유자 필터"
+      aria-label="공동서가 도서 소유자 필터"
     >
       <span className="text-xs font-medium text-muted-foreground">소유자</span>
       <div className="flex flex-wrap gap-1.5">
         <Badge variant={active ? "default" : "outline"} asChild>
           <Link
-            href={libraryDetailHref(libraryId, { genre, owner: undefined, tab, page: 1 })}
+            href={libraryDetailHref(libraryId, {
+              genre,
+              owner: undefined,
+              tab,
+              page: 1,
+            })}
             prefetch={false}
           >
             전체

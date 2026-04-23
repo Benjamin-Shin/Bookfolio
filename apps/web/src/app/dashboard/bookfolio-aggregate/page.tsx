@@ -10,7 +10,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "@/components/ui/card";
 import { getBookfolioAggregate } from "@/lib/stats/bookfolio-aggregate";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ function LeaderboardSection({
   description,
   suffix,
   data,
-  className
+  className,
 }: {
   title: string;
   description: string;
@@ -46,7 +46,8 @@ function LeaderboardSection({
         <p className="pt-1 text-sm text-muted-foreground">
           {me.rank != null ? (
             <>
-              내 순위: <span className="font-medium text-foreground">{me.rank}위</span> ·{" "}
+              내 순위:{" "}
+              <span className="font-medium text-foreground">{me.rank}위</span> ·{" "}
               {me.count}
               {suffix} (집계 대상 {me.totalRankedUsers}명)
             </>
@@ -61,7 +62,9 @@ function LeaderboardSection({
       <CardContent>
         <ol className="space-y-2">
           {top.length === 0 ? (
-            <li className="text-sm text-muted-foreground">아직 표시할 데이터가 없습니다.</li>
+            <li className="text-sm text-muted-foreground">
+              아직 표시할 데이터가 없습니다.
+            </li>
           ) : (
             top.map((row, idx) => (
               <li
@@ -100,7 +103,7 @@ export default async function BookfolioAggregatePage() {
   try {
     payload = await getBookfolioAggregate(10, {
       userId: session.user.id,
-      useAdmin: true
+      useAdmin: true,
     });
   } catch (e) {
     loadError = e instanceof Error ? e.message : "집계를 불러오지 못했습니다.";
@@ -115,11 +118,12 @@ export default async function BookfolioAggregatePage() {
             서가담 집계
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            회원 기준 소장·완독·포인트 순위와, 많은 회원이 소장으로 등록한 도서 TOP 10입니다.
+            회원 기준 소장·완독·포인트 순위와, 많은 회원이 소장으로 등록한 도서
+            TOP 10입니다.
           </p>
         </div>
         <Button variant="outline" asChild>
-          <Link href={"/dashboard" as Route}>내 서재로</Link>
+          <Link href={"/dashboard" as Route}>내 서가로</Link>
         </Button>
       </div>
 
@@ -148,13 +152,16 @@ export default async function BookfolioAggregatePage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">소장 책 순위</CardTitle>
               <CardDescription>
-                여러 회원이 소장으로 등록한 동일 도서(표지·제목) — 소장 등록 획수 기준 TOP 10
+                여러 회원이 소장으로 등록한 동일 도서(표지·제목) — 소장 등록
+                획수 기준 TOP 10
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 {payload.popularOwnedBooks.top.length === 0 ? (
-                  <li className="text-sm text-muted-foreground">아직 표시할 데이터가 없습니다.</li>
+                  <li className="text-sm text-muted-foreground">
+                    아직 표시할 데이터가 없습니다.
+                  </li>
                 ) : (
                   payload.popularOwnedBooks.top.map((b, idx) => (
                     <li
@@ -182,7 +189,9 @@ export default async function BookfolioAggregatePage() {
                         </Badge>
                       </div>
                       <div className="space-y-1 p-3">
-                        <p className="line-clamp-2 text-sm font-semibold leading-snug">{b.title}</p>
+                        <p className="line-clamp-2 text-sm font-semibold leading-snug">
+                          {b.title}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {b.ownerCount}명 소장 등록
                         </p>

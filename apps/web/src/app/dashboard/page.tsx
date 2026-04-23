@@ -162,68 +162,8 @@ function EditorialGrid({
   );
 }
 
-function DashboardCurrentReadingPanel({
-  books,
-  total,
-}: {
-  books: UserBookSummary[];
-  total: number;
-}) {
-  return (
-    <Card className="border-[#051b0e]/15 bg-white/70">
-      <CardHeader className="space-y-2">
-        <CardTitle className="font-serif text-xl text-[#051b0e]">
-          현재 읽고 있는 도서
-        </CardTitle>
-        <CardDescription>
-          읽는 중 상태로 기록된 책을 빠르게 이어서 확인합니다.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {books.length === 0 ? (
-          <p className="text-sm text-[#434843]">지금 읽는 책이 없습니다.</p>
-        ) : (
-          <div className="space-y-3">
-            {books.slice(0, 3).map((book) => {
-              const authors = book.authors.join(", ") || "저자 미상";
-              const pct = readingProgressPercent(book);
-              return (
-                <div
-                  key={book.id}
-                  className="rounded-md border border-[#051b0e]/10 bg-[#fbf9f4] p-3"
-                >
-                  <Link
-                    href={`/dashboard/books/${book.id}`}
-                    className="line-clamp-1 font-serif text-sm text-[#051b0e] underline-offset-4 hover:underline"
-                  >
-                    {book.title}
-                  </Link>
-                  <p className="mt-1 line-clamp-1 text-xs text-[#434843]">
-                    {authors}
-                  </p>
-                  <p className="mt-1 text-[11px] text-[#675d53]">
-                    {pct != null ? `진행률 ${pct}%` : "진행률 미입력"}
-                  </p>
-                </div>
-              );
-            })}
-            {total > 3 ? (
-              <Link
-                href={buildDashboardHref({ tab: "reading" })}
-                className="inline-block text-xs font-semibold text-[#163826] underline underline-offset-4"
-              >
-                읽는 중 {total.toLocaleString("ko-KR")}권 전체 보기
-              </Link>
-            ) : null}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 /**
- * 로그인 사용자의 읽는 중·소장 책장(에디토리얼 내 서재 레이아웃).
+ * 로그인 사용자의 읽는 중·소장 책장(에디토리얼 내 서가 레이아웃).
  *
  * @history
  * - 2026-04-22: 내 취향 추천 패널(`DashboardRecommendationPanel`) 추가, `/api/me/recommendations` 연동
@@ -231,7 +171,7 @@ function DashboardCurrentReadingPanel({
  * - 2026-04-12: 컬렉션 권수·탭 목록은 소장/읽기상태 전체; `p_hall_of_fame`는 Hall of Fame 탭·사이드 카운트만
  * - 2026-04-12: Hall of Fame 전용 목록(`p_hall_of_fame`/`0038`)·사이드 권수·ALL에서만 검색·선반·커버 스케일·상단 탭·가격 합계 제거
  * - 2026-04-12: 스티치 HTML 목업 기반 UI — 사이드 컬렉션·Hall of Fame·목판 선반 그리드·소장 `sort=title`(`0037`)
- * - 2026-04-05: 빈 서재 안내 카피 서가담 표기
+ * - 2026-04-05: 빈 서가 안내 카피 서가담 표기
  * - 2026-03-26: 독서 이벤트 캘린더(`DashboardReadingEventsCalendar`, `/api/me/reading-events/calendar`)
  * - 2026-03-26: 좌측 메뉴 카드 제거, 읽기 상태·소장 `tab` 탭, 상단 통계 카드(모바일형 지표)
  * - 2026-03-25: 사이드 카드에 OAuth 등 `session.user.image` 있으면 아바타 표시
@@ -274,14 +214,8 @@ export default async function DashboardPage({
       ctx,
     ),
     listUserBooksPaged({ isOwned: true, limit: 1, offset: 0 }, ctx),
-    listUserBooksPaged(
-      { readingStatus: "reading", limit: 1, offset: 0 },
-      ctx,
-    ),
-    listUserBooksPaged(
-      { readingStatus: "unread", limit: 1, offset: 0 },
-      ctx,
-    ),
+    listUserBooksPaged({ readingStatus: "reading", limit: 1, offset: 0 }, ctx),
+    listUserBooksPaged({ readingStatus: "unread", limit: 1, offset: 0 }, ctx),
     listUserBooksPaged(
       {
         readingStatus: "completed",
@@ -397,23 +331,17 @@ export default async function DashboardPage({
           ctx,
         );
 
-  const [
-    readingRes,
-    hallRes,
-    unreadRes,
-    completedRes,
-    ownedRes,
-    ownedGenres,
-  ] = await Promise.all([
-    readingForShelfP,
-    hallListP,
-    unreadListP,
-    completedListP,
-    ownedListP,
-    tab === "owned"
-      ? listUserOwnedGenreSlugs(ctx)
-      : Promise.resolve([] as string[]),
-  ]);
+  const [readingRes, hallRes, unreadRes, completedRes, ownedRes, ownedGenres] =
+    await Promise.all([
+      readingForShelfP,
+      hallListP,
+      unreadListP,
+      completedListP,
+      ownedListP,
+      tab === "owned"
+        ? listUserOwnedGenreSlugs(ctx)
+        : Promise.resolve([] as string[]),
+    ]);
 
   const readingBooks = readingRes.items;
   const readingTotal = readingRes.total;
@@ -444,8 +372,7 @@ export default async function DashboardPage({
   const completedPage =
     completedTotal === 0 ? 1 : Math.min(pageRaw, completedTotalPages);
 
-  const hallPage =
-    hallListTotal === 0 ? 1 : Math.min(pageRaw, hallTotalPages);
+  const hallPage = hallListTotal === 0 ? 1 : Math.min(pageRaw, hallTotalPages);
 
   if (tab === "owned" && ownedTotalForPager > 0 && pageRaw > ownedTotalPages) {
     const np = new URLSearchParams();
@@ -578,8 +505,7 @@ export default async function DashboardPage({
             >
               <CheckCircle className="size-5 shrink-0" aria-hidden />
               <span className="font-sans text-[0.75rem] uppercase tracking-widest">
-                Completed (
-                {completedCountProbe.total.toLocaleString("ko-KR")})
+                Completed ({completedCountProbe.total.toLocaleString("ko-KR")})
               </span>
             </Link>
             <Link
@@ -597,7 +523,7 @@ export default async function DashboardPage({
         <main className="flex-1 px-8 pb-24 pt-12 md:px-16 lg:ml-64">
           <section className="mb-16 max-w-4xl md:mb-20">
             <h1 className="mb-6 font-sans text-2xl font-bold italic text-[#051b0e]">
-              내 서재
+              내 서가
             </h1>
             <p className="max-w-2xl font-sans text-lg leading-relaxed text-[#434843]">
               기록되지 않은 삶은 망각의 뒤편으로 사라집니다. 이곳은 단순히 책을
@@ -629,7 +555,6 @@ export default async function DashboardPage({
               className="mb-12 grid grid-cols-1 gap-4 xl:grid-cols-3"
               aria-label="홈 인사이트 패널"
             >
-              <DashboardCurrentReadingPanel books={readingBooks} total={readingTotal} />
               <DashboardRecommendationPanel />
               <DashboardReadingEventsCalendar />
             </section>
@@ -642,8 +567,8 @@ export default async function DashboardPage({
                   소장 도서가 아직 없습니다
                 </CardTitle>
                 <CardDescription>
-                  첫 책을 등록해 보세요. 완독 후 개인 평점 4점 이상이면 Hall of
-                  Fame에도 올릴 수 있습니다.
+                  첫 책을 서가에 등록해 보세요. 완독 후 개인 평점 4점 이상이면
+                  명예의 전당(Hall of Fame)에도 올릴 수 있습니다.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -902,7 +827,6 @@ export default async function DashboardPage({
               ) : null}
             </div>
           ) : null}
-
         </main>
       </div>
 

@@ -103,7 +103,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final bottomPad = MediaQuery.viewPaddingOf(context).bottom + kBookfolioShellBottomNavClearance;
+    final bottomPad = MediaQuery.viewPaddingOf(context).bottom +
+        kBookfolioShellBottomNavClearance;
 
     final Widget body = _loading
         ? const Center(child: CircularProgressIndicator())
@@ -112,7 +113,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(20, 24, 20, bottomPad),
                 children: [
-                  Text(_error!, style: TextStyle(color: scheme.error, fontSize: 14)),
+                  Text(_error!,
+                      style: TextStyle(color: scheme.error, fontSize: 14)),
                   const SizedBox(height: 16),
                   FilledButton(onPressed: _load, child: const Text('다시 시도')),
                 ],
@@ -161,7 +163,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
             child: Text(
               '오늘의 큐레이션',
-              style: BookfolioDesignTokens.headlineMd(BookfolioDesignTokens.primary, fontStyle: FontStyle.normal),
+              style: BookfolioDesignTokens.headlineMd(
+                  BookfolioDesignTokens.primary,
+                  fontStyle: FontStyle.normal),
             ),
           ),
         ),
@@ -172,7 +176,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             actionLabel: '더보기',
             onAction: () {
               Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(builder: (_) => const BestsellerScreen()),
+                MaterialPageRoute<void>(
+                    builder: (_) => const BestsellerScreen()),
               );
             },
             subtitle: todayBestsellerListCaption(),
@@ -182,7 +187,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           child: _horizontalAladinStrip(
             context,
             best.items.take(_previewCount).toList(),
-            (item) => item.link.isNotEmpty ? () => _openAladin(item.link) : null,
+            (item) =>
+                item.link.isNotEmpty ? () => _openAladin(item.link) : null,
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
@@ -193,7 +199,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             actionLabel: '더보기',
             onAction: () {
               Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(builder: (_) => const ChoiceNewScreen()),
+                MaterialPageRoute<void>(
+                    builder: (_) => const ChoiceNewScreen()),
               );
             },
           ),
@@ -202,7 +209,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           child: _horizontalAladinStrip(
             context,
             neu.items.take(_previewCount).toList(),
-            (item) => item.link.isNotEmpty ? () => _openAladin(item.link) : null,
+            (item) =>
+                item.link.isNotEmpty ? () => _openAladin(item.link) : null,
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -211,13 +219,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             context,
             title: '다른 회원이 추가한 도서',
             subtitle:
-                '내 서재에는 없고 다른 회원이 등록한 종이책이에요. 탭하면 상세·구매 링크·한줄평, 길게 누르면 바로 등록할 수 있어요.',
+                '내 서가에는 없고 다른 회원이 등록한 종이책이에요. 탭하면 상세·구매 링크·한줄평, 길게 누르면 바로 등록할 수 있어요.',
           ),
         ),
         SliverToBoxAdapter(
           child: _community.isEmpty
               ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   child: Text(
                     '아직 표시할 책이 없습니다.',
                     style: GoogleFonts.manrope(
@@ -250,7 +259,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: BookfolioDesignTokens.labelMd(BookfolioDesignTokens.onSurface).copyWith(
+                  style: BookfolioDesignTokens.labelMd(
+                          BookfolioDesignTokens.onSurface)
+                      .copyWith(
                     fontSize: 13,
                     letterSpacing: 0.6,
                     fontWeight: FontWeight.w800,
@@ -260,7 +271,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               if (actionLabel != null && onAction != null)
                 TextButton(
                   onPressed: onAction,
-                  child: Text(actionLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  child: Text(actionLabel,
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
                 ),
             ],
           ),
@@ -271,7 +283,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               style: GoogleFonts.manrope(
                 fontSize: 12,
                 height: 1.35,
-                color: BookfolioDesignTokens.onSurfaceVariant.withValues(alpha: 0.85),
+                color: BookfolioDesignTokens.onSurfaceVariant
+                    .withValues(alpha: 0.85),
               ),
             ),
           ],
@@ -290,7 +303,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Text(
           '목록이 비어 있어요.',
-          style: GoogleFonts.manrope(fontSize: 14, color: BookfolioDesignTokens.onSurfaceVariant),
+          style: GoogleFonts.manrope(
+              fontSize: 14, color: BookfolioDesignTokens.onSurfaceVariant),
         ),
       );
     }
@@ -309,10 +323,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             width: 118,
             child: Material(
               color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+              borderRadius:
+                  BorderRadius.circular(BookfolioDesignTokens.radiusSm),
               child: InkWell(
                 onTap: onTap,
-                borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                borderRadius:
+                    BorderRadius.circular(BookfolioDesignTokens.radiusSm),
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: Column(
@@ -326,10 +342,15 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                                   cover,
                                   fit: BoxFit.cover,
                                   headers: kCoverImageRequestHeaders,
-                                  errorBuilder: (_, __, ___) =>
-                                      ColoredBox(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                                  errorBuilder: (_, __, ___) => ColoredBox(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest),
                                 )
-                              : ColoredBox(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                              : ColoredBox(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -337,7 +358,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         item.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w600, height: 1.25),
+                        style: GoogleFonts.manrope(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            height: 1.25),
                       ),
                     ],
                   ),
@@ -365,15 +389,18 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             width: 124,
             child: Material(
               color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+              borderRadius:
+                  BorderRadius.circular(BookfolioDesignTokens.radiusSm),
               child: InkWell(
                 onTap: () {
                   Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(builder: (_) => CanonBookDetailScreen(book: b)),
+                    MaterialPageRoute<void>(
+                        builder: (_) => CanonBookDetailScreen(book: b)),
                   );
                 },
                 onLongPress: () => _openAddFromCommunity(b),
-                borderRadius: BorderRadius.circular(BookfolioDesignTokens.radiusSm),
+                borderRadius:
+                    BorderRadius.circular(BookfolioDesignTokens.radiusSm),
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: Column(
@@ -387,10 +414,15 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                                   cover,
                                   fit: BoxFit.cover,
                                   headers: kCoverImageRequestHeaders,
-                                  errorBuilder: (_, __, ___) =>
-                                      ColoredBox(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                                  errorBuilder: (_, __, ___) => ColoredBox(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest),
                                 )
-                              : ColoredBox(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                              : ColoredBox(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -398,7 +430,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         b.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w600, height: 1.25),
+                        style: GoogleFonts.manrope(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            height: 1.25),
                       ),
                       Text(
                         '${b.otherOwnerCount}명 소장',

@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import {
   createAdminCanonicalBook,
   updateAdminCanonicalBook,
-  type AdminBookActionState
+  type AdminBookActionState,
 } from "./actions";
 
 function SubmitButton({ label }: { label: string }) {
@@ -40,7 +40,10 @@ function SubmitButton({ label }: { label: string }) {
   );
 }
 
-function setInputIfEmpty(el: HTMLInputElement | HTMLTextAreaElement | null, value: string) {
+function setInputIfEmpty(
+  el: HTMLInputElement | HTMLTextAreaElement | null,
+  value: string,
+) {
   if (!el || value === "") return;
   if (el.value.trim() === "") {
     el.value = value;
@@ -64,11 +67,14 @@ function applyLookupToFormFields(
     pageCount: RefObject<HTMLInputElement | null>;
   },
   mode: "create" | "edit",
-  cover?: { getCurrent: () => string; set: (url: string) => void }
+  cover?: { getCurrent: () => string; set: (url: string) => void },
 ) {
   const fillEmptyOnly = mode === "edit";
 
-  const assign = (el: HTMLInputElement | HTMLTextAreaElement | null, value: string) => {
+  const assign = (
+    el: HTMLInputElement | HTMLTextAreaElement | null,
+    value: string,
+  ) => {
     if (!el) return;
     if (fillEmptyOnly) {
       setInputIfEmpty(el, value);
@@ -80,7 +86,7 @@ function applyLookupToFormFields(
   assign(refs.title.current, book.title);
   assign(
     refs.authorsCsv.current,
-    book.authors.length > 0 ? book.authors.join(", ") : ""
+    book.authors.length > 0 ? book.authors.join(", ") : "",
   );
   if (refs.isbn.current) {
     refs.isbn.current.value = book.isbn;
@@ -143,7 +149,7 @@ const emptyValues: AdminCanonicalBookFormValues = {
   literatureRegion: "",
   originalLanguage: "",
   apiSource: "",
-  pageCount: ""
+  pageCount: "",
 };
 
 type AdminCanonicalBookFormProps = {
@@ -159,7 +165,11 @@ type AdminCanonicalBookFormProps = {
 function kyoboSearchUrl(keyword: string) {
   const q = keyword.trim();
   if (!q) return null;
-  const params = new URLSearchParams({ keyword: q, gbCode: "TOT", target: "total" });
+  const params = new URLSearchParams({
+    keyword: q,
+    gbCode: "TOT",
+    target: "total",
+  });
   return `https://search.kyobobook.co.kr/search?${params.toString()}`;
 }
 
@@ -168,20 +178,26 @@ export function AdminCanonicalBookForm({
   bookId,
   defaultValues,
   formHtmlId,
-  onSubmitPendingChange
+  onSubmitPendingChange,
 }: AdminCanonicalBookFormProps) {
   const initial = { ...emptyValues, ...defaultValues };
-  const action = mode === "create" ? createAdminCanonicalBook : updateAdminCanonicalBook;
-  const [state, formAction, isPending] = useActionState(action, null as AdminBookActionState | null);
+  const action =
+    mode === "create" ? createAdminCanonicalBook : updateAdminCanonicalBook;
+  const [state, formAction, isPending] = useActionState(
+    action,
+    null as AdminBookActionState | null,
+  );
 
   useEffect(() => {
     onSubmitPendingChange?.(isPending);
   }, [isPending, onSubmitPendingChange]);
 
   const [lookupIsbn, setLookupIsbn] = useState(() =>
-    mode === "edit" ? (defaultValues?.isbn ?? "").trim() : ""
+    mode === "edit" ? (defaultValues?.isbn ?? "").trim() : "",
   );
-  const [lookupLoading, setLookupLoading] = useState<null | "naver" | "nl">(null);
+  const [lookupLoading, setLookupLoading] = useState<null | "naver" | "nl">(
+    null,
+  );
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [lookupOk, setLookupOk] = useState(false);
   const [adminCoverUrl, setAdminCoverUrl] = useState(initial.coverUrl);
@@ -200,7 +216,9 @@ export function AdminCanonicalBookForm({
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const locationInputRef = useRef<HTMLInputElement>(null);
 
-  const [locationPreset, setLocationPreset] = useState<"집" | "회사" | null>(null);
+  const [locationPreset, setLocationPreset] = useState<"집" | "회사" | null>(
+    null,
+  );
 
   function applyLocationPreset(label: "집" | "회사") {
     const el = locationInputRef.current;
@@ -246,7 +264,7 @@ export function AdminCanonicalBookForm({
       const res = await fetch("/api/books/lookup-by-isbn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isbn: raw, provider })
+        body: JSON.stringify({ isbn: raw, provider }),
       });
 
       const data = (await res.json()) as BookLookupResult | { error?: string };
@@ -275,14 +293,16 @@ export function AdminCanonicalBookForm({
           originalLanguage: originalLanguageRef,
           description: descriptionRef,
           apiSource: apiSourceRef,
-          pageCount: pageCountRef
+          pageCount: pageCountRef,
         },
         mode,
-        { getCurrent: () => adminCoverUrl, set: setAdminCoverUrl }
+        { getCurrent: () => adminCoverUrl, set: setAdminCoverUrl },
       );
       setLookupOk(true);
     } catch {
-      setLookupError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      setLookupError(
+        "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+      );
     } finally {
       setLookupLoading(null);
     }
@@ -303,8 +323,9 @@ export function AdminCanonicalBookForm({
         <div className="space-y-1">
           <Label htmlFor="admin-isbn-lookup">ISBN으로 검색</Label>
           <p className="text-xs text-muted-foreground">
-            아래 버튼은 각각 해당 API만 호출합니다(로컬 카탈로그 우회). 일반 사용자·다른 화면의 ISBN 조회는 네이버 책검색 →
-            국립중앙도서관 순 폴백입니다.{" "}
+            아래 버튼은 각각 해당 API만 호출합니다(로컬 카탈로그 우회). 일반
+            사용자·다른 화면의 ISBN 조회는 네이버 책검색 → 국립중앙도서관 순
+            폴백입니다.{" "}
             {mode === "edit"
               ? "수정 모드에서는 비어 있는 필드만 채웁니다. 조회한 ISBN은 항상 ISBN 칸에 반영됩니다."
               : "신규 등록 시에는 조회 결과로 폼을 채웁니다."}
@@ -365,7 +386,10 @@ export function AdminCanonicalBookForm({
         ) : null}
         {lookupOk ? (
           <p className="text-sm text-muted-foreground">
-            {mode === "edit" ? "비어 있던 항목을 채웠습니다." : "폼에 반영했습니다."} 필요하면 수정한 뒤 저장하세요.
+            {mode === "edit"
+              ? "비어 있던 항목을 채웠습니다."
+              : "폼에 반영했습니다."}{" "}
+            필요하면 수정한 뒤 저장하세요.
           </p>
         ) : null}
         {lookupOk && adminCoverUrl.trim() ? (
@@ -415,7 +439,8 @@ export function AdminCanonicalBookForm({
       <div className="space-y-2">
         <Label htmlFor="apiSource">API소스</Label>
         <p className="text-xs text-muted-foreground">
-          외부 메타 조회 출처 식별자(예: nl.go.kr, naver). ISBN 검색으로 채울 때 비어 있는 칸만 갱신됩니다.
+          외부 메타 조회 출처 식별자(예: nl.go.kr, naver). ISBN 검색으로 채울 때
+          비어 있는 칸만 갱신됩니다.
         </p>
         <Input
           ref={apiSourceRef}
@@ -442,7 +467,12 @@ export function AdminCanonicalBookForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="publisher">출판사</Label>
-          <Input ref={publisherRef} id="publisher" name="publisher" defaultValue={initial.publisher} />
+          <Input
+            ref={publisherRef}
+            id="publisher"
+            name="publisher"
+            defaultValue={initial.publisher}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="publishedDate">출판일</Label>
@@ -479,7 +509,8 @@ export function AdminCanonicalBookForm({
       <div className="space-y-2">
         <Label htmlFor="pageCount">총 페이지 (쪽)</Label>
         <p className="text-xs text-muted-foreground">
-          ISBN 검색(국립·네이버 등)·알라딘 프리필에 값이 있으면 채웁니다. 비우면 저장 시 비움입니다. 1~50000.
+          ISBN 검색(국립·네이버 등)·알라딘 프리필에 값이 있으면 채웁니다. 비우면
+          저장 시 비움입니다. 1~50000.
         </p>
         <Input
           ref={pageCountRef}
@@ -496,7 +527,9 @@ export function AdminCanonicalBookForm({
 
       <div className="space-y-2">
         <Label htmlFor="genreSlugs">장르 슬러그</Label>
-        <p className="text-xs text-muted-foreground">쉼표로 구분합니다. 앱 허용 목록과 맞추면 필터에 유리합니다.</p>
+        <p className="text-xs text-muted-foreground">
+          쉼표로 구분합니다. 앱 허용 목록과 맞추면 필터에 유리합니다.
+        </p>
         <Input
           ref={genreSlugsRef}
           id="genreSlugs"
@@ -544,7 +577,8 @@ export function AdminCanonicalBookForm({
         <div className="space-y-2">
           <Label htmlFor="location">위치 (선택)</Label>
           <p className="text-xs text-muted-foreground">
-            입력하면 관리자 계정의 내 서재에 이 도서가 함께 등록되고, 아래 위치가 저장됩니다. 비우면 공유 서지만 추가됩니다.
+            입력하면 관리자 계정의 내 서가에 이 도서가 함께 등록되고, 아래
+            위치가 저장됩니다. 비우면 공유 서지만 추가됩니다.
           </p>
           <div className="flex flex-wrap gap-2">
             <button
@@ -554,7 +588,7 @@ export function AdminCanonicalBookForm({
                 "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 locationPreset === "집"
                   ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background text-foreground hover:bg-muted/80"
+                  : "border-border bg-background text-foreground hover:bg-muted/80",
               )}
             >
               집
@@ -566,7 +600,7 @@ export function AdminCanonicalBookForm({
                 "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 locationPreset === "회사"
                   ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background text-foreground hover:bg-muted/80"
+                  : "border-border bg-background text-foreground hover:bg-muted/80",
               )}
             >
               회사

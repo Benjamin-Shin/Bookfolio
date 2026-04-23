@@ -2,7 +2,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { fetchAdminSharedLibrariesOverview } from "@/lib/libraries/admin-shared-libraries-overview";
 
 /**
- * 관리자 전용 공동서재(`libraries`) 목록 — 멤버·연결 도서(캐논 기준 distinct) 수.
+ * 관리자 전용 공동서가(`libraries`) 목록 — 멤버·연결 도서(캐논 기준 distinct) 수.
  *
  * @history
  * - 2026-03-29: 신규
@@ -31,43 +31,64 @@ export default async function AdminSharedLibrariesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">공동서재 관리</h1>
+        <h1 className="text-2xl font-bold tracking-tight">공동서가 관리</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          등록된 공동서재와 참여 회원, 연결된 도서 권수(같은 책은 한 권으로 집계)를 봅니다.
+          등록된 공동서가와 참여 회원, 연결된 도서 권수(같은 책은 한 권으로
+          집계)를 봅니다.
         </p>
       </div>
 
       {loadError ? (
         <p className="text-sm text-destructive">{loadError}</p>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">등록된 공동서재가 없습니다.</p>
+        <p className="text-sm text-muted-foreground">
+          등록된 공동서가가 없습니다.
+        </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border/80">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="border-b border-border/60 bg-muted/40">
               <tr>
-                <th className="px-3 py-2 font-medium">서재 이름</th>
-                <th className="px-3 py-2 font-medium whitespace-nowrap">유형</th>
+                <th className="px-3 py-2 font-medium">서가 이름</th>
+                <th className="px-3 py-2 font-medium whitespace-nowrap">
+                  유형
+                </th>
                 <th className="px-3 py-2 font-medium">멤버</th>
-                <th className="px-3 py-2 text-right font-medium whitespace-nowrap">도서(권)</th>
-                <th className="px-3 py-2 font-medium whitespace-nowrap">생성자</th>
-                <th className="px-3 py-2 text-xs font-normal text-muted-foreground whitespace-nowrap">ID</th>
+                <th className="px-3 py-2 text-right font-medium whitespace-nowrap">
+                  도서(권)
+                </th>
+                <th className="px-3 py-2 font-medium whitespace-nowrap">
+                  생성자
+                </th>
+                <th className="px-3 py-2 text-xs font-normal text-muted-foreground whitespace-nowrap">
+                  ID
+                </th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-b border-border/40 last:border-b-0">
+                <tr
+                  key={row.id}
+                  className="border-b border-border/40 last:border-b-0"
+                >
                   <td className="align-top px-3 py-3 font-medium">
                     <div>{row.name}</div>
                     {row.description ? (
-                      <p className="mt-1 line-clamp-2 text-xs font-normal text-muted-foreground">{row.description}</p>
+                      <p className="mt-1 line-clamp-2 text-xs font-normal text-muted-foreground">
+                        {row.description}
+                      </p>
                     ) : null}
                   </td>
-                  <td className="align-top px-3 py-3 text-muted-foreground whitespace-nowrap">{kindLabel(row.kind)}</td>
+                  <td className="align-top px-3 py-3 text-muted-foreground whitespace-nowrap">
+                    {kindLabel(row.kind)}
+                  </td>
                   <td className="align-top px-3 py-3">
                     <ul className="space-y-1">
                       {row.members.map((m) => (
-                        <li key={m.userId} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <li
+                          key={m.userId}
+                          className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5"
+                        >
                           <span>{m.displayLabel}</span>
                           <span className="text-xs text-muted-foreground">
                             {m.role === "owner" ? "소유" : "멤버"}
@@ -76,9 +97,15 @@ export default async function AdminSharedLibrariesPage() {
                       ))}
                     </ul>
                   </td>
-                  <td className="align-top px-3 py-3 text-right tabular-nums">{row.distinctBookCount}</td>
-                  <td className="align-top px-3 py-3 text-muted-foreground whitespace-nowrap">{row.creatorLabel}</td>
-                  <td className="align-top px-3 py-3 font-mono text-xs text-muted-foreground">{row.id}</td>
+                  <td className="align-top px-3 py-3 text-right tabular-nums">
+                    {row.distinctBookCount}
+                  </td>
+                  <td className="align-top px-3 py-3 text-muted-foreground whitespace-nowrap">
+                    {row.creatorLabel}
+                  </td>
+                  <td className="align-top px-3 py-3 font-mono text-xs text-muted-foreground">
+                    {row.id}
+                  </td>
                 </tr>
               ))}
             </tbody>

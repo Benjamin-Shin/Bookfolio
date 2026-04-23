@@ -1,12 +1,12 @@
-# 포인트·테마·i18n·VIP(구독)·공동서재·출석 — 통합 설계 요약
+# 포인트·테마·i18n·VIP(구독)·공동서가·출석 — 통합 설계 요약
 
-이 문서는 Bookfolio에서 **포인트 소비(음수 규칙)**, **모바일 테마 확장**, **다국어**, **VIP 구독과 플랜 상限**, **공동(모임) 서재 한도·초대**, **출석체크(일간 활동)** 를 한궤도에 얹기 위한 설계 요약이다. 구현 시 `@history` 및 `docs/bookfolio-db-schema.md`를 함께 갱신한다.
+이 문서는 Bookfolio에서 **포인트 소비(음수 규칙)**, **모바일 테마 확장**, **다국어**, **VIP 구독과 플랜 상限**, **공동(모임) 서가 한도·초대**, **출석체크(일간 활동)** 를 한궤도에 얹기 위한 설계 요약이다. 구현 시 `@history` 및 `docs/bookfolio-db-schema.md`를 함께 갱신한다.
 
 ---
 
 ## 1. 목표 한 줄
 
-- **비구독:** 무료 한도 + 포인트 적립·차감으로 확장 기능(테마, 추가 공동서재, 추가 초대 등)을 연다.
+- **비구독:** 무료 한도 + 포인트 적립·차감으로 확장 기능(테마, 추가 공동서가, 추가 초대 등)을 연다.
 - **VIP:** 포인트 **소비**는 면제하되, **플랜 JSON `caps`** 로 운영·남용 방지 상한은 유지한다.
 - **시간:** DB/API는 **UTC 저장**, UI는 **로컬(로캘·타임존) 표시**; 출석 “하루”는 사용자 **로컬 달력** 기준.
 
@@ -14,15 +14,15 @@
 
 ## 2. 현재 코드베이스 출발점
 
-| 영역 | 상태 |
-| --- | --- |
-| 모바일 테마 | `apps/mobile/lib/src/app.dart` 단일 `ThemeData`, 다크/팔레트 확장 없음 |
-| i18n | Flutter ARB 미도입 |
-| `point_rules.points` | DB `CHECK (>= 0)`; 관리자 UI도 0 이상만 |
-| 지급 | `apps/web/src/lib/points/award-points.ts` — `points <= 0`이면 미적용 |
-| 관리자 | 포인트 정책·원장은 `apps/web/.../admin/points/`; 사용자 목록에는 잔액·지급 없음 |
-| 공동서재 | `app_users.policies_json.sharedLibraryCreateLimit`(기본 1), `createLibrary`에서 검증 |
-| 공개 API | 사용자 잔액·차감용 API는 거의 없음 |
+| 영역                 | 상태                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| 모바일 테마          | `apps/mobile/lib/src/app.dart` 단일 `ThemeData`, 다크/팔레트 확장 없음               |
+| i18n                 | Flutter ARB 미도입                                                                   |
+| `point_rules.points` | DB `CHECK (>= 0)`; 관리자 UI도 0 이상만                                              |
+| 지급                 | `apps/web/src/lib/points/award-points.ts` — `points <= 0`이면 미적용                 |
+| 관리자               | 포인트 정책·원장은 `apps/web/.../admin/points/`; 사용자 목록에는 잔액·지급 없음      |
+| 공동서가             | `app_users.policies_json.sharedLibraryCreateLimit`(기본 1), `createLibrary`에서 검증 |
+| 공개 API             | 사용자 잔액·차감용 API는 거의 없음                                                   |
 
 ---
 
@@ -96,7 +96,7 @@
 
 ---
 
-## 9. 공동(모임) 서재
+## 9. 공동(모임) 서가
 
 - 기본: 일반 회원 `sharedLibraryCreateLimit = 1`.
 - **VIP:** 포인트 생략, **`caps`** 로 소유 개수·초대·멤버 상한.
@@ -108,14 +108,14 @@
 
 ## 10. 구현 권장 순서 (참고)
 
-1. DB: `point_rules.points` 음수 + 스키마 문서  
-2. VIP: 플랜·구독 테이블, `hasActiveVip` + `withinCaps`  
-3. 포인트:apply 함수 일반화(비구독만 차감 경로 명확히)  
-4. 출석 테이블·훅  
-5. 관리자 UI 음수·사용자 잔액·지급  
-6. 공동서재·초대 게이트  
-7. 모바일 API + 테마  
-8. i18n 인프라  
+1. DB: `point_rules.points` 음수 + 스키마 문서
+2. VIP: 플랜·구독 테이블, `hasActiveVip` + `withinCaps`
+3. 포인트:apply 함수 일반화(비구독만 차감 경로 명확히)
+4. 출석 테이블·훅
+5. 관리자 UI 음수·사용자 잔액·지급
+6. 공동서가·초대 게이트
+7. 모바일 API + 테마
+8. i18n 인프라
 9. (후순위) 결제(PG) 모듈 + **VIP 자동 연계**(구독·갱신·해지와 DB 동기화)
 
 ---
@@ -128,7 +128,7 @@
 ## 12. 관련 경로 (구현 시)
 
 - 웹 포인트: `apps/web/src/lib/points/`, `apps/web/src/lib/subscription/vip.ts`
-- 공동서재: `apps/web/src/lib/libraries/repository.ts`, `shared-library-policy.ts`
+- 공동서가: `apps/web/src/lib/libraries/repository.ts`, `shared-library-policy.ts`
 - 모바일 진입: `apps/mobile/lib/src/app.dart`, `library_screen.dart` drawer
 - DB 문서: `docs/bookfolio-db-schema.md`
 - 마이그레이션: `supabase/migrations/0024_points_negative_vip_checkin_timezone.sql`

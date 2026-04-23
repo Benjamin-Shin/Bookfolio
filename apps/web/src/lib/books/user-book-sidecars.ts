@@ -4,7 +4,7 @@ import type {
   ReadingEventType,
   ReadingLeaderboardResponse,
   ReadingStatus,
-  UserBookMemoRow
+  UserBookMemoRow,
 } from "@bookfolio/shared";
 
 import { tryRecordDailyActivityCheckIn } from "@/lib/points/daily-check-in";
@@ -28,7 +28,7 @@ function getAdminContext(ctx: RepositoryContext) {
 
 export async function listUserBookMemos(
   userBookId: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<UserBookMemoRow[]> {
   const { supabase, userId } = getAdminContext(context);
   const { data: ub, error: e0 } = await supabase
@@ -52,14 +52,14 @@ export async function listUserBookMemos(
     userBookId: r.user_book_id as string,
     bodyMd: r.body_md as string,
     createdAt: r.created_at as string,
-    updatedAt: r.updated_at as string
+    updatedAt: r.updated_at as string,
   }));
 }
 
 export async function createUserBookMemo(
   userBookId: string,
   bodyMd: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<UserBookMemoRow> {
   const { supabase, userId } = getAdminContext(context);
   const body = bodyMd.trim();
@@ -88,7 +88,7 @@ export async function createUserBookMemo(
     userBookId: r.user_book_id as string,
     bodyMd: r.body_md as string,
     createdAt: r.created_at as string,
-    updatedAt: r.updated_at as string
+    updatedAt: r.updated_at as string,
   };
 }
 
@@ -96,7 +96,7 @@ export async function updateUserBookMemo(
   userBookId: string,
   memoId: string,
   bodyMd: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<UserBookMemoRow> {
   const { supabase, userId } = getAdminContext(context);
   const body = bodyMd.trim();
@@ -135,14 +135,14 @@ export async function updateUserBookMemo(
     userBookId: r.user_book_id as string,
     bodyMd: r.body_md as string,
     createdAt: r.created_at as string,
-    updatedAt: r.updated_at as string
+    updatedAt: r.updated_at as string,
   };
 }
 
 export async function deleteUserBookMemo(
   userBookId: string,
   memoId: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<void> {
   const { supabase, userId } = getAdminContext(context);
   const { data: row, error: e0 } = await supabase
@@ -164,15 +164,18 @@ export async function deleteUserBookMemo(
   if (!ub) {
     throw new Error("Not found");
   }
-  const { error } = await supabase.from("user_book_memos").delete().eq("id", memoId);
+  const { error } = await supabase
+    .from("user_book_memos")
+    .delete()
+    .eq("id", memoId);
   if (error) throw error;
 }
 
-/** 공동서재 공유 시 한 줄 메모 — `user_book_memos`에 추가 */
+/** 공동서가 공유 시 한 줄 메모 — `user_book_memos`에 추가 */
 export async function appendUserBookMemoLine(
   userBookId: string,
   bodyMd: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<void> {
   const trimmed = bodyMd.trim();
   if (!trimmed) return;
@@ -182,7 +185,7 @@ export async function appendUserBookMemoLine(
 export async function fetchLatestMemoPreviewsForUserBookIds(
   supabase: import("@supabase/supabase-js").SupabaseClient,
   userBookIds: string[],
-  maxLen = 120
+  maxLen = 120,
 ): Promise<Map<string, string | null>> {
   const out = new Map<string, string | null>();
   for (const id of userBookIds) {
@@ -204,15 +207,23 @@ export async function fetchLatestMemoPreviewsForUserBookIds(
     if (seen.has(ubid)) continue;
     seen.add(ubid);
     const raw = (r.body_md as string)?.trim() ?? "";
-    const oneLine = raw.split(/\r?\n/).map((l) => l.trim()).find(Boolean) ?? "";
+    const oneLine =
+      raw
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .find(Boolean) ?? "";
     const preview =
-      oneLine.length > maxLen ? `${oneLine.slice(0, maxLen)}…` : oneLine || null;
+      oneLine.length > maxLen
+        ? `${oneLine.slice(0, maxLen)}…`
+        : oneLine || null;
     out.set(ubid, preview);
   }
   return out;
 }
 
-export async function listBookOneLinersForBook(bookId: string): Promise<BookOneLinerRow[]> {
+export async function listBookOneLinersForBook(
+  bookId: string,
+): Promise<BookOneLinerRow[]> {
   const supabase = createSupabaseAdminClient();
   const { data: rows, error } = await supabase
     .from("book_one_liners")
@@ -240,7 +251,7 @@ export async function listBookOneLinersForBook(bookId: string): Promise<BookOneL
     for (const u of users ?? []) {
       userMap.set(u.id as string, {
         name: (u.name as string | null) ?? null,
-        email: (u.email as string) ?? ""
+        email: (u.email as string) ?? "",
       });
     }
   }
@@ -257,7 +268,7 @@ export async function listBookOneLinersForBook(bookId: string): Promise<BookOneL
       userId: uid,
       displayName,
       body: r.body as string,
-      updatedAt: r.updated_at as string
+      updatedAt: r.updated_at as string,
     };
   });
 }
@@ -265,7 +276,7 @@ export async function listBookOneLinersForBook(bookId: string): Promise<BookOneL
 export async function upsertMyBookOneLiner(
   userBookId: string,
   body: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<void> {
   const { supabase, userId } = getAdminContext(context);
   const text = body.trim();
@@ -289,16 +300,16 @@ export async function upsertMyBookOneLiner(
     {
       user_id: userId,
       book_id: ub.book_id as string,
-      body: text
+      body: text,
     },
-    { onConflict: "user_id,book_id" }
+    { onConflict: "user_id,book_id" },
   );
   if (error) throw error;
 }
 
 export async function clearMyBookOneLiner(
   userBookId: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<void> {
   const { supabase, userId } = getAdminContext(context);
   const { data: ub, error: e0 } = await supabase
@@ -321,7 +332,7 @@ export async function clearMyBookOneLiner(
 
 export async function listUserBookReadingEvents(
   userBookId: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<ReadingEventRow[]> {
   const { supabase, userId } = getAdminContext(context);
   const { data: ub, error: e0 } = await supabase
@@ -347,7 +358,7 @@ export async function listUserBookReadingEvents(
     eventType: r.event_type as ReadingEventType,
     payload: (r.payload as Record<string, unknown>) ?? {},
     occurredAt: r.occurred_at as string,
-    createdAt: r.created_at as string
+    createdAt: r.created_at as string,
   }));
 }
 
@@ -356,7 +367,7 @@ export async function appendUserBookReadingEvent(
   eventType: ReadingEventType,
   payload: Record<string, unknown>,
   context: RepositoryContext,
-  opts?: { setReadingStatus?: ReadingStatus; occurredAt?: string }
+  opts?: { setReadingStatus?: ReadingStatus; occurredAt?: string },
 ): Promise<ReadingEventRow> {
   const { supabase, userId } = getAdminContext(context);
   const { data: ub, error: e0 } = await supabase
@@ -381,7 +392,7 @@ export async function appendUserBookReadingEvent(
     user_book_id: userBookId,
     event_type: eventType,
     payload: payload ?? {},
-    occurred_at: opts?.occurredAt ?? new Date().toISOString()
+    occurred_at: opts?.occurredAt ?? new Date().toISOString(),
   };
   const { data, error } = await supabase
     .from("user_book_reading_events")
@@ -401,11 +412,13 @@ export async function appendUserBookReadingEvent(
     eventType: r.event_type as ReadingEventType,
     payload: (r.payload as Record<string, unknown>) ?? {},
     occurredAt: r.occurred_at as string,
-    createdAt: r.created_at as string
+    createdAt: r.created_at as string,
   };
 }
 
-export function parseLeaderboardPayload(raw: unknown): ReadingLeaderboardResponse {
+export function parseLeaderboardPayload(
+  raw: unknown,
+): ReadingLeaderboardResponse {
   let o = raw;
   if (typeof o === "string") {
     try {
@@ -426,7 +439,7 @@ export function parseLeaderboardPayload(raw: unknown): ReadingLeaderboardRespons
         return {
           userId: String(t.userId ?? ""),
           displayName: (t.displayName as string | null) ?? null,
-          count: Number(t.count ?? 0)
+          count: Number(t.count ?? 0),
         };
       })
     : [];
@@ -440,21 +453,21 @@ export function parseLeaderboardPayload(raw: unknown): ReadingLeaderboardRespons
     me: {
       rank: rankVal === null || rankVal === undefined ? null : Number(rankVal),
       count: Number(meRec.count ?? 0),
-      totalRankedUsers: Number(meRec.totalRankedUsers ?? 0)
-    }
+      totalRankedUsers: Number(meRec.totalRankedUsers ?? 0),
+    },
   };
 }
 
 export async function getReadingLeaderboard(
   kind: "completed" | "owned",
   topN: number,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<ReadingLeaderboardResponse> {
   const { supabase, userId } = getAdminContext(context);
   const { data, error } = await supabase.rpc("reading_leaderboard", {
     p_user_id: userId,
     p_kind: kind,
-    p_top_n: topN
+    p_top_n: topN,
   });
   if (error) throw error;
   return parseLeaderboardPayload(data);
@@ -463,13 +476,13 @@ export async function getReadingLeaderboard(
 export async function getReadingEventsCalendar(
   from: string,
   to: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<Record<string, number>> {
   const { supabase, userId } = getAdminContext(context);
   const { data, error } = await supabase.rpc("user_reading_events_calendar", {
     p_user_id: userId,
     p_from: from,
-    p_to: to
+    p_to: to,
   });
   if (error) throw error;
   if (!data || typeof data !== "object" || Array.isArray(data)) {
@@ -496,7 +509,10 @@ export type ReadingEventDayListItem = {
 };
 
 /** `user_reading_events_calendar` RPC과 동일하게 UTC 달력일 기준으로 경계를 둡니다. */
-function utcDayRangeIso(dayYmd: string): { startIso: string; endExclusiveIso: string } {
+function utcDayRangeIso(dayYmd: string): {
+  startIso: string;
+  endExclusiveIso: string;
+} {
   const trimmed = dayYmd.trim();
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
   if (!match) {
@@ -513,7 +529,7 @@ function utcDayRangeIso(dayYmd: string): { startIso: string; endExclusiveIso: st
   const dd = String(next.getUTCDate()).padStart(2, "0");
   return {
     startIso: `${trimmed}T00:00:00.000Z`,
-    endExclusiveIso: `${yy}-${mm}-${dd}T00:00:00.000Z`
+    endExclusiveIso: `${yy}-${mm}-${dd}T00:00:00.000Z`,
   };
 }
 
@@ -525,7 +541,7 @@ function utcDayRangeIso(dayYmd: string): { startIso: string; endExclusiveIso: st
  */
 export async function listReadingEventsForUtcDayWithBooks(
   dayYmd: string,
-  context: RepositoryContext
+  context: RepositoryContext,
 ): Promise<ReadingEventDayListItem[]> {
   const { supabase, userId } = getAdminContext(context);
   const { startIso, endExclusiveIso } = utcDayRangeIso(dayYmd);
@@ -545,7 +561,7 @@ export async function listReadingEventsForUtcDayWithBooks(
           cover_url
         )
       )
-    `
+    `,
     )
     .eq("user_books.user_id", userId)
     .gte("occurred_at", startIso)
@@ -574,7 +590,7 @@ export async function listReadingEventsForUtcDayWithBooks(
       occurredAt: String(r.occurred_at ?? ""),
       title: String(bk.title ?? ""),
       authorsLine: authors.join(", "),
-      coverUrl: typeof bk.cover_url === "string" ? bk.cover_url : null
+      coverUrl: typeof bk.cover_url === "string" ? bk.cover_url : null,
     });
   }
   return out;

@@ -6,7 +6,9 @@ import { hasActiveVipSubscription } from "@/lib/subscription/vip";
 import { POINT_EVENT_CODES } from "@/lib/points/event-codes";
 
 function startOfUtcDay(d: Date): Date {
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
+  return new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0),
+  );
 }
 
 function startOfUtcMonth(d: Date): Date {
@@ -42,7 +44,7 @@ export async function tryAwardPointsForEvent(
     refId?: string | null;
     /** false면 VIP여도 차감 원장을 시도(관리자·백필용). 기본 true */
     treatVipSpendExempt?: boolean;
-  }
+  },
 ): Promise<TryAwardPointsResult> {
   const treatVip = params.treatVipSpendExempt !== false;
 
@@ -103,7 +105,11 @@ export async function tryAwardPointsForEvent(
 
   const prev = last?.balance_after != null ? Number(last.balance_after) : 0;
 
-  if (points < 0 && treatVip && (await hasActiveVipSubscription(supabase, params.userId))) {
+  if (
+    points < 0 &&
+    treatVip &&
+    (await hasActiveVipSubscription(supabase, params.userId))
+  ) {
     return { ok: true, kind: "vip_spend_exempt", balanceAfter: prev };
   }
 
@@ -156,7 +162,7 @@ export async function tryAwardPointsForEvent(
     ref_type: params.refType ?? null,
     ref_id: params.refId ?? null,
     rule_version_id: ruleVersionId,
-    idempotency_key: params.idempotencyKey
+    idempotency_key: params.idempotencyKey,
   });
 
   if (insErr) {
@@ -182,23 +188,26 @@ export async function awardPointsJoinMembership(userId: string): Promise<void> {
     eventCode: POINT_EVENT_CODES.join_membership,
     idempotencyKey: `join_membership:${userId}`,
     refType: "app_user",
-    refId: userId
+    refId: userId,
   });
 }
 
 /**
- * 서재 도서 등록 1권당 1회(멱등 키 = user_book id).
+ * 서가 도서 등록 1권당 1회(멱등 키 = user_book id).
  *
  * @history
  * - 2026-03-26: 신규
  */
-export async function awardPointsUserBookRegister(userId: string, userBookId: string): Promise<void> {
+export async function awardPointsUserBookRegister(
+  userId: string,
+  userBookId: string,
+): Promise<void> {
   const supabase = createSupabaseAdminClient();
   await tryAwardPointsForEvent(supabase, {
     userId,
     eventCode: POINT_EVENT_CODES.user_book_register,
     idempotencyKey: `user_book_register:${userBookId}`,
     refType: "user_book",
-    refId: userBookId
+    refId: userBookId,
   });
 }
