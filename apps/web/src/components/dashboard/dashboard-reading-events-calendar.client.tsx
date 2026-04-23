@@ -441,6 +441,7 @@ export function DashboardReadingEventsCalendar({
             </div>
           ) : null}
         </div>
+      </div>
     </div>
   );
 }
