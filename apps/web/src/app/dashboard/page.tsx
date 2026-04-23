@@ -552,7 +552,7 @@ export default async function DashboardPage({
 
           {!emptyLibrary ? (
             <section
-              className="mb-12 grid grid-cols-1 gap-4 xl:grid-cols-3"
+              className="mb-12 grid grid-cols-1 gap-4 xl:grid-cols-2"
               aria-label="홈 인사이트 패널"
             >
               <DashboardRecommendationPanel />
