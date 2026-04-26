@@ -25,7 +25,7 @@ type HeaderAccountProps = {
   email: string;
   displayLabel: string;
   initialProfile: AppProfileView | null;
-  /** 소유 공동서가에 다른 멤버가 있어 서버 탈퇴가 거절되는 서가 이름 (`listOwnedSharedLibrariesBlockingWithdrawal`) */
+  /** 소유 모임서가에 다른 멤버가 있어 서버 탈퇴가 거절되는 서가 이름 (`listOwnedSharedLibrariesBlockingWithdrawal`) */
   sharedLibrariesBlockingWithdrawal?: string[];
 };
 
@@ -35,7 +35,7 @@ type HeaderAccountProps = {
  * @history
  * - 2026-04-22: 2열 비율을 1:2로 조정해 좌측 입력 컬럼을 전체 너비의 1/3로 고정
  * - 2026-04-22: 프로필 다이얼로그 폭을 약 1.5배 확장하고 아바타 업로드 영역을 우측 2열로 분리
- * - 2026-03-26: 탈퇴 안내 — 공동서가 소유권 이전·단독 소유 시 CASCADE 정리 문구
+ * - 2026-03-26: 탈퇴 안내 — 모임서가 소유권 이전·단독 소유 시 CASCADE 정리 문구
  * - 2026-03-26: 프로필 다이얼로그 1행에 이메일·표시 이름(2열), 2행에 `ProfileAvatarUploadField`(내부 2열)
  * - 2026-03-26: 표시 이름 왼쪽에 아바타 썸네일·저장 응답·서버 props 동기화
  * - 2026-03-26: 아바타 — `ProfileAvatarUploadField`(Cloudinary `/api/upload` kind `avatar`)
@@ -349,17 +349,17 @@ export function HeaderAccount({
                   <li>보유 포인트 및 포인트 원장 전체</li>
                   <li>내 서가(소장 도서), 메모, 독서 이벤트 기록, 한줄평</li>
                   <li>
-                    내가 만든 공동서가 — 다른 멤버가 없으면 탈퇴와 함께
+                    내가 만든 모임서가 — 다른 멤버가 없으면 탈퇴와 함께
                     삭제되고, 있으면 탈퇴 전 소유권 이전 필요
                   </li>
                   <li>다른 사람 서가에 참여 중이던 멤버십</li>
                   <li>프로필·계정(로그인) 정보</li>
                 </ul>
                 <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-foreground">
-                  <strong>소유한 공동서가</strong>에 다른 멤버가 있으면 탈퇴할
+                  <strong>소유한 모임서가</strong>에 다른 멤버가 있으면 탈퇴할
                   수 없습니다. 해당 서가 화면에서{" "}
                   <strong>소유권을 다른 멤버에게 이전</strong>한 뒤 탈퇴해
-                  주세요. 본인만 남은 공동서가는 별도 삭제 없이 탈퇴 시 함께
+                  주세요. 본인만 남은 모임서가는 별도 삭제 없이 탈퇴 시 함께
                   정리됩니다.
                 </p>
                 <p className="text-xs">
@@ -398,7 +398,7 @@ export function HeaderAccount({
                     setDeleteError(
                       data.error ??
                         (res.status === 409
-                          ? "탈퇴 전 공동서가를 정리해 주세요."
+                          ? "탈퇴 전 모임서가를 정리해 주세요."
                           : "탈퇴에 실패했습니다."),
                     );
                     return;

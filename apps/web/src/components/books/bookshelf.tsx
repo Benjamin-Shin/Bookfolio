@@ -31,7 +31,7 @@ type BookshelfProps = {
  * 선반 UI: 표지 나열 + 행마다 받침(앞판).
  *
  * @history
- * - 2026-03-24: 선반 상수·청크·스타일 `bookshelf-shared`로 이전; 공동서가 선반은 `library-bookshelf.tsx`
+ * - 2026-03-24: 선반 상수·청크·스타일 `bookshelf-shared`로 이전; 모임서가 선반은 `library-bookshelf.tsx`
  * - 2026-03-24: 책 행 가로 간격 `gap-1.5`·`sm:gap-2`로 소폭 확대
  * - 2026-03-24: 책 행 `justify-center`·`w-full`로 가운데 정렬
  * - 2026-03-24: 책 행 `overflow-y-hidden`·행마다 `pb-10`으로 첫 줄 세로 스크롤바 방지

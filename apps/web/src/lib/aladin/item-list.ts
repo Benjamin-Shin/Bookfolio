@@ -10,7 +10,10 @@ export const ALADIN_ITEM_LIST_DEFAULTS = {
   categoryId: 0
 } as const;
 
-export type AladinItemListQueryType = "Bestseller" | "ItemNewSpecial";
+export type AladinItemListQueryType =
+  | "Bestseller"
+  | "ItemNewSpecial"
+  | "ItemNewAll";
 
 export type AladinItemListParams = {
   queryType: AladinItemListQueryType;

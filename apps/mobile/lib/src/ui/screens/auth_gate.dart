@@ -1,10 +1,10 @@
 import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
 import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/state/library_controller.dart';
-import 'package:seogadam_mobile/src/ui/screens/main_shell_screen.dart';
-import 'package:seogadam_mobile/src/ui/screens/onboarding_screen.dart';
-import 'package:seogadam_mobile/src/ui/screens/sign_in_screen.dart';
-import 'package:seogadam_mobile/src/ui/widgets/network_gate.dart';
+import 'package:seogadam_mobile/src/ui/screens/auth/login_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/main_shell_v2_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/auth/onboarding_screen.dart';
+import 'package:seogadam_mobile/src/ui/layout/network_gate.dart';
 import 'package:seogadam_mobile/src/ui/widgets/shared_library_invite_lifecycle.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 /// History:
 /// - 2026-04-06: `NetworkGate`·프로필 기반 `OnboardingScreen`·`SharedLibraryInviteLifecycle` 순서 정리
 /// - 2026-04-02: 로그인 후 `MainShellScreen`(하단 내비·드로어)
+/// - 2026-04-25: 로그인 진입 화면을 `LoginScreen`(소셜 전용)으로 교체
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -21,8 +22,13 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthController>(
       builder: (context, auth, _) {
+        if (auth.isRestoring) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
         if (!auth.isAuthenticated) {
-          return const NetworkGate(child: SignInScreen());
+          return const NetworkGate(child: LoginScreen());
         }
         return const _AuthenticatedSessionRoot();
       },
@@ -34,7 +40,8 @@ class _AuthenticatedSessionRoot extends StatefulWidget {
   const _AuthenticatedSessionRoot();
 
   @override
-  State<_AuthenticatedSessionRoot> createState() => _AuthenticatedSessionRootState();
+  State<_AuthenticatedSessionRoot> createState() =>
+      _AuthenticatedSessionRootState();
 }
 
 class _AuthenticatedSessionRootState extends State<_AuthenticatedSessionRoot> {

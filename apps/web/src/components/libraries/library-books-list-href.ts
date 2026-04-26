@@ -16,7 +16,7 @@ export type LibraryBooksListQuery = {
 };
 
 /**
- * 공동서가 상세 URL (`tab`·`genre`·`owner`·`page`).
+ * 모임서가 상세 URL (`tab`·`genre`·`owner`·`page`).
  *
  * @history
  * - 2026-04-12: `tab`·`page` — 내 서가형 컬렉션 탭·페이지네이션

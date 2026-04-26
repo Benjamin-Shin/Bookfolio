@@ -4,7 +4,7 @@ import { getRequestUserId } from "@/lib/auth/request-user";
 import { transferLibraryOwnership } from "@/lib/libraries/repository";
 
 /**
- * 공동서가 소유권 이전(현재 소유자만).
+ * 모임서가 소유권 이전(현재 소유자만).
  *
  * @history
  * - 2026-03-26: `POST` — body `{ newOwnerUserId }`, 회원 탈퇴 전 정리용

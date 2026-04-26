@@ -1,10 +1,10 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 /**
- * 탈퇴가 막혀야 할 때(공동서가 정리 필요 등).
+ * 탈퇴가 막혀야 할 때(모임서가 정리 필요 등).
  *
  * @history
- * - 2026-03-26: 소유 공동서가·타 멤버 선행 조건
+ * - 2026-03-26: 소유 모임서가·타 멤버 선행 조건
  */
 export class AccountDeleteBlockedError extends Error {
   constructor(message: string) {
@@ -14,7 +14,7 @@ export class AccountDeleteBlockedError extends Error {
 }
 
 /**
- * `created_by`인 공동서가에 본인 외 멤버가 있는 서가 이름 목록(탈퇴 UI 비활성화·안내용).
+ * `created_by`인 모임서가에 본인 외 멤버가 있는 서가 이름 목록(탈퇴 UI 비활성화·안내용).
  * 빈 배열이면 해당 사유로 탈퇴가 막히지 않습니다.
  *
  * @history
@@ -63,7 +63,7 @@ export async function listOwnedSharedLibrariesBlockingWithdrawal(
 }
 
 /**
- * `created_by`인 공동서가에 본인 외 멤버가 있으면 탈퇴 불가(소유권 이전 필요).
+ * `created_by`인 모임서가에 본인 외 멤버가 있으면 탈퇴 불가(소유권 이전 필요).
  * 본인만 남은 소유 서가는 탈투 시 서버에서 자동 삭제합니다.
  *
  * @history
@@ -79,7 +79,7 @@ export async function assertAccountDeleteAllowed(
 
   if (namesWithOtherMembers.length > 0) {
     throw new AccountDeleteBlockedError(
-      `소유 중인 공동서가에 다른 멤버가 있습니다. 서가 설정에서 소유권을 다른 멤버에게 이전한 뒤 탈퇴해 주세요. (${namesWithOtherMembers.join(", ")})`,
+      `소유 중인 모임서가에 다른 멤버가 있습니다. 서가 설정에서 소유권을 다른 멤버에게 이전한 뒤 탈퇴해 주세요. (${namesWithOtherMembers.join(", ")})`,
     );
   }
 }
@@ -90,8 +90,8 @@ export async function assertAccountDeleteAllowed(
  * 공유 서지(`books`) 행은 삭제되지 않습니다.
  *
  * @history
- * - 2026-03-26: 본인 단독 소유 공동서가는 `libraries.created_by` CASCADE로 사용자 삭제 시 함께 삭제됨(선행 검증만 유지)
- * - 2026-03-26: 공동서가 선행 조건 검증
+ * - 2026-03-26: 본인 단독 소유 모임서가는 `libraries.created_by` CASCADE로 사용자 삭제 시 함께 삭제됨(선행 검증만 유지)
+ * - 2026-03-26: 모임서가 선행 조건 검증
  * - 2026-03-26: 회원 탈퇴 API용
  */
 export async function deleteAppUserById(userId: string): Promise<void> {

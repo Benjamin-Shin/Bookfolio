@@ -387,7 +387,7 @@ async function insertCanonicalBook(
 }
 
 /**
- * 공동서가 등 user_books 없이 `books` 행만 필요할 때 — ISBN·제목으로 카탈로그 행을 찾거나 만듭니다.
+ * 모임서가 등 user_books 없이 `books` 행만 필요할 때 — ISBN·제목으로 카탈로그 행을 찾거나 만듭니다.
  */
 export async function resolveCanonicalBookForSharedLibrary(
   supabase: SupabaseClient,

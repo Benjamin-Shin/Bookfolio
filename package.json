@@ -20,7 +20,6 @@
     "build:mobile:ipa": "bash scripts/build-mobile.sh ipa",
     "build:mobile:ios": "bash scripts/build-mobile.sh ios",
     "gen:mobile-app-icon": "npx --yes sharp-cli resize 1024 1024 --input apps/web/public/assets/bookfolio_b_favicon.svg --output apps/mobile/assets/brand/app_icon.png && cd apps/mobile && dart run flutter_launcher_icons",
-    "db-push": "npx supabase@latest db push",
-    "mobile:sha-1": "/c/Program Files/Android/Android Studio/jbr/bin/keytool.exe -list -v -keystore /c/Users/chiuo/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android"
+    "db-push": "npx supabase@latest db push"
   }
 }

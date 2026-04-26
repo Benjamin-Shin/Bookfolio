@@ -20,7 +20,7 @@ type LibraryBooksPaginationProps = {
 };
 
 /**
- * 공동서가 상세 — 탭별 책 목록 이전/다음.
+ * 모임서가 상세 — 탭별 책 목록 이전/다음.
  *
  * @history
  * - 2026-04-12: 신규

@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 /// History:
 /// - 2026-04-12: 읽는 중 상태색 — `DESIGN.md` tertiary(Archivist's Ribbon)
 /// - 2026-04-05: 4열(넓은 폰·폴드) 대응 비율
-/// - 2026-03-25: `library_screen`에서 분리해 공동서가 그리드와 공유
+/// - 2026-03-25: `library_screen`에서 분리해 모임서가 그리드와 공유
 double bookGridCardAspectRatio(int columns) {
   return switch (columns) {
     4 => 0.53,
@@ -25,7 +25,7 @@ double bookGridCardAspectRatio(int columns) {
 /// `minTileWidth`·`crossAxisSpacing`을 만족하도록 [minColumns]~[maxColumns]로 클램프한다.
 ///
 /// History:
-/// - 2026-04-05: 폰·태블릿 폭 가변 그리드(내 서가·공동서가 공통)
+/// - 2026-04-05: 폰·태블릿 폭 가변 그리드(내 서가·모임서가 공통)
 int bookfolioGridCrossAxisCount(
   double crossAxisExtent, {
   double crossAxisSpacing = 10,
@@ -43,7 +43,7 @@ int bookfolioGridCrossAxisCount(
   return math.min(maxColumns, math.max(minColumns, raw));
 }
 
-/// 내 서가·공동서가 공통 표지 카드.
+/// 내 서가·모임서가 공통 표지 카드.
 ///
 /// History:
 /// - 2026-04-03: 그리드 셀 높이 한계에서 표지 높이 상한 — 하단 메타 `Column` bottom overflow 방지
@@ -73,7 +73,7 @@ class BookGridCard extends StatelessWidget {
   final VoidCallback onTap;
   final Widget? coverBadge;
 
-  /// 공동서가 등 — 표지 아래 웹 `Badge`와 유사한 소유자 이름 칩.
+  /// 모임서가 등 — 표지 아래 웹 `Badge`와 유사한 소유자 이름 칩.
   final List<String>? ownerBadgeLabels;
   final String gradientSeedA;
   final String gradientSeedB;
@@ -321,7 +321,7 @@ Color readingStatusColor(ReadingStatus s) {
   };
 }
 
-/// 공동서가 등 소유자가 여러 명일 때 표지 좌상단 인원 뱃지.
+/// 모임서가 등 소유자가 여러 명일 때 표지 좌상단 인원 뱃지.
 ///
 /// History:
 /// - 2026-03-25: 신규

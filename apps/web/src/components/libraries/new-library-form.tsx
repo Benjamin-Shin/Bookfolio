@@ -71,9 +71,9 @@ export function NewLibraryForm({
     <form className="space-y-6" onSubmit={(e) => void handleSubmit(e)}>
       {!canCreateMore ? (
         <Alert variant="destructive">
-          <AlertTitle>새 공동서가를 더 만들 수 없습니다</AlertTitle>
+          <AlertTitle>새 모임서가를 더 만들 수 없습니다</AlertTitle>
           <AlertDescription>
-            회원 정책상 소유 공동서가는 최대 {createLimit}개입니다. (현재{" "}
+            회원 정책상 소유 모임서가는 최대 {createLimit}개입니다. (현재{" "}
             {createdCount}개)
           </AlertDescription>
         </Alert>
@@ -120,7 +120,7 @@ export function NewLibraryForm({
         />
       </div>
       <Button type="submit" disabled={loading || !canCreateMore}>
-        {loading ? "만드는 중…" : "공동서가 만들기"}
+        {loading ? "만드는 중…" : "모임서가 만들기"}
       </Button>
     </form>
   );

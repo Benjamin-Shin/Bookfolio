@@ -41,7 +41,7 @@ function effectiveUserDisplayLabel(row: AppUserMini): string {
 }
 
 /**
- * 관리자용 공동서가(`libraries`) 목록 집계 — 멤버 표시명·캐논 도서 distinct 수.
+ * 관리자용 모임서가(`libraries`) 목록 집계 — 멤버 표시명·캐논 도서 distinct 수.
  *
  * @history
  * - 2026-03-29: 신규 — 멤버(`library_members`)·`library_user_books`→`user_books.book_id` 기준 권 수

@@ -17,7 +17,7 @@ import {
 
 /**
  * @history
- * - 2026-03-25: 공동서가 생성 상한(`policies_json`) 반영해 폼에 전달
+ * - 2026-03-25: 모임서가 생성 상한(`policies_json`) 반영해 폼에 전달
  */
 export default async function NewLibraryPage() {
   const session = await auth();
@@ -37,7 +37,7 @@ export default async function NewLibraryPage() {
       <Card className="border-border/80">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>새 공동서가</CardTitle>
+            <CardTitle>새 모임서가</CardTitle>
             <CardDescription>
               이름과 종류를 정한 뒤 멤버를 이메일로 초대할 수 있습니다.
             </CardDescription>

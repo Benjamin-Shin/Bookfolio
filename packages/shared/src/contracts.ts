@@ -238,7 +238,7 @@ export interface ReadingLeaderboardResponse {
 
 /** DB `app_users.policies_json`과 맞춘 확장 가능 정책(알 수 없는 키는 무시). */
 export interface AppUserPolicies {
-  /** 내가 소유자로 새로 만든 공동서가(`libraries.created_by`) 최대 개수 */
+  /** 내가 소유자로 새로 만든 모임서가(`libraries.created_by`) 최대 개수 */
   sharedLibraryCreateLimit: number;
 }
 
@@ -294,6 +294,7 @@ export interface LibrarySummary {
   id: string;
   name: string;
   description: string | null;
+  imageUrl: string | null;
   kind: LibraryKind;
   createdBy: string;
   createdAt: string;
@@ -303,7 +304,7 @@ export interface LibrarySummary {
 }
 
 /**
- * 공동서가 멤버 한 줄.
+ * 모임서가 멤버 한 줄.
  *
  * @history
  * - 2026-04-12: `image` — `app_users.image`(OAuth 아바타 등) 목록 표시용
@@ -319,7 +320,7 @@ export interface LibraryMemberRow {
 }
 
 /**
- * 공동서가 집계 한 줄에 포함되는 소유자(개인 user_books 1행).
+ * 모임서가 집계 한 줄에 포함되는 소유자(개인 user_books 1행).
  *
  * @history
  * - 2026-04-12: `rating` — Hall of Fame(완독·개인 평점 4+) 판별용
@@ -338,7 +339,7 @@ export interface LibrarySharedOwnerRow {
   linkedAt: string;
 }
 
-/** book_id 기준으로 합친 공동서가 책 한 줄. */
+/** book_id 기준으로 합친 모임서가 책 한 줄. */
 export interface LibraryAggregatedBookRow {
   libraryId: string;
   bookId: string;
@@ -356,17 +357,19 @@ export interface LibraryAggregatedBookRow {
 export interface CreateLibraryInput {
   name: string;
   description?: string | null;
+  imageUrl?: string | null;
   kind: LibraryKind;
 }
 
 export interface UpdateLibraryInput {
   name?: string;
   description?: string | null;
+  imageUrl?: string | null;
   kind?: LibraryKind;
 }
 
 /**
- * 공동서가에 개인 소장을 연결.
+ * 모임서가에 개인 소장을 연결.
  * - userBookId: 이미 있는 내 user_books 행만 서가에 올림.
  * - bookId: 내 서가에 해당 books.id가 있으면 연결(없으면 400).
  * - 그 외: 개인 서가 등록과 동일 필드로 user_books 생성 후 연결(format 생략 시 paper).

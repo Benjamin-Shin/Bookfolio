@@ -1,4 +1,4 @@
--- 멤버로만 속한 공동서가: 해당 멤버의 개인 소장을 library_user_books에 연결
+-- 멤버로만 속한 모임서가: 해당 멤버의 개인 소장을 library_user_books에 연결
 -- (초대 후에도 소유자 서가만 보이던 기존 데이터 복구)
 
 insert into public.library_user_books (library_id, user_book_id, linked_at, linked_by)

@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { isDomesticAladinCategoryId } from "@/lib/aladin/categories";
 
 export type AppProfileView = {
   id: string;
@@ -14,6 +15,8 @@ export type AppProfileView = {
   annualReadingGoal: number | null;
   /** 온보딩 완료 시각(ISO 8601). null이면 미완료. */
   onboardingCompletedAt: string | null;
+  /** 알라딘 국내도서 관심 카테고리 CID(최대 5개). */
+  favoriteAladinCategoryIds: number[];
 };
 
 export type UpsertAppProfileInput = {
@@ -26,7 +29,26 @@ export type UpsertAppProfileInput = {
   annualReadingGoal?: number | null;
   /** true이면 `onboarding_completed_at`을 현재 시각으로 설정 */
   onboardingCompleted?: boolean;
+  favoriteAladinCategoryIds?: number[];
 };
+
+function normalizeFavoriteAladinCategoryIds(input: unknown): number[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+  const deduped = new Set<number>();
+  for (const raw of input) {
+    const cid = Math.floor(Number(raw));
+    if (!Number.isFinite(cid) || !isDomesticAladinCategoryId(cid)) {
+      continue;
+    }
+    deduped.add(cid);
+    if (deduped.size >= 5) {
+      break;
+    }
+  }
+  return [...deduped];
+}
 
 export async function getAppProfile(userId: string): Promise<AppProfileView | null> {
   const supabase = createSupabaseAdminClient();
@@ -44,7 +66,7 @@ export async function getAppProfile(userId: string): Promise<AppProfileView | nu
   const { data: profile } = await supabase
     .from("app_profiles")
     .select(
-      "display_name,avatar_url,gender,birth_date,gender_public,birth_date_public,annual_reading_goal,onboarding_completed_at"
+      "display_name,avatar_url,gender,birth_date,gender_public,birth_date_public,annual_reading_goal,onboarding_completed_at,favorite_aladin_category_ids"
     )
     .eq("id", userId)
     .maybeSingle();
@@ -63,6 +85,9 @@ export async function getAppProfile(userId: string): Promise<AppProfileView | nu
       onboardingCompletedAt = d.toISOString();
     }
   }
+  const favoriteAladinCategoryIds = normalizeFavoriteAladinCategoryIds(
+    p?.favorite_aladin_category_ids
+  );
 
   return {
     id: user.id,
@@ -77,7 +102,8 @@ export async function getAppProfile(userId: string): Promise<AppProfileView | nu
     genderPublic: p?.gender_public === true,
     birthDatePublic: p?.birth_date_public === true,
     annualReadingGoal,
-    onboardingCompletedAt
+    onboardingCompletedAt,
+    favoriteAladinCategoryIds
   };
 }
 
@@ -86,6 +112,7 @@ export async function getAppProfile(userId: string): Promise<AppProfileView | nu
  * `input`에 키가 없으면 기존 `app_profiles` / `app_users` 값을 유지합니다.
  *
  * @history
+ * - 2026-04-26: `favorite_aladin_category_ids`(국내도서 CID, 최대 5개)
  * - 2026-04-06: `onboarding_completed_at` — `onboardingCompleted`
  * - 2026-04-06: `annual_reading_goal`
  * - 2026-04-02: `gender`, `birthDate`, 공개 플래그
@@ -96,7 +123,7 @@ export async function upsertAppProfileRow(userId: string, input: UpsertAppProfil
   const { data: prof } = await supabase
     .from("app_profiles")
     .select(
-      "display_name,avatar_url,gender,birth_date,gender_public,birth_date_public,annual_reading_goal,onboarding_completed_at"
+      "display_name,avatar_url,gender,birth_date,gender_public,birth_date_public,annual_reading_goal,onboarding_completed_at,favorite_aladin_category_ids"
     )
     .eq("id", userId)
     .maybeSingle();
@@ -170,6 +197,13 @@ export async function upsertAppProfileRow(userId: string, input: UpsertAppProfil
     onboarding_completed_at = new Date().toISOString();
   }
 
+  const favorite_aladin_category_ids = Object.prototype.hasOwnProperty.call(
+    input,
+    "favoriteAladinCategoryIds"
+  )
+    ? normalizeFavoriteAladinCategoryIds(input.favoriteAladinCategoryIds)
+    : normalizeFavoriteAladinCategoryIds(pr?.favorite_aladin_category_ids);
+
   const { error: profileError } = await supabase.from("app_profiles").upsert(
     {
       id: userId,
@@ -180,7 +214,8 @@ export async function upsertAppProfileRow(userId: string, input: UpsertAppProfil
       gender_public,
       birth_date_public,
       annual_reading_goal,
-      onboarding_completed_at
+      onboarding_completed_at,
+      favorite_aladin_category_ids
     },
     { onConflict: "id" }
   );

@@ -1,8 +1,8 @@
 import 'package:seogadam_mobile/src/models/book_models.dart';
 import 'package:seogadam_mobile/src/state/library_controller.dart';
-import 'package:seogadam_mobile/src/ui/mobile_scroll_padding.dart';
+import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 import 'package:seogadam_mobile/src/ui/book_ui_labels.dart';
-import 'package:seogadam_mobile/src/ui/screens/book_detail_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/library/book_detail_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/book_form_screen.dart';
 import 'package:seogadam_mobile/src/ui/widgets/book_grid_card.dart';
 import 'package:flutter/material.dart';

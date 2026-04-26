@@ -1,4 +1,4 @@
--- 회원 탈퇴: `app_users` 삭제 시 해당 사용자가 만든 공동서가(`libraries`)도 함께 삭제되도록 CASCADE.
+-- 회원 탈퇴: `app_users` 삭제 시 해당 사용자가 만든 모임서가(`libraries`)도 함께 삭제되도록 CASCADE.
 -- (기존 RESTRICT이면 탈퇴 전 수동으로 서가를 지워야 했음.)
 
 alter table public.libraries

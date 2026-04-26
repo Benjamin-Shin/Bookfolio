@@ -173,6 +173,9 @@ class UserBook {
     this.pageCount,
     this.currentPage,
     this.readingTotalPages,
+    this.genreSlugs = const [],
+    this.createdAt,
+    this.updatedAt,
   });
 
   final String id;
@@ -199,6 +202,15 @@ class UserBook {
   final int? currentPage;
   /// `user_books.reading_total_pages` (총 쪽 재정의)
   final int? readingTotalPages;
+
+  /// 서지 `books.genre_slugs` (목록·상세 API).
+  final List<String> genreSlugs;
+
+  /// `user_books.created_at` (ISO8601).
+  final String? createdAt;
+
+  /// `user_books.updated_at` (ISO8601).
+  final String? updatedAt;
 
   int? get effectiveTotalPages =>
       effectiveReadingTotalPages(readingTotalPages: readingTotalPages, pageCount: pageCount);
@@ -229,6 +241,9 @@ class UserBook {
       'pageCount': pageCount,
       'currentPage': currentPage,
       'readingTotalPages': readingTotalPages,
+      'genreSlugs': genreSlugs,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 
@@ -243,6 +258,9 @@ class UserBook {
       if (v is num) return v.toInt();
       return null;
     }
+
+    final rawGenres = json['genreSlugs'] as List<dynamic>? ??
+        json['genre_slugs'] as List<dynamic>?;
 
     return UserBook(
       id: json['id'] as String,
@@ -265,6 +283,12 @@ class UserBook {
       pageCount: asInt(json['pageCount']),
       currentPage: asInt(json['currentPage']),
       readingTotalPages: asInt(json['readingTotalPages']),
+      genreSlugs: (rawGenres ?? const [])
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList(),
+      createdAt: json['createdAt'] as String? ?? json['created_at'] as String?,
+      updatedAt: json['updatedAt'] as String? ?? json['updated_at'] as String?,
     );
   }
 

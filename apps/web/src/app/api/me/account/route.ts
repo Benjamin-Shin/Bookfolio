@@ -10,7 +10,7 @@ import { getRequestUserId } from "@/lib/auth/request-user";
  * 본인 계정 및 연관 데이터 물리 삭제(세션·모바일 Bearer 동일).
  *
  * @history
- * - 2026-03-26: 소유 공동서가·멤버 선행 조건 시 409
+ * - 2026-03-26: 소유 모임서가·멤버 선행 조건 시 409
  * - 2026-03-26: 회원 탈퇴 DELETE
  */
 export async function DELETE(request: NextRequest) {

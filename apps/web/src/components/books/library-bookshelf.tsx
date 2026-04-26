@@ -28,13 +28,13 @@ type LibraryBookshelfProps = {
 };
 
 /**
- * 공동서가 집계 책 목록용 선반 UI (클라이언트 전용 — Link·Badge 하위 트리 하이드레이션 일치).
+ * 모임서가 집계 책 목록용 선반 UI (클라이언트 전용 — Link·Badge 하위 트리 하이드레이션 일치).
  *
  * @history
  * - 2026-03-24: `bookshelf.tsx`에서 분리·`"use client"` (서버/클라 DOM 불일치 방지)
  * - 2026-03-24: 책 행 가로 간격 `Bookshelf`와 동일하게 `gap-1.5`·`sm:gap-2`
  * - 2026-03-24: `BOOKS_PER_SHELF` 분할 제거 — 전체 목록을 한 선반 틀에 이어 붙이고 굵은 받침은 맨 아래 행만
- * - 2026-03-24: 신규 — 대시보드 책장과 동일한 선반·표지 배치, 링크는 공동서가 도서 상세
+ * - 2026-03-24: 신규 — 대시보드 책장과 동일한 선반·표지 배치, 링크는 모임서가 도서 상세
  */
 export function LibraryBookshelf({ libraryId, books }: LibraryBookshelfProps) {
   const variant: "reading" | "owned" = "owned";

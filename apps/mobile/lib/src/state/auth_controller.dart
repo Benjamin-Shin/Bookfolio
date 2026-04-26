@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AuthSession {
   AuthSession(this.accessToken);
@@ -15,18 +18,23 @@ class AuthSession {
 /// Bearer 세션, 이메일·Google 로그인, 이메일 가입.
 ///
 /// History:
+/// - 2026-04-26: `startWebSessionTransfer`/`openWebSessionTransfer` 추가 — 모바일 세션을 웹 로그인 URL로 전이
+/// - 2026-04-25: 카카오 로그인 시 이메일 스코프 부족(`account_email`)이면 `loginWithNewScopes`로 재동의 후 토큰 교환 재시도
 /// - 2026-04-24: `signInWithKakao` 추가 — 카카오 SDK 토큰을 `/api/auth/mobile/kakao`로 교환
 /// - 2026-04-12: `signIn`/`signUp` — 기본 오류 메시지 `??=` (lint)
 /// - 2026-04-05: `signUp` 자동 로그인·`/api/upload` 아바타·`/api/me/profile` 인구통계 반영
 class AuthController extends ChangeNotifier {
   static const _tokenKey = 'bookfolio_access_token';
+  static const _secureStorage = FlutterSecureStorage();
 
   AuthSession? _session;
   bool _isLoading = false;
+  bool _isRestoring = true;
   String? _error;
 
   AuthSession? get session => _session;
   bool get isLoading => _isLoading;
+  bool get isRestoring => _isRestoring;
   String? get error => _error;
   bool get isAuthenticated => _session != null;
 
@@ -53,10 +61,27 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> restoreSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_tokenKey);
-    _session = (raw != null && raw.isNotEmpty) ? AuthSession(raw) : null;
+    _isRestoring = true;
     notifyListeners();
+    try {
+      String? raw = await _secureStorage.read(key: _tokenKey);
+      if (raw == null || raw.isEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        final legacy = prefs.getString(_tokenKey);
+        if (legacy != null && legacy.isNotEmpty) {
+          raw = legacy;
+          await _secureStorage.write(key: _tokenKey, value: legacy);
+          await prefs.remove(_tokenKey);
+        }
+      }
+      _session = (raw != null && raw.isNotEmpty) ? AuthSession(raw) : null;
+    } catch (e) {
+      _session = null;
+      _error = '저장된 로그인 정보를 복원하지 못했습니다: $e';
+    } finally {
+      _isRestoring = false;
+      notifyListeners();
+    }
   }
 
   Future<void> signIn({required String email, required String password}) async {
@@ -80,6 +105,8 @@ class AuthController extends ChangeNotifier {
       } else {
         _error ??= '로그인에 실패했습니다.';
       }
+    } on PlatformException catch (e) {
+      _error = _mapGoogleSignInPlatformError(e);
     } on Exception catch (e) {
       _error = e.toString();
     } finally {
@@ -126,8 +153,9 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> _storeAccessToken(String token) async {
+    await _secureStorage.write(key: _tokenKey, value: token);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token);
+    await prefs.remove(_tokenKey);
     _session = AuthSession(token);
   }
 
@@ -417,32 +445,22 @@ class AuthController extends ChangeNotifier {
         return;
       }
 
-      final url = _apiUri('/api/auth/mobile/kakao');
-      if (kDebugMode) {
-        debugPrint('[auth] POST $url (kakao)');
-      }
-      final response = await http.post(
-        url,
-        headers: const {'Content-Type': 'application/json'},
-        body: jsonEncode({'accessToken': kakaoAccessToken}),
-      );
-
-      if (kDebugMode) {
-        debugPrint(
-            '[auth] kakao status=${response.statusCode} bodyLen=${response.body.length}');
+      final first = await _exchangeKakaoForMobileToken(kakaoAccessToken);
+      if (first != null) {
+        await _storeAccessToken(first);
+        return;
       }
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final map = jsonDecode(response.body) as Map<String, dynamic>;
-        final accessToken = map['accessToken'] as String?;
-        if (accessToken == null || accessToken.isEmpty) {
-          _error = '서버 응답이 올바르지 않습니다.';
-        } else {
-          await _storeAccessToken(accessToken);
+      // 이메일 추가 수집(account_email) 동의가 필요한 경우 재동의 후 재시도.
+      if (_needsKakaoEmailScope(_error)) {
+        final reGranted =
+            await UserApi.instance.loginWithNewScopes(['account_email']);
+        final second =
+            await _exchangeKakaoForMobileToken(reGranted.accessToken.trim());
+        if (second != null) {
+          await _storeAccessToken(second);
+          return;
         }
-      } else {
-        _error = _parseErrorBody(response.body) ??
-            '카카오 로그인에 실패했습니다. (${response.statusCode})';
       }
     } on Exception catch (e) {
       _error = e.toString();
@@ -452,7 +470,52 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<String?> _exchangeKakaoForMobileToken(String kakaoAccessToken) async {
+    if (kakaoAccessToken.isEmpty) {
+      _error = '카카오 액세스 토큰을 받지 못했습니다.';
+      return null;
+    }
+
+    final url = _apiUri('/api/auth/mobile/kakao');
+    if (kDebugMode) {
+      debugPrint('[auth] POST $url (kakao)');
+    }
+    final response = await http.post(
+      url,
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({'accessToken': kakaoAccessToken}),
+    );
+
+    if (kDebugMode) {
+      debugPrint(
+          '[auth] kakao status=${response.statusCode} bodyLen=${response.body.length}');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final map = jsonDecode(response.body) as Map<String, dynamic>;
+      final accessToken = map['accessToken'] as String?;
+      if (accessToken == null || accessToken.isEmpty) {
+        _error = '서버 응답이 올바르지 않습니다.';
+        return null;
+      }
+      return accessToken;
+    }
+
+    _error = _parseErrorBody(response.body) ??
+        '카카오 로그인에 실패했습니다. (${response.statusCode})';
+    return null;
+  }
+
+  bool _needsKakaoEmailScope(String? message) {
+    final m = message?.trim();
+    if (m == null || m.isEmpty) return false;
+    return m.contains('이메일 동의') ||
+        m.contains('account_email') ||
+        m.contains('KAKAO_EMAIL_SCOPE_REQUIRED');
+  }
+
   Future<void> signOut() async {
+    await _secureStorage.delete(key: _tokenKey);
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
     _session = null;
@@ -465,6 +528,66 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 모바일 Bearer 세션으로 웹 자동 로그인 URL을 발급받아 반환합니다.
+  ///
+  /// @history
+  /// - 2026-04-26: 신규 — `POST /api/auth/transfer/start` 호출
+  Future<Uri?> startWebSessionTransfer({String callbackPath = '/dashboard'}) async {
+    final token = _session?.accessToken.trim();
+    if (token == null || token.isEmpty) {
+      _error = '로그인이 필요합니다.';
+      notifyListeners();
+      return null;
+    }
+
+    final safePath = (callbackPath.startsWith('/') && !callbackPath.startsWith('//'))
+        ? callbackPath
+        : '/dashboard';
+
+    try {
+      final response = await http.post(
+        _apiUri('/api/auth/transfer/start'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'callbackPath': safePath}),
+      );
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        _error = _parseErrorBody(response.body) ?? '웹 로그인 연결에 실패했습니다. (${response.statusCode})';
+        notifyListeners();
+        return null;
+      }
+      final map = jsonDecode(response.body) as Map<String, dynamic>;
+      final loginUrl = (map['loginUrl'] as String?)?.trim();
+      if (loginUrl == null || loginUrl.isEmpty) {
+        _error = '웹 로그인 URL 응답이 올바르지 않습니다.';
+        notifyListeners();
+        return null;
+      }
+      return Uri.tryParse(loginUrl);
+    } on Exception catch (e) {
+      _error = '웹 로그인 연결 중 오류가 발생했습니다: $e';
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// 모바일 세션을 웹으로 전이하는 URL을 외부 브라우저로 엽니다.
+  ///
+  /// @history
+  /// - 2026-04-26: 신규 — 로그인 전이 URL 발급 후 `launchUrl` 실행
+  Future<bool> openWebSessionTransfer({String callbackPath = '/dashboard'}) async {
+    final uri = await startWebSessionTransfer(callbackPath: callbackPath);
+    if (uri == null) return false;
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok) {
+      _error = '브라우저를 열지 못했습니다.';
+      notifyListeners();
+    }
+    return ok;
+  }
+
   String? _parseErrorBody(String body) {
     if (body.isEmpty) return null;
     try {
@@ -473,5 +596,31 @@ class AuthController extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  String _mapGoogleSignInPlatformError(PlatformException e) {
+    final code = e.code.trim();
+    final message = (e.message ?? '').trim();
+    final detail = (e.details ?? '').toString().trim();
+
+    final isDeveloperConfigError = code == 'sign_in_failed' &&
+        (message.contains('10') ||
+            detail.contains('10') ||
+            message.contains('DEVELOPER_ERROR') ||
+            detail.contains('DEVELOPER_ERROR'));
+
+    if (isDeveloperConfigError) {
+      return '구글 로그인 설정 오류(개발자 구성, code 10)입니다. '
+          'Google Cloud Console의 Android OAuth 클라이언트에 '
+          '`app.bookfolio.seogadam` 패키지명과 현재 서명키 SHA-1(디버그/릴리즈)을 등록했는지 확인하세요. '
+          '에뮬레이터에서는 Google Play 서비스가 최신인지도 점검해 주세요.';
+    }
+
+    if (code == 'network_error') {
+      return '구글 로그인 중 네트워크 오류가 발생했습니다. 연결 상태를 확인하고 다시 시도해 주세요.';
+    }
+
+    return '구글 로그인에 실패했습니다. (${code.isEmpty ? 'unknown' : code})'
+        '${message.isEmpty ? '' : ' $message'}';
   }
 }

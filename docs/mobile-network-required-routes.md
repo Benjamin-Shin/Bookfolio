@@ -18,7 +18,7 @@ Stitch1 통합 계획의 **네트워크 필수 진입점 표·가드**용 기준
 | 프로필           | `ProfileScreen`                      | 필수              |                                         |
 | 프로필 편집      | `ProfileEditScreen`                  | 필수              |                                         |
 | 도서 상세·폼     | `BookDetailScreen`, `BookFormScreen` | 필수              |                                         |
-| 공동서가         | `SharedLibrariesScreen` 등           | 필수              |                                         |
+| 모임서가         | `SharedLibrariesScreen` 등           | 필수              |                                         |
 | 바코드·ISBN      | 스캔·조회 플로우                     | 필수              |                                         |
 
 **History**

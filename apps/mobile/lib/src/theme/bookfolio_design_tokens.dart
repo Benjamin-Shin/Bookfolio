@@ -10,15 +10,15 @@ import 'package:google_fonts/google_fonts.dart';
 /// - 2026-04-05: 모바일 공통 색·타이포·반경·고스트 보더·앰비언트 섀도
 abstract final class BookfolioDesignTokens {
   // —— Color & surface (`DESIGN.md` §2) ——
-  static const Color surface = Color(0xFFFCF9F3);
+  static const Color surface = Color(0xFFFCF7F4);
   static const Color surfaceContainerLow = Color(0xFFF6F3ED);
   static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
   /// 입력·블록 대비용(문서 `surface-container-high` 톤).
   static const Color surfaceContainerHigh = Color(0xFFEBE8E0);
   static const Color surfaceContainerHighest = Color(0xFFE3DED4);
 
-  static const Color primary = Color(0xFF163826);
-  static const Color primaryContainer = Color(0xFF0D2418);
+  static const Color primary = Color(0xFF084226);
+  static const Color primaryContainer = Color(0xFF06311C);
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color onPrimaryContainer = Color(0xFFD5E5DA);
 

@@ -186,6 +186,7 @@ class PersonalLibrarySummary {
 /// `GET/POST /api/me/profile` 응답.
 ///
 /// History:
+/// - 2026-04-26: `favoriteAladinCategoryIds` (국내도서 CID, 최대 5개)
 /// - 2026-04-06: `onboardingCompletedAt`
 /// - 2026-04-06: `annualReadingGoal`
 /// - 2026-04-02: 인구통계 필드
@@ -199,6 +200,7 @@ class MeAppProfile {
     required this.birthDate,
     required this.genderPublic,
     required this.birthDatePublic,
+    required this.favoriteAladinCategoryIds,
     this.annualReadingGoal,
     this.onboardingCompletedAt,
   });
@@ -211,6 +213,7 @@ class MeAppProfile {
   final String? birthDate;
   final bool genderPublic;
   final bool birthDatePublic;
+  final List<int> favoriteAladinCategoryIds;
 
   /// 올해 완독 목표 권수. null이면 미설정.
   final int? annualReadingGoal;
@@ -221,6 +224,17 @@ class MeAppProfile {
   factory MeAppProfile.fromJson(Map<String, dynamic> json) {
     final g = json['annualReadingGoal'];
     final oc = json['onboardingCompletedAt']?.toString();
+    final rawFavorite = json['favoriteAladinCategoryIds'];
+    final favorite = <int>[];
+    if (rawFavorite is List<dynamic>) {
+      for (final raw in rawFavorite) {
+        final parsed = int.tryParse(raw.toString());
+        if (parsed == null || parsed <= 0 || favorite.contains(parsed))
+          continue;
+        favorite.add(parsed);
+        if (favorite.length >= 5) break;
+      }
+    }
     return MeAppProfile(
       id: json['id'] as String,
       email: json['email'] as String,
@@ -230,6 +244,7 @@ class MeAppProfile {
       birthDate: json['birthDate'] as String?,
       genderPublic: json['genderPublic'] == true,
       birthDatePublic: json['birthDatePublic'] == true,
+      favoriteAladinCategoryIds: favorite,
       annualReadingGoal: g is int ? g : (g is num ? g.toInt() : null),
       onboardingCompletedAt: (oc != null && oc.isNotEmpty) ? oc : null,
     );
@@ -481,6 +496,34 @@ class BookfolioApi {
     );
   }
 
+  /// 통계·성향 분석용 — `pageSize` 최대치로 전 페이지를 순회합니다.
+  ///
+  /// History:
+  /// - 2026-04-26: `MyStatsScreen` 집계용 전체 도서 로더 재추가
+  Future<List<UserBook>> fetchAllUserBooks({
+    String? search,
+    String? readingStatus,
+    String? format,
+  }) async {
+    const pageSize = 100;
+    var page = 1;
+    final out = <UserBook>[];
+    while (true) {
+      final result = await fetchBooksPaged(
+        page: page,
+        pageSize: pageSize,
+        search: search,
+        readingStatus: readingStatus,
+        format: format,
+      );
+      out.addAll(result.items);
+      if (result.items.length < pageSize) break;
+      page += 1;
+      if (page > 500) break;
+    }
+    return out;
+  }
+
   /// History:
   /// - 2026-03-29: `user_owned_books_price_stats`와 동기
   Future<UserOwnedBooksPriceStats> fetchOwnedBooksPriceStats() async {
@@ -559,6 +602,60 @@ class BookfolioApi {
         .toList();
   }
 
+  /// 모임서가 생성.
+  ///
+  /// History:
+  /// - 2026-04-26: `SharedLibraryEditScreen` 폼 저장 연동용 재추가
+  Future<SharedLibrarySummary> createSharedLibrary({
+    required String name,
+    required String kind,
+    String? description,
+    String? imageUrl,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/api/me/libraries'),
+      headers: await _headers(),
+      body: jsonEncode({
+        'name': name,
+        'kind': kind,
+        'description': description,
+        'imageUrl': imageUrl,
+      }),
+    );
+    _throwIfFailed(response);
+    return SharedLibrarySummary.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  /// 모임서가 수정.
+  ///
+  /// History:
+  /// - 2026-04-26: `SharedLibraryEditScreen` 폼 저장 연동용 재추가
+  Future<SharedLibrarySummary> updateSharedLibrary(
+    String libraryId, {
+    String? name,
+    String? kind,
+    String? description,
+    String? imageUrl,
+  }) async {
+    final payload = <String, dynamic>{};
+    if (name != null) payload['name'] = name;
+    if (kind != null) payload['kind'] = kind;
+    if (description != null) payload['description'] = description;
+    if (imageUrl != null) payload['imageUrl'] = imageUrl;
+
+    final response = await _client.patch(
+      Uri.parse('$_baseUrl/api/me/libraries/$libraryId'),
+      headers: await _headers(),
+      body: jsonEncode(payload),
+    );
+    _throwIfFailed(response);
+    return SharedLibrarySummary.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<List<SharedLibraryBookSummary>> fetchSharedLibraryBooks(
       String libraryId) async {
     final response = await _client.get(
@@ -629,6 +726,23 @@ class BookfolioApi {
       {int categoryId = 0}) async {
     final response = await _client.get(
       Uri.parse('$_baseUrl/api/me/aladin-item-new').replace(
+        queryParameters: {'categoryId': '$categoryId'},
+      ),
+      headers: await _headers(),
+    );
+    _throwIfFailed(response);
+    return AladinBestsellerFeed.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// 신간 전체(서버가 `ALADIN_API_BASE_URL` + `QueryType=ItemNewAll`로 조회).
+  ///
+  /// History:
+  /// - 2026-04-26: `GET /api/me/aladin-item-new-all` 추가
+  Future<AladinBestsellerFeed> fetchAladinItemNewAllFeed(
+      {int categoryId = 0}) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/aladin-item-new-all').replace(
         queryParameters: {'categoryId': '$categoryId'},
       ),
       headers: await _headers(),

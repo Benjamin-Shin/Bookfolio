@@ -5,6 +5,7 @@ import { getRequestUserId } from "@/lib/auth/request-user";
 
 /**
  * @history
+ * - 2026-04-26: `favoriteAladinCategoryIds` — 국내도서 CID 즐겨찾기(최대 5개)
  * - 2026-04-06: `onboardingCompleted` — 온보딩 완료 시각 기록
  * - 2026-04-06: `annualReadingGoal` — 연간 완독 목표 권수
  * - 2026-04-02: `POST` + `action: "update"` — 웹 API 메서드 규약(`GET`/`POST`만). 인구통계 필드.
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
       birthDatePublic?: boolean;
       annualReadingGoal?: number | null;
       onboardingCompleted?: boolean;
+      favoriteAladinCategoryIds?: number[];
     };
 
     const action = typeof body.action === "string" ? body.action.trim().toLowerCase() : "";
@@ -53,7 +55,10 @@ export async function POST(request: NextRequest) {
       annualReadingGoal: Object.prototype.hasOwnProperty.call(body, "annualReadingGoal")
         ? body.annualReadingGoal
         : undefined,
-      onboardingCompleted: body.onboardingCompleted === true ? true : undefined
+      onboardingCompleted: body.onboardingCompleted === true ? true : undefined,
+      favoriteAladinCategoryIds: Object.prototype.hasOwnProperty.call(body, "favoriteAladinCategoryIds")
+        ? body.favoriteAladinCategoryIds
+        : undefined
     });
 
     const profile = await getAppProfile(userId);

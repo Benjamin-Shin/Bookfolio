@@ -1,4 +1,4 @@
--- 공동서가: 가족·모임 등. 물리적 한 권(library_books) + 멤버별 읽기 상태(library_book_member_states).
+-- 모임서가: 가족·모임 등. 물리적 한 권(library_books) + 멤버별 읽기 상태(library_book_member_states).
 -- 개인 서가(user_books)와는 별도(A안). API(service role)에서 멤버십 검증.
 
 create table if not exists public.libraries (
@@ -72,7 +72,7 @@ alter table public.library_book_member_states enable row level security;
 -- NextAuth 기반 앱은 주로 service_role로 접근합니다. authenticated 직접 접근 시에는 정책 없음 = 거부(app_users와 동일 패턴).
 -- 멤버십 검증은 API 레이어에서 수행합니다.
 
-comment on table public.libraries is '공동서가(가족·모임 등).';
-comment on table public.library_members is '공동서가 멤버 및 역할(owner/member).';
+comment on table public.libraries is '모임서가(가족·모임 등).';
+comment on table public.library_members is '모임서가 멤버 및 역할(owner/member).';
 comment on table public.library_books is '해당 서가 안의 물리적 한 권(공유 카탈로그 books 참조).';
-comment on table public.library_book_member_states is '공동서가 책에 대한 멤버별 읽기 상태.';
+comment on table public.library_book_member_states is '모임서가 책에 대한 멤버별 읽기 상태.';

@@ -39,12 +39,19 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const body = (await request.json()) as {
       name?: string;
       description?: string | null;
+      imageUrl?: string | null;
       kind?: string;
     };
 
-    const patch: { name?: string; description?: string | null; kind?: (typeof LIBRARY_KINDS)[number] } = {};
+    const patch: {
+      name?: string;
+      description?: string | null;
+      imageUrl?: string | null;
+      kind?: (typeof LIBRARY_KINDS)[number];
+    } = {};
     if (body.name !== undefined) patch.name = body.name;
     if (body.description !== undefined) patch.description = body.description;
+    if (body.imageUrl !== undefined) patch.imageUrl = body.imageUrl;
     if (body.kind !== undefined) {
       if (!isLibraryKind(body.kind)) {
         return NextResponse.json({ error: "kind는 family 또는 club 이어야 합니다." }, { status: 400 });

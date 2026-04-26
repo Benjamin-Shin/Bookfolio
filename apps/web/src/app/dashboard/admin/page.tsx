@@ -2,7 +2,7 @@
  * @history
  * - 2026-04-10: 클라이언트 오류 수집 카드
  * - 2026-03-29: 상단 플랫폼 통계 카드(`fetchAdminDashboardStats`) 추가
- * - 2026-03-29: 공동서가 관리 카드 추가
+ * - 2026-03-29: 모임서가 관리 카드 추가
  * - 2026-03-26: 포인트·정책 카드 추가
  */
 import Link from "next/link";
@@ -69,7 +69,7 @@ export default async function AdminHomePage() {
             value={stats.userCount}
           />
           <StatTile
-            title="공동서가"
+            title="모임서가"
             description="모임·공유 서가(libraries) 개수"
             value={stats.sharedLibraryCount}
           />
@@ -182,9 +182,9 @@ export default async function AdminHomePage() {
         </Card>
         <Card className="border-border/80">
           <CardHeader>
-            <CardTitle className="text-lg">공동서가</CardTitle>
+            <CardTitle className="text-lg">모임서가</CardTitle>
             <CardDescription>
-              공동서가 목록, 참여 회원, 연결 도서 권수를 확인합니다.
+              모임서가 목록, 참여 회원, 연결 도서 권수를 확인합니다.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -192,7 +192,7 @@ export default async function AdminHomePage() {
               href={"/dashboard/admin/shared-libraries" as Route}
               className="text-sm font-medium text-primary underline-offset-4 hover:underline"
             >
-              공동서가 목록 열기
+              모임서가 목록 열기
             </Link>
           </CardContent>
         </Card>

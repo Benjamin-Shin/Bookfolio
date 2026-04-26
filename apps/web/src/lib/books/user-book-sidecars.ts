@@ -171,7 +171,7 @@ export async function deleteUserBookMemo(
   if (error) throw error;
 }
 
-/** 공동서가 공유 시 한 줄 메모 — `user_book_memos`에 추가 */
+/** 모임서가 공유 시 한 줄 메모 — `user_book_memos`에 추가 */
 export async function appendUserBookMemoLine(
   userBookId: string,
   bodyMd: string,

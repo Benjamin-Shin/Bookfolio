@@ -2,7 +2,7 @@ import 'package:seogadam_mobile/src/state/shared_library_invite_controller.dart'
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-/// 로그인 상태에서 앱 라이프사이클에 맞춰 공동서가 초대 폴링을 켜고 끕니다.
+/// 로그인 상태에서 앱 라이프사이클에 맞춰 모임서가 초대 폴링을 켜고 끕니다.
 class SharedLibraryInviteLifecycle extends StatefulWidget {
   const SharedLibraryInviteLifecycle({super.key, required this.child});
 

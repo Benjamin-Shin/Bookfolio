@@ -37,14 +37,14 @@ function AndroidApkIcon({ className }: { className?: string }) {
  *
  * @history
  * - 2026-03-26: 대시보드·로그아웃 등 네비에 lucide 아이콘 추가
- * - 2026-03-28: 네비 순서 — 공동서가 → 북폴리오 집계 → 베스트셀러 → 초이스 신간 → 내 서가
+ * - 2026-03-28: 네비 순서 — 모임서가 → 북폴리오 집계 → 베스트셀러 → 초이스 신간 → 내 서가
  * - 2026-04-05: 브랜드 서가담·글래스 헤더; 내비 「서가담 집계」 표기
  * - 2026-04-12: 브랜드 링크 — 로그인 시 `/`(랜딩) 대신 `/dashboard`(내 서가)
  * - 2026-04-12: 모바일(`md` 미만) 브랜드 링크·로고 뷰포트 가운데 정렬; PNG 경로 `Seogadam_Web_logo.png`·`alt` 정리
  * - 2026-04-07: 헤더 브랜드 마크·표시명 서가담(`seogadam_logo.png`)
  * - 2026-03-29: `md` 미만 Sheet 햄버거 — 전역 내비·푸터와 동일 법적 고지 링크(개인정보·약관·쿠키)
  * - 2026-03-26: 로그인 네비에 베스트셀러·초이스 신간 링크 추가(`dashboard/bestsellers`, `dashboard/choice-new`)
- * - 2026-03-29: 소유 공동서가(타 멤버 있음) 시 탈퇴 막힘 목록을 헤더·모바일 메뉴에 전달
+ * - 2026-03-29: 소유 모임서가(타 멤버 있음) 시 탈퇴 막힘 목록을 헤더·모바일 메뉴에 전달
  */
 export async function SiteHeader() {
   const session = await auth();
@@ -95,7 +95,7 @@ export async function SiteHeader() {
                     className="inline-flex items-center gap-2"
                   >
                     <UsersRoundIcon className="size-4 opacity-80" />
-                    공동서가
+                    모임서가
                   </Link>
                 </Button>
                 <Button variant="ghost" size="sm" asChild>

@@ -102,6 +102,31 @@ export const ALADIN_CATEGORY_OPTIONS: AladinCategoryOption[] = parseCsvToOptions
   readFileSync(CATEGORY_CSV_PATH, "utf8")
 );
 
+/**
+ * 국내도서 몰 카테고리만 추린 옵션 목록입니다.
+ *
+ * @history
+ * - 2026-04-26: 프로필 즐겨찾기 CID 검증/표시용으로 추가
+ */
+export const ALADIN_DOMESTIC_CATEGORY_OPTIONS: AladinCategoryOption[] =
+  ALADIN_CATEGORY_OPTIONS.filter(
+    (option) => option.mall === "국내도서" && option.categoryId > 0
+  );
+
+const ALADIN_DOMESTIC_CATEGORY_ID_SET = new Set<number>(
+  ALADIN_DOMESTIC_CATEGORY_OPTIONS.map((option) => option.categoryId)
+);
+
+/**
+ * 입력 CID가 국내도서 몰 카테고리인지 검사합니다.
+ *
+ * @history
+ * - 2026-04-26: 프로필 저장 시 CID 유효성 검증
+ */
+export function isDomesticAladinCategoryId(categoryId: number): boolean {
+  return Number.isInteger(categoryId) && ALADIN_DOMESTIC_CATEGORY_ID_SET.has(categoryId);
+}
+
 export function parseCategoryId(input: string | null | undefined): number {
   if (!input) {
     return 0;

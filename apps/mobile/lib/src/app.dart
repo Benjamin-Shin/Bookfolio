@@ -5,7 +5,7 @@ import 'package:seogadam_mobile/src/state/shared_library_invite_controller.dart'
 import 'package:seogadam_mobile/src/state/theme_controller.dart';
 import 'package:seogadam_mobile/src/theme/bookfolio_themes.dart';
 import 'package:seogadam_mobile/src/ui/app_root_scaffold.dart';
-import 'package:seogadam_mobile/src/ui/screens/auth_gate.dart';
+import 'package:seogadam_mobile/src/ui/screens/auth/auth_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

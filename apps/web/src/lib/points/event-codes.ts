@@ -9,7 +9,7 @@ export const POINT_EVENT_CODES = {
   join_membership: "join_membership",
   /** 개인 서가에 도서 1권 등록 시 1회(행당 `user_books.id` 멱등) */
   user_book_register: "user_book_register",
-  /** 무료/기본 한도를 넘어 공동서가를 추가 생성할 때(음수 규칙, `shared_library_create_extra:libraryId`) */
+  /** 무료/기본 한도를 넘어 모임서가를 추가 생성할 때(음수 규칙, `shared_library_create_extra:libraryId`) */
   shared_library_create_extra: "shared_library_create_extra",
   /** 무료 초대 1명 초과 시 멤버 추가(음수 규칙, 멱등에 libraryId+피초대자) */
   shared_library_invite_extra: "shared_library_invite_extra",
@@ -26,7 +26,7 @@ export const POINT_EVENT_CODE_DESCRIPTION_KO: Partial<Record<string, string>> =
     user_book_register:
       "내 서가에 도서 등록 시(권당 1회, 일 한도는 규칙 테이블)",
     shared_library_create_extra:
-      "기본 한도 초과 공동서가 추가 생성 시 차감 — 이벤트 `shared_library_create_extra`(서버가 `libraryId` 멱등)",
+      "기본 한도 초과 모임서가 추가 생성 시 차감 — 이벤트 `shared_library_create_extra`(서버가 `libraryId` 멱등)",
     shared_library_invite_extra:
       "무료 초대 1명 이후 멤버 추가 시 차감 — `shared_library_invite_extra`(멱등 키에 서가·피초대자)",
   };

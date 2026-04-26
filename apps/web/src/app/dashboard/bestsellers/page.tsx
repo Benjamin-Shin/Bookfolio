@@ -18,6 +18,7 @@ import { env } from "@/lib/env";
  * - 2026-03-25: 대시보드 베스트셀러(피드) 페이지 추가
  */
 export const dynamic = "force-dynamic";
+const DOMESTIC_MALL = "국내도서";
 
 type PageProps = {
   searchParams: Promise<{
@@ -35,10 +36,10 @@ export default async function DashboardBestsellersPage({ searchParams }: PagePro
   }
 
   const sp = await searchParams;
-  const selectedMall = sp.mall?.trim() || "";
+  const selectedMall = DOMESTIC_MALL;
   const selectedDepth1 = sp.depth1?.trim() || "";
-  const selectedDepth2 = sp.depth2?.trim() || "";
-  const selectedDepth3 = sp.depth3?.trim() || "";
+  const selectedDepth2 = "";
+  const selectedDepth3 = "";
   const filter = buildAladinCategoryFilterOptions(ALADIN_CATEGORY_OPTIONS, {
     mall: selectedMall,
     depth1: selectedDepth1,
@@ -81,6 +82,8 @@ export default async function DashboardBestsellersPage({ searchParams }: PagePro
           selectedDepth1={selectedDepth1}
           selectedDepth2={selectedDepth2}
           selectedDepth3={selectedDepth3}
+          mallFixed
+          depth1Only
         />
       }
     />

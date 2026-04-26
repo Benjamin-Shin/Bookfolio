@@ -3,6 +3,7 @@ class SharedLibrarySummary {
     required this.id,
     required this.name,
     this.description,
+    this.imageUrl,
     required this.kind,
     required this.createdBy,
     required this.createdAt,
@@ -13,6 +14,7 @@ class SharedLibrarySummary {
   final String id;
   final String name;
   final String? description;
+  final String? imageUrl;
   final String kind;
   final String createdBy;
   final String createdAt;
@@ -24,6 +26,7 @@ class SharedLibrarySummary {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
+      imageUrl: json['imageUrl'] as String?,
       kind: json['kind'] as String,
       createdBy: json['createdBy'] as String,
       createdAt: json['createdAt'] as String,
@@ -49,6 +52,7 @@ class SharedLibraryOwnerRow {
     required this.userId,
     required this.email,
     this.name,
+    this.avatarUrl,
     required this.userBookId,
     required this.readingStatus,
     this.location,
@@ -59,6 +63,7 @@ class SharedLibraryOwnerRow {
   final String userId;
   final String email;
   final String? name;
+  final String? avatarUrl;
   final String userBookId;
   final String readingStatus;
   final String? location;
@@ -70,6 +75,7 @@ class SharedLibraryOwnerRow {
       userId: json['userId'] as String,
       email: json['email'] as String? ?? '',
       name: json['name'] as String?,
+      avatarUrl: (json['avatarUrl'] ?? json['profileImageUrl'] ?? json['imageUrl']) as String?,
       userBookId: json['userBookId'] as String,
       readingStatus: json['readingStatus'] as String? ?? 'unread',
       location: json['location'] as String?,

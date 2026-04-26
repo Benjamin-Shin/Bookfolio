@@ -300,7 +300,7 @@ export function LibraryNewBookForm({ libraryId }: Props) {
       </div>
 
       <Button type="submit" disabled={submitting}>
-        {submitting ? "등록 중…" : "공동서가에 추가"}
+        {submitting ? "등록 중…" : "모임서가에 추가"}
       </Button>
     </form>
   );

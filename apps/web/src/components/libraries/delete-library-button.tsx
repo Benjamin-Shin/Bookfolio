@@ -17,7 +17,7 @@ export function DeleteLibraryButton({ libraryId }: Props) {
   async function handleDelete() {
     if (
       !confirm(
-        "이 공동서가와 안의 모든 책·기록을 삭제할까요? 되돌릴 수 없습니다.",
+        "이 모임서가와 안의 모든 책·기록을 삭제할까요? 되돌릴 수 없습니다.",
       )
     ) {
       return;

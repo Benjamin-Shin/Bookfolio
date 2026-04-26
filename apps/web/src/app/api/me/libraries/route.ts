@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       name?: string;
       description?: string | null;
+      imageUrl?: string | null;
       kind?: string;
     };
 
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       {
         name: body.name,
         description: body.description ?? null,
+        imageUrl: body.imageUrl ?? null,
         kind: body.kind
       },
       userId,

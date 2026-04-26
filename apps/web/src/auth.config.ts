@@ -9,6 +9,7 @@ import Google from "next-auth/providers/google";
 import Kakao from "next-auth/providers/kakao";
 
 import { getAppUserRole } from "@/lib/auth/get-app-user-role";
+import { consumeMobileLoginTransferCode } from "@/lib/auth/mobile-login-transfer";
 import { ensureOAuthAppUser } from "@/lib/auth/app-users";
 import { verifyAppUserCredentials } from "@/lib/auth/verify-app-user-credentials";
 
@@ -66,6 +67,38 @@ providers.push(
         email: user.email,
         name: user.name ?? undefined,
         image: user.image ?? undefined
+      };
+    }
+  })
+);
+
+providers.push(
+  Credentials({
+    id: "mobile-transfer",
+    name: "mobile-transfer",
+    credentials: {
+      code: { label: "Transfer code", type: "text" }
+    },
+    /**
+     * 모바일에서 발급한 1회용 코드로 웹 세션을 교환합니다.
+     *
+     * @history
+     * - 2026-04-26: 신규 — 모바일 Bearer 세션을 웹 NextAuth 세션으로 전이하는 Credentials provider
+     */
+    async authorize(credentials) {
+      const codeRaw = credentials?.code;
+      if (!codeRaw) {
+        return null;
+      }
+      const consumed = await consumeMobileLoginTransferCode(String(codeRaw));
+      if (!consumed) {
+        return null;
+      }
+      return {
+        id: consumed.userId,
+        email: consumed.email,
+        name: consumed.name ?? undefined,
+        image: consumed.image ?? undefined
       };
     }
   })

@@ -2,7 +2,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { fetchAdminSharedLibrariesOverview } from "@/lib/libraries/admin-shared-libraries-overview";
 
 /**
- * 관리자 전용 공동서가(`libraries`) 목록 — 멤버·연결 도서(캐논 기준 distinct) 수.
+ * 관리자 전용 모임서가(`libraries`) 목록 — 멤버·연결 도서(캐논 기준 distinct) 수.
  *
  * @history
  * - 2026-03-29: 신규
@@ -31,9 +31,9 @@ export default async function AdminSharedLibrariesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">공동서가 관리</h1>
+        <h1 className="text-2xl font-bold tracking-tight">모임서가 관리</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          등록된 공동서가와 참여 회원, 연결된 도서 권수(같은 책은 한 권으로
+          등록된 모임서가와 참여 회원, 연결된 도서 권수(같은 책은 한 권으로
           집계)를 봅니다.
         </p>
       </div>
@@ -42,7 +42,7 @@ export default async function AdminSharedLibrariesPage() {
         <p className="text-sm text-destructive">{loadError}</p>
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          등록된 공동서가가 없습니다.
+          등록된 모임서가가 없습니다.
         </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border/80">

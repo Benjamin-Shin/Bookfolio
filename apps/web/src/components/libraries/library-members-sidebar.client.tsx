@@ -47,7 +47,7 @@ function MemberAvatar({ member }: { member: LibraryMemberRow }) {
 }
 
 /**
- * 공동서가 좌측 — 멤버 목록(이메일 비표시)·소유자 초대·관리 다이얼로그.
+ * 모임서가 좌측 — 멤버 목록(이메일 비표시)·소유자 초대·관리 다이얼로그.
  *
  * @history
  * - 2026-04-12: `LibraryMembersPanel` 대체 — 아바타·이름 우선, 초대는 팝업

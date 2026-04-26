@@ -50,7 +50,7 @@ type SiteHeaderMobileNavProps = {
   user: { id: string; email: string; role?: string | null } | null;
   displayLabel: string;
   initialProfile: AppProfileView | null;
-  /** 소유 공동서가에 다른 멤버가 있어 탈퇴가 막히는 서가 이름(서버 `assertAccountDeleteAllowed`와 동일) */
+  /** 소유 모임서가에 다른 멤버가 있어 탈퇴가 막히는 서가 이름(서버 `assertAccountDeleteAllowed`와 동일) */
   sharedLibrariesBlockingWithdrawal: string[];
 };
 
@@ -182,7 +182,7 @@ export function SiteHeaderMobileNav({
                 ) : null}
                 <MobileNavLink href="/dashboard/libraries" onNavigate={close}>
                   <UsersRoundIcon className="size-4 opacity-80" />
-                  공동서가
+                  모임서가
                 </MobileNavLink>
                 <MobileNavLink
                   href="/dashboard/bookfolio-aggregate"

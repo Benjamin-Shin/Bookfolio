@@ -38,7 +38,7 @@ export default async function LibraryNewBookPage({ params }: PageProps) {
       <Card className="border-border/80">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>공동서가에 책 추가</CardTitle>
+            <CardTitle>모임서가에 책 추가</CardTitle>
             <CardDescription>
               「{lib.name}」에 물리적 한 권을 등록합니다.
             </CardDescription>

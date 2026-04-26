@@ -22,7 +22,7 @@ String readingStatusLabelKo(ReadingStatus s) {
 /// API 문자열(`unread` 등)을 한글 라벨로. 알 수 없으면 원문 반환.
 ///
 /// History:
-/// - 2026-03-25: 공동서가 소유자 행용
+/// - 2026-03-25: 모임서가 소유자 행용
 String readingStatusLabelFromApi(String raw) {
   try {
     return readingStatusLabelKo(ReadingStatus.values.byName(raw));

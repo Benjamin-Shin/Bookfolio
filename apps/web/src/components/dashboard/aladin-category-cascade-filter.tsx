@@ -13,6 +13,8 @@ type Props = {
   selectedDepth1: string;
   selectedDepth2: string;
   selectedDepth3: string;
+  mallFixed?: boolean;
+  depth1Only?: boolean;
 };
 
 /**
@@ -30,7 +32,9 @@ export function AladinCategoryCascadeFilter({
   selectedMall,
   selectedDepth1,
   selectedDepth2,
-  selectedDepth3
+  selectedDepth3,
+  mallFixed = false,
+  depth1Only = false
 }: Props) {
   const router = useRouter();
   const [mall, setMall] = useState(selectedMall);
@@ -62,27 +66,29 @@ export function AladinCategoryCascadeFilter({
 
   return (
     <div className="flex items-center gap-2" suppressHydrationWarning>
-      <select
-        name="mall"
-        value={mall}
-        className="h-9 w-[120px] rounded-md border bg-background px-2 text-sm"
-        onChange={(e) => {
-          const nextMall = e.currentTarget.value;
-          setMall(nextMall);
-          setD1("");
-          setD2("");
-          setD3("");
-          push({ mall: nextMall || undefined });
-        }}
-        suppressHydrationWarning
-      >
-        <option value="">카테고리</option>
-        {malls.map((mall) => (
-          <option key={mall} value={mall}>
-            {mall}
-          </option>
-        ))}
-      </select>
+      {!mallFixed ? (
+        <select
+          name="mall"
+          value={mall}
+          className="h-9 w-[120px] rounded-md border bg-background px-2 text-sm"
+          onChange={(e) => {
+            const nextMall = e.currentTarget.value;
+            setMall(nextMall);
+            setD1("");
+            setD2("");
+            setD3("");
+            push({ mall: nextMall || undefined });
+          }}
+          suppressHydrationWarning
+        >
+          <option value="">카테고리</option>
+          {malls.map((mall) => (
+            <option key={mall} value={mall}>
+              {mall}
+            </option>
+          ))}
+        </select>
+      ) : null}
       <select
         name="depth1"
         value={d1}
@@ -106,52 +112,56 @@ export function AladinCategoryCascadeFilter({
           </option>
         ))}
       </select>
-      <select
-        name="depth2"
-        value={d2}
-        className="h-9 w-[120px] rounded-md border bg-background px-2 text-sm"
-        onChange={(e) => {
-          const nextDepth2 = e.currentTarget.value;
-          setD2(nextDepth2);
-          setD3("");
-          push({
-            mall: mall || undefined,
-            depth1: d1 || undefined,
-            depth2: nextDepth2 || undefined
-          });
-        }}
-        suppressHydrationWarning
-      >
-        <option value="">카테고리</option>
-        {depth2.map((v) => (
-          <option key={v} value={v}>
-            {v}
-          </option>
-        ))}
-      </select>
-      <select
-        name="depth3"
-        value={d3}
-        className="h-9 w-[120px] rounded-md border bg-background px-2 text-sm"
-        onChange={(e) => {
-          const nextDepth3 = e.currentTarget.value;
-          setD3(nextDepth3);
-          push({
-            mall: mall || undefined,
-            depth1: d1 || undefined,
-            depth2: d2 || undefined,
-            depth3: nextDepth3 || undefined
-          });
-        }}
-        suppressHydrationWarning
-      >
-        <option value="">카테고리</option>
-        {depth3.map((v) => (
-          <option key={v} value={v}>
-            {v}
-          </option>
-        ))}
-      </select>
+      {!depth1Only ? (
+        <>
+          <select
+            name="depth2"
+            value={d2}
+            className="h-9 w-[120px] rounded-md border bg-background px-2 text-sm"
+            onChange={(e) => {
+              const nextDepth2 = e.currentTarget.value;
+              setD2(nextDepth2);
+              setD3("");
+              push({
+                mall: mall || undefined,
+                depth1: d1 || undefined,
+                depth2: nextDepth2 || undefined
+              });
+            }}
+            suppressHydrationWarning
+          >
+            <option value="">카테고리</option>
+            {depth2.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <select
+            name="depth3"
+            value={d3}
+            className="h-9 w-[120px] rounded-md border bg-background px-2 text-sm"
+            onChange={(e) => {
+              const nextDepth3 = e.currentTarget.value;
+              setD3(nextDepth3);
+              push({
+                mall: mall || undefined,
+                depth1: d1 || undefined,
+                depth2: d2 || undefined,
+                depth3: nextDepth3 || undefined
+              });
+            }}
+            suppressHydrationWarning
+          >
+            <option value="">카테고리</option>
+            {depth3.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+        </>
+      ) : null}
     </div>
   );
 }

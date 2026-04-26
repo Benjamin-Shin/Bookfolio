@@ -139,7 +139,7 @@ function tabSectionLabel(tab: LibraryBookTab): string {
 }
 
 /**
- * 공동서가 상세(멤버·책) — 내 서가형 좌측 컬렉션·멤버 패널.
+ * 모임서가 상세(멤버·책) — 내 서가형 좌측 컬렉션·멤버 패널.
  *
  * @history
  * - 2026-04-12: 에디토리얼 좌측 메뉴(집계 탭·Hall of Fame)·멤버·초대 다이얼로그; `tab`·`page`·`owners.rating`
@@ -349,7 +349,7 @@ export default async function LibraryDetailPage({
       <div className="flex min-h-screen">
         <aside
           className="fixed left-0 top-20 z-40 hidden h-[calc(100vh-5rem)] w-72 flex-col overflow-y-auto border-r border-[#051b0e]/10 bg-[#fbf9f4] px-5 py-8 lg:flex"
-          aria-label="공동서가 컬렉션·멤버"
+          aria-label="모임서가 컬렉션·멤버"
         >
           <div className="mb-8">
             <h3 className="mb-1 font-sans text-[0.75rem] font-bold uppercase tracking-widest text-[#051b0e]">
@@ -420,7 +420,7 @@ export default async function LibraryDetailPage({
         <main className="flex-1 px-6 pb-24 pt-10 md:px-12 lg:ml-72 lg:px-16">
           <nav
             className="mb-8 flex gap-1 overflow-x-auto pb-2 lg:hidden"
-            aria-label="공동서가 보기 탭"
+            aria-label="모임서가 보기 탭"
           >
             {(
               [

@@ -21,11 +21,11 @@ import {
 } from "@/lib/libraries/repository";
 
 /**
- * 공동서가 허브(목록) — 내 서가와 동일한 에디토리얼 셸·좌측 네비.
+ * 모임서가 허브(목록) — 내 서가와 동일한 에디토리얼 셸·좌측 네비.
  *
  * @history
- * - 2026-04-12: `dashboard`형 배경·고정 사이드(내 서가·공동서가 목록)
- * - 2026-03-25: 공동서가 생성 상한 도달 시 「새 공동서가」 버튼 비활성
+ * - 2026-04-12: `dashboard`형 배경·고정 사이드(내 서가·모임서가 목록)
+ * - 2026-03-25: 모임서가 생성 상한 도달 시 「새 모임서가」 버튼 비활성
  */
 export default async function LibrariesPage() {
   const session = await auth();
@@ -46,14 +46,14 @@ export default async function LibrariesPage() {
       <div className="flex min-h-screen">
         <aside
           className="fixed left-0 top-20 z-40 hidden h-[calc(100vh-5rem)] w-64 flex-col overflow-y-auto border-r border-[#051b0e]/10 bg-[#fbf9f4] px-6 py-8 lg:flex"
-          aria-label="공동서가 메뉴"
+          aria-label="모임서가 메뉴"
         >
           <div className="mb-10">
             <h3 className="mb-1 font-sans text-[0.75rem] font-bold uppercase tracking-widest text-[#051b0e]">
               서가담
             </h3>
             <p className="font-sans text-[0.65rem] text-[#1a3021]/60">
-              공동서가 허브
+              모임서가 허브
             </p>
           </div>
           <nav className="space-y-2">
@@ -75,7 +75,7 @@ export default async function LibrariesPage() {
             >
               <LibraryIcon className="size-5 shrink-0" aria-hidden />
               <span className="font-sans text-[0.75rem] uppercase tracking-widest">
-                공동서가
+                모임서가
               </span>
             </div>
           </nav>
@@ -114,7 +114,7 @@ export default async function LibrariesPage() {
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="font-sans text-2xl font-bold italic text-[#051b0e]">
-                공동서가
+                모임서가
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-[#434843]">
                 가족·오프라인 모임 등 함께 쓰는 책장입니다. 권당 멤버별 읽기
@@ -129,7 +129,7 @@ export default async function LibrariesPage() {
                   asChild
                 >
                   <Link href={"/dashboard/libraries/new" as Route}>
-                    새 공동서가
+                    새 모임서가
                   </Link>
                 </Button>
               ) : (
@@ -137,9 +137,9 @@ export default async function LibrariesPage() {
                   size="sm"
                   type="button"
                   disabled
-                  title="소유 공동서가 개수 상한에 도달했습니다."
+                  title="소유 모임서가 개수 상한에 도달했습니다."
                 >
-                  새 공동서가
+                  새 모임서가
                 </Button>
               )}
             </div>
@@ -149,7 +149,7 @@ export default async function LibrariesPage() {
             <Card className="border-[#051b0e]/15 bg-white/50">
               <CardHeader>
                 <CardTitle className="font-serif text-[#051b0e]">
-                  아직 공동서가가 없습니다
+                  아직 모임서가가 없습니다
                 </CardTitle>
                 <CardDescription>
                   첫 서가를 만들고 멤버를 초대해 보세요.
@@ -162,12 +162,12 @@ export default async function LibrariesPage() {
                     asChild
                   >
                     <Link href={"/dashboard/libraries/new" as Route}>
-                      공동서가 만들기
+                      모임서가 만들기
                     </Link>
                   </Button>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    소유 공동서가는 최대 {policies.sharedLibraryCreateLimit}
+                    소유 모임서가는 최대 {policies.sharedLibraryCreateLimit}
                     개까지 만들 수 있습니다.
                   </p>
                 )}

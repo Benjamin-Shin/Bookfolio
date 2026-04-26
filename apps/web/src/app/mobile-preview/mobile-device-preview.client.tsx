@@ -41,7 +41,7 @@ const PRESET_GROUPS: PresetGroup[] = [
     description:
       "iframe 너비가 모바일이라 상단 오른쪽 햄버거(≡)도 실제와 같이 보입니다. 아래 버튼은 그 메뉴·항목과 같은 주소입니다.",
     items: [
-      { label: "공동서가", path: "/dashboard/libraries" },
+      { label: "모임서가", path: "/dashboard/libraries" },
       { label: "서가담 집계", path: "/dashboard/bookfolio-aggregate" },
       { label: "베스트셀러", path: "/dashboard/bestsellers" },
       { label: "초이스 신간", path: "/dashboard/choice-new" },
@@ -83,7 +83,7 @@ interface MobileDevicePreviewProps {
  * @history
  * - 2026-04-13: 계정·데이터 삭제 프리셋 → `/terms#article-20-withdrawal`
  * - 2026-04-05: 프리셋·툴팁 서가담 표기
- * - 2026-03-29: 햄버거(`SiteHeaderMobileNav`)와 동일 프리셋·법적 고지·내/공동 상세·공동서가 서가 홈(UUID).
+ * - 2026-03-29: 햄버거(`SiteHeaderMobileNav`)와 동일 프리셋·법적 고지·내/공동 상세·모임서가 서가 홈(UUID).
  * - 2026-03-29: 초기 구현(프리셋 경로·갱신·안내 카드).
  */
 export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
@@ -124,11 +124,11 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
   const openSharedLibraryHome = useCallback(() => {
     const lib = trimId(sharedLibraryId);
     if (!lib) {
-      setDetailError("공동서가 ID를 입력하세요.");
+      setDetailError("모임서가 ID를 입력하세요.");
       return;
     }
     if (!isUuidLike(lib)) {
-      setDetailError("공동서가 ID는 UUID 형식이어야 합니다.");
+      setDetailError("모임서가 ID는 UUID 형식이어야 합니다.");
       return;
     }
     setDetailError(null);
@@ -140,11 +140,11 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
     const lib = trimId(sharedLibraryId);
     const book = trimId(sharedBookId);
     if (!lib || !book) {
-      setDetailError("공동서가 ID와 도서 ID를 모두 입력하세요.");
+      setDetailError("모임서가 ID와 도서 ID를 모두 입력하세요.");
       return;
     }
     if (!isUuidLike(lib) || !isUuidLike(book)) {
-      setDetailError("공동서가·도서 ID는 UUID 형식이어야 합니다.");
+      setDetailError("모임서가·도서 ID는 UUID 형식이어야 합니다.");
       return;
     }
     setDetailError(null);
@@ -221,7 +221,7 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                 <code className="rounded bg-muted px-1 py-0.5 text-[11px]">
                   /dashboard/books/…
                 </code>
-                , 공동서가 서가 홈은{" "}
+                , 모임서가 서가 홈은{" "}
                 <code className="rounded bg-muted px-1 py-0.5 text-[11px]">
                   /dashboard/libraries/…
                 </code>
@@ -258,7 +258,7 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">공동서가 — 서가 ID</Label>
+                  <Label className="text-xs">모임서가 — 서가 ID</Label>
                   <Input
                     value={sharedLibraryId}
                     onChange={(e) => setSharedLibraryId(e.target.value)}
@@ -277,7 +277,7 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
                     </Button>
                   </div>
                   <Label className="text-xs text-muted-foreground">
-                    공동서가 도서 상세 — 캐논 도서 ID
+                    모임서가 도서 상세 — 캐논 도서 ID
                   </Label>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                     <Input
@@ -362,7 +362,7 @@ export function MobileDevicePreview({ origin }: MobileDevicePreviewProps) {
 
           <p className="max-w-md text-center text-xs text-muted-foreground">
             iframe 안에서 링크로 이동하거나, 상단 햄버거로 메뉴를 열어
-            공동서가·집계 등으로 갈 수 있습니다. 프리셋 버튼은 밖에서 경로를
+            모임서가·집계 등으로 갈 수 있습니다. 프리셋 버튼은 밖에서 경로를
             바꿀 때만 씁니다.
           </p>
         </div>

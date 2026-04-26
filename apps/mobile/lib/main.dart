@@ -2,7 +2,7 @@ import 'package:seogadam_mobile/src/app.dart';
 import 'package:seogadam_mobile/src/local/library_offline_store.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 /// History:
 /// - 2026-04-24: 카카오 SDK 초기화(`KAKAO_NATIVE_APP_KEY`) 추가

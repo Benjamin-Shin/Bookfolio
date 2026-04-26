@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  *
  * @history
  * - 2026-04-05: `resolveActiveSubscription` — 스냅샷에 `features` 병합
- * - 2026-03-28: 신규 — 공동서가 생성·멤버 상한
+ * - 2026-03-28: 신규 — 모임서가 생성·멤버 상한
  */
 export type SubscriptionCaps = {
   shared_libraries_owned_max?: number;
@@ -44,7 +44,7 @@ export const SUBSCRIPTION_PLAN_FEATURE_LABELS: Record<
   string
 > = {
   premium_themes_unlocked: "프리미엄 테마",
-  can_create_extra_shared_libraries_without_points: "추가 공동서가 포인트 면제",
+  can_create_extra_shared_libraries_without_points: "추가 모임서가 포인트 면제",
   reading_reports_unlocked: "독서 리포트",
   sns_share_unlocked: "SNS 공유",
 };

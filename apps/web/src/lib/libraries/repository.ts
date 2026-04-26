@@ -41,6 +41,7 @@ type DbLibraryRow = {
   id: string;
   name: string;
   description: string | null;
+  image_url?: string | null;
   kind: LibrarySummary["kind"];
   created_by: string;
   created_at: string;
@@ -103,7 +104,7 @@ async function deleteLibraryCascade(
 }
 
 /**
- * `libraries.created_by` 기준, 해당 사용자가 소유자로 만든 공동서가 개수.
+ * `libraries.created_by` 기준, 해당 사용자가 소유자로 만든 모임서가 개수.
  *
  * @history
  * - 2026-03-25: `policies_json.sharedLibraryCreateLimit` 검증·UI용
@@ -144,7 +145,7 @@ export async function assertLibraryMember(
   const supabase = await getClient(context);
   const role = await getMemberRole(supabase, libraryId, userId);
   if (!role) {
-    throw new Error("공동서가에 접근할 권한이 없습니다.");
+    throw new Error("모임서가에 접근할 권한이 없습니다.");
   }
   return role;
 }
@@ -168,6 +169,7 @@ function mapLibraryRow(
     id: row.id,
     name: row.name,
     description: row.description,
+    imageUrl: row.image_url ?? null,
     kind: row.kind,
     createdBy: row.created_by,
     createdAt: row.created_at,
@@ -190,6 +192,7 @@ export async function listLibrariesForUser(
         id,
         name,
         description,
+        image_url,
         kind,
         created_by,
         created_at,
@@ -199,8 +202,43 @@ export async function listLibrariesForUser(
     )
     .eq("user_id", userId);
 
-  if (error) throw error;
-  const rows = (data ?? []) as unknown as DbLibraryMemberRow[];
+  let rows: DbLibraryMemberRow[];
+  if (error) {
+    const maybeMissingImageUrl =
+      typeof error.message === "string" &&
+      error.message.includes("image_url") &&
+      error.message.toLowerCase().includes("column");
+
+    if (!maybeMissingImageUrl) {
+      throw error;
+    }
+
+    // Backward-compatible fallback for DBs where 0040 migration is not applied yet.
+    const legacy = await supabase
+      .from("library_members")
+      .select(
+        `
+        role,
+        libraries (
+          id,
+          name,
+          description,
+          kind,
+          created_by,
+          created_at,
+          updated_at
+        )
+      `,
+      )
+      .eq("user_id", userId);
+    if (legacy.error) {
+      throw legacy.error;
+    }
+    rows = (legacy.data ?? []) as unknown as DbLibraryMemberRow[];
+  } else {
+    rows = (data ?? []) as unknown as DbLibraryMemberRow[];
+  }
+
   return rows
     .map((r) => {
       const lib = Array.isArray(r.libraries) ? r.libraries[0] : r.libraries;
@@ -251,10 +289,13 @@ export async function createLibrary(
     .insert({
       name,
       description: input.description?.trim() ? input.description.trim() : null,
+      image_url: input.imageUrl?.trim() ? input.imageUrl.trim() : null,
       kind: input.kind,
       created_by: userId,
     })
-    .select("id, name, description, kind, created_by, created_at, updated_at")
+    .select(
+      "id, name, description, image_url, kind, created_by, created_at, updated_at",
+    )
     .single();
 
   if (libErr) throw libErr;
@@ -305,15 +346,15 @@ export async function createLibrary(
   }
   if (!pt.ok && pt.kind === "no_rule_or_zero") {
     throw new SharedLibraryPointsRequiredError(
-      "추가 공동서가에 필요한 포인트 규칙이 없습니다. 관리자에게 문의하세요.",
+      "추가 모임서가에 필요한 포인트 규칙이 없습니다. 관리자에게 문의하세요.",
     );
   }
   throw new SharedLibraryPointsRequiredError(
-    "추가 공동서가를 만들 수 없습니다. 포인트 또는 정책을 확인해 주세요.",
+    "추가 모임서가를 만들 수 없습니다. 포인트 또는 정책을 확인해 주세요.",
   );
 }
 
-/** 공동서가 목록은 매핑된 user_books만 보이므로, 소유자 개인 서가 전체를 서가 생성 시 자동 연결한다. */
+/** 모임서가 목록은 매핑된 user_books만 보이므로, 소유자 개인 서가 전체를 서가 생성 시 자동 연결한다. */
 async function linkAllUserBooksToLibrary(
   supabase: SupabaseClient,
   libraryId: string,
@@ -348,7 +389,7 @@ async function linkAllUserBooksToLibrary(
   }
 }
 
-/** 개인 서가에 책을 새로 넣었을 때, 내가 속한 모든 공동서가(소유자·멤버)에 동일 매핑을 둔다. */
+/** 개인 서가에 책을 새로 넣었을 때, 내가 속한 모든 모임서가(소유자·멤버)에 동일 매핑을 둔다. */
 export async function linkUserBookToOwnedLibraries(
   userBookId: string,
   userId: string,
@@ -398,7 +439,9 @@ export async function getLibrary(
 
   const { data, error } = await supabase
     .from("libraries")
-    .select("id, name, description, kind, created_by, created_at, updated_at")
+    .select(
+      "id, name, description, image_url, kind, created_by, created_at, updated_at",
+    )
     .eq("id", libraryId)
     .maybeSingle();
 
@@ -427,6 +470,9 @@ export async function updateLibrary(
       ? input.description.trim()
       : null;
   }
+  if (input.imageUrl !== undefined) {
+    patch.image_url = input.imageUrl?.trim() ? input.imageUrl.trim() : null;
+  }
   if (input.kind !== undefined) {
     patch.kind = input.kind;
   }
@@ -441,7 +487,9 @@ export async function updateLibrary(
     .from("libraries")
     .update(patch)
     .eq("id", libraryId)
-    .select("id, name, description, kind, created_by, created_at, updated_at")
+    .select(
+      "id, name, description, image_url, kind, created_by, created_at, updated_at",
+    )
     .single();
 
   if (error) throw error;
@@ -463,10 +511,10 @@ export async function deleteLibrary(
 }
 
 /**
- * 공동서가 소유권을 다른 멤버에게 이전합니다 (`libraries.created_by`, `library_members.role`).
+ * 모임서가 소유권을 다른 멤버에게 이전합니다 (`libraries.created_by`, `library_members.role`).
  *
  * @history
- * - 2026-03-26: 회원 탈투 전 소유 공동서가 정리(이전) 지원
+ * - 2026-03-26: 회원 탈투 전 소유 모임서가 정리(이전) 지원
  */
 export async function transferLibraryOwnership(
   libraryId: string,
@@ -675,7 +723,7 @@ export async function removeLibraryMember(
   const supabase = await getClient(context);
   const actorRole = await getMemberRole(supabase, libraryId, actorUserId);
   if (!actorRole) {
-    throw new Error("공동서가에 접근할 권한이 없습니다.");
+    throw new Error("모임서가에 접근할 권한이 없습니다.");
   }
 
   if (targetUserId !== actorUserId) {
@@ -799,7 +847,7 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
  * `book_id`별 소유자 묶음 → 집계 행.
  *
  * @history
- * - 2026-04-12: 소유자별 `rating` — 공동서가 Hall of Fame
+ * - 2026-04-12: 소유자별 `rating` — 모임서가 Hall of Fame
  * - 2026-03-24: 공유 서지 `genre_slugs`를 `genreSlugs`로 노출
  */
 function buildAggregatedList(
@@ -989,7 +1037,7 @@ export async function shareBookToLibrary(
   const supabase = await getClient(context);
 
   let userBookIdToLink: string;
-  /** 공동서가 폼으로 새 user_books를 만든 경우에만, 내가 속한 다른 공동서가에도 같은 매핑을 둔다. */
+  /** 모임서가 폼으로 새 user_books를 만든 경우에만, 내가 속한 다른 모임서가에도 같은 매핑을 둔다. */
   let propagateNewBookToOwnedLibraries = false;
 
   if ("userBookId" in input && input.userBookId) {
