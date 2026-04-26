@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 
@@ -17,7 +17,7 @@ function toSafeCallbackUrl(raw: string | null): string {
  * @history
  * - 2026-04-26: 신규 — `mobile-transfer` Credentials provider 자동 로그인 페이지
  */
-export default function AuthTransferPage() {
+function AuthTransferPageContent() {
   const searchParams = useSearchParams();
   const code = (searchParams.get("code") ?? "").trim();
   const callbackUrl = useMemo(
@@ -73,5 +73,22 @@ export default function AuthTransferPage() {
         ) : null}
       </section>
     </main>
+  );
+}
+
+export default function AuthTransferPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="container flex min-h-[50vh] items-center justify-center py-12">
+          <section className="w-full max-w-md rounded-xl border border-border/70 bg-card p-6 text-center shadow-sm">
+            <h1 className="text-lg font-semibold">모바일 로그인 연동</h1>
+            <p className="mt-3 text-sm text-muted-foreground">로그인 정보를 불러오는 중…</p>
+          </section>
+        </main>
+      }
+    >
+      <AuthTransferPageContent />
+    </Suspense>
   );
 }
