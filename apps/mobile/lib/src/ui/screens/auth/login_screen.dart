@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await auth.signIn(email: email, password: password);
   }
 
-  static const _kakaoAsset = 'assets/kakao_login_medium_narrow.png';
+  static const _kakaoAsset = 'assets/Kakao.svg';
   static const _googleSvgAsset = 'assets/Google.svg';
 
   @override

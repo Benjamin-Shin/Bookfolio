@@ -4,7 +4,6 @@ import {
   BarChart3Icon,
   FlameIcon,
   LibraryBigIcon,
-  LogInIcon,
   LogOutIcon,
   SparklesIcon,
   UsersRoundIcon,
@@ -13,6 +12,7 @@ import {
 import { auth } from "@/auth";
 import { AdminHeaderMenu } from "@/components/layout/admin-header-menu";
 import { HeaderAccount } from "@/components/layout/header-account";
+import { SiteHeaderGuestActions } from "@/components/layout/site-header-guest-actions.client";
 import { SiteHeaderMobileNav } from "@/components/layout/site-header-mobile-nav.client";
 import { Button } from "@/components/ui/button";
 import { getAppProfile } from "@/lib/auth/app-profiles";
@@ -36,6 +36,8 @@ function AndroidApkIcon({ className }: { className?: string }) {
  * 전역 상단 헤더(브랜드·로그인 시 대시보드 바로가기).
  *
  * @history
+ * - 2026-04-27: `/login` 경로에서는 비로그인 `로그인` CTA를 숨기도록 클라이언트 경로 분기 추가
+ * - 2026-04-27: 비로그인 상태 헤더에서는 `내 서가` CTA를 숨겨 로그인 버튼만 노출
  * - 2026-03-26: 대시보드·로그아웃 등 네비에 lucide 아이콘 추가
  * - 2026-03-28: 네비 순서 — 모임서가 → 북폴리오 집계 → 베스트셀러 → 초이스 신간 → 내 서가
  * - 2026-04-05: 브랜드 서가담·글래스 헤더; 내비 「서가담 집계」 표기
@@ -147,23 +149,7 @@ export async function SiteHeader() {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center gap-2"
-                  >
-                    <LogInIcon className="size-4 opacity-80" />
-                    로그인
-                  </Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center gap-2"
-                  >
-                    <LibraryBigIcon className="size-4 opacity-90" />내 서가
-                  </Link>
-                </Button>
+                <SiteHeaderGuestActions />
               </>
             )}
           </div>

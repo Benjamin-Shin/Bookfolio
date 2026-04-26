@@ -9,7 +9,7 @@ export default function LoginPage() {
     Boolean(process.env.AUTH_KAKAO_ID?.trim()) && Boolean(process.env.AUTH_KAKAO_SECRET?.trim());
 
   return (
-    <main className="container flex flex-col items-center py-12 md:py-20">
+    <main className="min-h-screen bg-[#f4f4f1] px-4 py-6 text-[#222] md:px-6 md:py-8">
       <Suspense
         fallback={<p className="text-sm text-muted-foreground">로그인 화면을 불러오는 중…</p>}
       >

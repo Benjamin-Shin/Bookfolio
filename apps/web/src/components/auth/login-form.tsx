@@ -1,12 +1,14 @@
 "use client";
 
 /**
- * 이메일·구글·카카오(에셋) 로그인 폼.
+ * 시안 기반 웹 로그인 페이지.
  *
  * @history
+ * - 2026-04-27: 구글 버튼을 `Google.svg` 아이콘+텍스트형으로 교체, 카카오 버튼은 환경변수 없어도 비활성 상태로 표시
+ * - 2026-04-27: 웹 로그인 시안 반영 — 좌측 비주얼/우측 카드/하단 안내 바 레이아웃으로 개편, 로그인 중심 UX로 단순화
  * - 2026-04-24: 카카오 OAuth 연동 — `kakaoEnabled`일 때 `signIn("kakao", { callbackUrl })` 실행
  * - 2026-04-12: 구글 공식 Web PNG(`/assets/google_signin_light_sq_si.png`·`google_signup_light_sq_su.png`) — 로그인/가입 탭별 SI·SU; 카카오와 동일 52px 높이 `object-contain`
- * - 2026-04-12: 카카오 공식 PNG(`/assets/kakao_login_medium_narrow.png`)·모바일과 동일 순서·183×45 비율 너비 컬럼; 카카오 OAuth 미연동 시 안내
+ * - 2026-04-12: 카카오 공식 PNG(`/assets/Kakao.svg`)·모바일과 동일 순서·183×45 비율 너비 컬럼; 카카오 OAuth 미연동 시 안내
  * - 2026-04-05: 로그인 탭 — 라벨·힌트「이메일 또는 아이디」, @ 앞 로컬만 입력 가능(`type="text"`)
  * - 2026-04-05: 카드 제목 서가담·에디토리얼 타이포(`font-serif`)
  * - 2026-03-24: Credentials 로그인 성공 후 `router.push` 대신 `location.assign`으로 이동 — 미들웨어 `auth()`가 클라이언트 전환 직후 쿠키를 못 읽어 `/login`으로 되튕기던 현상 수정
@@ -14,17 +16,16 @@
 
 import type { Route } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 
 type LoginFormProps = {
   googleEnabled: boolean;
@@ -38,113 +39,32 @@ function toSafeCallbackUrl(raw: string | null): Route {
   return "/dashboard";
 }
 
-/** 공식 `kakao_login_medium_narrow` 원본 183×45; 슬롯 높이 52px에 맞춘 가로 길이(모바일 `sign_in_screen`과 동일). */
-const kakaoAlignedColumnClass = "mx-auto w-[min(100%,calc(183*52px/45))]";
-
-/** Google Branding `web_light_sq_*@2x` 고유 픽셀(복사본 `public/assets/`). */
-const GOOGLE_SIGNIN_ASSET_PX = { w: 350, h: 80 } as const;
-const GOOGLE_SIGNUP_ASSET_PX = { w: 358, h: 80 } as const;
-
-type OauthContinueBlockProps = {
-  googleEnabled: boolean;
-  kakaoEnabled: boolean;
-  pending: boolean;
-  callbackUrl: Route;
-  /** 로그인 탭이면 SI, 회원가입 탭이면 SU 에셋. */
-  googleAsset: "signin" | "signup";
-  primarySlot: React.ReactNode;
-  onKakaoClick: () => void;
-};
-
-function OauthContinueBlock({
-  googleEnabled,
-  kakaoEnabled,
-  pending,
-  callbackUrl,
-  googleAsset,
-  primarySlot,
-  onKakaoClick
-}: OauthContinueBlockProps) {
-  return (
-    <div className={cn("flex flex-col gap-8", kakaoAlignedColumnClass)}>
-      {primarySlot}
-      <div className="flex flex-col gap-6">
-        <p className="text-center text-xs text-muted-foreground opacity-[0.45]">
-          또는 다음으로 계속하기
-        </p>
-        <div className="flex flex-col gap-3">
-          {kakaoEnabled ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={onKakaoClick}
-              className="relative flex h-[52px] w-full shrink-0 items-center justify-center overflow-hidden rounded-md border border-transparent bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
-            >
-              <Image
-                src="/assets/kakao_login_medium_narrow.png"
-                alt="카카오 로그인"
-                width={183}
-                height={45}
-                className="h-[52px] w-auto max-w-full object-contain object-center"
-                priority
-              />
-            </button>
-          ) : null}
-          {googleEnabled ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => signIn("google", { callbackUrl })}
-              className="relative flex h-[52px] w-full shrink-0 items-center justify-center overflow-hidden rounded-md border border-transparent bg-transparent p-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
-            >
-              <Image
-                src={
-                  googleAsset === "signup"
-                    ? "/assets/google_signup_light_sq_su.png"
-                    : "/assets/google_signin_light_sq_si.png"
-                }
-                alt={googleAsset === "signup" ? "Google 계정으로 가입하기" : "Google 계정으로 로그인"}
-                width={
-                  googleAsset === "signup" ? GOOGLE_SIGNUP_ASSET_PX.w : GOOGLE_SIGNIN_ASSET_PX.w
-                }
-                height={
-                  googleAsset === "signup" ? GOOGLE_SIGNUP_ASSET_PX.h : GOOGLE_SIGNIN_ASSET_PX.h
-                }
-                className="h-[52px] w-auto max-w-full object-contain object-center"
-                priority
-              />
-            </button>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
   const searchParams = useSearchParams();
   const callbackUrl = toSafeCallbackUrl(searchParams.get("callbackUrl"));
+  const mode = searchParams.get("mode");
+  const defaultAuthMode = mode === "signup" ? "signup" : "signin";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [tab, setTab] = useState<"signin" | "signup">("signin");
+  const [keepLogin, setKeepLogin] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup">(
+    defaultAuthMode,
+  );
 
   async function onSignIn(e: React.FormEvent) {
     e.preventDefault();
     setPending(true);
     setError(null);
-    setMessage(null);
-    setInfo(null);
     const result = await signIn("credentials", {
       email: email.trim().toLowerCase(),
       password,
       redirect: false,
-      callbackUrl
+      callbackUrl,
     });
     setPending(false);
     if (!result?.ok || result.error) {
@@ -159,7 +79,6 @@ export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
     setPending(true);
     setError(null);
     setMessage(null);
-    setInfo(null);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -167,8 +86,8 @@ export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
           password,
-          name: name.trim() || undefined
-        })
+          name: name.trim() || undefined,
+        }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
@@ -176,58 +95,74 @@ export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
         setPending(false);
         return;
       }
-      setMessage("가입되었습니다. 로그인 중…");
+      setMessage("가입이 완료되었습니다. 로그인 중…");
       const result = await signIn("credentials", {
         email: email.trim().toLowerCase(),
         password,
         redirect: false,
-        callbackUrl
+        callbackUrl,
       });
       if (!result?.ok || result.error) {
-        setError("가입은 완료되었으나 로그인에 실패했습니다. 다시 시도해주세요.");
+        setError("가입은 완료되었으나 로그인에 실패했습니다.");
         setPending(false);
         return;
       }
       window.location.assign(callbackUrl);
     } catch {
       setError("네트워크 오류가 발생했습니다.");
+      setPending(false);
     }
-    setPending(false);
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-lg gap-6">
-      <Card className="border-border/80 shadow-lg">
-        <CardHeader>
-          <CardTitle className="font-serif text-2xl font-medium">
-            서가담 로그인
-          </CardTitle>
-          <CardDescription>
-            이메일·비밀번호로 로그인하거나 소셜 계정으로 계속할 수 있습니다.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-6">
-          <Tabs
-            value={tab}
-            onValueChange={(v) => {
-              setTab(v as "signin" | "signup");
-              setError(null);
-              setInfo(null);
-            }}
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">로그인</TabsTrigger>
-              <TabsTrigger value="signup">회원가입</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin" className="mt-4 space-y-4">
-              <form onSubmit={onSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                    <Label htmlFor="signin-email">이메일 또는 아이디</Label>
-                    <span className="text-muted-foreground text-xs">
-                      이메일 @ 앞 아이디(영문·숫자 등)만으로도 로그인할 수 있습니다.
-                    </span>
+    <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-5">
+      <section className="overflow-hidden rounded-[26px] border border-[#ddd] bg-[#efefec] shadow-[0_14px_30px_rgba(17,17,17,0.08)]">
+        <div className="grid min-h-[680px] grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+          <aside className="relative hidden bg-[#1f2d1f] text-white lg:flex">
+            <Image
+              src="/assets/Web-Login-back.png"
+              alt=""
+              fill
+              className="object-cover"
+              priority
+            />
+          </aside>
+
+          <div className="flex items-center justify-center px-5 py-8 sm:px-8 lg:px-10">
+            <div className="w-full max-w-[470px] rounded-3xl border border-[#e3e4df] bg-white p-7 shadow-[0_12px_35px_rgba(20,20,20,0.08)] sm:p-9">
+              <div className="mb-7 flex flex-col items-center gap-2 text-center">
+                <Image
+                  src="/assets/seogadam_logo.png"
+                  alt="서가담"
+                  width={168}
+                  height={72}
+                  priority
+                />
+                <p className="text-[17px] text-[#6a7067]">당신의 서가를 담다</p>
+              </div>
+
+              <form
+                onSubmit={authMode === "signup" ? onSignUp : onSignIn}
+                className="space-y-4"
+              >
+                {authMode === "signup" ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name" className="sr-only">
+                      이름
+                    </Label>
+                    <Input
+                      id="signup-name"
+                      value={name}
+                      onChange={(ev) => setName(ev.target.value)}
+                      placeholder="이름을 입력해주세요 (선택)"
+                      className="h-12 rounded-lg border-[#e6e6e1] bg-white px-4 text-[15px]"
+                    />
                   </div>
+                ) : null}
+                <div className="space-y-2">
+                  <Label htmlFor="signin-email" className="sr-only">
+                    이메일 또는 아이디
+                  </Label>
                   <Input
                     id="signin-email"
                     type="text"
@@ -235,86 +170,46 @@ export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
                     inputMode="email"
                     value={email}
                     onChange={(ev) => setEmail(ev.target.value)}
-                    placeholder="you@example.com 또는 아이디"
+                    placeholder="이메일을 입력해주세요"
+                    className="h-12 rounded-lg border-[#e6e6e1] bg-white px-4 text-[15px]"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">비밀번호</Label>
+                  <Label htmlFor="signin-password" className="sr-only">
+                    비밀번호
+                  </Label>
                   <Input
                     id="signin-password"
                     type="password"
                     autoComplete="current-password"
                     value={password}
                     onChange={(ev) => setPassword(ev.target.value)}
-                    placeholder="8자 이상"
+                    placeholder="비밀번호를 입력해주세요"
+                    className="h-12 rounded-lg border-[#e6e6e1] bg-white px-4 text-[15px]"
                     minLength={8}
                     required
                   />
                 </div>
-                {error ? (
-                  <Alert variant="destructive">
-                    <AlertTitle>오류</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                ) : null}
-                {info ? (
-                  <Alert>
-                    <AlertTitle>알림</AlertTitle>
-                    <AlertDescription>{info}</AlertDescription>
-                  </Alert>
-                ) : null}
-                <OauthContinueBlock
-                  googleEnabled={googleEnabled}
-                  kakaoEnabled={kakaoEnabled}
-                  pending={pending}
-                  callbackUrl={callbackUrl}
-                  googleAsset="signin"
-                  onKakaoClick={() => signIn("kakao", { callbackUrl })}
-                  primarySlot={
-                    <Button type="submit" className="h-[52px] w-full" disabled={pending}>
-                      {pending ? "처리 중…" : "로그인"}
-                    </Button>
-                  }
-                />
-              </form>
-            </TabsContent>
-            <TabsContent value="signup" className="mt-4 space-y-4">
-              <form onSubmit={onSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">이름 (선택)</Label>
-                  <Input
-                    id="signup-name"
-                    value={name}
-                    onChange={(ev) => setName(ev.target.value)}
-                    placeholder="표시 이름"
-                  />
+
+                <div className="flex items-center justify-between text-sm">
+                  <label
+                    htmlFor="keep-login"
+                    className="flex cursor-pointer items-center gap-2 text-[#6f726d]"
+                  >
+                    <Checkbox
+                      id="keep-login"
+                      checked={keepLogin}
+                      onCheckedChange={(checked) =>
+                        setKeepLogin(checked === true)
+                      }
+                      className="border-[#cfd3cc] data-[state=checked]:border-[#1f6c3f] data-[state=checked]:bg-[#1f6c3f]"
+                    />
+                    로그인 상태 유지
+                  </label>
+                  <span className="text-[#5e765f]">비밀번호 찾기</span>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">이메일</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(ev) => setEmail(ev.target.value)}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">비밀번호</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(ev) => setPassword(ev.target.value)}
-                    placeholder="8자 이상"
-                    minLength={8}
-                    required
-                  />
-                </div>
+
                 {error ? (
                   <Alert variant="destructive">
                     <AlertTitle>오류</AlertTitle>
@@ -327,30 +222,113 @@ export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
                     <AlertDescription>{message}</AlertDescription>
                   </Alert>
                 ) : null}
-                {info ? (
-                  <Alert>
-                    <AlertTitle>알림</AlertTitle>
-                    <AlertDescription>{info}</AlertDescription>
-                  </Alert>
-                ) : null}
-                <OauthContinueBlock
-                  googleEnabled={googleEnabled}
-                  kakaoEnabled={kakaoEnabled}
-                  pending={pending}
-                  callbackUrl={callbackUrl}
-                  googleAsset="signup"
-                  onKakaoClick={() => signIn("kakao", { callbackUrl })}
-                  primarySlot={
-                    <Button type="submit" className="h-[52px] w-full" disabled={pending}>
-                      {pending ? "처리 중…" : "가입하고 로그인"}
-                    </Button>
-                  }
-                />
+
+                <Button
+                  type="submit"
+                  className="h-12 w-full rounded-lg bg-[#1f6c3f] text-base font-semibold hover:bg-[#1a5b36]"
+                  disabled={pending}
+                >
+                  {pending
+                    ? "처리 중…"
+                    : authMode === "signup"
+                      ? "가입하고 로그인"
+                      : "로그인"}
+                </Button>
               </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+
+              <div className="my-6 flex items-center gap-3">
+                <span className="h-px flex-1 bg-[#e4e5e1]" />
+                <span className="text-sm text-[#878b84]">또는</span>
+                <span className="h-px flex-1 bg-[#e4e5e1]" />
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  disabled={pending || !googleEnabled}
+                  onClick={() => {
+                    if (!googleEnabled) return;
+                    signIn("google", { callbackUrl });
+                  }}
+                  className="relative flex h-[52px] w-full items-center justify-center gap-2 rounded-lg border border-[#e2e3de] bg-white text-[15px] font-medium text-[#3c4043] transition-colors hover:bg-[#f9faf9] disabled:pointer-events-none disabled:opacity-50"
+                >
+                  <Image
+                    src="/assets/Google.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="h-5 w-5"
+                    priority
+                  />
+                  <span>구글로 시작하기</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={pending || !kakaoEnabled}
+                  onClick={() => {
+                    if (!kakaoEnabled) return;
+                    signIn("kakao", { callbackUrl });
+                  }}
+                  className="relative flex h-[52px] w-full items-center justify-center gap-2 rounded-lg border border-[#e2e3de] bg-[#FEE500] text-[15px] font-medium text-[#191919] transition-colors hover:bg-[#f4db00] disabled:pointer-events-none disabled:opacity-50"
+                >
+                  <Image
+                    src="/assets/Kakao.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="h-5 w-5"
+                    priority
+                  />
+                  <span>카카오로 시작하기</span>
+                </button>
+              </div>
+
+              <p className="mt-7 text-center text-sm text-[#727671]">
+                {authMode === "signin"
+                  ? "아직 계정이 없으신가요?"
+                  : "이미 계정이 있으신가요?"}{" "}
+                <button
+                  type="button"
+                  className="font-semibold text-[#37644b] hover:underline"
+                  onClick={() => {
+                    setAuthMode((prev) =>
+                      prev === "signin" ? "signup" : "signin",
+                    );
+                    setError(null);
+                    setMessage(null);
+                  }}
+                >
+                  {authMode === "signin" ? "회원가입" : "로그인"}
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="rounded-2xl border border-[#e5e7e2] bg-[#f7f8f5] px-4 py-3 text-center text-[15px] text-[#566657]">
+        로그인하고 <span className="font-semibold text-[#1f6c3f]">10P</span>를
+        받아보세요!
+      </div>
+
+      <footer className="flex flex-col items-center justify-between gap-3 px-1 pb-2 text-xs text-[#7f837d] sm:flex-row">
+        <div className="flex flex-wrap items-center justify-center gap-5 sm:justify-start">
+          <Link href="/" className="hover:text-[#4f534f]">
+            서비스 소개
+          </Link>
+          <Link href="/terms" className="hover:text-[#4f534f]">
+            이용약관
+          </Link>
+          <Link href="/privacy" className="hover:text-[#4f534f]">
+            개인정보처리방침
+          </Link>
+          <Link href="/" className="hover:text-[#4f534f]">
+            고객센터
+          </Link>
+        </div>
+        <p>© 2024 서가담. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
