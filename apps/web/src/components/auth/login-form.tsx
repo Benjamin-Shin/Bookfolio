@@ -306,29 +306,6 @@ export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
           </div>
         </div>
       </section>
-
-      <div className="rounded-2xl border border-[#e5e7e2] bg-[#f7f8f5] px-4 py-3 text-center text-[15px] text-[#566657]">
-        로그인하고 <span className="font-semibold text-[#1f6c3f]">10P</span>를
-        받아보세요!
-      </div>
-
-      <footer className="flex flex-col items-center justify-between gap-3 px-1 pb-2 text-xs text-[#7f837d] sm:flex-row">
-        <div className="flex flex-wrap items-center justify-center gap-5 sm:justify-start">
-          <Link href="/" className="hover:text-[#4f534f]">
-            서비스 소개
-          </Link>
-          <Link href="/terms" className="hover:text-[#4f534f]">
-            이용약관
-          </Link>
-          <Link href="/privacy" className="hover:text-[#4f534f]">
-            개인정보처리방침
-          </Link>
-          <Link href="/" className="hover:text-[#4f534f]">
-            고객센터
-          </Link>
-        </div>
-        <p>© 2024 서가담. All rights reserved.</p>
-      </footer>
     </div>
   );
 }
