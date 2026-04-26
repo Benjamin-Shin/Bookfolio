@@ -128,7 +128,7 @@ export function LoginForm({ googleEnabled, kakaoEnabled }: LoginFormProps) {
             />
           </aside>
 
-          <div className="flex items-center justify-center px-5 py-8 sm:px-8 lg:px-10">
+          <div className="flex items-center justify-center px-5 py-2 sm:px-8 lg:px-10">
             <div className="w-full max-w-[470px] rounded-3xl border border-[#e3e4df] bg-white p-7 shadow-[0_12px_35px_rgba(20,20,20,0.08)] sm:p-9">
               <div className="mb-7 flex flex-col items-center gap-2 text-center">
                 <Image
