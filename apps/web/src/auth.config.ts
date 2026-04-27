@@ -17,6 +17,29 @@ function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
+function readString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+/**
+ * OAuth 제공자별 프로필 형태 차이를 흡수해 이메일을 안전하게 추출합니다.
+ *
+ * @history
+ * - 2026-04-27: 카카오 프로필(`kakao_account.email`) 경로를 포함해 이메일 우선 매칭 안정화
+ */
+function extractOAuthEmail(profile: unknown, fallbackEmail?: string | null): string | null {
+  const p = (profile ?? {}) as Record<string, unknown>;
+  const direct = readString(p.email);
+  if (direct) return normalizeEmail(direct);
+
+  const kakaoAccount = (p.kakao_account ?? {}) as Record<string, unknown>;
+  const kakaoEmail = readString(kakaoAccount.email);
+  if (kakaoEmail) return normalizeEmail(kakaoEmail);
+
+  const fallback = readString(fallbackEmail);
+  return fallback ? normalizeEmail(fallback) : null;
+}
+
 const googleConfigured =
   Boolean(process.env.AUTH_GOOGLE_ID?.trim()) && Boolean(process.env.AUTH_GOOGLE_SECRET?.trim());
 const kakaoConfigured =
@@ -110,21 +133,30 @@ export const authConfig = {
   pages: { signIn: "/login" },
   trustHost: true,
   callbacks: {
+    async signIn({ account, profile, user }) {
+      if (account?.provider !== "google" && account?.provider !== "kakao") {
+        return true;
+      }
+      const email = extractOAuthEmail(profile, user.email ?? null);
+      // OAuth 프로필에서 이메일을 확보하지 못하면 provider subject로 세션이 잡혀 데이터가 분리될 수 있어 차단한다.
+      return Boolean(email);
+    },
     async jwt({ token, user, account, profile }) {
       if (account?.provider === "google" || account?.provider === "kakao") {
         const p = profile as { email?: string; name?: string; picture?: string };
-        if (!p.email) {
-          return token;
+        const email = extractOAuthEmail(profile, user?.email);
+        if (!email) {
+          throw new Error("OAUTH_EMAIL_REQUIRED");
         }
         const id = await ensureOAuthAppUser({
-          email: p.email,
-          name: p.name,
-          image: p.picture
+          email,
+          name: readString(p.name) ?? user?.name ?? undefined,
+          image: readString(p.picture) ?? user?.image ?? undefined
         });
         token.sub = id;
-        token.email = normalizeEmail(p.email);
-        token.name = p.name;
-        token.picture = p.picture;
+        token.email = email;
+        token.name = readString(p.name) ?? user?.name ?? undefined;
+        token.picture = readString(p.picture) ?? user?.image ?? undefined;
         token.role = await getAppUserRole(id);
         return token;
       }
