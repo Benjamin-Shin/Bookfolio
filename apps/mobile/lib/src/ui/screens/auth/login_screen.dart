@@ -1,9 +1,11 @@
 import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/theme/bookfolio_design_tokens.dart';
 import 'package:seogadam_mobile/src/ui/screens/legal/legal_markdown_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 /// 소셜 로그인 전용 랜딩형 로그인 화면.
@@ -12,6 +14,8 @@ import 'package:provider/provider.dart';
 /// - 2026-04-25: `Login.png` 기준으로 신규 생성(카카오/구글 전용, 중앙 정렬)
 /// - 2026-04-25: 웹(`kIsWeb`)에서는 이메일/비밀번호 로그인 폼 노출, 소셜 버튼 숨김
 /// - 2026-04-28: 플랫폼 분기 제거, 이메일/비밀번호 로그인 폼을 모든 환경에서 상시 노출
+/// - 2026-04-28: 앱 버전/빌드 정보를 읽어 로그인 화면 하단에 표시
+/// - 2026-04-28: 이메일/비밀번호 로그인 폼을 디버그 빌드에서만 노출
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -23,6 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  String? _appVersionText;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAppVersion();
+  }
 
   @override
   void dispose() {
@@ -41,6 +52,21 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     await auth.signIn(email: email, password: password);
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (!mounted) return;
+      setState(() {
+        _appVersionText = '버전 ${info.version} (${info.buildNumber})';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _appVersionText = null;
+      });
+    }
   }
 
   static const _kakaoAsset = 'assets/Kakao.svg';
@@ -105,59 +131,62 @@ class _LoginScreenState extends State<LoginScreen> {
                       BookfolioDesignTokens.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 22),
-                  TextField(
-                    controller: _emailController,
-                    enabled: !auth.isLoading,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      hintText: '이메일',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _passwordController,
-                    enabled: !auth.isLoading,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      hintText: '비밀번호',
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                      suffixIcon: IconButton(
-                        onPressed: auth.isLoading
-                            ? null
-                            : () => setState(
-                                () => _obscurePassword = !_obscurePassword),
-                        icon: Icon(_obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined),
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 22),
+                    TextField(
+                      controller: _emailController,
+                      enabled: !auth.isLoading,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        hintText: '이메일',
+                        border: OutlineInputBorder(),
+                        isDense: true,
                       ),
                     ),
-                    onSubmitted: (_) => _submitEmailSignIn(auth),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      onPressed: auth.isLoading
-                          ? null
-                          : () => _submitEmailSignIn(auth),
-                      child: auth.isLoading
-                          ? const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('이메일로 로그인'),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _passwordController,
+                      enabled: !auth.isLoading,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        hintText: '비밀번호',
+                        border: const OutlineInputBorder(),
+                        isDense: true,
+                        suffixIcon: IconButton(
+                          onPressed: auth.isLoading
+                              ? null
+                              : () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
+                          icon: Icon(_obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined),
+                        ),
+                      ),
+                      onSubmitted: (_) => _submitEmailSignIn(auth),
                     ),
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: FilledButton(
+                        onPressed: auth.isLoading
+                            ? null
+                            : () => _submitEmailSignIn(auth),
+                        child: auth.isLoading
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('이메일로 로그인'),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ] else
+                    const SizedBox(height: 22),
                   _SocialButton(
                     backgroundColor: const Color(0xFFFEE500),
                     label: '카카오로 시작하기',
@@ -257,14 +286,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '탭하면 앱 내 페이지에서 바로 확인할 수 있어요.',
-                    style: BookfolioDesignTokens.labelMd(
-                      BookfolioDesignTokens.onSurfaceVariant,
-                      opacity: 0.65,
+                  if (_appVersionText != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _appVersionText!,
+                      style: BookfolioDesignTokens.labelMd(
+                        BookfolioDesignTokens.onSurfaceVariant,
+                        opacity: 0.55,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
