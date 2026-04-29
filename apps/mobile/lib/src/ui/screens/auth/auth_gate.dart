@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
+import 'package:seogadam_mobile/src/services/app_update_service.dart';
 import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/state/library_controller.dart';
 import 'package:seogadam_mobile/src/ui/screens/auth/login_screen.dart';
@@ -11,12 +14,26 @@ import 'package:provider/provider.dart';
 
 /// 로그인 여부·온보딩·네트워크 가드 후 메인 쉘.
 ///
-/// History:
+/// @history
+/// - 2026-04-29: 앱 시작 시 `AppUpdateService`로 Android/iOS 스토어 업데이트 체크를 연결
 /// - 2026-04-06: `NetworkGate`·프로필 기반 `OnboardingScreen`·`SharedLibraryInviteLifecycle` 순서 정리
 /// - 2026-04-02: 로그인 후 `MainShellScreen`(하단 내비·드로어)
 /// - 2026-04-25: 로그인 진입 화면을 `LoginScreen`(소셜 전용)으로 교체
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(AppUpdateService.instance.checkForUpdateOnLaunch(context));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +52,8 @@ class _AuthenticatedSessionRoot extends StatefulWidget {
   const _AuthenticatedSessionRoot();
 
   @override
-  State<_AuthenticatedSessionRoot> createState() => _AuthenticatedSessionRootState();
+  State<_AuthenticatedSessionRoot> createState() =>
+      _AuthenticatedSessionRootState();
 }
 
 class _AuthenticatedSessionRootState extends State<_AuthenticatedSessionRoot> {
@@ -46,7 +64,9 @@ class _AuthenticatedSessionRootState extends State<_AuthenticatedSessionRoot> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProfile());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_loadProfile());
+    });
   }
 
   Future<void> _loadProfile() async {
