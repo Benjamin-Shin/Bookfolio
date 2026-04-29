@@ -12,7 +12,11 @@
 ## 모바일 설정
 
 - `KAKAO_NATIVE_APP_KEY`: Kakao Native App Key (`--dart-define`)
-- Android/iOS 스킴/매니페스트 설정은 Kakao Flutter SDK 가이드에 맞춰 추가
+- Android: `AndroidManifest.xml`에 `kakao{NATIVE_APP_KEY}://oauth` 콜백 인텐트 필터 필요
+- iOS: `Info.plist`에 아래 항목 필요
+  - `CFBundleURLTypes` → `kakao{NATIVE_APP_KEY}` 스킴 등록
+  - `LSApplicationQueriesSchemes` → `kakaokompassauth`, `kakaolink`
+  - 현재 프로젝트는 `apps/mobile/ios/Runner/Info.plist`에 스킴이 반영되어 있으므로, Native App Key가 바뀌면 같은 파일의 `kakao...` 값을 함께 갱신해야 함
 
 ## 모바일 API
 

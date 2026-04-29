@@ -1,4 +1,5 @@
 import java.io.FileInputStream
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -16,6 +17,27 @@ val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
+
+/**
+ * Flutter `--dart-define` 값을 Gradle 단계에서 읽어 Android Manifest placeholder에 전달합니다.
+ *
+ * @history
+ * - 2026-04-29: `KAKAO_NATIVE_APP_KEY`를 파싱해 카카오 OAuth 콜백 스킴(`kakao<app_key>`) 자동 주입
+ */
+fun readDartDefine(name: String): String {
+    val encoded = (project.findProperty("dart-defines") as String?)
+        ?.split(",")
+        ?.mapNotNull { item ->
+            runCatching { String(Base64.getDecoder().decode(item)) }.getOrNull()
+        }
+        ?: emptyList()
+    return encoded.firstOrNull { it.startsWith("$name=") }
+        ?.substringAfter("=")
+        ?.trim()
+        .orEmpty()
+}
+
+val kakaoNativeAppKey = readDartDefine("KAKAO_NATIVE_APP_KEY")
 
 android {
     // Dart 패키지명 `seogadam_mobile`과 정렬(앱 표시명은 strings.xml `서가담`).
@@ -44,6 +66,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["kakaoScheme"] =
+            if (kakaoNativeAppKey.isNotEmpty()) "kakao$kakaoNativeAppKey" else "kakao"
     }
 
     signingConfigs {
