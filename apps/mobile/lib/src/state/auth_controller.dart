@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,9 @@ class AuthSession {
 /// Bearer 세션, 이메일·Google 로그인, 이메일 가입.
 ///
 /// History:
+/// - 2026-04-30: 카카오 토큰 교환 요청에 `x-bookfolio-auth-trace` 헤더를 추가해 서버 access log 대조 가능하도록 개선
+/// - 2026-04-30: 디버그 빌드에서 로그인 단계 추적을 위해 인앱 로그 버퍼(`loginTrace`) 추가
+/// - 2026-04-30: 카카오 로그인 무에러 정체 디버깅을 위해 토큰 저장 예외/무에러 실패 기본 메시지 추가
 /// - 2026-04-26: `startWebSessionTransfer`/`openWebSessionTransfer` 추가 — 모바일 세션을 웹 로그인 URL로 전이
 /// - 2026-04-25: 카카오 로그인 시 이메일 스코프 부족(`account_email`)이면 `loginWithNewScopes`로 재동의 후 토큰 교환 재시도
 /// - 2026-04-24: `signInWithKakao` 추가 — 카카오 SDK 토큰을 `/api/auth/mobile/kakao`로 교환
@@ -31,12 +35,14 @@ class AuthController extends ChangeNotifier {
   bool _isLoading = false;
   bool _isRestoring = true;
   String? _error;
+  final List<String> _loginTrace = <String>[];
 
   AuthSession? get session => _session;
   bool get isLoading => _isLoading;
   bool get isRestoring => _isRestoring;
   String? get error => _error;
   bool get isAuthenticated => _session != null;
+  List<String> get loginTrace => List.unmodifiable(_loginTrace);
 
   /// 로그인 화면 등에서 검증 오류 배너를 닫을 때 사용합니다.
   ///
@@ -48,12 +54,40 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 로그인 디버그 로그 버퍼를 비웁니다.
+  ///
+  /// @history
+  /// - 2026-04-30: 로그인 단계 추적 로그 수동 초기화용으로 추가
+  void clearLoginTrace() {
+    _loginTrace.clear();
+    notifyListeners();
+  }
+
   static const _apiBase = String.fromEnvironment('BOOKFOLIO_API_BASE_URL');
 
   /// 서버 `AUTH_GOOGLE_ID`(웹 클라이언트 ID)와 같게 두면 ID 토큰 aud 검증이 맞습니다.
   /// 비우면 네이티브 클라이언트 aud 만 쓰게 되므로 서버에 `AUTH_GOOGLE_MOBILE_AUDIENCES` 로 해당 ID를 추가해야 합니다.
   static const _googleAuthClientId =
       String.fromEnvironment('GOOGLE_AUTH_CLIENT_ID');
+
+  void _appendLoginTrace(String message) {
+    if (!kDebugMode) return;
+    final now = DateTime.now();
+    final hh = now.hour.toString().padLeft(2, '0');
+    final mm = now.minute.toString().padLeft(2, '0');
+    final ss = now.second.toString().padLeft(2, '0');
+    _loginTrace.add('[$hh:$mm:$ss] $message');
+    if (_loginTrace.length > 40) {
+      _loginTrace.removeRange(0, _loginTrace.length - 40);
+    }
+    notifyListeners();
+  }
+
+  String _newAuthTraceId() {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    final rand = Random().nextInt(0x100000).toRadixString(16).padLeft(5, '0');
+    return 'kakao-$now-$rand';
+  }
 
   Uri _apiUri(String path) {
     final base = _apiBase.trim().replaceAll(RegExp(r'/+$'), '');
@@ -152,11 +186,20 @@ class AuthController extends ChangeNotifier {
     return null;
   }
 
+  /// 액세스 토큰을 메모리/영구 스토리지에 저장합니다.
+  ///
+  /// @history
+  /// - 2026-04-30: Keychain/secure storage 저장 실패가 로그인 정체로 보이지 않도록 예외를 호출자에게 명확히 전달
   Future<void> _storeAccessToken(String token) async {
-    await _secureStorage.write(key: _tokenKey, value: token);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
     _session = AuthSession(token);
+    try {
+      await _secureStorage.write(key: _tokenKey, value: token);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_tokenKey);
+    } catch (_) {
+      _session = null;
+      rethrow;
+    }
   }
 
   /// 이메일 가입 후 자동 로그인합니다. 선택 프로필(이름·성별·생일·아바타)은 로그인 뒤 API로 반영합니다.
@@ -344,9 +387,11 @@ class AuthController extends ChangeNotifier {
   Future<void> signInWithGoogle() async {
     _isLoading = true;
     _error = null;
+    _appendLoginTrace('Google 로그인 시작');
     notifyListeners();
 
     if (_apiBase.trim().isEmpty) {
+      _appendLoginTrace('중단: BOOKFOLIO_API_BASE_URL 누락');
       _error =
           'BOOKFOLIO_API_BASE_URL 이 비어 있습니다. 실행 시 --dart-define=BOOKFOLIO_API_BASE_URL=<웹 URL> 을 넣거나 VS Code launch.json 의 toolArgs 를 확인하세요.';
       _isLoading = false;
@@ -363,6 +408,7 @@ class AuthController extends ChangeNotifier {
     try {
       final account = await google.signIn();
       if (account == null) {
+        _appendLoginTrace('Google 계정 선택 취소');
         _isLoading = false;
         notifyListeners();
         return;
@@ -371,6 +417,7 @@ class AuthController extends ChangeNotifier {
       final ga = await account.authentication;
       final idToken = ga.idToken;
       if (idToken == null || idToken.isEmpty) {
+        _appendLoginTrace('실패: Google ID 토큰 누락');
         _error =
             'Google ID 토큰을 받지 못했습니다. --dart-define=GOOGLE_AUTH_CLIENT_ID= 를 웹 OAuth 클라이언트 ID(AUTH_GOOGLE_ID 와 동일)로 설정해 보세요.';
         _isLoading = false;
@@ -379,6 +426,7 @@ class AuthController extends ChangeNotifier {
       }
 
       final url = _apiUri('/api/auth/mobile/google');
+      _appendLoginTrace('서버 토큰 교환 요청: $url');
       if (kDebugMode) {
         debugPrint('[auth] POST $url (google)');
       }
@@ -394,21 +442,27 @@ class AuthController extends ChangeNotifier {
       }
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        _appendLoginTrace('서버 응답 성공(${response.statusCode})');
         final map = jsonDecode(response.body) as Map<String, dynamic>;
         final token = map['accessToken'] as String?;
         if (token == null || token.isEmpty) {
+          _appendLoginTrace('실패: accessToken 필드 누락');
           _error = '서버 응답이 올바르지 않습니다.';
         } else {
           await _storeAccessToken(token);
+          _appendLoginTrace('성공: 앱 세션 토큰 저장 완료');
         }
       } else {
+        _appendLoginTrace('실패: 서버 응답 ${response.statusCode}');
         _error = _parseErrorBody(response.body) ??
             'Google 로그인에 실패했습니다. (${response.statusCode})';
       }
     } on Exception catch (e) {
+      _appendLoginTrace('예외: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _appendLoginTrace(_error == null ? 'Google 로그인 흐름 종료(성공)' : 'Google 로그인 흐름 종료(오류)');
       notifyListeners();
     }
   }
@@ -416,9 +470,11 @@ class AuthController extends ChangeNotifier {
   Future<void> signInWithKakao() async {
     _isLoading = true;
     _error = null;
+    _appendLoginTrace('카카오 로그인 시작');
     notifyListeners();
 
     if (_apiBase.trim().isEmpty) {
+      _appendLoginTrace('중단: BOOKFOLIO_API_BASE_URL 누락');
       _error =
           'BOOKFOLIO_API_BASE_URL 이 비어 있습니다. 실행 시 --dart-define=BOOKFOLIO_API_BASE_URL=<웹 URL> 을 넣거나 VS Code launch.json 의 toolArgs 를 확인하세요.';
       _isLoading = false;
@@ -429,43 +485,68 @@ class AuthController extends ChangeNotifier {
     try {
       OAuthToken token;
       final installed = await isKakaoTalkInstalled();
+      _appendLoginTrace(installed ? '카카오톡 설치 감지: Talk 로그인 시도' : '카카오톡 미설치: 계정 로그인 시도');
       if (installed) {
         try {
           token = await UserApi.instance.loginWithKakaoTalk();
+          _appendLoginTrace('카카오톡 로그인 성공');
         } catch (_) {
+          _appendLoginTrace('카카오톡 로그인 실패 → 계정 로그인 폴백');
           token = await UserApi.instance.loginWithKakaoAccount();
         }
       } else {
         token = await UserApi.instance.loginWithKakaoAccount();
+        _appendLoginTrace('카카오 계정 로그인 성공');
       }
 
       final kakaoAccessToken = token.accessToken.trim();
       if (kakaoAccessToken.isEmpty) {
+        _appendLoginTrace('실패: 카카오 accessToken 누락');
         _error = '카카오 액세스 토큰을 받지 못했습니다.';
         return;
       }
 
+      _appendLoginTrace('카카오 토큰 수신, 서버 교환 1차 시도');
       final first = await _exchangeKakaoForMobileToken(kakaoAccessToken);
       if (first != null) {
-        await _storeAccessToken(first);
+        try {
+          await _storeAccessToken(first);
+          _appendLoginTrace('성공: 앱 세션 토큰 저장 완료');
+        } catch (e) {
+          _appendLoginTrace('실패: 토큰 저장 예외 $e');
+          _error = '로그인 토큰 저장에 실패했습니다. 앱 저장소 권한/상태를 확인해 주세요. ($e)';
+        }
         return;
       }
 
       // 이메일 추가 수집(account_email) 동의가 필요한 경우 재동의 후 재시도.
       if (_needsKakaoEmailScope(_error)) {
+        _appendLoginTrace('추가 동의 필요(account_email) → 재동의 시도');
         final reGranted =
             await UserApi.instance.loginWithNewScopes(['account_email']);
+        _appendLoginTrace('재동의 완료, 서버 교환 2차 시도');
         final second =
             await _exchangeKakaoForMobileToken(reGranted.accessToken.trim());
         if (second != null) {
-          await _storeAccessToken(second);
+          try {
+            await _storeAccessToken(second);
+            _appendLoginTrace('성공: 재시도 후 토큰 저장 완료');
+          } catch (e) {
+            _appendLoginTrace('실패: 재시도 토큰 저장 예외 $e');
+            _error = '로그인 토큰 저장에 실패했습니다. 앱 저장소 권한/상태를 확인해 주세요. ($e)';
+          }
           return;
         }
       }
+
+      _appendLoginTrace('실패: 세션 생성 실패(원인 메시지 없음)');
+      _error ??= '카카오 로그인 후 세션 생성에 실패했습니다. 서버 주소와 카카오 권한 설정을 확인해 주세요.';
     } on Exception catch (e) {
+      _appendLoginTrace('예외: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _appendLoginTrace(_error == null ? '카카오 로그인 흐름 종료(성공)' : '카카오 로그인 흐름 종료(오류)');
       notifyListeners();
     }
   }
@@ -477,12 +558,18 @@ class AuthController extends ChangeNotifier {
     }
 
     final url = _apiUri('/api/auth/mobile/kakao');
+    final traceId = _newAuthTraceId();
+    _appendLoginTrace('서버 토큰 교환 요청: $url (trace=$traceId)');
+    _appendLoginTrace('서버 access log에서 /api/auth/mobile/kakao + trace=$traceId 확인');
     if (kDebugMode) {
       debugPrint('[auth] POST $url (kakao)');
     }
     final response = await http.post(
       url,
-      headers: const {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'x-bookfolio-auth-trace': traceId,
+      },
       body: jsonEncode({'accessToken': kakaoAccessToken}),
     );
 
@@ -492,15 +579,18 @@ class AuthController extends ChangeNotifier {
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
+      _appendLoginTrace('서버 응답 성공(${response.statusCode})');
       final map = jsonDecode(response.body) as Map<String, dynamic>;
       final accessToken = map['accessToken'] as String?;
       if (accessToken == null || accessToken.isEmpty) {
+        _appendLoginTrace('실패: accessToken 필드 누락');
         _error = '서버 응답이 올바르지 않습니다.';
         return null;
       }
       return accessToken;
     }
 
+    _appendLoginTrace('실패: 서버 응답 ${response.statusCode}');
     _error = _parseErrorBody(response.body) ??
         '카카오 로그인에 실패했습니다. (${response.statusCode})';
     return null;

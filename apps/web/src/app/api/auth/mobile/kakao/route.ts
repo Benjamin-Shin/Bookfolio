@@ -12,9 +12,13 @@ function normalizeEmail(email: string) {
  * 모바일 카카오 로그인 토큰 교환 엔드포인트.
  *
  * @history
+ * - 2026-04-30: `x-bookfolio-auth-trace` 헤더를 access 로그에 남겨 모바일 인앱 로그와 요청 도착 여부를 대조 가능하게 개선
  * - 2026-04-24: 카카오 액세스 토큰 검증(`kapi.kakao.com/v2/user/me`) 후 모바일 JWT 발급 추가
  */
 export async function POST(request: NextRequest) {
+  const traceId = request.headers.get("x-bookfolio-auth-trace")?.trim() || "none";
+  const forwardedFor = request.headers.get("x-forwarded-for")?.trim() || "unknown";
+  console.info(`[auth/mobile/kakao] request trace=${traceId} ip=${forwardedFor}`);
   try {
     const body = (await request.json()) as { accessToken?: string };
     const accessToken = body.accessToken;
@@ -46,8 +50,10 @@ export async function POST(request: NextRequest) {
       image: profile.picture ?? null
     });
     const mobileAccessToken = await signMobileAccessToken({ userId, email });
+    console.info(`[auth/mobile/kakao] success trace=${traceId} userId=${userId}`);
     return NextResponse.json({ accessToken: mobileAccessToken });
   } catch {
+    console.warn(`[auth/mobile/kakao] bad-request trace=${traceId}`);
     return NextResponse.json({ error: "요청 본문이 올바르지 않습니다." }, { status: 400 });
   }
 }

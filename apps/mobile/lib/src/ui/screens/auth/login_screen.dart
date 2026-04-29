@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 /// 소셜 로그인 전용 랜딩형 로그인 화면.
 ///
 /// History:
+/// - 2026-04-30: 디버그 빌드에서 로그인 처리과정 확인용 임시 로그 패널(`auth.loginTrace`) 추가
 /// - 2026-04-25: `Login.png` 기준으로 신규 생성(카카오/구글 전용, 중앙 정렬)
 /// - 2026-04-25: 웹(`kIsWeb`)에서는 이메일/비밀번호 로그인 폼 노출, 소셜 버튼 숨김
 /// - 2026-04-28: 플랫폼 분기 제거, 이메일/비밀번호 로그인 폼을 모든 환경에서 상시 노출
@@ -237,6 +238,64 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                  ],
+                  if (kDebugMode && auth.loginTrace.isNotEmpty) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF111827),
+                        borderRadius: BorderRadius.circular(
+                            BookfolioDesignTokens.radiusMd),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                '로그인 처리 로그(임시)',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const Spacer(),
+                              TextButton(
+                                onPressed:
+                                    auth.isLoading ? null : auth.clearLoginTrace,
+                                style: TextButton.styleFrom(
+                                  minimumSize: Size.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                ),
+                                child: const Text('지우기'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          ...auth.loginTrace.reversed
+                              .take(8)
+                              .map(
+                                (line) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Text(
+                                    line,
+                                    style: GoogleFonts.robotoMono(
+                                      fontSize: 11,
+                                      color: const Color(0xFFE5E7EB),
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                   ],
                   Text(
                     '로그인은 최초 1회만 필요해요.',
