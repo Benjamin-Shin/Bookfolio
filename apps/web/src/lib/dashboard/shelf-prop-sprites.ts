@@ -5,6 +5,7 @@
  * `x`·`y`·`w`·`h`를 실제 시트에 맞게 조정한다. (현재 값은 **그리드 가정용 플레이스홀더**이다.)
  *
  * @history
+ * - 2026-05-03: `shelfPropHash32` export — `shelf-row-mix` 등 시드 유틸에서 재사용
  * - 2026-05-03: 신규 — 시트 크기·타일 맵·`getShelfPropSpriteStyle`·시드 기반 `pickShelfPropSpriteIds`
  */
 
@@ -66,7 +67,8 @@ export function getShelfPropSpriteStyle(
   };
 }
 
-function hash32(input: string): number {
+/** FNV-1a 32bit — 동일 문자열이면 항상 동일한 정수(SSR·CSR 공통). */
+export function shelfPropHash32(input: string): number {
   let h = 2166136261;
   for (let i = 0; i < input.length; i++) {
     h ^= input.charCodeAt(i);
@@ -88,7 +90,7 @@ export function pickShelfPropSpriteIds(
   }
   const used = new Set<ShelfPropSpriteId>();
   const out: ShelfPropSpriteId[] = [];
-  let h = hash32(seed);
+  let h = shelfPropHash32(seed);
   for (let i = 0; i < n; i++) {
     h = Math.imul(h + i + 1, 1103515245) + 12345;
     let idx = h % ORDERED_IDS.length;

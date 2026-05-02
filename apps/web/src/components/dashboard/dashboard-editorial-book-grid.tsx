@@ -4,16 +4,25 @@ import {
   BOOKS_PER_VISUAL_ROW,
   chunk,
 } from "@/components/books/bookshelf-shared";
-import { ShelfPropSprite } from "@/components/dashboard/shelf-prop-sprite";
-import {
-  pickShelfPropSpriteIds,
-} from "@/lib/dashboard/shelf-prop-sprites";
+import { ShelfDecorInline } from "@/components/dashboard/shelf-decor-inline";
+import { mixShelfRowItems } from "@/lib/dashboard/shelf-row-mix";
 import { cn } from "@/lib/utils";
 
 import type { UserBookSummary } from "@bookfolio/shared";
 
-const showShelfPropSprites =
-  process.env.NEXT_PUBLIC_SHELF_PROPS_SPRITE_ENABLED === "1";
+/**
+ * 책 줄 인라인 데코: 기본 표시. 끄려면 `NEXT_PUBLIC_SHELF_PROPS_SPRITE_DISABLED=1`.
+ * (`NEXT_PUBLIC_SHELF_PROPS_SPRITE_ENABLED=0`이면 역시 OFF — 예전 플래그 호환)
+ */
+function shelfInlineDecorsEnabled(): boolean {
+  if (process.env.NEXT_PUBLIC_SHELF_PROPS_SPRITE_DISABLED === "1") {
+    return false;
+  }
+  if (process.env.NEXT_PUBLIC_SHELF_PROPS_SPRITE_ENABLED === "0") {
+    return false;
+  }
+  return true;
+}
 
 /**
  * 읽기 진행률(0–100). 분모는 `readingTotalPages ?? pageCount`.
@@ -88,15 +97,18 @@ function EditorialBookCell({
   book,
   variant,
   indexInRow,
+  tiltPatternIndex,
 }: {
   book: UserBookSummary;
   variant: "reading" | "owned";
-  /** 한 줄 안에서의 0-based 인덱스(기울기·낮춤 이펙트) */
+  /** 줄 안에서 몇 번째 책인지(0-based) */
   indexInRow: number;
+  /** 책+데코 혼합 줄에서의 인덱스(참고 스니펫 `mixed.map`의 `idx`); 생략 시 `indexInRow` */
+  tiltPatternIndex?: number;
 }) {
   const authors = book.authors.join(", ") || "저자 미상";
   const pct = variant === "reading" ? readingProgressPercent(book) : null;
-  const i = indexInRow;
+  const i = tiltPatternIndex ?? indexInRow;
 
   return (
     <div
@@ -110,10 +122,10 @@ function EditorialBookCell({
       <Link
         href={`/dashboard/books/${book.id}`}
         title={book.title}
-        className="group relative block h-full w-full"
+        className="group relative block h-full w-full drop-shadow-[0_6px_14px_rgba(0,0,0,0.12)]"
       >
         <div className="relative h-full w-full origin-bottom transition-transform duration-200 ease-out will-change-transform group-hover:-translate-y-2 group-hover:scale-[1.04]">
-          <div className="relative h-full w-full overflow-hidden rounded-sm shadow-lg ring-1 ring-black/5">
+          <div className="relative h-full w-full overflow-hidden rounded-sm shadow-lg ring-1 ring-black/[0.06]">
             <ShelfBookSurface book={book} />
           </div>
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-end rounded-sm bg-black/55 p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -138,9 +150,51 @@ function EditorialBookCell({
         </div>
       </Link>
       <div
-        className="pointer-events-none absolute bottom-[-6px] left-1/2 h-[10px] w-[70%] -translate-x-1/2 bg-black/20 blur-md"
+        className="pointer-events-none absolute bottom-[-5px] left-1/2 h-[8px] w-[72%] -translate-x-1/2 bg-black/25 blur-[6px]"
         aria-hidden
       />
+    </div>
+  );
+}
+
+/**
+ * 표지 그리드 행 하단 — 벽에 거는 목판(상면·전면)·양끝 코벨·벽 그림자.
+ *
+ * @history
+ * - 2026-05-03: `shelfRowLedgeMid`/`shelfLedge` 시도 후, 스니펫 4층 스트립으로 재정렬
+ * - 2026-05-03: 참고 UI — 두께감 있는 목 선반·드롭 섀도·코벨
+ */
+/**
+ * 양끝 목재 브래킷(코벨) — `EditorialShelf` 전용.
+ *
+ * @history
+ * - 2026-05-03: 참고 벽걸이 책장 UI에 맞춰 `clipPath` 사다리꼴·그라데이션
+ */
+function ShelfCorbel() {
+  return (
+    <div
+      className="h-[15px] w-[11px] shrink-0 bg-gradient-to-b from-[#c49a72] via-[#9a6e45] to-[#6b4528] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),inset_-1px_0_2px_rgba(0,0,0,0.12)]"
+      style={{ clipPath: "polygon(18% 0, 82% 0, 100% 100%, 0% 100%)" }}
+    />
+  );
+}
+
+function EditorialShelf() {
+  return (
+    <div className="relative mx-auto mt-3 w-full max-w-full px-1 sm:px-2" aria-hidden>
+      <div className="relative z-[1] flex items-end justify-center gap-0">
+        <div className="flex shrink-0 flex-col justify-end pb-px opacity-95">
+          <ShelfCorbel />
+        </div>
+        <div className="relative min-w-0 flex-1 shadow-[0_12px_24px_-6px_rgba(0,0,0,0.22)]">
+          <div className="h-[6px] rounded-t-[4px] bg-gradient-to-b from-[#f0e0cc] via-[#deb887] to-[#c9a06e] shadow-[inset_0_1px_1px_rgba(255,255,255,0.55),inset_0_-1px_0_rgba(0,0,0,0.08)]" />
+          <div className="h-[13px] rounded-b-[5px] border-t border-[#8f6239]/60 bg-gradient-to-b from-[#b88956] via-[#8f6239] to-[#5c3d24] shadow-[inset_0_-4px_8px_rgba(0,0,0,0.2)]" />
+        </div>
+        <div className="flex shrink-0 flex-col justify-end pb-px opacity-95">
+          <ShelfCorbel />
+        </div>
+      </div>
+      <div className="pointer-events-none absolute -bottom-1 left-[6%] right-[6%] z-0 h-6 rounded-[50%] bg-black/[0.12] blur-[18px]" />
     </div>
   );
 }
@@ -149,9 +203,10 @@ function EditorialBookCell({
  * 내 서가 표지 그리드: 줄마다 얇은 목 선반·표지 호버 시 메타 오버레이.
  *
  * @history
- * - 2026-05-03: 선반 하단 라인 — `10px`×3층(`#d7b07a` 그라데이션·`#8b5e3c`·`black/20 blur-md`)으로 복귀
+ * - 2026-05-03: 데코 — `mixShelfRowItems` 인라인 삽입·`ShelfDecorInline`(참고 `mixItems`/`DecorItem`, 시드 고정)
+ * - 2026-05-03: 선반·벽 — 밝은 단색 벽(`#f0f0f0`대)·목판 상·전면·코벨·하단 그림자(`EditorialShelf`)
  * - 2026-05-03: 권마다 `translate-y`·`rotate`·접촉 그림자
- * - 2026-05-03: `NEXT_PUBLIC_SHELF_PROPS_SPRITE_ENABLED=1`일 때 행 양쪽 `ShelfPropSprite`(시드 `L|R-{row}`)
+ * - 2026-05-03: 인라인 데코 기본 ON·`SHELF_PROPS_SPRITE_DISABLED=1`일 때만 OFF
  * - 2026-05-03: 행 래퍼 `rounded-xl`·내부 음영·호버 오버레이
  * - 2026-05-03: 참고 책장 스니펫 반영 — `flex` 행·호버 오버레이
  */
@@ -168,25 +223,31 @@ export function EditorialGrid({
       {rows.map((rowBooks, rowIdx) => (
         <div
           key={rowIdx}
-          className="relative mb-12 overflow-hidden rounded-xl bg-gradient-to-b from-[#f8f6f2] to-[#eae3d8] p-6"
+          className="relative mb-12 overflow-hidden rounded-xl border border-black/[0.06] bg-[#f0f0f0] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),inset_0_0_0_1px_rgba(255,255,255,0.35)]"
         >
           <div
-            className="pointer-events-none absolute inset-0 shadow-[inset_0_20px_40px_rgba(0,0,0,0.05)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_95%_70%_at_50%_8%,rgba(0,0,0,0.045),transparent_62%)]"
             aria-hidden
           />
-          {showShelfPropSprites ? (
-            <div className="relative z-10 flex items-end justify-center gap-2 md:gap-4">
-              <div className="flex w-[72px] shrink-0 items-end justify-center md:w-[100px]">
-                {pickShelfPropSpriteIds(`L-${rowIdx}`, 1).map((id) => (
-                  <ShelfPropSprite
-                    key={`L-${rowIdx}-${id}`}
-                    id={id}
-                    className="origin-bottom scale-[0.5] md:scale-[0.58]"
-                  />
-                ))}
-              </div>
-              <div className="flex min-w-0 flex-1 flex-wrap items-end justify-center gap-[6px]">
-                {rowBooks.map((book, i) => (
+          <div className="relative z-10 flex flex-wrap items-end justify-center gap-[6px] pb-1">
+            {shelfInlineDecorsEnabled()
+              ? mixShelfRowItems(rowBooks, `row-${rowIdx}`).map((item, idx) =>
+                  item.type === "book" ? (
+                    <EditorialBookCell
+                      key={item.book.id}
+                      book={item.book}
+                      variant={variant}
+                      indexInRow={item.bookOrdinal}
+                      tiltPatternIndex={idx}
+                    />
+                  ) : (
+                    <ShelfDecorInline
+                      key={`decor-${rowIdx}-${idx}-${item.kind}`}
+                      kind={item.kind}
+                    />
+                  )
+                )
+              : rowBooks.map((book, i) => (
                   <EditorialBookCell
                     key={book.id}
                     book={book}
@@ -194,34 +255,8 @@ export function EditorialGrid({
                     indexInRow={i}
                   />
                 ))}
-              </div>
-              <div className="flex w-[72px] shrink-0 items-end justify-center md:w-[100px]">
-                {pickShelfPropSpriteIds(`R-${rowIdx}`, 1).map((id) => (
-                  <ShelfPropSprite
-                    key={`R-${rowIdx}-${id}`}
-                    id={id}
-                    className="origin-bottom scale-[0.5] md:scale-[0.58]"
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="relative z-10 flex flex-wrap items-end justify-center gap-[6px]">
-              {rowBooks.map((book, i) => (
-                <EditorialBookCell
-                  key={book.id}
-                  book={book}
-                  variant={variant}
-                  indexInRow={i}
-                />
-              ))}
-            </div>
-          )}
-          <div className="relative z-0 mt-2" aria-hidden>
-            <div className="h-[10px] bg-gradient-to-b from-[#d7b07a] to-[#b98a5a]" />
-            <div className="h-[10px] bg-[#8b5e3c]" />
-            <div className="h-[10px] bg-black/20 blur-md" />
           </div>
+          <EditorialShelf />
         </div>
       ))}
     </div>

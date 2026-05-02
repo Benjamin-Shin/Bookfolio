@@ -99,7 +99,7 @@ apps/web/public/
 ### 선반·장식 소품 이미지(스프라이트)
 
 - 여러 소품을 **한 장(맵/아틀라스)**에 묶어 두었다면 **CSS 스프라이트**로 잘라 쓸 수 있다: 고정 크기 래퍼 + `background-image: url(/assets/...)` + `background-size`(전체 시트 기준) + `background-position`(타일 좌표). 또는 코드 상수 **맵**(키 → `{ x, y, w, h }` 비율)으로 위치만 관리하고 동일 방식으로 적용한다.
-- 구현 참고: `lib/dashboard/shelf-prop-sprites.ts`, `components/dashboard/shelf-prop-sprite.tsx`. 시트 파일 `public/assets/shelf-props.png`를 둔 뒤 맵 좌표를 맞춘다. 대시보드 표지 행 양쪽 장식은 **`NEXT_PUBLIC_SHELF_PROPS_SPRITE_ENABLED=1`** 일 때만 노출되도록 할 수 있다(미설정·`0`이면 비표시).
+- 구현 참고: `lib/dashboard/shelf-row-mix.ts`, `components/dashboard/shelf-decor-inline.tsx`. 인라인 데코는 **`public/assets/shelf-decor/{plant|clock|teddy|candle}.svg`**(또는 동명 `.png`)를 `<img>`로 불러온다. 한 장 스프라이트는 `lib/dashboard/shelf-prop-sprites.ts`·`shelf-props.png`로 확장 가능하다. 대시보드 표지 행은 **기본으로** `mixShelfRowItems`로 책 사이에 데코를 넣는다. 끄려면 **`NEXT_PUBLIC_SHELF_PROPS_SPRITE_DISABLED=1`**. (레거시: `NEXT_PUBLIC_SHELF_PROPS_SPRITE_ENABLED=0`이면 책만.)
 - 장식은 `aria-hidden`·`pointer-events-none` 등으로 **접근성·클릭 충돌**을 피한다.
     ├── woff2/
     └── woff/
