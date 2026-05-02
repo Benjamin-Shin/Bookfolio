@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
  * `next.config.mjs`가 있는 디렉터리(앱 루트)를 고정으로 로드합니다.
  *
  * @history
+ * - 2026-05-03: 랜딩·로그인 Stitch 이미지를 `public/assets`로 옮김에 따라 `images.remotePatterns` 제거
+ * - 2026-05-03: `images.remotePatterns` — Stitch 시안 좌측 배경(`lh3.googleusercontent.com`) `next/image` 허용
  * - 2026-03-25: `loadEnvConfig(appDir)` — `ALADIN_API_BASE_URL` 등 서버 전용 변수 보장
  */
 const appDir = path.dirname(fileURLToPath(import.meta.url));
@@ -19,7 +21,7 @@ loadEnvConfig(appDir);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@bookfolio/shared"],
-  typedRoutes: true
+  typedRoutes: true,
 };
 
 export default nextConfig;

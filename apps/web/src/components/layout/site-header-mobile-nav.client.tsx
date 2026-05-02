@@ -90,6 +90,7 @@ function MobileNavLink({
  * - 2026-03-29: 신규 — 햄버거 메뉴·개인정보·약관·쿠키(푸터 동일 경로)
  * - 2026-03-29: `sharedLibrariesBlockingWithdrawal`을 프로필(탈퇴)로 전달
  * - 2026-04-05: 「서가담 집계」 표기
+ * - 2026-05-03: 로그인 메뉴 순서·라벨을 데스크톱 헤더(내 서가·발견·모임서가·통계)와 맞춤
  */
 export function SiteHeaderMobileNav({
   apkUrl,
@@ -185,6 +186,14 @@ export function SiteHeaderMobileNav({
                     <Separator className="my-2" />
                   </>
                 ) : null}
+                <MobileNavLink href="/dashboard" onNavigate={close}>
+                  <LibraryBigIcon className="size-4 opacity-90" />
+                  내 서가
+                </MobileNavLink>
+                <MobileNavLink href="/dashboard/bestsellers" onNavigate={close}>
+                  <FlameIcon className="size-4 opacity-80" />
+                  발견
+                </MobileNavLink>
                 <MobileNavLink href="/dashboard/libraries" onNavigate={close}>
                   <UsersRoundIcon className="size-4 opacity-80" />
                   모임서가
@@ -194,18 +203,11 @@ export function SiteHeaderMobileNav({
                   onNavigate={close}
                 >
                   <BarChart3Icon className="size-4 opacity-80" />
-                  서가담 집계
-                </MobileNavLink>
-                <MobileNavLink href="/dashboard/bestsellers" onNavigate={close}>
-                  <FlameIcon className="size-4 opacity-80" />
-                  베스트셀러
+                  통계
                 </MobileNavLink>
                 <MobileNavLink href="/dashboard/choice-new" onNavigate={close}>
                   <SparklesIcon className="size-4 opacity-80" />
                   초이스 신간
-                </MobileNavLink>
-                <MobileNavLink href="/dashboard" onNavigate={close}>
-                  <LibraryBigIcon className="size-4 opacity-90" />내 서가
                 </MobileNavLink>
                 <form
                   action="/auth/signout"

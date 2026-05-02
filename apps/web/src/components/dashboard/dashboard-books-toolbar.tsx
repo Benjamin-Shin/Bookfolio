@@ -39,6 +39,8 @@ type DashboardBooksToolbarProps = {
  * - 2026-03-26: 탭(`tab`)·통계 요약 제거 — 상단 통계 카드·탭 네비로 이전
  * - 2026-03-24: 쿼리 `genre` 유지(`dashboardHref`)
  * - 2026-03-24: 소장 페이지 이전/다음은 `DashboardBooksPagination`으로 분리(책장 바로 아래 배치)
+ * - 2026-05-03: 검색창·요약 문구를 내 서가 크림/잉크 톤에 맞춤
+ * - 2026-05-03: `#1A3C2F` 팔레트로 통일(시안형 대시보드)
  */
 export function DashboardBooksToolbar({
   searchQuery,
@@ -73,7 +75,7 @@ export function DashboardBooksToolbar({
             type="search"
             placeholder="제목 또는 저자 검색"
             defaultValue={searchQuery}
-            className="flex-1"
+            className="flex-1 border-[#1A3C2F]/15 bg-white text-[#1A3C2F] placeholder:text-[#1A3C2F]/40 focus-visible:ring-[#1A3C2F]/25"
             autoComplete="off"
           />
           {genreSlug.trim() ? (
@@ -92,7 +94,7 @@ export function DashboardBooksToolbar({
       ) : null}
       <div
         className={cn(
-          "text-sm text-muted-foreground",
+          "text-sm text-[#5c6560]",
           !showSearch && "sm:ml-auto",
         )}
       >
@@ -117,7 +119,7 @@ export function DashboardBooksToolbar({
           )}
         </p>
         {totalPages > 1 ? (
-          <p className="mt-0.5 text-xs">{page}/{totalPages}쪽</p>
+          <p className="mt-0.5 text-xs text-[#7a847c]">{page}/{totalPages}쪽</p>
         ) : null}
       </div>
     </div>
@@ -144,6 +146,7 @@ type DashboardBooksPaginationProps = {
  * - 2026-03-26: `tab`·`sectionLabel`로 일반화(읽기 전·완독 포함)
  * - 2026-03-24: 쿼리 `genre` 유지(`dashboardHref`)
  * - 2026-03-24: 신규 — 대시보드 소장 구역 하단 페이지네이션
+ * - 2026-05-03: 내 서가 팔레트에 맞춘 테두리·배경
  */
 export function DashboardBooksPagination({
   searchQuery,
@@ -164,10 +167,10 @@ export function DashboardBooksPagination({
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-lg border border-border/80 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-col gap-2 rounded-xl border border-[#051b0e]/12 bg-white/60 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
       aria-label={`${sectionLabel} 책 페이지 이동`}
     >
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-[#434843]">
         {sectionLabel} {total.toLocaleString("ko-KR")}권 · {page}/{totalPages}쪽
       </p>
       <div className="flex flex-wrap items-center gap-2">

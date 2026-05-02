@@ -84,6 +84,7 @@ type DashboardReadingEventsCalendarProps = {
  * 이벤트가 있는 날 선택 시 `GET /api/me/reading-events/by-day` 상세 테이블.
  *
  * @history
+ * - 2026-05-03: 내 서가 카드 톤(`border-[#051b0e]/15`·`bg-white/70`)과 타이포 통일
  * - 2026-03-26: 일 선택 시 표지·도서·이벤트 타입 테이블(`by-day` API)
  * - 2026-03-26: 신규 — 대시보드용 월 이동·일별 건수 표시
  */
@@ -239,15 +240,17 @@ export function DashboardReadingEventsCalendar({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border/80 bg-card p-4 shadow-sm",
+        "rounded-xl border border-[#051b0e]/15 bg-white/70 p-4 shadow-sm",
         loading && "opacity-90",
         className,
       )}
     >
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">독서 이벤트 캘린더</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <h2 className="font-serif text-lg font-medium tracking-tight text-[#051b0e]">
+            독서 이벤트 캘린더
+          </h2>
+          <p className="mt-0.5 text-xs leading-relaxed text-[#434843]">
             책 상세에서 기록한 독서 이벤트가 날짜별로 집계됩니다. 숫자가 있는 날을 누르면
             아래에 목록이 표시됩니다.
           </p>

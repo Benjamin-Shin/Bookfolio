@@ -86,6 +86,7 @@ function getRequestId(): string {
  * 내 서가 상단 추천 패널. 추천 API를 호출해 개인화 후보를 노출합니다.
  *
  * @history
+ * - 2026-05-03: 카드 외곽선·그림자를 내 서가 패널과 동일 톤으로 정리
  * - 2026-04-22: 신규 — `/api/me/recommendations` 연동 + 관심 저장 상호작용 로깅
  */
 export function DashboardRecommendationPanel() {
@@ -173,7 +174,7 @@ export function DashboardRecommendationPanel() {
   );
 
   return (
-    <Card className="border-[#051b0e]/15 bg-white/70">
+    <Card className="rounded-xl border-[#051b0e]/15 bg-white/70 shadow-sm">
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="font-serif text-xl text-[#051b0e]">

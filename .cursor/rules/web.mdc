@@ -93,10 +93,27 @@ apps/web/src/
 └── auth.edge.ts            # 미들웨어용 최소 NextAuth 설정
 
 apps/web/public/
+├── assets/                 # 정적 이미지(SVG·PNG 등). Stitch 시안 이미지도 여기에 받아 둔다
 └── fonts/                  # Pretendard (woff2 / woff)
+
+### 선반·장식 소품 이미지(스프라이트)
+
+- 여러 소품을 **한 장(맵/아틀라스)**에 묶어 두었다면 **CSS 스프라이트**로 잘라 쓸 수 있다: 고정 크기 래퍼 + `background-image: url(/assets/...)` + `background-size`(전체 시트 기준) + `background-position`(타일 좌표). 또는 코드 상수 **맵**(키 → `{ x, y, w, h }` 비율)으로 위치만 관리하고 동일 방식으로 적용한다.
+- 구현 참고: `lib/dashboard/shelf-prop-sprites.ts`, `components/dashboard/shelf-prop-sprite.tsx`. 시트 파일 `public/assets/shelf-props.png`를 둔 뒤 맵 좌표를 맞춘다. 대시보드 표지 행 양쪽 장식은 **`NEXT_PUBLIC_SHELF_PROPS_SPRITE_ENABLED=1`** 일 때만 노출되도록 할 수 있다(미설정·`0`이면 비표시).
+- 장식은 `aria-hidden`·`pointer-events-none` 등으로 **접근성·클릭 충돌**을 피한다.
     ├── woff2/
     └── woff/
 ```
+
+## Stitch 디자인 반영 (MCP·시안 이식)
+
+- 레이아웃·카피·컴포넌트 구조는 Stitch HTML을 **참고**해 TSX + Tailwind + shadcn으로 옮긴다 (인라인 스타일·원본 HTML 그대로 붙여넣기 지양은 기존 스타일 규칙과 동일).
+- **이미지(필수)**  
+  - Stitch 산출물에 포함된 **`lh3.googleusercontent.com` 등 외부 호스트 URL을 최종 코드에 직접 두지 않는다.** (만료·접근 제한·추적 이슈, 폰트 CDN과 마찬가지로 배포를 외부에 묶지 않음.)
+  - 시안에 쓰인 원본 URL에서 파일을 받아 **`apps/web/public/assets/`** 에 두고, 파일명은 용도가 드러나게 한다 (예: `landing-hero-bg.png`, `stitch-login-dark-panel-bg.png`, `stitch-login-dark-brand-logo.png`).
+  - 코드에서는 **`/assets/...` 로컬 경로**만 참조한다 (`next/image` 포함).
+  - **`next.config.mjs`의 `images.remotePatterns`를 Stitch 이미지용으로 상시 추가하지 않는다.** 임시로 원격을 켠 경우, 자산을 `public/assets`로 옮긴 뒤 패턴을 제거한다.
+- 요약 절차: **다운로드 → `public/assets` 저장 → 코드는 로컬 경로만.**
 
 ## 코딩 컨벤션
 
@@ -132,7 +149,8 @@ apps/web/public/
 ### 스타일
 
 - Tailwind 유틸리티 클래스만 사용 (globals.css에 커스텀 CSS 최소화)
-- 반응형 디자인: mobile-first 접근 (`sm:`, `md:`, `lg:` 순서)
+- 반응형 디자인: Tailwind는 `sm:`·`md:`·`lg:` 순서로 작성한다.
+- **웹(apps/web) 목표 뷰포트:** 레이아웃·간격·시각 검증은 **데스크톱과 최소 태블릿**(대략 `md` 이상, 약 768px 이상)을 기준으로 한다. 폰 단독 웹 퍼스트 레이아웃까지 맞추는 작업은 우선순위에서 제외해도 된다 — **모바일은 별도 Flutter 앱**이 담당한다.
 - 다크 모드: `globals.css`에 `.dark` 토큰 정의됨, 필요 시 루트에 클래스 토글로 활성화
 - 색상은 shadcn/ui CSS 변수 시스템 활용
 

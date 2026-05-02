@@ -7,6 +7,7 @@ const sep = <span className="text-muted-foreground/70" aria-hidden>|</span>;
  * 전역 하단 푸터 — 저작권(중앙)·정책 링크(우측, 큰 화면 기준).
  *
  * @history
+ * - 2026-05-02: 뷰포트 하단 고정(`fixed`)·가독을 위해 상단 보더·배경 명시
  * - 2026-04-13: 계정·데이터 삭제 → 이용약관 제20조 앵커 링크
  * - 2026-03-26: 신규
  * - 2026-04-05: 서가담 표기·구역은 배경 톤만(솔리드 상단 보더 제거)
@@ -15,8 +16,8 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto bg-muted/60">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-4 px-4 py-8 sm:grid-cols-[1fr_auto_1fr] sm:gap-6">
+    <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-muted/95 backdrop-blur-sm">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-3 px-4 py-4 sm:grid-cols-[1fr_auto_1fr] sm:gap-6 sm:py-5">
         <div className="hidden sm:block" aria-hidden />
         <p className="text-center text-sm text-muted-foreground">
           © {year} 서가담. All rights reserved.

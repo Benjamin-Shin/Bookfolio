@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 /// 소셜 로그인 전용 랜딩형 로그인 화면.
 ///
 /// History:
+/// - 2026-05-02: 카카오 버튼 아이콘을 `Image.asset`에서 `SvgPicture.asset`으로 변경(SVG 정상 표시).
 /// - 2026-04-30: 디버그 빌드에서 로그인 처리과정 확인용 임시 로그 패널(`auth.loginTrace`) 추가
 /// - 2026-04-25: `Login.png` 기준으로 신규 생성(카카오/구글 전용, 중앙 정렬)
 /// - 2026-04-25: 웹(`kIsWeb`)에서는 이메일/비밀번호 로그인 폼 노출, 소셜 버튼 숨김
@@ -193,11 +194,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: '카카오로 시작하기',
                     loading: auth.isLoading,
                     onTap: auth.isLoading ? null : auth.signInWithKakao,
-                    icon: Image.asset(
+                    icon: SvgPicture.asset(
                       _kakaoAsset,
                       width: 20,
                       height: 20,
-                      fit: BoxFit.contain,
                     ),
                     textColor: const Color(0xFF3A1D1D),
                   ),
@@ -263,8 +263,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const Spacer(),
                               TextButton(
-                                onPressed:
-                                    auth.isLoading ? null : auth.clearLoginTrace,
+                                onPressed: auth.isLoading
+                                    ? null
+                                    : auth.clearLoginTrace,
                                 style: TextButton.styleFrom(
                                   minimumSize: Size.zero,
                                   tapTargetSize:
@@ -277,9 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          ...auth.loginTrace.reversed
-                              .take(8)
-                              .map(
+                          ...auth.loginTrace.reversed.take(8).map(
                                 (line) => Padding(
                                   padding: const EdgeInsets.only(bottom: 4),
                                   child: Text(

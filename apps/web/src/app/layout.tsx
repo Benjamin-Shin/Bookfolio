@@ -40,6 +40,7 @@ export const metadata: Metadata = {
 
 /**
  * @history
+ * - 2026-05-02: `SiteHeader`·`SiteFooter` 고정 시 본문이 가려지지 않도록 `pt-14`·`pb-32`·세로 스크롤 래퍼 추가
  * - 2026-03-26: `SiteFooter` — `Providers` 안 세로 flex로 본문·푸터 배치
  * - 2026-04-05: Manrope·Newsreader CSS 변수(`next/font`)·메타데이터 서가담화
  * - 2026-04-07: 파비콘·애플 터치 아이콘을 `#Resources` Seogadam 에셋으로 연결
@@ -52,7 +53,9 @@ export default function RootLayout({
       <body className={cn(manrope.className, "antialiased")}>
         <Providers>
           <SiteHeader />
-          <div className="flex-1">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-14 pb-32">
+            {children}
+          </div>
           <SiteFooter />
         </Providers>
       </body>

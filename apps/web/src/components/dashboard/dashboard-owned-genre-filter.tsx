@@ -8,6 +8,7 @@ import {
 
 /**
  * @history
+ * - 2026-05-03: 라벨 색상을 내 서가 본문 톤(`#434843`)에 맞춤
  * - 2026-04-12: `ownedSort`로 제목순 쿼리 유지
  * - 2026-03-26: 소장 탭 고정(`tab=owned`)으로 링크
  * - 2026-03-24: 소장 구역 장르 슬러그 필터(링크·쿼리 `genre`)
@@ -52,7 +53,9 @@ export function DashboardOwnedGenreFilter({
       className="flex flex-wrap items-center gap-2"
       aria-label="소장 도서 장르 필터"
     >
-      <span className="text-xs font-medium text-muted-foreground">장르</span>
+      <span className="text-xs font-medium uppercase tracking-[0.12em] text-[#434843]">
+        장르
+      </span>
       <div className="flex flex-wrap gap-1.5">
         <Badge variant={active ? "default" : "outline"} asChild>
           <Link href={ownedDashboardHref(q, undefined, 1, ownedSort)} prefetch={false}>

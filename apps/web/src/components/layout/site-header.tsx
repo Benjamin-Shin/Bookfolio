@@ -1,41 +1,25 @@
 import type { Route } from "next";
 import Link from "next/link";
-import {
-  BarChart3Icon,
-  FlameIcon,
-  LibraryBigIcon,
-  LogOutIcon,
-  SparklesIcon,
-  UsersRoundIcon,
-} from "lucide-react";
+import { Bell, Leaf, LogOutIcon, Search } from "lucide-react";
 
 import { auth } from "@/auth";
 import { AdminHeaderMenu } from "@/components/layout/admin-header-menu";
 import { HeaderAccount } from "@/components/layout/header-account";
+import { LoggedInMainNav } from "@/components/layout/logged-in-main-nav.client";
 import { SiteHeaderGuestActions } from "@/components/layout/site-header-guest-actions.client";
 import { SiteHeaderMobileNav } from "@/components/layout/site-header-mobile-nav.client";
 import { Button } from "@/components/ui/button";
 import { getAppProfile } from "@/lib/auth/app-profiles";
 import { listOwnedSharedLibrariesBlockingWithdrawal } from "@/lib/auth/delete-app-user";
 import { env } from "@/lib/env";
-
-function AndroidApkIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.55 1.22 12.85 1 12 1s-1.55.22-2.2.63L8.32.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.3 1.3C6.97 3.97 6 6.24 6 8.83V9h12v-.17c0-2.59-.97-4.86-2.47-6.67z" />
-    </svg>
-  );
-}
+import { cn } from "@/lib/utils";
 
 /**
  * 전역 상단 헤더(브랜드·로그인 시 대시보드 바로가기).
  *
  * @history
+ * - 2026-05-03: 로그인 레이아웃 — 잎 아이콘·세리프「서가담」·중앙 4메뉴(`LoggedInMainNav`)·검색·알림·계정(시안 정렬)
+ * - 2026-05-02: 뷰포트 상단 고정(`fixed`)으로 스크롤 시에도 항상 노출
  * - 2026-04-27: `/login` 경로에서는 비로그인 `로그인` CTA를 숨기도록 클라이언트 경로 분기 추가
  * - 2026-04-27: 비로그인 상태 헤더에서는 `내 서가` CTA를 숨겨 로그인 버튼만 노출
  * - 2026-03-26: 대시보드·로그아웃 등 네비에 lucide 아이콘 추가
@@ -64,109 +48,124 @@ export async function SiteHeader() {
     "사용자";
 
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md">
-      <div className="relative mx-auto flex h-14 w-full max-w-6xl items-center justify-end gap-4 px-4 md:justify-between">
-        <Link
-          href={(user?.id ? "/dashboard" : "/") as Route}
-          className="absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center text-foreground md:static md:left-auto md:top-auto md:z-auto md:translate-x-0 md:translate-y-0"
-        >
-          <img
-            src="/assets/Seogadam_Web_logo.png"
-            alt="서가담"
-            width={200}
-            height={48}
-            className="h-8 w-auto max-w-[min(11rem,calc(100vw-5.5rem))] shrink-0 object-contain md:max-w-[8.5rem]"
-          />
-        </Link>
-        <nav className="flex min-w-0 items-center gap-2">
-          <div className="hidden min-w-0 items-center gap-2 md:flex">
-            {user?.id && user.email ? (
-              <>
-                {user.role === "ADMIN" ? <AdminHeaderMenu /> : null}
-                <HeaderAccount
-                  email={user.email}
-                  displayLabel={displayLabel}
-                  initialProfile={profile}
-                  sharedLibrariesBlockingWithdrawal={
-                    sharedLibrariesBlockingWithdrawal
-                  }
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#1A3C2F]/10 bg-[#F8F9FA]/95 backdrop-blur-md">
+      <div
+        className={cn(
+          "mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-3 sm:px-4 md:gap-4 md:px-6",
+          !(user?.id && user.email) && "justify-end",
+        )}
+      >
+        {user?.id && user.email ? (
+          <>
+            <div className="flex min-w-0 shrink-0 items-center gap-2 md:gap-3">
+              <SiteHeaderMobileNav
+                apkUrl={apkUrl ?? null}
+                user={
+                  user.id && user.email
+                    ? { id: user.id, email: user.email, role: user.role ?? null }
+                    : null
+                }
+                displayLabel={displayLabel}
+                initialProfile={profile}
+                sharedLibrariesBlockingWithdrawal={
+                  sharedLibrariesBlockingWithdrawal
+                }
+              />
+              <Link
+                href={"/dashboard" as Route}
+                className="flex min-w-0 items-center gap-2 text-[#1A3C2F]"
+              >
+                <Leaf
+                  className="size-7 shrink-0 text-[#1A3C2F] md:size-8"
+                  aria-hidden
                 />
-                <Button variant="ghost" size="sm" asChild>
-                  <Link
-                    href={"/dashboard/libraries" as Route}
-                    className="inline-flex items-center gap-2"
-                  >
-                    <UsersRoundIcon className="size-4 opacity-80" />
-                    모임서가
-                  </Link>
+                <span className="font-serif text-lg font-semibold tracking-tight md:text-xl">
+                  서가담
+                </span>
+              </Link>
+              {user.role === "ADMIN" ? (
+                <span className="hidden sm:inline-block">
+                  <AdminHeaderMenu />
+                </span>
+              ) : null}
+            </div>
+
+            <LoggedInMainNav className="mx-auto hidden min-w-0 flex-1 justify-center md:flex" />
+
+            <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden text-[#1A3C2F] sm:inline-flex"
+                asChild
+              >
+                <Link
+                  href={"/dashboard?tab=owned" as Route}
+                  aria-label="내 서가에서 검색"
+                >
+                  <Search className="size-5" />
+                </Link>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="hidden text-[#1A3C2F] sm:inline-flex"
+                aria-label="알림"
+              >
+                <Bell className="size-5" />
+              </Button>
+              <HeaderAccount
+                email={user.email}
+                displayLabel={displayLabel}
+                initialProfile={profile}
+                sharedLibrariesBlockingWithdrawal={
+                  sharedLibrariesBlockingWithdrawal
+                }
+              />
+              <form action="/auth/signout" method="post" className="shrink-0">
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="icon"
+                  className="text-[#5c6560] hover:text-[#1A3C2F]"
+                  aria-label="로그아웃"
+                >
+                  <LogOutIcon className="size-5" />
                 </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link
-                    href={"/dashboard/bookfolio-aggregate" as Route}
-                    className="inline-flex items-center gap-2"
-                  >
-                    <BarChart3Icon className="size-4 opacity-80" />
-                    서가담 집계
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link
-                    href={"/dashboard/bestsellers" as Route}
-                    className="inline-flex items-center gap-2"
-                  >
-                    <FlameIcon className="size-4 opacity-80" />
-                    베스트셀러
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link
-                    href={"/dashboard/choice-new" as Route}
-                    className="inline-flex items-center gap-2"
-                  >
-                    <SparklesIcon className="size-4 opacity-80" />
-                    초이스 신간
-                  </Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center gap-2"
-                  >
-                    <LibraryBigIcon className="size-4 opacity-90" />내 서가
-                  </Link>
-                </Button>
-                <form action="/auth/signout" method="post">
-                  <Button
-                    type="submit"
-                    variant="ghost"
-                    size="sm"
-                    className="inline-flex items-center gap-2"
-                  >
-                    <LogOutIcon className="size-4 opacity-80" />
-                    로그아웃
-                  </Button>
-                </form>
-              </>
-            ) : (
-              <>
+              </form>
+            </div>
+          </>
+        ) : (
+          <div className="relative flex w-full items-center justify-end gap-4 md:justify-between">
+            <Link
+              href="/"
+              className="absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center md:static md:left-auto md:top-auto md:z-auto md:translate-x-0 md:translate-y-0"
+            >
+              <img
+                src="/assets/Seogadam_Web_logo.png"
+                alt="서가담"
+                width={200}
+                height={48}
+                className="h-8 w-auto max-w-[min(11rem,calc(100vw-5.5rem))] shrink-0 object-contain md:max-w-[8.5rem]"
+              />
+            </Link>
+            <nav className="flex min-w-0 items-center gap-2">
+              <div className="hidden min-w-0 items-center gap-2 md:flex">
                 <SiteHeaderGuestActions />
-              </>
-            )}
+              </div>
+              <SiteHeaderMobileNav
+                apkUrl={apkUrl ?? null}
+                user={null}
+                displayLabel={displayLabel}
+                initialProfile={profile}
+                sharedLibrariesBlockingWithdrawal={
+                  sharedLibrariesBlockingWithdrawal
+                }
+              />
+            </nav>
           </div>
-          <SiteHeaderMobileNav
-            apkUrl={apkUrl ?? null}
-            user={
-              user?.id && user.email
-                ? { id: user.id, email: user.email, role: user.role ?? null }
-                : null
-            }
-            displayLabel={displayLabel}
-            initialProfile={profile}
-            sharedLibrariesBlockingWithdrawal={
-              sharedLibrariesBlockingWithdrawal
-            }
-          />
-        </nav>
+        )}
       </div>
     </header>
   );

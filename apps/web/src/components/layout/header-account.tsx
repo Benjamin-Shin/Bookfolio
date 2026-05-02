@@ -43,6 +43,7 @@ type HeaderAccountProps = {
  * - 2026-03-26: 회원 탈퇴 확인 후 `DELETE /api/me/account`·`signOut`
  * - 2026-03-29: 프로필 하단 푸터 한 줄에 탈퇴(좌·destructive)·취소·저장, 안내 문구는 그 아래
  * - 2026-03-29: 소유 공동·모임 서가에 타 멤버 있으면 탈퇴 버튼 비활성·안내
+ * - 2026-05-03: 트리거에 `id="site-header-profile-trigger"` — 대시보드 히어로「프로필 보기」에서 동일 다이얼로그 오픈
  */
 export function HeaderAccount({
   email,
@@ -133,6 +134,7 @@ export function HeaderAccount({
       >
         <DialogTrigger asChild>
           <Button
+            id="site-header-profile-trigger"
             type="button"
             variant="ghost"
             size="icon-sm"
