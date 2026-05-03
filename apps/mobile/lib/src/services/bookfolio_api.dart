@@ -229,10 +229,13 @@ class MeAppProfile {
     if (rawFavorite is List<dynamic>) {
       for (final raw in rawFavorite) {
         final parsed = int.tryParse(raw.toString());
-        if (parsed == null || parsed <= 0 || favorite.contains(parsed))
+        if (parsed == null || parsed <= 0 || favorite.contains(parsed)) {
           continue;
+        }
         favorite.add(parsed);
-        if (favorite.length >= 5) break;
+        if (favorite.length >= 5) {
+          break;
+        }
       }
     }
     return MeAppProfile(
