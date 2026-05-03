@@ -303,6 +303,41 @@ export interface LibrarySummary {
   myRole: LibraryMemberRole;
 }
 
+export const LIBRARY_EVENT_KINDS = ["meeting", "social", "deadline"] as const;
+export type LibraryEventKind = (typeof LIBRARY_EVENT_KINDS)[number];
+
+export const LIBRARY_EVENT_RSVP_STATUSES = [
+  "going",
+  "maybe",
+  "declined",
+  "pending",
+] as const;
+export type LibraryEventRsvpStatus =
+  (typeof LIBRARY_EVENT_RSVP_STATUSES)[number];
+
+/**
+ * 모임서가 일정·이벤트 한 줄(API·캘린더).
+ *
+ * @history
+ * - 2026-05-03: `library_events`·RSVP 연동(`0043`)
+ */
+export interface LibraryEventSummary {
+  id: string;
+  libraryId: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  eventKind: LibraryEventKind;
+  startsAt: string;
+  endsAt: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  cancelledAt: string | null;
+  /** RSVP 행이 없으면 null — UI에서는 미응답으로 표시 */
+  myRsvpStatus: LibraryEventRsvpStatus | null;
+}
+
 /**
  * 모임서가 멤버 한 줄.
  *

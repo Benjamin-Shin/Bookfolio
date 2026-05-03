@@ -32,7 +32,7 @@ export function DeleteLibraryButton({ libraryId }: Props) {
         alert(data.error ?? "삭제하지 못했습니다.");
         return;
       }
-      router.push("/dashboard/libraries" as Route);
+      router.push("/libraries" as Route);
       router.refresh();
     } catch {
       alert("네트워크 오류가 발생했습니다.");

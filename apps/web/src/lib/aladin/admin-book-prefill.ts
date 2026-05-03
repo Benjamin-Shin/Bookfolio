@@ -1,7 +1,10 @@
 import type { Route } from "next";
 
-import type { AdminCanonicalBookFormValues } from "@/app/dashboard/admin/books/admin-canonical-book-form";
-import { expandNormalizedIsbnForDbLookup, normalizeIsbn } from "@/lib/books/lookup";
+import type { AdminCanonicalBookFormValues } from "@/app/admin/books/admin-canonical-book-form";
+import {
+  expandNormalizedIsbnForDbLookup,
+  normalizeIsbn,
+} from "@/lib/books/lookup";
 
 import type { AladinFeedItem } from "./bestseller-feed";
 
@@ -24,7 +27,9 @@ function pickIsbnForForm(item: AladinFeedItem): string {
  * @history
  * - 2026-03-26: 알라딘 일괄 등록 시 저장용 ISBN
  */
-export function canonicalStoredIsbnFromAladinItem(item: AladinFeedItem): string | null {
+export function canonicalStoredIsbnFromAladinItem(
+  item: AladinFeedItem,
+): string | null {
   const raw = pickIsbnForForm(item);
   const n = normalizeIsbn(raw);
   return n.length > 0 ? n : null;
@@ -36,7 +41,9 @@ export function canonicalStoredIsbnFromAladinItem(item: AladinFeedItem): string 
  * @history
  * - 2026-03-26: 일괄 등록 시 `replace_book_author_links` 입력
  */
-export function authorsFromAladinAuthorField(author: string | undefined): string[] {
+export function authorsFromAladinAuthorField(
+  author: string | undefined,
+): string[] {
   const raw = author?.trim() ?? "";
   if (!raw) return [];
   return raw
@@ -71,7 +78,9 @@ export function aladinFeedItemDbIsbnKeys(item: AladinFeedItem): string[] {
  * - 2026-03-26: `pageCount` 쿼리 반영(알라딘 Open API)
  * - 2026-03-25: 관리자 도서 목록 빠른 추가용
  */
-export function adminNewBookPrefillHrefFromAladinItem(item: AladinFeedItem): Route {
+export function adminNewBookPrefillHrefFromAladinItem(
+  item: AladinFeedItem,
+): Route {
   const params = new URLSearchParams();
   if (item.title) {
     params.set("title", item.title);
@@ -102,7 +111,7 @@ export function adminNewBookPrefillHrefFromAladinItem(item: AladinFeedItem): Rou
   }
   params.set("apiSource", "aladin");
   const q = params.toString();
-  return (q ? `/dashboard/admin/books/new?${q}` : "/dashboard/admin/books/new") as Route;
+  return (q ? `/admin/books/new?${q}` : "/admin/books/new") as Route;
 }
 
 /**
@@ -113,7 +122,7 @@ export function adminNewBookPrefillHrefFromAladinItem(item: AladinFeedItem): Rou
  * - 2026-03-25: 알라딘 프리필·URL 공유 대비
  */
 export function adminBookPrefillFromSearchParams(
-  sp: Record<string, string | string[] | undefined>
+  sp: Record<string, string | string[] | undefined>,
 ): Partial<AdminCanonicalBookFormValues> {
   const out: Partial<AdminCanonicalBookFormValues> = {};
   const title = spFirst(sp.title).trim();

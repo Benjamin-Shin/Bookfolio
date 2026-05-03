@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
  * - 2026-04-12: 모바일(`md` 미만) 브랜드 링크·로고 뷰포트 가운데 정렬; PNG 경로 `Seogadam_Web_logo.png`·`alt` 정리
  * - 2026-04-07: 헤더 브랜드 마크·표시명 서가담(`seogadam_logo.png`)
  * - 2026-03-29: `md` 미만 Sheet 햄버거 — 전역 내비·푸터와 동일 법적 고지 링크(개인정보·약관·쿠키)
- * - 2026-03-26: 로그인 네비에 베스트셀러·초이스 신간 링크 추가(`dashboard/bestsellers`, `dashboard/choice-new`)
+ * - 2026-03-26: 로그인 네비에 베스트셀러·초이스 신간 링크 추가(이후 `/discovery/*`로 이전)
  * - 2026-03-29: 소유 모임서가(타 멤버 있음) 시 탈퇴 막힘 목록을 헤더·모바일 메뉴에 전달
  */
 export async function SiteHeader() {

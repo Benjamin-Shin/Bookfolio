@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.bookfolio.seogadam",
+      "sha256_cert_fingerprints": [
+        "35:F6:12:B6:5F:52:8A:9C:2A:D5:48:18:6A:44:37:E4:22:8F:58:13:9A:51:81:EB:7D:92:1F:B5:0E:2F:44:C9"
+      ]
+    }
+  }
+]

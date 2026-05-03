@@ -12,6 +12,7 @@ export interface DashboardMonthReadingStatsProps {
  * 우측「독서 통계」카드 — 이번 달 주차별 활동(캘린더 RPC 합계)과 요약 수치.
  *
  * @history
+ * - 2026-05-03: 「통계 더보기」→ `/discovery/personalized` (내 서가 통계 화면)
  * - 2026-05-03: 신규
  */
 export function DashboardMonthReadingStats({
@@ -84,7 +85,7 @@ export function DashboardMonthReadingStats({
 
       <div className="mt-auto flex justify-end border-t border-[#1A3C2F]/8 px-5 py-3">
         <Link
-          href={"/dashboard/bookfolio-aggregate" as Route}
+          href={"/discovery/personalized" as Route}
           className="inline-flex items-center gap-0.5 text-sm font-medium text-[#1A3C2F] hover:underline"
         >
           통계 더보기

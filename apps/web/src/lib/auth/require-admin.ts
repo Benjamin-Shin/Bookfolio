@@ -13,7 +13,7 @@ export type AdminSession = Session & {
 export async function requireAdmin(): Promise<AdminSession> {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect("/login?callbackUrl=/dashboard/admin");
+    redirect("/login?callbackUrl=/admin");
   }
   if (session.user.role !== "ADMIN") {
     redirect("/dashboard");

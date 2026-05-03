@@ -57,7 +57,7 @@ export function NewLibraryForm({
         return;
       }
       if (data.id) {
-        router.push(`/dashboard/libraries/${data.id}` as Route);
+        router.push(`/libraries/${data.id}` as Route);
         router.refresh();
       }
     } catch {

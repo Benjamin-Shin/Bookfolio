@@ -13,6 +13,45 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+/// [categoryId]에 맞는 [AladinCategoryOption]을 찾고, 없으면 분야 탐색용 플레이스홀더를 만든다.
+///
+/// History:
+/// - 2026-05-03: 국내도서 몰 우선, 없으면 동일 CID 임의 몰, 없으면 synthetic (하단 칩·더보기 일관성)
+AladinCategoryOption _resolveAladinCategoryForDiscovery(
+  int categoryId,
+  List<AladinCategoryOption> all,
+) {
+  AladinCategoryOption? firstWhere(bool Function(AladinCategoryOption c) pred) {
+    for (final c in all) {
+      if (c.categoryId == categoryId && pred(c)) return c;
+    }
+    return null;
+  }
+
+  return firstWhere((c) => c.mall == '국내도서') ??
+      firstWhere((_) => true) ??
+      AladinCategoryOption(
+        categoryId: categoryId,
+        mall: '국내도서',
+        depth1: '',
+        depth2: '',
+        depth3: '',
+        label: '분야 #$categoryId',
+      );
+}
+
+String _displayLabelForAladinCategory(AladinCategoryOption c) {
+  if (c.depth3.isNotEmpty) return c.depth3;
+  if (c.depth2.isNotEmpty) return c.depth2;
+  if (c.depth1.isNotEmpty) return c.depth1;
+  if (c.label.isNotEmpty) return c.label;
+  return 'CID ${c.categoryId}';
+}
+
+/// 발견 탭 — 알라딘 베스트/신간·분야 탐색.
+///
+/// History:
+/// - 2026-05-03: 프로필 관심 CID 기준으로 하단 분야 칩·섹션 제목·캡션 정합; 카테고리 목록 매칭 실패 시에도 칩 표시(해석 보강)
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key, this.embeddedInShell = false});
 
@@ -28,6 +67,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   List<AladinBestsellerItem> _itemNew = const [];
   List<AladinCategoryOption> _favoriteCategories = const [];
   List<int> _favoriteCategoryIds = const [];
+  /// 프로필에 저장된 관심 카테고리 CID가 1개 이상일 때 true (기본 소설 폴백이 아님).
+  bool _usingProfileFavoriteCategories = false;
   bool _loading = true;
   String? _error;
 
@@ -46,7 +87,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       final api = context.read<LibraryController>().api;
       final profile = await api.fetchMeProfile();
       final preferred = profile.favoriteAladinCategoryIds.take(5).toList();
-      final categoryIds = preferred.isNotEmpty
+      final usingSaved = preferred.isNotEmpty;
+      final categoryIds = usingSaved
           ? preferred
           : const [_defaultFallbackCategoryId];
       Future<List<AladinBestsellerItem>> mergedByCategories(
@@ -77,14 +119,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       ]);
       final allCategories = await api.fetchAladinCategories();
       final favoriteCategories = categoryIds
-          .map((cid) => allCategories.cast<AladinCategoryOption?>().firstWhere(
-                (item) => item?.categoryId == cid && item?.mall == '국내도서',
-                orElse: () => null,
-              ))
-          .whereType<AladinCategoryOption>()
+          .map((cid) => _resolveAladinCategoryForDiscovery(cid, allCategories))
           .toList();
       if (!mounted) return;
       setState(() {
+        _usingProfileFavoriteCategories = usingSaved;
         _favoriteCategoryIds = categoryIds;
         _favoriteCategories = favoriteCategories;
         _bestseller = results[0];
@@ -120,11 +159,26 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     );
   }
 
+  String _compactCategoryTitleSuffix() {
+    if (_favoriteCategories.isEmpty) {
+      return _usingProfileFavoriteCategories ? '내 관심 분야' : '기본(소설)';
+    }
+    final parts =
+        _favoriteCategories.map(_displayLabelForAladinCategory).toList();
+    if (parts.length <= 2) return parts.join(' · ');
+    return '${parts[0]} · ${parts[1]} 외 ${parts.length - 2}';
+  }
+
+  String _appliedCategoriesCaption() {
+    if (_usingProfileFavoriteCategories) {
+      return '적용 분야: ${_favoriteCategories.map(_displayLabelForAladinCategory).join(', ')}';
+    }
+    return '기본 카테고리 적용: 소설 (CID 112011)';
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final preferredCategoryApplied = _favoriteCategoryIds.length != 1 ||
-        _favoriteCategoryIds.first != _defaultFallbackCategoryId;
     final body = _loading
         ? const Center(child: CircularProgressIndicator())
         : _error != null
@@ -156,7 +210,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     _heroBanner(),
                     const SizedBox(height: 14),
                     _section(
-                      title: '베스트셀러 (국내도서 관심 카테고리)',
+                      title:
+                          '베스트셀러 (${_usingProfileFavoriteCategories ? _compactCategoryTitleSuffix() : '기본(소설)'})',
                       onMore: () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
                               builder: (_) => const BestsellerScreen())),
@@ -164,7 +219,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     ),
                     const SizedBox(height: 12),
                     _section(
-                      title: '초이스 신간 (국내도서 관심 카테고리)',
+                      title:
+                          '초이스 신간 (${_usingProfileFavoriteCategories ? _compactCategoryTitleSuffix() : '기본(소설)'})',
                       onMore: () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
                               builder: (_) => const ChoiceNewScreen())),
@@ -174,9 +230,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 2, bottom: 8),
                         child: Text(
-                          preferredCategoryApplied
-                              ? '적용 카테고리: ${_favoriteCategoryIds.length}개'
-                              : '기본 카테고리 적용: 소설 (CID 112011)',
+                          _appliedCategoriesCaption(),
                           style: GoogleFonts.manrope(
                               fontSize: 12,
                               color: BookfolioDesignTokens.onSurfaceVariant),
@@ -379,8 +433,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Widget _categorySection() {
     final scheme = Theme.of(context).colorScheme;
     final categories = _favoriteCategories;
-    final preferredCategoryApplied = _favoriteCategoryIds.length != 1 ||
-        _favoriteCategoryIds.first != _defaultFallbackCategoryId;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -388,11 +440,31 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             style: GoogleFonts.manrope(
                 fontSize: 28 / 2, fontWeight: FontWeight.w800)),
         const SizedBox(height: 10),
+        if (!_usingProfileFavoriteCategories)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              '프로필에서 관심 카테고리를 설정하면 아래에 내가 고른 분야가 표시되고, 위 베스트셀러·신간에도 반영됩니다. 지금은 기본(소설) 기준입니다.',
+              style: GoogleFonts.manrope(
+                fontSize: 12,
+                color: BookfolioDesignTokens.onSurfaceVariant,
+              ),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              '저장해 둔 관심 분야입니다. 탭하면 해당 분야 신간·목록으로 이동합니다.',
+              style: GoogleFonts.manrope(
+                fontSize: 12,
+                color: BookfolioDesignTokens.onSurfaceVariant,
+              ),
+            ),
+          ),
         if (categories.isEmpty)
           Text(
-            preferredCategoryApplied
-                ? '내 프로필에서 관심 카테고리를 선택하면 여기에 표시됩니다.'
-                : '관심 카테고리 미설정 상태라 기본 소설 카테고리를 사용 중입니다.',
+            '표시할 카테고리가 없습니다. 당겨서 새로고침 해 보세요.',
             style: GoogleFonts.manrope(
               fontSize: 12,
               color: BookfolioDesignTokens.onSurfaceVariant,
@@ -410,11 +482,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       MaterialPageRoute<void>(
                         builder: (_) => CategoryDiscoveryScreen(
                           categoryId: category.categoryId,
-                          categoryLabel: category.depth3.isNotEmpty
-                              ? category.depth3
-                              : category.depth2.isNotEmpty
-                                  ? category.depth2
-                                  : category.depth1,
+                          categoryLabel:
+                              _displayLabelForAladinCategory(category),
                         ),
                       ),
                     );
@@ -435,11 +504,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            category.depth3.isNotEmpty
-                                ? category.depth3
-                                : category.depth2.isNotEmpty
-                                    ? category.depth2
-                                    : category.depth1,
+                            _displayLabelForAladinCategory(category),
                             style: GoogleFonts.manrope(fontSize: 12),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

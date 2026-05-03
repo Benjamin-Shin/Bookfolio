@@ -38,7 +38,7 @@ export function libraryDetailHref(
   const page = next.page ?? 1;
   if (page > 1) sp.set("page", String(page));
   const s = sp.toString();
-  const base = `/dashboard/libraries/${libraryId}`;
+  const base = `/libraries/${libraryId}`;
   return (s ? `${base}?${s}` : base) as Route;
 }
 

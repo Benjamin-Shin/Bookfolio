@@ -1,5 +1,6 @@
 /**
  * @history
+ * - 2026-05-03: OAuth JWT `name`/`picture` — DB `getAppProfile` 우선(기존 계정 닉네임·아바타 유지)
  * - 2026-04-05: Credentials 식별자 필드를 `text`로 — 이메일 또는 @ 앞 로컬 부분 로그인
  * - 2026-03-26: JWT/세션에 `STAFF` 역할 유지(0021)
  */
@@ -9,6 +10,7 @@ import Google from "next-auth/providers/google";
 import Kakao from "next-auth/providers/kakao";
 
 import { getAppUserRole } from "@/lib/auth/get-app-user-role";
+import { getAppProfile } from "@/lib/auth/app-profiles";
 import { consumeMobileLoginTransferCode } from "@/lib/auth/mobile-login-transfer";
 import { ensureOAuthAppUser } from "@/lib/auth/app-users";
 import { verifyAppUserCredentials } from "@/lib/auth/verify-app-user-credentials";
@@ -153,10 +155,17 @@ export const authConfig = {
           name: readString(p.name) ?? user?.name ?? undefined,
           image: readString(p.picture) ?? user?.image ?? undefined
         });
+        const stored = await getAppProfile(id);
+        const oauthName = readString(p.name) ?? user?.name ?? undefined;
+        const oauthPicture = readString(p.picture) ?? user?.image ?? undefined;
         token.sub = id;
         token.email = email;
-        token.name = readString(p.name) ?? user?.name ?? undefined;
-        token.picture = readString(p.picture) ?? user?.image ?? undefined;
+        token.name = stored
+          ? stored.displayName?.trim() || undefined
+          : oauthName ?? undefined;
+        token.picture = stored
+          ? stored.avatarUrl?.trim() || undefined
+          : oauthPicture ?? undefined;
         token.role = await getAppUserRole(id);
         return token;
       }

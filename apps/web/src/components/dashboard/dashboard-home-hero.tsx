@@ -20,6 +20,8 @@ export interface DashboardHomeHeroProps {
  * 내 서가 상단 프로필·요약 통계·명언 카드(시안 상단 와이드 카드).
  *
  * @history
+ * - 2026-05-03: 통계 라벨 한 줄 유지(이번 달 읽은 책)·통계 행 아이콘·간격 소폭 압축
+ * - 2026-05-03: 히어로 좌측 프로필 블록(아바타·타이틀·태그라인) 간격·타이포 소폭 축소
  * - 2026-05-03: 신규
  */
 export function DashboardHomeHero({
@@ -32,9 +34,7 @@ export function DashboardHomeHero({
 }: DashboardHomeHeroProps) {
   const src = normalizeCoverUrlForClient(avatarUrl);
   const avgText =
-    averageRating != null
-      ? `${averageRating.toFixed(1)} / 5`
-      : "—";
+    averageRating != null ? `${averageRating.toFixed(1)} / 5` : "—";
 
   return (
     <section
@@ -45,8 +45,8 @@ export function DashboardHomeHero({
         내 서가 요약
       </h2>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-center lg:gap-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center lg:col-span-4">
-          <div className="relative size-20 shrink-0 overflow-hidden rounded-full border-2 border-[#1A3C2F]/12 bg-[#F8F9FA] shadow-inner">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center lg:col-span-4">
+          <div className="relative size-16 shrink-0 overflow-hidden rounded-full border-2 border-[#1A3C2F]/12 bg-[#F8F9FA] shadow-inner">
             {src ? (
               <img
                 src={src}
@@ -57,18 +57,18 @@ export function DashboardHomeHero({
               />
             ) : (
               <div
-                className="flex size-full items-center justify-center font-serif text-2xl font-semibold text-[#1A3C2F]/40"
+                className="flex size-full items-center justify-center font-serif text-lg font-semibold text-[#1A3C2F]/40"
                 aria-hidden
               >
                 {displayLabel.slice(0, 1)}
               </div>
             )}
           </div>
-          <div className="min-w-0 flex-1 space-y-2">
-            <p className="truncate font-serif text-xl font-semibold tracking-tight text-[#1A3C2F] md:text-2xl">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <p className="truncate font-serif text-lg font-semibold tracking-tight text-[#1A3C2F] md:text-xl">
               {displayLabel}님의 서가
             </p>
-            <p className="line-clamp-2 text-sm leading-relaxed text-[#5c6560]">
+            <p className="line-clamp-2 text-sm leading-snug text-[#5c6560]">
               {tagline}
             </p>
             <DashboardProfileOpenButton />
@@ -76,12 +76,12 @@ export function DashboardHomeHero({
         </div>
 
         <div className="grid grid-cols-1 gap-4 border-t border-[#1A3C2F]/8 pt-6 sm:grid-cols-3 sm:border-t-0 sm:pt-0 lg:col-span-5 lg:border-s lg:border-t-0 lg:ps-8">
-          <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#1A3C2F]/[0.08] text-[#1A3C2F]">
-              <Library className="size-5" aria-hidden />
+          <div className="flex items-start gap-2">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#1A3C2F]/[0.08] text-[#1A3C2F]">
+              <Library className="size-4" aria-hidden />
             </span>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-[#5c6560]">
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-normal text-[#5c6560]">
                 총 권수
               </p>
               <p className="mt-0.5 font-serif text-2xl font-semibold text-[#1A3C2F]">
@@ -89,12 +89,12 @@ export function DashboardHomeHero({
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#1A3C2F]/[0.08] text-[#1A3C2F]">
-              <BookMarked className="size-5" aria-hidden />
+          <div className="flex items-start gap-2">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#1A3C2F]/[0.08] text-[#1A3C2F]">
+              <BookMarked className="size-4" aria-hidden />
             </span>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-[#5c6560]">
+            <div className="min-w-0">
+              <p className="whitespace-nowrap text-xs font-medium uppercase tracking-normal text-[#5c6560]">
                 이번 달 읽은 책
               </p>
               <p className="mt-0.5 font-serif text-2xl font-semibold text-[#1A3C2F]">
@@ -102,12 +102,12 @@ export function DashboardHomeHero({
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#1A3C2F]/[0.08] text-[#1A3C2F]">
-              <Star className="size-5" aria-hidden />
+          <div className="flex items-start gap-2">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#1A3C2F]/[0.08] text-[#1A3C2F]">
+              <Star className="size-4" aria-hidden />
             </span>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-[#5c6560]">
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-normal text-[#5c6560]">
                 평균 평점
               </p>
               <p className="mt-0.5 font-serif text-2xl font-semibold text-[#1A3C2F]">

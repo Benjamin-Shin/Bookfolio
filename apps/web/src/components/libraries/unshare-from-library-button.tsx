@@ -34,7 +34,7 @@ export function UnshareFromLibraryButton({ libraryId, bookId }: Props) {
         window.alert(data.error ?? "처리하지 못했습니다.");
         return;
       }
-      router.push(`/dashboard/libraries/${libraryId}` as Route);
+      router.push(`/libraries/${libraryId}` as Route);
       router.refresh();
     } catch {
       window.alert("네트워크 오류가 발생했습니다.");

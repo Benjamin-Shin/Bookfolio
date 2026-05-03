@@ -1,166 +1,163 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { BookCoverUploadFieldState } from "@/components/books/book-cover-upload-field";
-import {
-  BookFormatChoiceFieldset,
-  RatingChoiceFieldset,
-  ReadingStatusChoiceFieldset,
-} from "@/components/books/shelf-choice-fields";
+import { AdminEditBookPageClient } from "@/app/admin/books/admin-edit-book-page-client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { requireStaffOrAdmin } from "@/lib/auth/require-staff-or-admin";
 import { getUserBookWithCanonical } from "@/lib/books/repository";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
+
+type BookRow = {
+  id: string;
+  isbn: string | null;
+  title: string;
+  authors: string[];
+  translators: string[];
+  source: string;
+  api_source: string | null;
+  price_krw: number | null;
+  page_count: number | null;
+  genre_slugs: string[] | null;
+  literature_region: string | null;
+  original_language: string | null;
+  publisher: string | null;
+  published_date: string | null;
+  cover_url: string | null;
+  description: string | null;
+};
 
 /**
+ * 스태프·관리자 전용 — 연결된 공유 서지(`books`) 캐논 편집.
+ * 일반 회원의 `user_books` 수정은 도서 상세 화면에서 합니다.
+ *
  * @history
- * - 2026-04-06: 독서 진행(현재 쪽·총 쪽 재정의) — `user_books` 전용
- * - 2026-03-25: `BookCoverUploadFieldState` — `variant="edit"`(미리보기·비-Cloudinary 이관)
- * - 2026-03-25: `BookCoverUploadFieldState` — 표지 Cloudinary 업로드·저장
+ * - 2026-05-03: 내 서가 기록 폼과 분리·`requireStaffOrAdmin`·`AdminEditBookPageClient` 재사용
+ * - 2026-05-03: 내 서가 대시보드와 동일 셸·`max-w-6xl`·`<header>` 타이틀 블록으로 정렬
  */
-export default async function BookEditPage({
+export default async function DashboardStaffCanonEditPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const row = await getUserBookWithCanonical(id);
+  const session = await requireStaffOrAdmin();
+  const { id: userBookId } = await params;
 
+  const row = await getUserBookWithCanonical(userBookId, {
+    userId: session.user.id,
+    useAdmin: true,
+  });
   if (!row) {
     notFound();
   }
 
   const { userBook } = row;
-  const displayTitle = userBook.title;
+  const bookId = userBook.bookId?.trim();
+  if (!bookId) {
+    notFound();
+  }
+
+  const supabase = createSupabaseAdminClient();
+  const { data: canonRow, error } = await supabase
+    .from("books")
+    .select(
+      "id,isbn,title,authors,translators,source,api_source,price_krw,page_count,genre_slugs,literature_region,original_language,publisher,published_date,cover_url,description",
+    )
+    .eq("id", bookId)
+    .single();
+
+  if (error || !canonRow) {
+    notFound();
+  }
+
+  const book = canonRow as BookRow;
+  const translators = Array.isArray(book.translators) ? book.translators : [];
+
+  const { data: refRows } = await supabase
+    .from("user_books")
+    .select("is_owned")
+    .eq("book_id", bookId);
+
+  let totalRefs = 0;
+  let ownedRefs = 0;
+  for (const r of refRows ?? []) {
+    totalRefs += 1;
+    if (r.is_owned) ownedRefs += 1;
+  }
+
+  const deleteDisabled = totalRefs > 0;
+  const deleteTitle =
+    ownedRefs > 0
+      ? "사용자 소장 서가에 포함된 도서는 삭제할 수 없습니다."
+      : "사용자 서가(읽는 중 등)에 연결된 도서는 삭제할 수 없습니다.";
+
+  const defaultValues = {
+    title: book.title,
+    authorsCsv: (book.authors ?? []).join(", "),
+    translatorsCsv: translators.join(", "),
+    isbn: book.isbn ?? "",
+    publisher: book.publisher ?? "",
+    publishedDate: book.published_date ?? "",
+    coverUrl: book.cover_url ?? "",
+    description: book.description ?? "",
+    priceKrw: book.price_krw != null ? String(book.price_krw) : "",
+    pageCount: book.page_count != null ? String(book.page_count) : "",
+    genreSlugs: (book.genre_slugs ?? []).join(", "),
+    literatureRegion: book.literature_region ?? "",
+    originalLanguage: book.original_language ?? "",
+    apiSource: book.api_source ?? "",
+  };
+
+  const detailHref = `/dashboard/books/${userBookId}` as Route;
+  const isAdmin = session.user.role === "ADMIN";
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8 md:py-12">
-      <Card className="border-border/80">
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <CardTitle className="text-xl">내 서가 기록 수정</CardTitle>
-            <CardDescription className="mt-1">
-              「{displayTitle}」의 내 서가 필드(형식·상태·위치·소장 여부·독서
-              진행 쪽), 참고 가격, 표지 이미지 URL을 바꿀 수 있습니다. 긴 메모는
-              상세 화면의 마크다운 메모에서 관리합니다. 가격·표지는 공유
-              도서(`books`)에 저장되어 같은 서지를 쓰는 경우에도 반영될 수
-              있습니다.
-            </CardDescription>
-          </div>
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/books/${userBook.id}`}>취소 · 상세로</Link>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <form
-            action={`/api/me/books/${userBook.id}`}
-            method="post"
-            className="space-y-6"
-          >
-            <BookCoverUploadFieldState
-              initialCoverUrl={userBook.coverUrl ?? ""}
-              variant="edit"
-            />
-            <BookFormatChoiceFieldset defaultFormat={userBook.format} />
-            <ReadingStatusChoiceFieldset
-              defaultStatus={userBook.readingStatus}
-            />
-            <RatingChoiceFieldset defaultRating={userBook.rating ?? null} />
-            <div className="space-y-2">
-              <Label htmlFor="priceKrw">가격 (원)</Label>
-              <p className="text-xs text-muted-foreground">
-                공유 서지(`books`)의 참고 가격입니다. 비우면 지웁니다. 같은
-                ISBN을 쓰는 다른 사용자에게도 보일 수 있습니다.
-              </p>
-              <Input
-                id="priceKrw"
-                type="number"
-                name="priceKrw"
-                min={0}
-                step={1}
-                defaultValue={userBook.priceKrw ?? ""}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">위치</Label>
-              <p className="text-xs text-muted-foreground">
-                집, 회사, 빌려준 사람 등 이 권이 지금 어디 있는지 적어 두세요.
-              </p>
-              <Input
-                id="location"
-                name="location"
-                placeholder="예: 집 책장 2층 / 회사 / 이모에게 빌려줌"
-                defaultValue={userBook.location ?? ""}
-              />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="currentPage">현재까지 읽은 쪽</Label>
-                <p className="text-xs text-muted-foreground">
-                  비우면 진행 쪽을 지웁니다. 서지에 등록된 총 쪽은{" "}
-                  {userBook.pageCount != null && userBook.pageCount > 0
-                    ? `${userBook.pageCount}쪽`
-                    : "아직 없습니다"}
-                  .
+    <div className="min-h-screen bg-[#F8F9FA] text-[#1b1c19] selection:bg-[#c5e6d4] selection:text-[#0f241c]">
+      <main className="px-4 pb-28 pt-8 md:px-8 md:pb-24 md:pt-10 lg:px-12">
+        <div className="mx-auto w-full max-w-6xl">
+          <header className="mb-8 space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-2">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#675d53]">
+                  Staff · Catalog
                 </p>
-                <Input
-                  id="currentPage"
-                  name="currentPage"
-                  type="number"
-                  min={0}
-                  step={1}
-                  placeholder="예: 120"
-                  defaultValue={userBook.currentPage ?? ""}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="readingTotalPages">총 쪽(선택)</Label>
-                <p className="text-xs text-muted-foreground">
-                  서지 쪽수와 다를 때만 입력하세요. 비우면
-                  서지(`books.page_count`)를 따릅니다.
+                <h1 className="font-serif text-3xl text-[#1A3C2F] md:text-4xl">
+                  공유 서지(캐논) 편집
+                </h1>
+                <p className="max-w-2xl text-sm text-[#434843]">
+                  「{userBook.title}」에 연결된 서지 레코드를 수정합니다. 저장 시 같은
+                  ISBN·서지를 쓰는 모든 회원에게 반영됩니다.
                 </p>
-                <Input
-                  id="readingTotalPages"
-                  name="readingTotalPages"
-                  type="number"
-                  min={1}
-                  step={1}
-                  placeholder="재정의 시만 입력"
-                  defaultValue={userBook.readingTotalPages ?? ""}
-                />
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                id="isOwned"
-                name="isOwned"
-                type="checkbox"
-                value="true"
-                defaultChecked={userBook.isOwned}
-                className="size-4 rounded border-input"
-              />
-              <Label htmlFor="isOwned" className="font-normal">
-                소장 중
-              </Label>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Button type="submit">저장</Button>
-              <Button type="button" variant="outline" asChild>
-                <Link href={`/dashboard/books/${userBook.id}`}>
-                  상세로 돌아가기
-                </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="w-full shrink-0 border-[#1A3C2F]/25 bg-white/80 text-[#1A3C2F] hover:bg-white sm:w-auto"
+              >
+                <Link href={detailHref}>내 서가 상세로</Link>
               </Button>
             </div>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
+          </header>
+
+          <AdminEditBookPageClient
+            book={{
+              id: book.id,
+              title: book.title,
+              source: book.source,
+              api_source: book.api_source,
+            }}
+            metaLine={{ totalRefs, ownedRefs }}
+            defaultValues={defaultValues}
+            deleteDisabled={deleteDisabled}
+            deleteTitle={deleteTitle}
+            toolbarBackHref={detailHref}
+            toolbarBackLabel="상세로"
+            pageHeading="공유 서지(캐논) 편집"
+            showCatalogDelete={isAdmin}
+          />
+        </div>
+      </main>
+    </div>
   );
 }

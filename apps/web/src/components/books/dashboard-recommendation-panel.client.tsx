@@ -86,6 +86,7 @@ function getRequestId(): string {
  * 내 서가 상단 추천 패널. 추천 API를 호출해 개인화 후보를 노출합니다.
  *
  * @history
+ * - 2026-05-03: 대시보드 본문에서는 `/discovery/personalized`·`DashboardDiscoveryRails`로 흐름 이전(컴포넌트는 유지)
  * - 2026-05-03: 카드 외곽선·그림자를 내 서가 패널과 동일 톤으로 정리
  * - 2026-04-22: 신규 — `/api/me/recommendations` 연동 + 관심 저장 상호작용 로깅
  */

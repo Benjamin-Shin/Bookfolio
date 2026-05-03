@@ -105,7 +105,7 @@ function LibraryBookOnShelf({
 
   return (
     <Link
-      href={`/dashboard/libraries/${libraryId}/books/${book.bookId}`}
+      href={`/libraries/${libraryId}/books/${book.bookId}`}
       title={label}
       className="group relative shrink-0 outline-none transition-transform duration-200 hover:z-20 hover:-translate-y-2 focus-visible:z-20 focus-visible:-translate-y-2"
       style={{ transform: `rotate(${tilt}deg)` }}

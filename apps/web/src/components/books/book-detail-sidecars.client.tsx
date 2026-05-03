@@ -1,60 +1,149 @@
 "use client";
 
 import type {
-  BookOneLinerRow,
   ReadingEventRow,
   ReadingEventType,
   ReadingStatus,
-  UserBookMemoRow
+  UserBookMemoRow,
 } from "@bookfolio/shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
+import {
+  BookOpen,
+  Bookmark,
+  CheckCircle,
+  CircleSlash,
+  Pause,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { TimelineLayout } from "@/components/ui/timeline-layout";
+import { summarizeReadingEvent } from "@/lib/books/reading-event-payload-format";
+import type { TimelineColor, TimelineElement } from "@/types";
 
 const EVENT_LABEL_KO: Record<ReadingEventType, string> = {
   read_start: "읽기 시작",
   progress: "진도·페이지 저장",
   read_pause: "읽기 중지",
   read_complete: "완독",
-  dropped: "하차"
+  dropped: "하차",
 };
 
+function stableTimelineId(uuid: string): number {
+  let h = 0;
+  for (let i = 0; i < uuid.length; i++) {
+    h = (Math.imul(31, h) + uuid.charCodeAt(i)) | 0;
+  }
+  return h === 0 ? 1 : Math.abs(h);
+}
+
+function readingEventTimelineColor(t: ReadingEventType): TimelineColor {
+  switch (t) {
+    case "read_start":
+      return "accent";
+    case "progress":
+      return "primary";
+    case "read_pause":
+      return "warning";
+    case "read_complete":
+      return "accent";
+    case "dropped":
+      return "destructive";
+    default:
+      return "muted";
+  }
+}
+
+function ReadingEventTimelineIcon(t: ReadingEventType) {
+  const iconClass = "size-4 shrink-0 text-white";
+  switch (t) {
+    case "read_start":
+      return <BookOpen className={iconClass} aria-hidden />;
+    case "progress":
+      return <Bookmark className={iconClass} aria-hidden />;
+    case "read_pause":
+      return <Pause className={iconClass} aria-hidden />;
+    case "read_complete":
+      return <CheckCircle className={iconClass} aria-hidden />;
+    case "dropped":
+      return <CircleSlash className={iconClass} aria-hidden />;
+    default:
+      return <BookOpen className={iconClass} aria-hidden />;
+  }
+}
+
 /**
- * 도서 상세 — 한줄평·메모(마크다운)·독서 이벤트 UI.
+ * 독서 이벤트 API 행을 `TimelineLayout`용 요소로 변환(시간 오름차순 — 레이아웃이 최신부터 표시).
  *
  * @history
+ * - 2026-05-03: `TimelineLayout` 연동
+ */
+function toReadingTimelineElements(
+  events: ReadingEventRow[],
+  pageCount: number | null | undefined,
+  readingTotalPages: number | null | undefined,
+): TimelineElement[] {
+  const totals = {
+    pageCount: pageCount ?? null,
+    readingTotalPages: readingTotalPages ?? null,
+  };
+  const sorted = [...events].sort(
+    (a, b) =>
+      new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime(),
+  );
+  return sorted.map((ev) => {
+    const summary = summarizeReadingEvent(ev, totals);
+    const typeLabel = EVENT_LABEL_KO[ev.eventType];
+    const showDetailTitle = summary.title !== typeLabel;
+    const lines = [
+      showDetailTitle ? summary.title : null,
+      summary.subtitle,
+    ].filter((x): x is string => Boolean(x && String(x).trim()));
+    return {
+      id: stableTimelineId(ev.id),
+      date: new Date(ev.occurredAt).toLocaleString("ko-KR"),
+      title: typeLabel,
+      description: lines.length > 0 ? lines.join("\n") : "\u00a0",
+      icon: () => ReadingEventTimelineIcon(ev.eventType),
+      color: readingEventTimelineColor(ev.eventType),
+    };
+  });
+}
+
+/**
+ * 도서 상세 — 메모·독서 이벤트 UI. 한줄평은 `BookCanonInfoPanel`로 이전.
+ *
+ * @history
+ * - 2026-05-03: 독서 이벤트를 `TimelineLayout`으로 표시; 메모 카드 제목에서 「마크다운」 문구 제거
+ * - 2026-05-03: 한줄평 제거·독서 이벤트 `progress` 가독 요약·`pageCount`/`readingTotalPages` props
  * - 2026-03-27: 메모 마크다운에 `remark-breaks` 적용 — 엔터(단일 줄바꿈)가 표시에 반영됨
- * - 2026-03-26: 빈 `userBookId`/`bookId`면 잘못된 fetch URL로 404 나는 문제 방지
+ * - 2026-03-26: 빈 `userBookId`면 잘못된 fetch URL로 404 나는 문제 방지
  * - 2026-03-26: 신규
  */
-export function BookDetailSidecars(props: { userBookId: string; bookId: string }) {
-  const { userBookId, bookId } = props;
-  const [oneLiners, setOneLiners] = useState<BookOneLinerRow[]>([]);
-  const [myOneLiner, setMyOneLiner] = useState("");
+export function BookDetailSidecars(props: {
+  userBookId: string;
+  pageCount?: number | null;
+  readingTotalPages?: number | null;
+}) {
+  const { userBookId, pageCount, readingTotalPages } = props;
   const [memos, setMemos] = useState<UserBookMemoRow[]>([]);
   const [newMemoMd, setNewMemoMd] = useState("");
   const [events, setEvents] = useState<ReadingEventRow[]>([]);
   const [pageInput, setPageInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-
-  const loadOneLiners = useCallback(async () => {
-    const bid = bookId.trim();
-    if (!bid) {
-      setOneLiners([]);
-      return;
-    }
-    const res = await fetch(`/api/books/${bid}/one-liners`, { credentials: "include" });
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "한줄평을 불러오지 못했습니다.");
-    setOneLiners((await res.json()) as BookOneLinerRow[]);
-  }, [bookId]);
 
   const loadMemos = useCallback(async () => {
     const ub = userBookId.trim();
@@ -80,12 +169,17 @@ export function BookDetailSidecars(props: { userBookId: string; bookId: string }
 
   const refreshAll = useCallback(async () => {
     setErr(null);
-    await Promise.all([loadOneLiners(), loadMemos(), loadEvents()]);
-  }, [loadEvents, loadMemos, loadOneLiners]);
+    await Promise.all([loadMemos(), loadEvents()]);
+  }, [loadEvents, loadMemos]);
 
   useEffect(() => {
     void refreshAll().catch((e) => setErr(e instanceof Error ? e.message : "불러오기 실패"));
   }, [refreshAll]);
+
+  const readingTimelineItems = useMemo(
+    () => toReadingTimelineElements(events, pageCount, readingTotalPages),
+    [events, pageCount, readingTotalPages],
+  );
 
   const postJson = async (url: string, body: unknown) => {
     const res = await fetch(url, {
@@ -99,36 +193,6 @@ export function BookDetailSidecars(props: { userBookId: string; bookId: string }
       throw new Error(typeof j.error === "string" ? j.error : "요청 실패");
     }
     return res;
-  };
-
-  const saveOneLiner = async () => {
-    setBusy(true);
-    setErr(null);
-    try {
-      await postJson(`/api/me/books/${userBookId}/one-liner`, {
-        action: "upsert",
-        body: myOneLiner
-      });
-      setMyOneLiner("");
-      await loadOneLiners();
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "저장 실패");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const clearOneLiner = async () => {
-    setBusy(true);
-    setErr(null);
-    try {
-      await postJson(`/api/me/books/${userBookId}/one-liner`, { action: "clear" });
-      await loadOneLiners();
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "삭제 실패");
-    } finally {
-      setBusy(false);
-    }
   };
 
   const addMemo = async () => {
@@ -175,53 +239,14 @@ export function BookDetailSidecars(props: { userBookId: string; bookId: string }
         </p>
       ) : null}
 
-      <Card className="border-border/80">
+      <Card className="border-[#1A3C2F]/10 bg-white/90 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg">한줄평</CardTitle>
-          <CardDescription>
-            소장 중인 책에 남긴 한줄평은 다른 사용자도 이 화면에서 볼 수 있습니다.
+          <CardTitle className="font-serif text-lg text-[#1A3C2F]">
+            메모
+          </CardTitle>
+          <CardDescription className="text-[#434843]">
+            인상 깊은 문장·느낌을 여러 개로 남길 수 있습니다.
           </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="my-one-liner">내 한줄평 (500자)</Label>
-            <Textarea
-              id="my-one-liner"
-              rows={2}
-              value={myOneLiner}
-              onChange={(e) => setMyOneLiner(e.target.value)}
-              disabled={busy}
-              placeholder="짧게 남겨 보세요."
-            />
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" size="sm" disabled={busy} onClick={() => void saveOneLiner()}>
-                저장
-              </Button>
-              <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void clearOneLiner()}>
-                삭제
-              </Button>
-            </div>
-          </div>
-          <Separator />
-          <ul className="space-y-3 text-sm">
-            {oneLiners.length === 0 ? (
-              <li className="text-muted-foreground">아직 한줄평이 없습니다.</li>
-            ) : (
-              oneLiners.map((o) => (
-                <li key={`${o.userId}-${o.updatedAt}`} className="rounded-md border border-border/60 bg-muted/15 p-3">
-                  <p className="font-medium">{o.displayName ?? "사용자"}</p>
-                  <p className="mt-1 text-muted-foreground">{o.body}</p>
-                </li>
-              ))
-            )}
-          </ul>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border/80">
-        <CardHeader>
-          <CardTitle className="text-lg">메모 (마크다운)</CardTitle>
-          <CardDescription>인상 깊은 문장·느낌을 여러 개로 남길 수 있습니다.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -251,34 +276,69 @@ export function BookDetailSidecars(props: { userBookId: string; bookId: string }
         </CardContent>
       </Card>
 
-      <Card className="border-border/80">
+      <Card className="border-[#1A3C2F]/10 bg-white/90 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg">독서 이벤트 (나만 보기)</CardTitle>
-          <CardDescription>시작·진도·중지·완독·하차를 기록합니다. 읽기 상태도 함께 맞출 수 있습니다.</CardDescription>
+          <CardTitle className="font-serif text-lg text-[#1A3C2F]">
+            독서 이벤트
+          </CardTitle>
+          <CardDescription className="text-[#434843]">
+            나만 볼 수 있는 타임라인입니다. 시작·진도·중지·완독·하차를 기록하면
+            읽기 상태도 함께 맞출 수 있습니다.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={() => void appendEvent("read_start", {}, "reading")}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+              className="bg-[#F8F9FA]"
+              onClick={() => void appendEvent("read_start", {}, "reading")}
+            >
               읽기 시작
             </Button>
-            <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={() => void appendEvent("read_pause", {}, "paused")}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+              className="bg-[#F8F9FA]"
+              onClick={() => void appendEvent("read_pause", {}, "paused")}
+            >
               읽기 중지
             </Button>
-            <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={() => void appendEvent("read_complete", {}, "completed")}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+              className="bg-[#F8F9FA]"
+              onClick={() => void appendEvent("read_complete", {}, "completed")}
+            >
               완독
             </Button>
-            <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={() => void appendEvent("dropped", {}, "dropped")}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+              className="bg-[#F8F9FA]"
+              onClick={() => void appendEvent("dropped", {}, "dropped")}
+            >
               하차
             </Button>
           </div>
           <div className="flex flex-wrap items-end gap-2">
             <div className="space-y-1">
-              <Label htmlFor="cur-page">현재 페이지</Label>
+              <Label htmlFor="cur-page" className="text-[#434843]">
+                현재 페이지
+              </Label>
               <Input
                 id="cur-page"
                 type="number"
                 min={1}
-                className="w-32"
+                className="w-32 border-[#1A3C2F]/15"
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
                 disabled={busy}
@@ -288,36 +348,34 @@ export function BookDetailSidecars(props: { userBookId: string; bookId: string }
               type="button"
               size="sm"
               disabled={busy}
+              className="bg-[#1A3C2F] text-white hover:bg-[#1A3C2F]/90"
               onClick={() => {
                 const n = parseInt(pageInput, 10);
                 const cur = Number.isFinite(n) && n > 0 ? n : null;
-                void appendEvent("progress", cur != null ? { currentPage: cur } : {});
+                void appendEvent(
+                  "progress",
+                  cur != null ? { currentPage: cur } : {},
+                );
                 setPageInput("");
               }}
             >
               페이지 저장
             </Button>
           </div>
-          <Separator />
-          <ul className="max-h-80 space-y-2 overflow-y-auto text-sm">
+          <Separator className="bg-[#1A3C2F]/10" />
+          <div className="max-h-[32rem] overflow-y-auto overflow-x-hidden pr-1">
             {events.length === 0 ? (
-              <li className="text-muted-foreground">기록된 이벤트가 없습니다.</li>
+              <p className="rounded-lg border border-dashed border-[#1A3C2F]/15 bg-[#F8F9FA]/60 px-4 py-8 text-center text-sm text-[#675d53]">
+                기록된 이벤트가 없습니다.
+              </p>
             ) : (
-              events.map((ev) => (
-                <li key={ev.id} className="rounded-md border border-border/50 px-3 py-2">
-                  <span className="font-medium">{EVENT_LABEL_KO[ev.eventType]}</span>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {new Date(ev.occurredAt).toLocaleString("ko-KR")}
-                  </span>
-                  {Object.keys(ev.payload).length > 0 ? (
-                    <pre className="mt-1 whitespace-pre-wrap break-all text-xs text-muted-foreground">
-                      {JSON.stringify(ev.payload)}
-                    </pre>
-                  ) : null}
-                </li>
-              ))
+              <TimelineLayout
+                items={readingTimelineItems}
+                size="sm"
+                className="mx-0 max-w-none pt-4 pb-0"
+              />
             )}
-          </ul>
+          </div>
         </CardContent>
       </Card>
     </>

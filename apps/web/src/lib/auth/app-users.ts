@@ -8,8 +8,10 @@ function normalizeEmail(email: string) {
 
 /**
  * Google OAuth 등에서 동일 이메일이면 기존 app_users id를 재사용합니다.
+ * 기존 행이 있으면 표시 이름·아바타는 OAuth 값으로 갱신하지 않습니다.
  *
  * @history
+ * - 2026-05-03: 동일 이메일 기존 계정 — `app_users`/`app_profiles`에 OAuth 닉네임·이미지 미반영
  * - 2026-03-26: 신규 OAuth `app_users` 행에 대해 `user_signup` 포인트 시도
  */
 export async function ensureOAuthAppUser(params: {
@@ -28,16 +30,6 @@ export async function ensureOAuthAppUser(params: {
 
   if (selectError) throw selectError;
   if (existing?.id) {
-    const patch: Record<string, string | null> = {};
-    if (params.name != null) patch.name = params.name;
-    if (params.image != null) patch.image = params.image;
-    if (Object.keys(patch).length > 0) {
-      await supabase.from("app_users").update(patch).eq("id", existing.id);
-    }
-    await upsertAppProfileRow(existing.id, {
-      ...(params.name != null ? { displayName: params.name } : {}),
-      ...(params.image != null ? { avatarUrl: params.image } : {})
-    });
     return existing.id;
   }
 

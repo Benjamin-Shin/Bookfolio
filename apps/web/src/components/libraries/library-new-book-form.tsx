@@ -155,9 +155,7 @@ export function LibraryNewBookForm({ libraryId }: Props) {
         return;
       }
       if (data.bookId) {
-        router.push(
-          `/dashboard/libraries/${libraryId}/books/${data.bookId}` as Route,
-        );
+        router.push(`/libraries/${libraryId}/books/${data.bookId}` as Route);
         router.refresh();
       }
     } catch {

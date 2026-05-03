@@ -1,7 +1,7 @@
 name: seogadam_mobile
 description: 서가담(Seogadam) — 개인 서가 Flutter 앱. 패키지 식별자 seogadam_mobile 유지.
 publish_to: "none"
-version: 1.0.9+110
+version: 1.0.9+111
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -27,6 +27,7 @@ dependencies:
   google_mlkit_text_recognition: ^0.15.1
   connectivity_plus: ^6.1.4
   package_info_plus: ^8.3.0
+  device_info_plus: ^11.3.0
   in_app_update: ^4.2.5
   drift: ^2.32.1
   path_provider: ^2.1.5

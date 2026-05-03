@@ -12,7 +12,7 @@ type InteractionType =
 
 type JsonObject = Record<string, unknown>;
 
-type UserPreferenceProfile = {
+export type UserPreferenceProfile = {
   userId: string;
   genreWeights: Record<string, number>;
   authorWeights: Record<string, number>;
@@ -360,6 +360,18 @@ async function getOrBuildPreferenceProfile(userId: string): Promise<UserPreferen
     profileWindowDays: Number(data.profile_window_days ?? 180),
     updatedAt: String(data.updated_at)
   };
+}
+
+/**
+ * 추천 알고리즘에 쓰는 선호 프로필을 조회합니다(없으면 생성).
+ *
+ * @history
+ * - 2026-05-03: `/discovery/personalized` 등에서 지표 표시용 export
+ */
+export async function loadUserPreferenceProfileSnapshot(
+  userId: string,
+): Promise<UserPreferenceProfile> {
+  return getOrBuildPreferenceProfile(userId);
 }
 
 /**

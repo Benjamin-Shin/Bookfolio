@@ -15,6 +15,7 @@ import {
   MenuIcon,
   ShieldIcon,
   SparklesIcon,
+  TrendingUpIcon,
   UsersIcon,
   UsersRoundIcon,
 } from "lucide-react";
@@ -91,6 +92,7 @@ function MobileNavLink({
  * - 2026-03-29: `sharedLibrariesBlockingWithdrawal`을 프로필(탈퇴)로 전달
  * - 2026-04-05: 「서가담 집계」 표기
  * - 2026-05-03: 로그인 메뉴 순서·라벨을 데스크톱 헤더(내 서가·발견·모임서가·통계)와 맞춤
+ * - 2026-05-03: 발견 `/discovery`·베스트셀러·초이스 신간 경로를 `/discovery/*`로 정리
  */
 export function SiteHeaderMobileNav({
   apkUrl,
@@ -158,28 +160,19 @@ export function SiteHeaderMobileNav({
                     <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                       관리자
                     </p>
-                    <MobileNavLink
-                      href="/dashboard/admin/users"
-                      onNavigate={close}
-                    >
+                    <MobileNavLink href="/admin/users" onNavigate={close}>
                       <UsersIcon className="size-4 opacity-80" />
                       사용자 관리
                     </MobileNavLink>
-                    <MobileNavLink
-                      href="/dashboard/admin/books"
-                      onNavigate={close}
-                    >
+                    <MobileNavLink href="/admin/books" onNavigate={close}>
                       <BookMarkedIcon className="size-4 opacity-80" />
                       도서 관리
                     </MobileNavLink>
-                    <MobileNavLink
-                      href="/dashboard/admin/points"
-                      onNavigate={close}
-                    >
+                    <MobileNavLink href="/admin/points" onNavigate={close}>
                       <CoinsIcon className="size-4 opacity-80" />
                       포인트 · 정책
                     </MobileNavLink>
-                    <MobileNavLink href="/dashboard/admin" onNavigate={close}>
+                    <MobileNavLink href="/admin" onNavigate={close}>
                       <ShieldIcon className="size-4 opacity-80" />
                       관리 홈
                     </MobileNavLink>
@@ -187,14 +180,13 @@ export function SiteHeaderMobileNav({
                   </>
                 ) : null}
                 <MobileNavLink href="/dashboard" onNavigate={close}>
-                  <LibraryBigIcon className="size-4 opacity-90" />
-                  내 서가
+                  <LibraryBigIcon className="size-4 opacity-90" />내 서가
                 </MobileNavLink>
-                <MobileNavLink href="/dashboard/bestsellers" onNavigate={close}>
+                <MobileNavLink href="/discovery" onNavigate={close}>
                   <FlameIcon className="size-4 opacity-80" />
                   발견
                 </MobileNavLink>
-                <MobileNavLink href="/dashboard/libraries" onNavigate={close}>
+                <MobileNavLink href="/libraries" onNavigate={close}>
                   <UsersRoundIcon className="size-4 opacity-80" />
                   모임서가
                 </MobileNavLink>
@@ -204,10 +196,6 @@ export function SiteHeaderMobileNav({
                 >
                   <BarChart3Icon className="size-4 opacity-80" />
                   통계
-                </MobileNavLink>
-                <MobileNavLink href="/dashboard/choice-new" onNavigate={close}>
-                  <SparklesIcon className="size-4 opacity-80" />
-                  초이스 신간
                 </MobileNavLink>
                 <form
                   action="/auth/signout"

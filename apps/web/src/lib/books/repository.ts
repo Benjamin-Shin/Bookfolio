@@ -839,6 +839,87 @@ export async function updateUserBook(
   return detail;
 }
 
+export type UserBookShelfPatchInput = Pick<
+  UpdateUserBookInput,
+  | "readingStatus"
+  | "rating"
+  | "isOwned"
+  | "location"
+  | "currentPage"
+  | "readingTotalPages"
+>;
+
+/**
+ * `user_books`만 갱신합니다. 공유 서지(`books`)는 건드리지 않습니다.
+ *
+ * @history
+ * - 2026-05-03: 웹 상세 인라인·모바일 JSON이 캐논 필드 없이 저장하도록 분리
+ */
+export async function updateUserBookShelfOnly(
+  id: string,
+  input: UserBookShelfPatchInput,
+  context?: RepositoryContext,
+): Promise<UserBookDetail> {
+  const { supabase, userId } = await getClientAndUser(context);
+
+  const { data: existing, error: fetchErr } = await supabase
+    .from("user_books")
+    .select("id")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (fetchErr) throw fetchErr;
+  if (!existing?.id) {
+    throw new Error("Not found");
+  }
+
+  const userPatch: Record<string, unknown> = {};
+  if (input.readingStatus !== undefined) {
+    userPatch.reading_status = input.readingStatus;
+  }
+  if (input.rating !== undefined) {
+    userPatch.rating = input.rating;
+  }
+  if (input.isOwned !== undefined) {
+    userPatch.is_owned = input.isOwned;
+  }
+  if (input.location !== undefined) {
+    userPatch.location = input.location;
+  }
+  if (input.currentPage !== undefined) {
+    userPatch.current_page =
+      input.currentPage === null
+        ? null
+        : Math.floor(Math.min(Math.max(0, input.currentPage), 50_000));
+  }
+  if (input.readingTotalPages !== undefined) {
+    userPatch.reading_total_pages =
+      input.readingTotalPages === null
+        ? null
+        : Math.floor(Math.min(Math.max(1, input.readingTotalPages), 50_000));
+  }
+
+  if (Object.keys(userPatch).length === 0) {
+    const detail = await getUserBook(id, context);
+    if (!detail) throw new Error("Not found");
+    return detail;
+  }
+
+  const { error: uErr } = await supabase
+    .from("user_books")
+    .update(userPatch)
+    .eq("id", id)
+    .eq("user_id", userId);
+  if (uErr) throw uErr;
+
+  const detail = await getUserBook(id, context);
+  if (!detail) {
+    throw new Error("Not found");
+  }
+  return detail;
+}
+
 export async function deleteUserBook(
   id: string,
   context?: RepositoryContext,

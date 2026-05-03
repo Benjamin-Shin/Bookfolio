@@ -6,6 +6,7 @@ import type {
   AladinFeedItem,
   AladinFeedResult,
 } from "@/lib/aladin/bestseller-feed";
+import { resolveAladinItemHref } from "@/lib/aladin/resolve-item-href";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,11 @@ export type AladinTtbItemListViewProps = {
   pageTitle: string;
   pageDescription: string;
   filters?: ReactNode;
+  /** 상단 작은 라벨(기본 `Dashboard`). */
+  sectionEyebrow?: string;
+  /** 우측 보조 버튼 링크(기본 내 서가). */
+  backHref?: Route;
+  backLabel?: string;
 };
 
 /**
@@ -32,6 +38,7 @@ export type AladinTtbItemListViewProps = {
  * - 2026-04-22: 상단 필터 슬롯(`filters`) 추가
  * - 2026-04-12: 카드 클릭 시 알라딘 상품 URL(피드 `link`, 없으면 ISBN) 새 탭 열기
  * - 2026-03-25: `bestsellers/page`에서 분리, 초이스 신간 재사용
+ * - 2026-05-03: `sectionEyebrow`·`backHref` — 발견(`/discovery`) 경로 지원
  */
 export function AladinTtbItemListView({
   feed,
@@ -39,12 +46,17 @@ export function AladinTtbItemListView({
   pageTitle,
   pageDescription,
   filters,
+  sectionEyebrow = "Dashboard",
+  backHref = "/dashboard",
+  backLabel = "내 서가로",
 }: AladinTtbItemListViewProps) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">Dashboard</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            {sectionEyebrow}
+          </p>
           <h1 className="text-3xl font-bold tracking-tight">{pageTitle}</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             {pageDescription}
@@ -53,7 +65,7 @@ export function AladinTtbItemListView({
         <div className="flex items-center gap-2">
           {filters}
           <Button variant="outline" asChild>
-            <Link href={"/dashboard" as Route}>내 서가로</Link>
+            <Link href={backHref as Route}>{backLabel}</Link>
           </Button>
         </div>
       </div>
@@ -198,24 +210,6 @@ function parseAladinCategorySegments(
     .split(">")
     .map((s) => s.trim())
     .filter(Boolean);
-}
-
-/**
- * 피드 `link` 또는 ISBN으로 알라딘 상품 페이지 URL을 만듭니다.
- *
- * @history
- * - 2026-04-12: 베스트셀러·신간 카드 클릭용
- */
-function resolveAladinItemHref(item: AladinFeedItem): string | null {
-  const fromFeed = item.link?.trim();
-  if (fromFeed) {
-    return fromFeed;
-  }
-  const isbn = (item.isbn13 || item.isbn || "").replace(/[^0-9Xx]/g, "");
-  if (!isbn) {
-    return null;
-  }
-  return `https://www.aladin.co.kr/shop/wproduct.aspx?ISBN=${encodeURIComponent(isbn)}`;
 }
 
 function AladinItemCardLink({

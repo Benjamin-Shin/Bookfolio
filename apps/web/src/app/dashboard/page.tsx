@@ -16,7 +16,7 @@ import { DashboardCurrentReadingFeatured } from "@/components/dashboard/dashboar
 import { DashboardHomeHero } from "@/components/dashboard/dashboard-home-hero";
 import { DashboardMonthReadingStats } from "@/components/dashboard/dashboard-month-reading-stats";
 import { DashboardReadingEventsCalendar } from "@/components/dashboard/dashboard-reading-events-calendar.client";
-import { DashboardRecommendationPanel } from "@/components/books/dashboard-recommendation-panel.client";
+import { DashboardDiscoveryRails } from "@/components/dashboard/dashboard-discovery-rails";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -75,7 +75,7 @@ type DashboardPageProps = {
  * 로그인 사용자의 읽는 중·소장 책장(에디토리얼 내 서가 레이아웃).
  *
  * @history
- * - 2026-04-22: 내 취향 추천 패널(`DashboardRecommendationPanel`) 추가, `/api/me/recommendations` 연동
+ * - 2026-04-22: 내 취향 추천 패널 추가, `/api/me/recommendations` 연동 (2026-05-03 `/discovery/personalized`로 이전)
  * - 2026-04-12: Hall of Fame은 `tab=hall`에서만 선반 그리드·페이지네이션; 다른 탭에서는 HoF 구역 미표시
  * - 2026-04-12: 컬렉션 권수·탭 목록은 소장/읽기상태 전체; `p_hall_of_fame`는 Hall of Fame 탭·사이드 카운트만
  * - 2026-04-12: Hall of Fame 전용 목록(`p_hall_of_fame`/`0038`)·사이드 권수·ALL에서만 검색·선반·커버 스케일·상단 탭·가격 합계 제거
@@ -84,8 +84,8 @@ type DashboardPageProps = {
  * - 2026-03-26: 독서 이벤트 캘린더(`DashboardReadingEventsCalendar`, `/api/me/reading-events/calendar`)
  * - 2026-03-26: 좌측 메뉴 카드 제거, 읽기 상태·소장 `tab` 탭, 상단 통계 카드(모바일형 지표)
  * - 2026-03-25: 사이드 카드에 OAuth 등 `session.user.image` 있으면 아바타 표시
- * - 2026-03-25: 사이드 카드에 「초이스 신간」 링크(`/dashboard/choice-new`)
- * - 2026-03-25: 사이드 카드에 「베스트셀러」 링크(`/dashboard/bestsellers`)
+ * - 2026-03-25: 사이드 카드에 「초이스 신간」 링크(이후 `/discovery/choice-new`로 이전)
+ * - 2026-03-25: 사이드 카드에 「베스트셀러」 링크(이후 `/discovery/bestsellers`로 이전)
  * - 2026-03-24: 소장 장르 필터(`genre` 쿼리, `listUserOwnedGenreSlugs`·RPC `p_genre_slug`)
  * - 2026-03-24: `PAGE_SIZE` = `BOOKS_PER_SHELF` import(선반 줄 수·한 줄 권수 상수와 동기)
  * - 2026-03-24: 소장 총권수 보정·소장 하단 페이지네이션(`DashboardBooksPagination`)
@@ -94,6 +94,8 @@ type DashboardPageProps = {
  * - 2026-05-03: 좌측 컬렉션 제거·히어로 아래 가로 탭; 책등 단일 선반·가로 페이지
  * - 2026-05-03: 「현재 읽고 있는 도서」는 `tab=reading`일 때만 표시
  * - 2026-05-03: 시안형 히어로·현재 읽는 책 카드·월간 독서 통계·`#F8F9FA` / `#1A3C2F` 팔레트
+ * - 2026-05-03: 툴바 위 발견 레일(`DashboardDiscoveryRails`)·독서 캘린더 단독; 추천 패널은 `/discovery/personalized`로 이동
+ * - 2026-05-03: `DashboardMonthReadingStats` 「통계 더보기」→ `/discovery/personalized`
  */
 export default async function DashboardPage({
   searchParams,
@@ -250,34 +252,40 @@ export default async function DashboardPage({
           ctx,
         );
 
-  const monthStatsP =
-    showBookSections
-      ? Promise.all([
-          listUserBooksPaged(
-            {
-              isOwned: true,
-              readingStatus: "completed",
-              limit: 5000,
-              offset: 0,
-            },
-            ctx,
-          ),
-          getReadingEventsCalendar(monthCalFrom, monthCalTo, ctx),
-        ])
-      : Promise.resolve(null);
+  const monthStatsP = showBookSections
+    ? Promise.all([
+        listUserBooksPaged(
+          {
+            isOwned: true,
+            readingStatus: "completed",
+            limit: 5000,
+            offset: 0,
+          },
+          ctx,
+        ),
+        getReadingEventsCalendar(monthCalFrom, monthCalTo, ctx),
+      ])
+    : Promise.resolve(null);
 
-  const [readingRes, hallRes, unreadRes, completedRes, ownedRes, ownedGenres, monthStatsBundle] =
-    await Promise.all([
-      readingForShelfP,
-      hallListP,
-      unreadListP,
-      completedListP,
-      ownedListP,
-      tab === "owned"
-        ? listUserOwnedGenreSlugs(ctx)
-        : Promise.resolve([] as string[]),
-      monthStatsP,
-    ]);
+  const [
+    readingRes,
+    hallRes,
+    unreadRes,
+    completedRes,
+    ownedRes,
+    ownedGenres,
+    monthStatsBundle,
+  ] = await Promise.all([
+    readingForShelfP,
+    hallListP,
+    unreadListP,
+    completedListP,
+    ownedListP,
+    tab === "owned"
+      ? listUserOwnedGenreSlugs(ctx)
+      : Promise.resolve([] as string[]),
+    monthStatsP,
+  ]);
 
   const readingBooks = readingRes.items;
   const readingTotal = readingRes.total;
@@ -318,8 +326,7 @@ export default async function DashboardPage({
       : "기록되지 않은 삶은 망각의 뒤편으로 사라집니다. 오늘의 한 줄을 남겨 보세요.";
   const avgRatingDisplay =
     averageRating != null ? `${averageRating.toFixed(1)}/5` : "—";
-  const primaryReadingBook =
-    readingBooks.length > 0 ? readingBooks[0]! : null;
+  const primaryReadingBook = readingBooks.length > 0 ? readingBooks[0]! : null;
 
   const ownedTotalForPager = ownedRes.total;
 
@@ -415,6 +422,19 @@ export default async function DashboardPage({
     <div className="min-h-screen bg-[#F8F9FA] text-[#1b1c19] selection:bg-[#c5e6d4] selection:text-[#0f241c]">
       <main className="px-4 pb-28 pt-8 md:px-8 md:pb-24 md:pt-10 lg:px-12">
         <div className="mx-auto w-full max-w-6xl">
+          <header className="space-y-2 mb-8">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#675d53]">
+              My Library
+            </p>
+            <h1 className="font-serif text-3xl text-[#1A3C2F] md:text-4xl">
+              내 서가
+            </h1>
+            <p className="max-w-2xl text-sm text-[#434843]">
+              기록되지 않은 삶은 망각의 뒤편으로 사라집니다. 오늘의 한 줄을 남겨
+              보세요.
+            </p>
+          </header>
+
           <DashboardHomeHero
             displayLabel={displayLabelHero}
             avatarUrl={appProfile?.avatarUrl ?? null}
@@ -443,14 +463,14 @@ export default async function DashboardPage({
           </section>
 
           {!emptyLibrary ? (
-            <section
-              className="mb-8 grid grid-cols-1 gap-5 xl:grid-cols-2"
-              aria-label="홈 인사이트 패널"
-            >
-              <DashboardRecommendationPanel />
+            <section className="mb-8" aria-label="독서 캘린더">
               <DashboardReadingEventsCalendar />
             </section>
           ) : null}
+
+          {/* {!emptyLibrary ? (
+            <DashboardDiscoveryRails userId={session.user.id} />
+          ) : null} */}
 
           {!emptyLibrary ? (
             <div className="mb-4 space-y-5">
@@ -538,9 +558,7 @@ export default async function DashboardPage({
                 id="dash-reading-shelf-heading"
                 className="mb-6 border-b border-[#1A3C2F]/10 pb-3 font-serif text-xl text-[#1A3C2F] sm:text-2xl"
               >
-                {readingBooks.length > 1
-                  ? "읽는 중인 책 전체"
-                  : "읽는 중인 책"}
+                {readingBooks.length > 1 ? "읽는 중인 책 전체" : "읽는 중인 책"}
               </h2>
               <DashboardBookCollectionViewClient
                 books={readingBooks}
