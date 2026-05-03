@@ -2,13 +2,14 @@
 
 /**
  * @history
- * - 2026-04-22: 헤더 관리자 트리거 아이콘을 방패에서 설정(톱니) 아이콘으로 변경
+ * - 2026-05-04: 헤더 관리 드롭다운에 공지 관리 링크
  * - 2026-04-10: 클라이언트 오류 메뉴
  * - 2026-03-26: 포인트·정책 관리 링크 추가
  */
 import {
   BookMarkedIcon,
   CoinsIcon,
+  MegaphoneIcon,
   SettingsIcon,
   UsersIcon,
 } from "lucide-react";
@@ -66,6 +67,15 @@ export function AdminHeaderMenu() {
           >
             <CoinsIcon className="size-4 opacity-70" />
             포인트 · 정책
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href="/admin/announcements"
+            className="flex cursor-pointer items-center gap-2"
+          >
+            <MegaphoneIcon className="size-4 opacity-70" />
+            공지사항
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

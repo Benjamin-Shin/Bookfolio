@@ -6,9 +6,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 import { CopyUserIdButton } from "./copy-user-id-button.client";
 import { adminGrantPointsToUserFromRule } from "./grant-points-action";
-import { adminAssignUserSubscription } from "./vip-subscription-action";
-import { UserNameForm } from "./user-name-form";
-import { UserRoleForm } from "./user-role-form";
+import { UserRowActions } from "./user-row-actions.client";
+import { UserRowProfileForm } from "./user-row-profile-form.client";
 
 type AppUserRow = {
   id: string;
@@ -29,14 +28,14 @@ function effectiveUserDisplayName(row: AppUserRow): string | null {
  * 관리자 전용 사용자 목록 페이지.
  *
  * @history
+ * - 2026-05-04: 이름·권한 `UserRowProfileForm` 단일 저장·작업 열(`UserRowActions`)
  * - 2026-03-28: `<select>`에 `suppressHydrationWarning`(확장 프로그램 `data-sharkid` 등 DOM 변조와 SSR 불일치 방지)
  * - 2026-03-28: 사용자 ID `CopyUserIdButton` 클립보드 복사
- * - 2026-03-28: VIP 구독 수동 부여 폼(`adminAssignUserSubscription`)
+ * - 2026-03-28: VIP 구독 수동 부여(이후 행별 다이얼로그로 통합)
  * - 2026-05-03: 표 헤더 `whitespace-nowrap`으로 한 줄 표시
  * - 2026-05-03: 사용자 ID 열은 복사 버튼만 표시(본문 UUID 숨김), 안내 문구 정리
  * - 2026-03-28: 규칙별 포인트 지급 폼·사용자 ID 열
  * - 2026-03-28: 포인트 잔액·VIP 활성 컬럼(`v_user_points_balance`, `user_subscriptions`)
- * - 2026-03-24: 이름 컬럼에 인라인 편집(`UserNameForm`) 및 프로필 표시명 조회
  */
 export default async function AdminUsersPage() {
   await requireAdmin();
@@ -98,7 +97,7 @@ export default async function AdminUsersPage() {
         .select("user_id")
         .in("user_id", userIds)
         .eq("status", "active")
-        .gt("current_period_end", nowIso)
+        .gt("current_period_end", nowIso),
     ]);
     if (b.error) {
       balanceFetchError = new Error(b.error.message);
@@ -127,7 +126,7 @@ export default async function AdminUsersPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">사용자 관리</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          최근 가입 순(최대 500명). 첫 관리자는 DB에서 직접{" "}
+          최근 가입 순(최대 500명). 각 행에서 이름·권한을 함께 저장하고, 알림·VIP 작업을 실행합니다. 첫 관리자는 DB에서 직접{" "}
           <code className="rounded bg-muted px-1 py-0.5 text-xs">role = &apos;ADMIN&apos;</code>으로 지정하세요.
         </p>
       </div>
@@ -184,65 +183,26 @@ export default async function AdminUsersPage() {
         <p className="text-sm text-destructive">
           구독 플랜 목록 조회 실패: {subscriptionPlansError.message}
         </p>
+      ) : subscriptionPlans.length === 0 ? (
+        <p className="text-xs text-muted-foreground">
+          등록된 플랜이 없어 행에서 VIP 부여를 할 수 없습니다.{" "}
+          <code className="rounded bg-muted px-1">subscription_plans</code>를 확인하세요.
+        </p>
       ) : null}
 
-      <section className="space-y-2 rounded-lg border border-border/80 bg-muted/10 p-4">
-        <h2 className="text-sm font-semibold tracking-tight">VIP 구독 부여</h2>
-        <p className="text-xs text-muted-foreground">
-          대상 사용자의 기존 활성 구독은 취소 처리한 뒤, 선택한 플랜으로 새 행을 추가합니다. 종료일은 브라우저 로컬 기준으로 입력하세요.
-        </p>
-        {subscriptionPlans.length === 0 ? (
-          <p className="text-xs text-muted-foreground">
-            등록된 플랜이 없습니다. 마이그레이션·DB의 <code className="rounded bg-muted px-1">subscription_plans</code>를 확인하세요.
-          </p>
-        ) : (
-          <form action={adminAssignUserSubscription} className="flex flex-wrap items-end gap-2">
-            <label className="flex min-w-[14rem] flex-col gap-0.5 text-xs">
-              <span className="text-muted-foreground">사용자 UUID</span>
-              <Input
-                name="targetUserId"
-                required
-                placeholder="00000000-0000-…"
-                className="h-8 font-mono text-xs"
-              />
-            </label>
-            <label className="flex min-w-[12rem] flex-col gap-0.5 text-xs">
-              <span className="text-muted-foreground">플랜</span>
-              <select
-                name="planKey"
-                required
-                suppressHydrationWarning
-                className="flex h-8 w-full rounded-md border border-input bg-background px-2 text-xs shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                {subscriptionPlans.map((pl) => (
-                  <option key={pl.plan_key} value={pl.plan_key}>
-                    {pl.display_name?.trim() ? pl.display_name : pl.plan_key} ({pl.plan_key})
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex min-w-[12rem] flex-col gap-0.5 text-xs">
-              <span className="text-muted-foreground">종료 일시 (로컬)</span>
-              <Input type="datetime-local" name="currentPeriodEnd" required className="h-8 text-xs" />
-            </label>
-            <Button type="submit" size="sm" variant="secondary">
-              부여
-            </Button>
-          </form>
-        )}
-      </section>
-
       <div className="overflow-x-auto rounded-lg border border-border/80">
-        <table className="w-full min-w-[800px] text-left text-sm">
+        <table className="w-full min-w-[960px] text-left text-sm">
           <thead className="border-b border-border/60 bg-muted/40">
             <tr>
               <th className="whitespace-nowrap px-3 py-2 font-medium">ID 복사</th>
               <th className="whitespace-nowrap px-3 py-2 font-medium">이메일</th>
-              <th className="whitespace-nowrap px-3 py-2 font-medium">이름</th>
               <th className="whitespace-nowrap px-3 py-2 font-medium">가입일</th>
               <th className="whitespace-nowrap px-3 py-2 text-right font-medium">포인트</th>
               <th className="whitespace-nowrap px-3 py-2 font-medium">VIP</th>
-              <th className="whitespace-nowrap px-3 py-2 font-medium">권한</th>
+              <th className="whitespace-nowrap px-3 py-2 font-medium min-w-[14rem]">
+                이름 · 권한
+              </th>
+              <th className="whitespace-nowrap px-3 py-2 font-medium">작업</th>
             </tr>
           </thead>
           <tbody>
@@ -257,9 +217,6 @@ export default async function AdminUsersPage() {
                     <CopyUserIdButton userId={u.id} />
                   </td>
                   <td className="px-3 py-2 font-mono text-xs">{u.email}</td>
-                  <td className="px-3 py-2 align-middle">
-                    <UserNameForm userId={u.id} initialName={effectiveUserDisplayName(u)} />
-                  </td>
                   <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                     {new Date(u.created_at).toLocaleString("ko-KR")}
                   </td>
@@ -267,8 +224,20 @@ export default async function AdminUsersPage() {
                     {balanceFetchError ? "—" : balance.toLocaleString("ko-KR")}
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{vipFetchError ? "—" : vip ? "예" : ""}</td>
-                  <td className="px-3 py-2">
-                    <UserRoleForm userId={u.id} currentRole={role} />
+                  <td className="px-3 py-2 align-middle">
+                    <UserRowProfileForm
+                      userId={u.id}
+                      initialName={effectiveUserDisplayName(u)}
+                      currentRole={role}
+                    />
+                  </td>
+                  <td className="px-3 py-2 align-middle">
+                    <UserRowActions
+                      userId={u.id}
+                      email={u.email}
+                      vipActive={vip}
+                      subscriptionPlans={subscriptionPlans}
+                    />
                   </td>
                 </tr>
               );

@@ -24,6 +24,8 @@ export const dynamic = "force-dynamic";
  * - 2026-05-03: 대시보드 히어로와 동일한 호칭(`님의 서가`)·모임서가 허브와 동일한 `main` 셸
  * - 2026-05-03: 신규
  * - 2026-05-03: 바로가기 카드 대신 실제 표지·메타 + `loadDiscoveryHubFeeds` 공유
+ * - 2026-05-04: 타일 클릭 → `/discovery/books/by-isbn/...`(알라딘)·`/discovery/books/[id]`(추천)
+ * - 2026-05-04: 섹션 설명과 `moreLabel`(전체 목록·지표·전체 보기) 워딩 통일
  */
 export default async function DiscoveryHubPage() {
   const session = await auth();
@@ -71,7 +73,7 @@ export default async function DiscoveryHubPage() {
           <DiscoveryHubSection
             sectionId="hub-bestseller"
             title="베스트셀러"
-            description="국내도서 순위 · 아래에서 최대 5권을 미리 볼 수 있습니다. 전체 목록과 카테고리 필터는 더보기에서 열 수 있습니다."
+            description="국내도서 순위 · 아래에서 최대 5권을 미리 볼 수 있습니다. 전체 목록과 카테고리 필터는 「전체 목록」에서 열 수 있습니다."
             moreHref="/discovery/bestsellers"
             moreLabel="전체 목록"
             error={aladinError}
@@ -85,7 +87,7 @@ export default async function DiscoveryHubPage() {
           <DiscoveryHubSection
             sectionId="hub-choice"
             title="초이스 신간"
-            description="알라딘 초이스 신간 피드에서 최대 5권입니다."
+            description="알라딘 초이스 신간 피드에서 최대 5권을 미리 볼 수 있습니다. 더 많은 도서는 「전체 목록」에서 확인할 수 있습니다."
             moreHref="/discovery/choice-new"
             moreLabel="전체 목록"
             error={aladinError}
@@ -99,7 +101,7 @@ export default async function DiscoveryHubPage() {
           <DiscoveryHubSection
             sectionId="hub-personalized"
             title="맞춤 추천"
-            description="하이브리드 추천 상위 5권입니다. 선호 프로필·서가 통계는 더보기에서 확인할 수 있습니다."
+            description="하이브리드 추천 상위 5권입니다. 선호 프로필·서가 통계는 「지표·전체 보기」에서 확인할 수 있습니다."
             moreHref="/discovery/personalized"
             moreLabel="지표·전체 보기"
             error={recError}

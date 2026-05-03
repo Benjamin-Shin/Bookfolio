@@ -316,9 +316,26 @@ export type LibraryEventRsvpStatus =
   (typeof LIBRARY_EVENT_RSVP_STATUSES)[number];
 
 /**
+ * 일정별 멤버 RSVP 집계(해당 서가 멤버 수 기준).
+ *
+ * @history
+ * - 2026-05-04: 모임서가 캘린더·참석 현황 표시용
+ */
+export interface LibraryEventRsvpTally {
+  going: number;
+  maybe: number;
+  declined: number;
+  /** 행은 있으나 상태가 `pending`인 멤버 */
+  pending: number;
+  /** RSVP 행이 없는 멤버(아직 응답 안 함) */
+  noResponse: number;
+}
+
+/**
  * 모임서가 일정·이벤트 한 줄(API·캘린더).
  *
  * @history
+ * - 2026-05-04: `rsvpTally` — 참석·미정·불참·미응답 집계
  * - 2026-05-03: `library_events`·RSVP 연동(`0043`)
  */
 export interface LibraryEventSummary {
@@ -336,6 +353,7 @@ export interface LibraryEventSummary {
   cancelledAt: string | null;
   /** RSVP 행이 없으면 null — UI에서는 미응답으로 표시 */
   myRsvpStatus: LibraryEventRsvpStatus | null;
+  rsvpTally: LibraryEventRsvpTally;
 }
 
 /**
@@ -374,7 +392,12 @@ export interface LibrarySharedOwnerRow {
   linkedAt: string;
 }
 
-/** book_id 기준으로 합친 모임서가 책 한 줄. */
+/**
+ * book_id 기준으로 합친 모임서가 책 한 줄.
+ *
+ * @history
+ * - 2026-05-04: 캐논 메타(`publisher` 등) — 비소장 상세에서 `BookCanonInfoPanel`용
+ */
 export interface LibraryAggregatedBookRow {
   libraryId: string;
   bookId: string;
@@ -384,6 +407,13 @@ export interface LibraryAggregatedBookRow {
   coverUrl: string | null;
   /** 공유 서지 `books.genre_slugs` (없으면 생략). */
   genreSlugs?: string[];
+  /** 공유 서지 `books` — 모임서가에서 도서 정보 패널용. */
+  publisher: string | null;
+  publishedDate: string | null;
+  description: string | null;
+  priceKrw: number | null;
+  /** `books.source`. */
+  catalogSource: string | null;
   owners: LibrarySharedOwnerRow[];
   /** 목록 정렬용(소유자 연결 시각 중 최댓값). */
   updatedAt: string;

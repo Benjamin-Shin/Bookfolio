@@ -28,10 +28,33 @@ export type BookCanonInfoPanelData = {
  * 공유 서지(`books`) 메타데이터 + 표지 + 소개 + 공개 한줄평.
  *
  * @history
+ * - 2026-05-04: `pendingLabel` — 빈 메타·소개·장르 누락 문구(발견 상세 `준비중` 등)
  * - 2026-05-03: 장르 `Badge`는 shadcn `@/components/ui/badge`(lucide `Badge` 아이콘과 혼동 수정)
  * - 2026-05-03: 내 서가 도서 상세에서 분리, 한줄평 블록 통합
  */
-export function BookCanonInfoPanel({ book }: { book: BookCanonInfoPanelData }) {
+export function BookCanonInfoPanel({
+  book,
+  canManageOneLiners = true,
+  showPublicOneLiners = true,
+  /** 비어 있는 메타 필드·장르·소개에 쓰는 누락 표기 (예: 발견 상세 `준비중`). */
+  pendingLabel,
+}: {
+  book: BookCanonInfoPanelData;
+  /** false면 공개 한줄평 목록만(편집 없음). */
+  canManageOneLiners?: boolean;
+  /** false면 한줄평 영역 전체 미표시(캐논 메타만). */
+  showPublicOneLiners?: boolean;
+  pendingLabel?: string;
+}) {
+  const miss = pendingLabel?.trim() || null;
+  /** 짧은 문자열 메타(출판사·출판일 등). */
+  const metaText = (raw: string | null | undefined): string => {
+    const t = raw?.trim();
+    if (t) return t;
+    if (miss) return miss;
+    return "—";
+  };
+  const canonIsbn = metaText(book.isbn);
   return (
     <section
       className="overflow-hidden rounded-2xl border border-[#1A3C2F]/10 bg-white/90 shadow-[0_8px_30px_rgba(26,60,47,0.06)]"
@@ -69,24 +92,24 @@ export function BookCanonInfoPanel({ book }: { book: BookCanonInfoPanelData }) {
         </div>
         <div className="min-w-0 space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
-            <CanonField label="ISBN" value={book.isbn ?? "—"} mono />
+            <CanonField label="ISBN" value={canonIsbn} mono />
             <CanonField
               label="참고 가격"
               value={
                 book.priceKrw != null
                   ? `${book.priceKrw.toLocaleString("ko-KR")}원`
-                  : "—"
+                  : miss ?? "—"
               }
             />
-            <CanonField label="출판사" value={book.publisher ?? "—"} />
-            <CanonField label="출판일" value={book.publishedDate ?? "—"} />
+            <CanonField label="출판사" value={metaText(book.publisher)} />
+            <CanonField label="출판일" value={metaText(book.publishedDate)} />
             <CanonField
               label="회원평균평점"
               value={
                 formatCommunityRating(
                   book.communityRatingAvg,
                   book.communityRatingCount,
-                ) ?? "—"
+                ) ?? (miss ?? "—")
               }
             />
             <div className="rounded-xl border border-[#1A3C2F]/10 bg-white/80 p-4">
@@ -107,7 +130,7 @@ export function BookCanonInfoPanel({ book }: { book: BookCanonInfoPanelData }) {
                 </div>
               ) : (
                 <p className="mt-2 text-sm text-[#675d53]">
-                  등록된 장르가 없습니다.
+                  {miss ?? "등록된 장르가 없습니다."}
                 </p>
               )}
             </div>
@@ -133,16 +156,26 @@ export function BookCanonInfoPanel({ book }: { book: BookCanonInfoPanelData }) {
                 </p>
               )}
             </div>
+          ) : miss ? (
+            <div className="rounded-xl border border-[#1A3C2F]/10 bg-[#F8F9FA]/50 p-4 md:p-5">
+              <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#675d53]">
+                소개
+              </p>
+              <p className="mt-2 text-sm text-[#675d53]">{miss}</p>
+            </div>
           ) : null}
         </div>
       </div>
 
+      {showPublicOneLiners ? (
       <div className="border-t border-[#1A3C2F]/8 px-5 py-6 md:px-8 md:py-8">
         <BookOneLinersInCanonPanel
           userBookId={book.userBookId}
           bookId={book.bookId}
+          canManage={canManageOneLiners}
         />
       </div>
+      ) : null}
     </section>
   );
 }

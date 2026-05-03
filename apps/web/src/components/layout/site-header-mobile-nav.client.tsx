@@ -12,6 +12,7 @@ import {
   LibraryBigIcon,
   LogInIcon,
   LogOutIcon,
+  MegaphoneIcon,
   MenuIcon,
   ShieldIcon,
   SparklesIcon,
@@ -91,7 +92,7 @@ function MobileNavLink({
  * - 2026-03-29: 신규 — 햄버거 메뉴·개인정보·약관·쿠키(푸터 동일 경로)
  * - 2026-03-29: `sharedLibrariesBlockingWithdrawal`을 프로필(탈퇴)로 전달
  * - 2026-04-05: 「서가담 집계」 표기
- * - 2026-05-03: 로그인 메뉴 순서·라벨을 데스크톱 헤더(내 서가·발견·모임서가·통계)와 맞춤
+ * - 2026-05-04: 로그인 메뉴에 공지(`/announcements`) 링크
  * - 2026-05-03: 발견 `/discovery`·베스트셀러·초이스 신간 경로를 `/discovery/*`로 정리
  */
 export function SiteHeaderMobileNav({
@@ -172,6 +173,10 @@ export function SiteHeaderMobileNav({
                       <CoinsIcon className="size-4 opacity-80" />
                       포인트 · 정책
                     </MobileNavLink>
+                    <MobileNavLink href="/admin/announcements" onNavigate={close}>
+                      <MegaphoneIcon className="size-4 opacity-80" />
+                      공지 관리
+                    </MobileNavLink>
                     <MobileNavLink href="/admin" onNavigate={close}>
                       <ShieldIcon className="size-4 opacity-80" />
                       관리 홈
@@ -196,6 +201,10 @@ export function SiteHeaderMobileNav({
                 >
                   <BarChart3Icon className="size-4 opacity-80" />
                   통계
+                </MobileNavLink>
+                <MobileNavLink href="/announcements" onNavigate={close}>
+                  <MegaphoneIcon className="size-4 opacity-80" />
+                  공지사항
                 </MobileNavLink>
                 <form
                   action="/auth/signout"

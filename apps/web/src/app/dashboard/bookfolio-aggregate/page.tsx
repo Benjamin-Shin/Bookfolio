@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { findMyUserBookIdsByCanonicalBookIds } from "@/lib/books/repository";
 import { getBookfolioAggregate } from "@/lib/stats/bookfolio-aggregate";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
  * 회원·도서 집계 TOP10(소장·완독·포인트·인기 소장 도서).
  *
  * @history
+ * - 2026-05-04: 「소장 책 순위」 카드 클릭 시 내 서가 상세 또는 `/discovery/books/[bookId]`(캐논 상세)로 이동
  * - 2026-05-03: 발견·모임서가 허브와 동일한 상단 타이틀 패턴·`main` 셸·하단 내 서가로 돌아가기
  * - 2026-04-05: 페이지 제목 사용자 노출 「서가담 집계」
  * - 2026-03-28: 신규
@@ -110,6 +112,18 @@ export default async function BookfolioAggregatePage() {
     loadError = e instanceof Error ? e.message : "집계를 불러오지 못했습니다.";
   }
 
+  let myUserBookByCanon = new Map<string, string>();
+  if (payload && payload.popularOwnedBooks.top.length > 0) {
+    try {
+      myUserBookByCanon = await findMyUserBookIdsByCanonicalBookIds(
+        payload.popularOwnedBooks.top.map((b) => b.bookId),
+        { userId: session.user.id, useAdmin: true },
+      );
+    } catch {
+      myUserBookByCanon = new Map();
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#F8F9FA] px-4 pb-28 pt-8 text-[#1b1c19] selection:bg-[#c5e6d4] selection:text-[#0f241c] md:px-8 md:pb-24 md:pt-10 lg:px-12">
       <div className="mx-auto w-full max-w-6xl space-y-8">
@@ -149,7 +163,7 @@ export default async function BookfolioAggregatePage() {
                 <CardTitle className="text-lg">소장 책 순위</CardTitle>
                 <CardDescription>
                   여러 회원이 소장으로 등록한 동일 도서(표지·제목) — 소장 등록
-                  획수 기준 TOP 10
+                  획수 기준 TOP 10 · 카드를 누르면 도서 상세로 이동합니다.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -159,41 +173,52 @@ export default async function BookfolioAggregatePage() {
                       아직 표시할 데이터가 없습니다.
                     </li>
                   ) : (
-                    payload.popularOwnedBooks.top.map((b, idx) => (
-                      <li
-                        key={b.bookId}
-                        className="flex flex-col overflow-hidden rounded-lg border border-border/60 bg-muted/20"
-                      >
-                        <div className="relative aspect-[2/3] w-full bg-muted">
-                          {b.coverUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element -- 외부 표지 URL(동적 호스트) 허용
-                            <img
-                              src={b.coverUrl}
-                              alt=""
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                              표지 없음
-                            </div>
-                          )}
-                          <Badge
-                            className="absolute left-2 top-2 shadow-sm"
-                            variant="secondary"
+                    payload.popularOwnedBooks.top.map((b, idx) => {
+                      const myShelfId = myUserBookByCanon.get(b.bookId);
+                      const href = (
+                        myShelfId
+                          ? `/dashboard/books/${myShelfId}`
+                          : `/discovery/books/${b.bookId}`
+                      ) as Route;
+                      return (
+                        <li key={b.bookId}>
+                          <Link
+                            href={href}
+                            className="group flex h-full flex-col overflow-hidden rounded-lg border border-border/60 bg-muted/20 transition hover:border-[#1A3C2F]/35 hover:bg-muted/35 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A3C2F]/40"
                           >
-                            {idx + 1}
-                          </Badge>
-                        </div>
-                        <div className="space-y-1 p-3">
-                          <p className="line-clamp-2 text-sm font-semibold leading-snug">
-                            {b.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {b.ownerCount}명 소장 등록
-                          </p>
-                        </div>
-                      </li>
-                    ))
+                            <div className="relative aspect-[2/3] w-full bg-muted">
+                              {b.coverUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element -- 외부 표지 URL(동적 호스트) 허용
+                                <img
+                                  src={b.coverUrl}
+                                  alt={b.title}
+                                  className="h-full w-full object-cover transition group-hover:opacity-95"
+                                />
+                              ) : (
+                                <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                                  표지 없음
+                                </div>
+                              )}
+                              <Badge
+                                className="absolute left-2 top-2 shadow-sm"
+                                variant="secondary"
+                              >
+                                {idx + 1}
+                              </Badge>
+                            </div>
+                            <div className="space-y-1 p-3">
+                              <p className="line-clamp-2 text-sm font-semibold leading-snug group-hover:text-[#1A3C2F]">
+                                {b.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {b.ownerCount}명 소장 등록
+                                {myShelfId ? " · 내 서가" : null}
+                              </p>
+                            </div>
+                          </Link>
+                        </li>
+                      );
+                    })
                   )}
                 </ul>
               </CardContent>

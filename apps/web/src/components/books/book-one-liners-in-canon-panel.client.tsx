@@ -11,13 +11,19 @@ import { Textarea } from "@/components/ui/textarea";
  * 공유 서지(`books`)에 연결된 공개 한줄평 — 캐논 정보 패널 안에 삽입.
  *
  * @history
+ * - 2026-05-04: `userBookId` 빈 문자열이면 `POST /api/me/canon-books/:bookId/my-one-liner`(내 서가 비소장)
+ * - 2026-05-04: `canManage` — 비소장·열람만일 때 입력 UI 숨김
  * - 2026-05-03: `BookDetailSidecars`에서 분리·캐논 패널로 이전
  */
 export function BookOneLinersInCanonPanel(props: {
+  /** 비어 있으면 캐논 `bookId`만으로 저장 API 사용 */
   userBookId: string;
   bookId: string;
+  /** false면 목록만(내 `user_books`가 없을 때). 기본 true */
+  canManage?: boolean;
 }) {
-  const { userBookId, bookId } = props;
+  const { userBookId, bookId, canManage = true } = props;
+  const writeByUserBook = userBookId.trim().length > 0;
   const [oneLiners, setOneLiners] = useState<BookOneLinerRow[]>([]);
   const [myOneLiner, setMyOneLiner] = useState("");
   const [busy, setBusy] = useState(false);
@@ -61,11 +67,15 @@ export function BookOneLinersInCanonPanel(props: {
     return res;
   };
 
+  const oneLinerWriteUrl = writeByUserBook
+    ? `/api/me/books/${encodeURIComponent(userBookId.trim())}/one-liner`
+    : `/api/me/canon-books/${encodeURIComponent(bookId.trim())}/my-one-liner`;
+
   const saveOneLiner = async () => {
     setBusy(true);
     setErr(null);
     try {
-      await postJson(`/api/me/books/${userBookId}/one-liner`, {
+      await postJson(oneLinerWriteUrl, {
         action: "upsert",
         body: myOneLiner,
       });
@@ -82,7 +92,7 @@ export function BookOneLinersInCanonPanel(props: {
     setBusy(true);
     setErr(null);
     try {
-      await postJson(`/api/me/books/${userBookId}/one-liner`, {
+      await postJson(oneLinerWriteUrl, {
         action: "clear",
       });
       await loadOneLiners();
@@ -113,43 +123,49 @@ export function BookOneLinersInCanonPanel(props: {
         </p>
       ) : null}
 
-      <div className="space-y-3">
-        <Label htmlFor="my-one-liner-canon" className="text-[#434843]">
-          내 한줄평 (500자)
-        </Label>
-        <Textarea
-          id="my-one-liner-canon"
-          rows={2}
-          value={myOneLiner}
-          onChange={(e) => setMyOneLiner(e.target.value)}
-          disabled={busy}
-          placeholder="짧게 남겨 보세요."
-          className="resize-none border-[#1A3C2F]/15 bg-white"
-        />
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            size="sm"
+      {canManage ? (
+        <div className="space-y-3">
+          <Label htmlFor="my-one-liner-canon" className="text-[#434843]">
+            내 한줄평 (500자)
+          </Label>
+          <Textarea
+            id="my-one-liner-canon"
+            rows={2}
+            value={myOneLiner}
+            onChange={(e) => setMyOneLiner(e.target.value)}
             disabled={busy}
-            className="bg-[#1A3C2F] text-white hover:bg-[#1A3C2F]/90"
-            onClick={() => void saveOneLiner()}
-          >
-            저장
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={busy}
-            className="border-[#1A3C2F]/25 bg-white text-[#1A3C2F]"
-            onClick={() => void clearOneLiner()}
-          >
-            삭제
-          </Button>
+            placeholder="짧게 남겨 보세요."
+            className="resize-none border-[#1A3C2F]/15 bg-white"
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              disabled={busy}
+              className="bg-[#1A3C2F] text-white hover:bg-[#1A3C2F]/90"
+              onClick={() => void saveOneLiner()}
+            >
+              저장
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              className="border-[#1A3C2F]/25 bg-white text-[#1A3C2F]"
+              onClick={() => void clearOneLiner()}
+            >
+              삭제
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <p className="text-xs text-[#675d53]">
+          내 서가에 이 도서를 추가하면 한줄평을 남길 수 있습니다.
+        </p>
+      )}
 
-      <ul className="mt-6 space-y-3">
+      <ul className={`space-y-3 ${canManage ? "mt-6" : "mt-4"}`}>
         {oneLiners.length === 0 ? (
           <li className="rounded-lg border border-dashed border-[#1A3C2F]/20 bg-white/60 px-4 py-6 text-center text-sm text-[#675d53]">
             아직 한줄평이 없습니다.

@@ -1,4 +1,24 @@
 /**
+ * 여러 멤버의 일→건수 맵을 같은 키 기준으로 합산합니다(모임서가 월간 통계용).
+ *
+ * @history
+ * - 2026-05-04: 신규 — 멤버별 `user_reading_events_calendar` 병합
+ */
+export function mergeReadingEventDayCountMaps(
+  maps: Record<string, number>[],
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const m of maps) {
+    for (const [k, v] of Object.entries(m)) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) continue;
+      out[k] = (out[k] ?? 0) + n;
+    }
+  }
+  return out;
+}
+
+/**
  * `user_reading_events_calendar` RPC가 돌려준 일→건수 맵을
  * 해당 UTC 달의 1~4주차 막대 높이(합계)로 묶습니다.
  *

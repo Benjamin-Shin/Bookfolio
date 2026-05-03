@@ -2,8 +2,9 @@
 
 import { useFormStatus } from "react-dom";
 
-import { setUserRoleFromForm } from "@/app/admin/actions";
+import { saveUserDisplayNameAndRoleFromForm } from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { FormSelect } from "@/components/ui/form-select";
 
 function SubmitButton() {
@@ -15,25 +16,38 @@ function SubmitButton() {
   );
 }
 
-type UserRoleFormProps = {
+type UserRowProfileFormProps = {
   userId: string;
+  initialName: string | null;
   currentRole: "ADMIN" | "STAFF" | "USER";
 };
 
 /**
- * 관리자 사용자 표에서 `app_users.role`을 변경합니다.
+ * 관리자 사용자 행 — 표시명·권한을 한 번에 저장합니다.
  *
  * @history
- * - 2026-05-03: `FormSelect` 기본 `py-2`와 `h-8` 충돌로 글자 잘림 방지(`py-0`·`leading-8`)
- * - 2026-05-03: 권한 `<select>` 너비 `7.5rem` → `9.5rem`
+ * - 2026-05-04: 신규 — `UserNameForm`·`UserRoleForm` 통합
  */
-export function UserRoleForm({ userId, currentRole }: UserRoleFormProps) {
+export function UserRowProfileForm({
+  userId,
+  initialName,
+  currentRole,
+}: UserRowProfileFormProps) {
   return (
     <form
-      action={setUserRoleFromForm}
-      className="flex flex-wrap items-center gap-2"
+      action={saveUserDisplayNameAndRoleFromForm}
+      className="flex min-w-[18rem] max-w-[28rem] flex-wrap items-center gap-2"
     >
       <input type="hidden" name="userId" value={userId} />
+      <Input
+        name="displayName"
+        type="text"
+        defaultValue={initialName ?? ""}
+        maxLength={200}
+        className="h-8 min-w-[7rem] flex-1 text-xs"
+        aria-label="이름"
+        autoComplete="off"
+      />
       <FormSelect
         name="role"
         defaultValue={currentRole}

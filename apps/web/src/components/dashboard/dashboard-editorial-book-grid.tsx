@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 import {
@@ -98,6 +99,7 @@ function EditorialBookCell({
   variant,
   indexInRow,
   tiltPatternIndex,
+  getBookHref,
 }: {
   book: UserBookSummary;
   variant: "reading" | "owned";
@@ -105,11 +107,14 @@ function EditorialBookCell({
   indexInRow: number;
   /** 책+데코 혼합 줄에서의 인덱스(참고 스니펫 `mixed.map`의 `idx`); 생략 시 `indexInRow` */
   tiltPatternIndex?: number;
+  /** 기본: `/dashboard/books/:userBookId` */
+  getBookHref?: (book: UserBookSummary) => string;
 }) {
   const authors = book.authors.join(", ") || "저자 미상";
   const pct = variant === "reading" ? readingProgressPercent(book) : null;
   const i = tiltPatternIndex ?? indexInRow;
-
+  const href = (getBookHref?.(book) ??
+    `/dashboard/books/${book.id}`) as Route;
   return (
     <div
       className={cn(
@@ -120,7 +125,7 @@ function EditorialBookCell({
       )}
     >
       <Link
-        href={`/dashboard/books/${book.id}`}
+        href={href}
         title={book.title}
         className="group relative block h-full w-full drop-shadow-[0_6px_14px_rgba(0,0,0,0.12)]"
       >
@@ -203,6 +208,7 @@ function EditorialShelf() {
  * 내 서가 표지 그리드: 줄마다 얇은 목 선반·표지 호버 시 메타 오버레이.
  *
  * @history
+ * - 2026-05-04: `getBookHref` — 모임서가 등 대시보드 외 상세 링크
  * - 2026-05-03: 데코 — `mixShelfRowItems` 인라인 삽입·`ShelfDecorInline`(참고 `mixItems`/`DecorItem`, 시드 고정)
  * - 2026-05-03: 선반·벽 — 밝은 단색 벽(`#f0f0f0`대)·목판 상·전면·코벨·하단 그림자(`EditorialShelf`)
  * - 2026-05-03: 권마다 `translate-y`·`rotate`·접촉 그림자
@@ -213,9 +219,11 @@ function EditorialShelf() {
 export function EditorialGrid({
   books,
   variant,
+  getBookHref,
 }: {
   books: UserBookSummary[];
   variant: "reading" | "owned";
+  getBookHref?: (book: UserBookSummary) => string;
 }) {
   const rows = chunk(books, BOOKS_PER_VISUAL_ROW);
   return (
@@ -239,6 +247,7 @@ export function EditorialGrid({
                       variant={variant}
                       indexInRow={item.bookOrdinal}
                       tiltPatternIndex={idx}
+                      getBookHref={getBookHref}
                     />
                   ) : (
                     <ShelfDecorInline
@@ -253,6 +262,7 @@ export function EditorialGrid({
                     book={book}
                     variant={variant}
                     indexInRow={i}
+                    getBookHref={getBookHref}
                   />
                 ))}
           </div>

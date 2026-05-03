@@ -67,6 +67,20 @@ function formatTimeRangeKo(ev: LibraryEventSummary): string {
   return `${a} – ${end.toLocaleString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+function formatRsvpTallyLine(ev: LibraryEventSummary): string {
+  const t = ev.rsvpTally;
+  const awaiting = t.pending + t.noResponse;
+  const parts = [
+    `참석 ${t.going}`,
+    `미정 ${t.maybe}`,
+    `불참 ${t.declined}`,
+  ];
+  if (awaiting > 0) {
+    parts.push(`응답 전 ${awaiting}`);
+  }
+  return parts.join(" · ");
+}
+
 function parseDayItems(
   items: LibraryEventSummary[],
   selectedYmd: string,
@@ -84,6 +98,8 @@ type LibraryEventsCalendarProps = {
  * 모임서가 일정 월 캘린더·일별 목록·RSVP(`GET/POST …/events`, `POST …/rsvp`).
  *
  * @history
+ * - 2026-05-04: 멤버 전원 일정 추가·`rsvpTally` 참석 현황 한 줄
+ * - 2026-05-04: 캘린더 좌측·일정 상세 우측 2열(내 서가 독서 캘린더 레이아웃 정렬)
  * - 2026-05-03: 신규
  */
 export function LibraryEventsCalendar({
@@ -355,68 +371,66 @@ export function LibraryEventsCalendar({
         </div>
       </div>
 
-      {isOwner ? (
-        <div className="mb-4">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => setShowCreate((v) => !v)}
-          >
-            {showCreate ? "일정 추가 닫기" : "일정 추가"}
-          </Button>
-          {showCreate ? (
-            <div className="mt-3 space-y-3 rounded-xl border border-[#1A3C2F]/10 bg-[#F8F9FA] p-4">
-              <label className="block text-xs font-medium text-[#5c6560]">
-                제목
-                <input
-                  className="mt-1 w-full rounded-md border border-[#1A3C2F]/15 bg-white px-3 py-2 text-sm"
-                  value={createTitle}
-                  onChange={(e) => setCreateTitle(e.target.value)}
-                  placeholder="예: 5월 정기 모임"
-                />
-              </label>
-              <label className="block text-xs font-medium text-[#5c6560]">
-                시작(로컬)
-                <input
-                  type="datetime-local"
-                  className="mt-1 w-full rounded-md border border-[#1A3C2F]/15 bg-white px-3 py-2 text-sm"
-                  value={createStartsLocal}
-                  onChange={(e) => setCreateStartsLocal(e.target.value)}
-                />
-              </label>
-              <label className="block text-xs font-medium text-[#5c6560]">
-                종류
-                <select
-                  className="mt-1 w-full rounded-md border border-[#1A3C2F]/15 bg-white px-3 py-2 text-sm"
-                  value={createKind}
-                  onChange={(e) => setCreateKind(e.target.value as LibraryEventKind)}
-                >
-                  <option value="meeting">{EVENT_KIND_LABEL.meeting}</option>
-                  <option value="social">{EVENT_KIND_LABEL.social}</option>
-                  <option value="deadline">{EVENT_KIND_LABEL.deadline}</option>
-                </select>
-              </label>
-              <Button
-                type="button"
-                size="sm"
-                className="bg-[#1A3C2F] hover:bg-[#1A3C2F]/90"
-                disabled={createBusy}
-                onClick={() => void onCreate()}
+      <div className="mb-4">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() => setShowCreate((v) => !v)}
+        >
+          {showCreate ? "일정 추가 닫기" : "일정 추가"}
+        </Button>
+        {showCreate ? (
+          <div className="mt-3 space-y-3 rounded-xl border border-[#1A3C2F]/10 bg-[#F8F9FA] p-4">
+            <label className="block text-xs font-medium text-[#5c6560]">
+              제목
+              <input
+                className="mt-1 w-full rounded-md border border-[#1A3C2F]/15 bg-white px-3 py-2 text-sm"
+                value={createTitle}
+                onChange={(e) => setCreateTitle(e.target.value)}
+                placeholder="예: 5월 정기 모임"
+              />
+            </label>
+            <label className="block text-xs font-medium text-[#5c6560]">
+              시작(로컬)
+              <input
+                type="datetime-local"
+                className="mt-1 w-full rounded-md border border-[#1A3C2F]/15 bg-white px-3 py-2 text-sm"
+                value={createStartsLocal}
+                onChange={(e) => setCreateStartsLocal(e.target.value)}
+              />
+            </label>
+            <label className="block text-xs font-medium text-[#5c6560]">
+              종류
+              <select
+                className="mt-1 w-full rounded-md border border-[#1A3C2F]/15 bg-white px-3 py-2 text-sm"
+                value={createKind}
+                onChange={(e) => setCreateKind(e.target.value as LibraryEventKind)}
               >
-                {createBusy ? (
-                  <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                    저장 중
-                  </>
-                ) : (
-                  "등록"
-                )}
-              </Button>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+                <option value="meeting">{EVENT_KIND_LABEL.meeting}</option>
+                <option value="social">{EVENT_KIND_LABEL.social}</option>
+                <option value="deadline">{EVENT_KIND_LABEL.deadline}</option>
+              </select>
+            </label>
+            <Button
+              type="button"
+              size="sm"
+              className="bg-[#1A3C2F] hover:bg-[#1A3C2F]/90"
+              disabled={createBusy}
+              onClick={() => void onCreate()}
+            >
+              {createBusy ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  저장 중
+                </>
+              ) : (
+                "등록"
+              )}
+            </Button>
+          </div>
+        ) : null}
+      </div>
 
       {error ? (
         <p className="mb-3 text-sm text-red-700" role="alert">
@@ -430,75 +444,99 @@ export function LibraryEventsCalendar({
           불러오는 중…
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-7 gap-1 text-center text-[0.65rem] font-semibold uppercase tracking-wide text-[#5c6560]">
-            {WEEKDAYS_KO.map((d) => (
-              <div key={d}>{d}</div>
-            ))}
-          </div>
-          <div className="mt-1 grid grid-cols-7 gap-1">
-            {cells.map((day, idx) => {
-              if (day == null) {
-                return <div key={`e-${idx}`} className="aspect-square" />;
-              }
-              const ymd = ymdLocal(year, month0, day);
-              const n = countsByLocalDay[ymd] ?? 0;
-              const selected = selectedYmd === ymd;
-              return (
-                <button
-                  key={ymd}
-                  type="button"
-                  onClick={() => setSelectedYmd(ymd)}
-                  className={cn(
-                    "flex aspect-square flex-col items-center justify-center rounded-lg border text-sm transition-colors",
-                    selected
-                      ? "border-[#1A3C2F] bg-[#1A3C2F]/10 font-semibold text-[#1A3C2F]"
-                      : "border-transparent hover:bg-[#1A3C2F]/5",
-                  )}
-                >
-                  <span>{day}</span>
-                  {n > 0 ? (
-                    <span className="mt-0.5 text-[0.6rem] font-bold text-[#b8860b]">
-                      {n}
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })}
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <div>
+            <p className="mb-2 text-xs leading-relaxed text-[#434843]">
+              일정이 있는 날에는 숫자가 표시됩니다. 날짜를 누르면 오른쪽에서 상세,
+              멤버 참석 현황, RSVP를 다룰 수 있습니다.
+            </p>
+            <div className="grid grid-cols-7 gap-1 border-b border-[#1A3C2F]/10 pb-2 text-center text-[0.65rem] font-semibold uppercase tracking-wide text-[#5c6560]">
+              {WEEKDAYS_KO.map((d) => (
+                <div key={d} className="py-1">
+                  {d}
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 grid grid-cols-7 gap-1">
+              {cells.map((day, idx) => {
+                if (day == null) {
+                  return <div key={`e-${idx}`} className="aspect-square min-h-9" />;
+                }
+                const ymd = ymdLocal(year, month0, day);
+                const n = countsByLocalDay[ymd] ?? 0;
+                const selected = selectedYmd === ymd;
+                const has = n > 0;
+                return (
+                  <button
+                    key={ymd}
+                    type="button"
+                    onClick={() =>
+                      setSelectedYmd((prev) => (prev === ymd ? null : ymd))
+                    }
+                    className={cn(
+                      "flex aspect-square min-h-9 flex-col items-center justify-center rounded-lg border text-sm transition-colors",
+                      selected
+                        ? "border-[#1A3C2F] bg-[#1A3C2F]/10 font-semibold text-[#1A3C2F]"
+                        : has
+                          ? "border-transparent bg-[#c5e6d4]/25 text-[#0f241c] hover:bg-[#1A3C2F]/10"
+                          : "border-transparent text-[#5c6560]/70 hover:bg-[#1A3C2F]/5",
+                    )}
+                    aria-pressed={selected}
+                  >
+                    <span className="tabular-nums">{day}</span>
+                    {has ? (
+                      <span className="mt-0.5 text-[0.6rem] font-bold text-[#b8860b]">
+                        {n}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {selectedYmd != null ? (
-            <div className="mt-6 border-t border-[#1A3C2F]/10 pt-4">
-              <h3 className="mb-2 text-sm font-semibold text-[#1A3C2F]">
-                {selectedYmd}
-              </h3>
-              {dayRows.length === 0 ? (
-                <p className="text-sm text-[#5c6560]">이 날짜에 등록된 일정이 없습니다.</p>
-              ) : (
-                <ul className="space-y-3">
-                  {dayRows.map((ev) => (
-                    <li
-                      key={ev.id}
-                      className="rounded-xl border border-[#1A3C2F]/10 bg-[#F8F9FA] p-3"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                          <p className="font-medium text-[#1A3C2F]">{ev.title}</p>
-                          <p className="text-xs text-[#5c6560]">
-                            {formatTimeRangeKo(ev)} · {EVENT_KIND_LABEL[ev.eventKind]}
-                          </p>
-                          {ev.location ? (
-                            <p className="text-xs text-[#5c6560]">{ev.location}</p>
-                          ) : null}
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {(
-                            ["going", "maybe", "declined", "pending"] as const
-                          ).map((st) => {
-                            const active =
-                              ev.myRsvpStatus === st ||
-                              (ev.myRsvpStatus == null && st === "pending");
-                            return (
+          <div className="space-y-2 rounded-lg border border-[#1A3C2F]/12 bg-[#F8F9FA]/90 p-4">
+            <h3 className="text-sm font-semibold text-[#1A3C2F]">
+              {selectedYmd
+                ? `${selectedYmd.replace(/-/g, ".")} 일정`
+                : "날짜를 선택하면 일정이 표시됩니다."}
+            </h3>
+            {!selectedYmd ? (
+              <p className="text-sm text-[#5c6560]">
+                달력에서 날짜를 눌러 모임 일정과 RSVP를 확인해 보세요.
+              </p>
+            ) : dayRows.length === 0 ? (
+              <p className="text-sm text-[#5c6560]">
+                이 날짜에 등록된 일정이 없습니다.
+              </p>
+            ) : (
+              <ul className="space-y-3">
+                {dayRows.map((ev) => (
+                  <li
+                    key={ev.id}
+                    className="rounded-xl border border-[#1A3C2F]/10 bg-white p-3"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <p className="font-medium text-[#1A3C2F]">{ev.title}</p>
+                        <p className="text-xs text-[#5c6560]">
+                          {formatTimeRangeKo(ev)} · {EVENT_KIND_LABEL[ev.eventKind]}
+                        </p>
+                        {ev.location ? (
+                          <p className="text-xs text-[#5c6560]">{ev.location}</p>
+                        ) : null}
+                        <p className="mt-1.5 text-xs text-[#1A3C2F]/90">
+                          {formatRsvpTallyLine(ev)}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(
+                          ["going", "maybe", "declined", "pending"] as const
+                        ).map((st) => {
+                          const active =
+                            ev.myRsvpStatus === st ||
+                            (ev.myRsvpStatus == null && st === "pending");
+                          return (
                             <Button
                               key={st}
                               type="button"
@@ -514,44 +552,39 @@ export function LibraryEventsCalendar({
                               {RSVP_LABEL[st]}
                             </Button>
                           );
-                          })}
-                        </div>
+                        })}
                       </div>
-                      {isOwner ? (
-                        <div className="mt-2 flex gap-2">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs text-[#5c6560]"
-                            disabled={rsvpBusyId === ev.id}
-                            onClick={() => void onCancelEvent(ev.id)}
-                          >
-                            취소 처리
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs text-red-700"
-                            disabled={rsvpBusyId === ev.id}
-                            onClick={() => void onDeleteEvent(ev.id)}
-                          >
-                            삭제
-                          </Button>
-                        </div>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ) : (
-            <p className="mt-4 text-sm text-[#5c6560]">
-              달력에서 날짜를 누르면 해당일 일정과 RSVP를 볼 수 있습니다.
-            </p>
-          )}
-        </>
+                    </div>
+                    {isOwner ? (
+                      <div className="mt-2 flex gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs text-[#5c6560]"
+                          disabled={rsvpBusyId === ev.id}
+                          onClick={() => void onCancelEvent(ev.id)}
+                        >
+                          취소 처리
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs text-red-700"
+                          disabled={rsvpBusyId === ev.id}
+                          onClick={() => void onDeleteEvent(ev.id)}
+                        >
+                          삭제
+                        </Button>
+                      </div>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       )}
     </section>
   );

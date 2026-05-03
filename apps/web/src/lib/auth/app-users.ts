@@ -60,3 +60,42 @@ export async function ensureOAuthAppUser(params: {
 
   return created.id;
 }
+
+/**
+ * 등록된 이메일(`app_users.email`)로 사용자 ID를 조회합니다.
+ *
+ * @history
+ * - 2026-05-04: 관리자 개인 알림 수신자 해석용
+ */
+export async function findAppUserIdByEmail(email: string): Promise<string | null> {
+  const normalized = normalizeEmail(email);
+  if (!normalized) {
+    return null;
+  }
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("app_users")
+    .select("id")
+    .eq("email", normalized)
+    .maybeSingle();
+  if (error || !data?.id) {
+    return null;
+  }
+  return data.id;
+}
+
+/**
+ * `app_users` PK 존재 여부.
+ *
+ * @history
+ * - 2026-05-04: 관리자 개인 알림 수신자(UUID) 검증용
+ */
+export async function appUserExistsById(id: string): Promise<boolean> {
+  const trimmed = id.trim();
+  if (!trimmed) {
+    return false;
+  }
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase.from("app_users").select("id").eq("id", trimmed).maybeSingle();
+  return !error && !!data?.id;
+}

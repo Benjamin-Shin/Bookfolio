@@ -1,23 +1,18 @@
-import type { Route } from "next";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
-import { LibraryNewBookForm } from "@/components/libraries/library-new-book-form";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { getLibrary } from "@/lib/libraries/repository";
 
 type PageProps = {
   params: Promise<{ libraryId: string }>;
 };
 
+/**
+ * 모임서가에는 직접 도서를 추가하지 않습니다. 내 서가에서 등록·연결된 소장만 합쳐집니다.
+ *
+ * @history
+ * - 2026-05-04: 내 서가 연결 모델에 맞춰 상세로만 리다이렉트
+ */
 export default async function LibraryNewBookPage({ params }: PageProps) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -30,27 +25,8 @@ export default async function LibraryNewBookPage({ params }: PageProps) {
     useAdmin: true,
   });
   if (!lib) {
-    notFound();
+    redirect("/libraries");
   }
 
-  return (
-    <main className="mx-auto max-w-2xl px-4 py-8 md:py-12">
-      <Card className="border-border/80">
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <CardTitle>모임서가에 책 추가</CardTitle>
-            <CardDescription>
-              「{lib.name}」에 물리적 한 권을 등록합니다.
-            </CardDescription>
-          </div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/libraries/${libraryId}` as Route}>서가로</Link>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <LibraryNewBookForm libraryId={libraryId} />
-        </CardContent>
-      </Card>
-    </main>
-  );
+  redirect(`/libraries/${libraryId}`);
 }

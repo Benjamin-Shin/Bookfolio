@@ -20,6 +20,7 @@ function getAdminContext(ctx: RepositoryContext) {
  * 개인 메모·한줄평·독서 이벤트·리더보드(0018 마이그레이션).
  *
  * @history
+ * - 2026-05-04: `upsertMyCanonBookOneLiner`·`clearMyCanonBookOneLiner` — 내 서가 없이 `books.id`로 한줄평
  * - 2026-03-28: `parseLeaderboardPayload` export — 집계 API에서 재사용
  * - 2026-03-28: 독서 이벤트 추가 시 일일 출석(`tryRecordDailyActivityCheckIn`) 시도
  * - 2026-03-26: `listReadingEventsForUtcDayWithBooks` — 일별 이벤트+도서 메타(대시보드 캘린더)
@@ -327,6 +328,72 @@ export async function clearMyBookOneLiner(
     .delete()
     .eq("user_id", userId)
     .eq("book_id", ub.book_id as string);
+  if (error) throw error;
+}
+
+/**
+ * 내 서가에 `user_books` 행 없이도, 공유 서지(`books.id`) 기준 한줄평 upsert.
+ *
+ * @history
+ * - 2026-05-04: 모임서가 등 타인 소장만 있을 때 작성 UI 연동용
+ */
+export async function upsertMyCanonBookOneLiner(
+  canonBookId: string,
+  body: string,
+  context: RepositoryContext,
+): Promise<void> {
+  const { supabase, userId } = getAdminContext(context);
+  const bookId = canonBookId.trim();
+  if (!bookId) {
+    throw new Error("bookId가 필요합니다.");
+  }
+  const text = body.trim();
+  if (!text) {
+    throw new Error("한줄평을 입력해 주세요.");
+  }
+  if (text.length > 500) {
+    throw new Error("한줄평은 500자 이내로 입력해 주세요.");
+  }
+  const { data: book, error: e0 } = await supabase
+    .from("books")
+    .select("id")
+    .eq("id", bookId)
+    .maybeSingle();
+  if (e0) throw e0;
+  if (!book?.id) {
+    throw new Error("Not found");
+  }
+  const { error } = await supabase.from("book_one_liners").upsert(
+    {
+      user_id: userId,
+      book_id: bookId,
+      body: text,
+    },
+    { onConflict: "user_id,book_id" },
+  );
+  if (error) throw error;
+}
+
+/**
+ * `upsertMyCanonBookOneLiner`와 대응하는 삭제.
+ *
+ * @history
+ * - 2026-05-04: 캐논 ID 기준 한줄평 제거
+ */
+export async function clearMyCanonBookOneLiner(
+  canonBookId: string,
+  context: RepositoryContext,
+): Promise<void> {
+  const { supabase, userId } = getAdminContext(context);
+  const bookId = canonBookId.trim();
+  if (!bookId) {
+    throw new Error("bookId가 필요합니다.");
+  }
+  const { error } = await supabase
+    .from("book_one_liners")
+    .delete()
+    .eq("user_id", userId)
+    .eq("book_id", bookId);
   if (error) throw error;
 }
 

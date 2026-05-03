@@ -6,12 +6,15 @@ export interface DashboardMonthReadingStatsProps {
   weekBars: number[];
   booksReadThisMonth: number;
   avgRatingDisplay: string;
+  /** false면 하단「통계 더보기」 링크 숨김(모임서가 등) */
+  showFooterLink?: boolean;
 }
 
 /**
  * 우측「독서 통계」카드 — 이번 달 주차별 활동(캘린더 RPC 합계)과 요약 수치.
  *
  * @history
+ * - 2026-05-04: `showFooterLink` — 모임서가 합산 카드에서 개인화 링크 비표시
  * - 2026-05-03: 「통계 더보기」→ `/discovery/personalized` (내 서가 통계 화면)
  * - 2026-05-03: 신규
  */
@@ -19,6 +22,7 @@ export function DashboardMonthReadingStats({
   weekBars,
   booksReadThisMonth,
   avgRatingDisplay,
+  showFooterLink = true,
 }: DashboardMonthReadingStatsProps) {
   const max = Math.max(1, ...weekBars, 1);
   const labels = ["1주", "2주", "3주", "4주"];
@@ -83,15 +87,17 @@ export function DashboardMonthReadingStats({
         </ul>
       </div>
 
-      <div className="mt-auto flex justify-end border-t border-[#1A3C2F]/8 px-5 py-3">
-        <Link
-          href={"/discovery/personalized" as Route}
-          className="inline-flex items-center gap-0.5 text-sm font-medium text-[#1A3C2F] hover:underline"
-        >
-          통계 더보기
-          <ChevronRight className="size-4" aria-hidden />
-        </Link>
-      </div>
+      {showFooterLink ? (
+        <div className="mt-auto flex justify-end border-t border-[#1A3C2F]/8 px-5 py-3">
+          <Link
+            href={"/discovery/personalized" as Route}
+            className="inline-flex items-center gap-0.5 text-sm font-medium text-[#1A3C2F] hover:underline"
+          >
+            통계 더보기
+            <ChevronRight className="size-4" aria-hidden />
+          </Link>
+        </div>
+      ) : null}
     </section>
   );
 }

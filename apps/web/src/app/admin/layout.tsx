@@ -1,5 +1,6 @@
 /**
  * @history
+ * - 2026-05-04: 공지사항 관리(`/admin/announcements`) 내비 링크
  * - 2026-05-03: 관리 내비를 왼쪽 고정(sticky) 사이드바로 두고 본문과 분리
  * - 2026-05-03: 관리 내비에 아이콘·도서 등록(`/admin/books/new`) 링크 추가
  * - 2026-04-10: 클라이언트 오류 수집 관리 링크
@@ -14,6 +15,7 @@ import {
   Coins,
   LayoutDashboard,
   Library,
+  Megaphone,
   PenLine,
   Users,
 } from "lucide-react";
@@ -65,6 +67,10 @@ export default async function AdminLayout({
           <Link href="/admin/points" className={navLinkClass}>
             <Coins className="size-4 shrink-0 opacity-80" aria-hidden />
             포인트 · 정책
+          </Link>
+          <Link href="/admin/announcements" className={navLinkClass}>
+            <Megaphone className="size-4 shrink-0 opacity-80" aria-hidden />
+            공지사항
           </Link>
           <Link href="/admin/client-errors" className={navLinkClass}>
             <Bug className="size-4 shrink-0 opacity-80" aria-hidden />

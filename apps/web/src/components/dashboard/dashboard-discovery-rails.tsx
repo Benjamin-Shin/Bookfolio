@@ -17,6 +17,7 @@ import {
  * @history
  * - 2026-05-03: 모바일 발견 탭과 동일하게 프로필 관심 CID 병합 + `/discovery/*` 더보기
  * - 2026-05-03: `loadDiscoveryHubFeeds`·`discovery-hub-tiles`로 발견 허브와 로직 공유
+ * - 2026-05-04: `moreLabel`을 발견 허브와 동일(전체 목록·지표·전체 보기)
  */
 export async function DashboardDiscoveryRails({ userId }: { userId: string }) {
   const {
@@ -37,7 +38,7 @@ export async function DashboardDiscoveryRails({ userId }: { userId: string }) {
         title="베스트셀러"
         description="국내도서 · 관심 카테고리(또는 기본) 순위"
         moreHref="/discovery/bestsellers"
-        moreLabel="더보기"
+        moreLabel="전체 목록"
         error={aladinError}
         emptyMessage="표시할 도서가 없습니다."
       >
@@ -51,7 +52,7 @@ export async function DashboardDiscoveryRails({ userId }: { userId: string }) {
         title="초이스 신간"
         description="알라딘 초이스 신간 피드"
         moreHref="/discovery/choice-new"
-        moreLabel="더보기"
+        moreLabel="전체 목록"
         error={aladinError}
         emptyMessage="표시할 도서가 없습니다."
       >
@@ -65,7 +66,7 @@ export async function DashboardDiscoveryRails({ userId }: { userId: string }) {
         title="맞춤 추천"
         description="내 서가 기록으로 만든 선호 프로필 + 인기·신선도 점수"
         moreHref="/discovery/personalized"
-        moreLabel="지표와 전체 보기"
+        moreLabel="지표·전체 보기"
         error={recError}
         emptyMessage="추천 후보가 없거나 아직 기록이 부족합니다."
       >

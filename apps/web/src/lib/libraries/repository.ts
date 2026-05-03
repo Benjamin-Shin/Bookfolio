@@ -847,6 +847,7 @@ function flattenLinkedRows(rows: LinkedLibraryRow[]): FlatLinked[] {
  * `book_id`별 소유자 묶음 → 집계 행.
  *
  * @history
+ * - 2026-05-04: 집계 행에 `publisher`·`publishedDate` 등 캐논 필드 포함(비소장 상세 패널용)
  * - 2026-04-12: 소유자별 `rating` — 모임서가 Hall of Fame
  * - 2026-03-24: 공유 서지 `genre_slugs`를 `genreSlugs`로 노출
  */
@@ -901,6 +902,11 @@ function buildAggregatedList(
       authors: Array.isArray(book.authors) ? book.authors : [],
       coverUrl: normalizeCoverUrlForClient(book.cover_url),
       genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined,
+      publisher: book.publisher ?? null,
+      publishedDate: book.published_date ?? null,
+      description: book.description ?? null,
+      priceKrw: book.price_krw ?? null,
+      catalogSource: book.source ?? null,
       owners,
       updatedAt,
     });

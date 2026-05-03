@@ -2,7 +2,7 @@
  * 선반 UI 공통: 권수·청크·기울기·선반 셸 클래스 (React 없음).
  *
  * @history
- * - 2026-03-24: `LibraryBookshelf` 클라이언트 분리에 맞춰 공통 모듈로 추출
+ * - 2026-03-24: 모임서가·대시보드 선반 공통 상수로 추출
  */
 
 export function chunk<T>(items: T[], size: number): T[][] {

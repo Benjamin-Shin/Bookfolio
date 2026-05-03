@@ -52,6 +52,7 @@ function formatReasonLine(code: string): string {
  * (서가담 전역 집계 `bookfolio-aggregate`와는 별개의 「나」 중심 화면.)
  *
  * @history
+ * - 2026-05-04: 추천 행 메인 영역 클릭 시 `/discovery/books/[bookId]` 상세
  * - 2026-05-03: 신규 — 모바일 발견·홈의 추천 설명을 웹에서 확장
  */
 export default async function DiscoveryPersonalizedPage() {
@@ -220,7 +221,11 @@ export default async function DiscoveryPersonalizedPage() {
                 <li key={item.bookId}>
                   <Card className="rounded-xl border-[#051b0e]/10 bg-white/90 shadow-sm">
                     <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:gap-4">
-                      <div className="flex gap-3 sm:min-w-0 sm:flex-1">
+                      <Link
+                        href={`/discovery/books/${item.bookId}` as Route}
+                        className="flex min-w-0 flex-1 gap-3 rounded-lg outline-none ring-offset-2 transition-opacity hover:opacity-95 focus-visible:ring-2 focus-visible:ring-[#1A3C2F]/30 sm:min-w-0 sm:flex-1"
+                      >
+                        <div className="flex gap-3 sm:min-w-0 sm:flex-1">
                         <div className="relative h-28 w-[4.5rem] shrink-0 overflow-hidden rounded-md bg-[#efece4]">
                           <span className="absolute left-1 top-1 rounded bg-[#1A3C2F] px-1.5 py-0.5 text-[10px] font-bold text-white">
                             {idx + 1}
@@ -261,6 +266,7 @@ export default async function DiscoveryPersonalizedPage() {
                           )}
                         </div>
                       </div>
+                      </Link>
                       <div className="flex shrink-0 flex-col items-stretch justify-between gap-2 sm:w-40">
                         <p className="text-right text-xs tabular-nums text-[#8a7f72] sm:text-left">
                           점수 {item.score.toFixed(4)}

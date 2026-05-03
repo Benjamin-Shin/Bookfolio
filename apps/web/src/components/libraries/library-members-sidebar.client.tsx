@@ -47,9 +47,10 @@ function MemberAvatar({ member }: { member: LibraryMemberRow }) {
 }
 
 /**
- * 모임서가 좌측 — 멤버 목록(이메일 비표시)·소유자 초대·관리 다이얼로그.
+ * 모임서가 — 멤버 목록(이메일 비표시)·소유자 초대·관리 다이얼로그.
  *
  * @history
+ * - 2026-05-04: 소유자의 멤버 내보내기 버튼 카피를 「탈퇴」로 통일
  * - 2026-04-12: `LibraryMembersPanel` 대체 — 아바타·이름 우선, 초대는 팝업
  */
 export function LibraryMembersSidebar({
@@ -111,7 +112,7 @@ export function LibraryMembersSidebar({
   }
 
   async function handleRemove(targetUserId: string) {
-    if (!confirm("이 멤버를 서가에서 제거할까요?")) return;
+    if (!confirm("이 멤버를 모임서가에서 탈퇴시킬까요?")) return;
     setError(null);
     try {
       const res = await fetch(
@@ -122,7 +123,7 @@ export function LibraryMembersSidebar({
       );
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
-        setError(data.error ?? "제거하지 못했습니다.");
+        setError(data.error ?? "처리하지 못했습니다.");
         return;
       }
       await refresh();
@@ -308,7 +309,7 @@ export function LibraryMembersSidebar({
                     className="h-7 px-2 text-xs"
                     onClick={() => void handleRemove(m.userId)}
                   >
-                    제거
+                    탈퇴
                   </Button>
                 ) : null}
               </div>

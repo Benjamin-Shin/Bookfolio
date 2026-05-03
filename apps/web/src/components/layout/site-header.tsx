@@ -1,9 +1,11 @@
 import type { Route } from "next";
 import Link from "next/link";
-import { Bell, Leaf, LogOutIcon, Search } from "lucide-react";
+import { Leaf, LogOutIcon, Search } from "lucide-react";
 
 import { auth } from "@/auth";
 import { AdminHeaderMenu } from "@/components/layout/admin-header-menu";
+import { HeaderAnnouncements } from "@/components/layout/header-announcements.client";
+import { HeaderNotifications } from "@/components/layout/header-notifications.client";
 import { HeaderAccount } from "@/components/layout/header-account";
 import { LoggedInMainNav } from "@/components/layout/logged-in-main-nav.client";
 import { SiteHeaderGuestActions } from "@/components/layout/site-header-guest-actions.client";
@@ -12,12 +14,15 @@ import { Button } from "@/components/ui/button";
 import { getAppProfile } from "@/lib/auth/app-profiles";
 import { listOwnedSharedLibrariesBlockingWithdrawal } from "@/lib/auth/delete-app-user";
 import { env } from "@/lib/env";
+import { listPublishedSiteAnnouncements } from "@/lib/site/announcements-repository";
+import { countUnreadUserNotifications } from "@/lib/site/user-notifications-repository";
 import { cn } from "@/lib/utils";
 
 /**
  * 전역 상단 헤더(브랜드·로그인 시 대시보드 바로가기).
  *
  * @history
+ * - 2026-05-04: 공지(`HeaderAnnouncements`·`/announcements`)·개인 알림(`HeaderNotifications`, `user_notifications`)
  * - 2026-05-03: 로그인 레이아웃 — 잎 아이콘·세리프「서가담」·중앙 4메뉴(`LoggedInMainNav`)·검색·알림·계정(시안 정렬)
  * - 2026-05-02: 뷰포트 상단 고정(`fixed`)으로 스크롤 시에도 항상 노출
  * - 2026-04-27: `/login` 경로에서는 비로그인 `로그인` CTA를 숨기도록 클라이언트 경로 분기 추가
@@ -46,6 +51,19 @@ export async function SiteHeader() {
     user?.name?.trim() ||
     user?.email?.trim() ||
     "사용자";
+
+  let announcementTeasers: { id: string; title: string }[] = [];
+  let unreadNotifications = 0;
+  if (user?.id && user.email) {
+    try {
+      const published = await listPublishedSiteAnnouncements();
+      announcementTeasers = published.map((a) => ({ id: a.id, title: a.title }));
+      unreadNotifications = await countUnreadUserNotifications(user.id);
+    } catch {
+      announcementTeasers = [];
+      unreadNotifications = 0;
+    }
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#1A3C2F]/10 bg-[#F8F9FA]/95 backdrop-blur-md">
@@ -106,15 +124,8 @@ export async function SiteHeader() {
                   <Search className="size-5" />
                 </Link>
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="hidden text-[#1A3C2F] sm:inline-flex"
-                aria-label="알림"
-              >
-                <Bell className="size-5" />
-              </Button>
+              <HeaderAnnouncements items={announcementTeasers} />
+              <HeaderNotifications initialUnreadCount={unreadNotifications} />
               <HeaderAccount
                 email={user.email}
                 displayLabel={displayLabel}

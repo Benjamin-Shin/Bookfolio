@@ -7,6 +7,7 @@ import type {
   AladinFeedResult,
 } from "@/lib/aladin/bestseller-feed";
 import { resolveAladinItemHref } from "@/lib/aladin/resolve-item-href";
+import { discoveryDetailHrefFromAladinItem } from "@/lib/discovery/catalog-detail-href";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,8 @@ export type AladinTtbItemListViewProps = {
   /** 우측 보조 버튼 링크(기본 내 서가). */
   backHref?: Route;
   backLabel?: string;
+  /** `discovery`면 표지 카드 클릭 시 캐논 상세, 하단 알라딘 링크 유지 */
+  itemLinkMode?: "aladin" | "discovery";
 };
 
 /**
@@ -39,6 +42,7 @@ export type AladinTtbItemListViewProps = {
  * - 2026-04-12: 카드 클릭 시 알라딘 상품 URL(피드 `link`, 없으면 ISBN) 새 탭 열기
  * - 2026-03-25: `bestsellers/page`에서 분리, 초이스 신간 재사용
  * - 2026-05-03: `sectionEyebrow`·`backHref` — 발견(`/discovery`) 경로 지원
+ * - 2026-05-04: `itemLinkMode`=`discovery` — `/discovery/books/by-isbn/...` + 알라딘 보조 링크
  */
 export function AladinTtbItemListView({
   feed,
@@ -49,6 +53,7 @@ export function AladinTtbItemListView({
   sectionEyebrow = "Dashboard",
   backHref = "/dashboard",
   backLabel = "내 서가로",
+  itemLinkMode = "aladin",
 }: AladinTtbItemListViewProps) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">
@@ -97,100 +102,49 @@ export function AladinTtbItemListView({
               item.categoryName,
             );
             const aladinHref = resolveAladinItemHref(item);
+            const discoveryHref = discoveryDetailHrefFromAladinItem(item);
             return (
               <li key={item.itemId || `${item.isbn13}-${item.isbn}-${index}`}>
-                <AladinItemCardLink
-                  href={aladinHref}
-                  ariaLabel={
-                    aladinHref
-                      ? `${(item.title || "도서").trim()} — 알라딘에서 보기`
-                      : undefined
-                  }
-                >
-                  <Card className="h-full overflow-hidden border-border/80 transition-shadow hover:shadow-md">
-                    <CardContent className="flex flex-col gap-3 p-4">
-                      {categorySegments.length > 0 ? (
-                        <div
-                          className="flex flex-wrap items-center gap-1.5"
-                          aria-label="도서 분류"
-                        >
-                          {categorySegments.map((seg, ci) => (
-                            <Badge
-                              key={`${item.itemId}-${ci}-${seg}`}
-                              variant="outline"
-                              className="max-w-full border-border/80 bg-muted/40 px-2 py-0.5 text-[11px] font-normal leading-snug whitespace-normal break-words text-foreground"
-                            >
-                              {seg}
-                            </Badge>
-                          ))}
-                        </div>
-                      ) : null}
-                      <div className="flex gap-4">
-                        <div className="relative h-36 w-24 shrink-0 overflow-hidden rounded-md bg-muted">
-                          {item.cover ? (
-                            // eslint-disable-next-line @next/next/no-img-element -- 외부 알라딘 CDN
-                            <img
-                              src={item.cover}
-                              alt=""
-                              className="h-full w-full object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center px-1 text-center text-xs text-muted-foreground">
-                              표지 없음
-                            </div>
-                          )}
-                          <span
-                            className="absolute left-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-xs font-bold tabular-nums shadow-sm"
-                            aria-hidden
-                          >
-                            {index + 1}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1 space-y-1">
-                          <p className="line-clamp-3 text-sm font-semibold leading-snug">
-                            {item.title || "(제목 없음)"}
-                          </p>
-                          {item.author ? (
-                            <p className="line-clamp-2 text-xs text-muted-foreground">
-                              작가: {item.author}
-                            </p>
-                          ) : null}
-                          {item.publisher ? (
-                            <p className="text-xs text-muted-foreground">
-                              출판사: {item.publisher}
-                            </p>
-                          ) : null}
-                          {item.pubDate ? (
-                            <p className="line-clamp-2 text-xs text-muted-foreground">
-                              출판일: {item.pubDate}
-                            </p>
-                          ) : null}
-                          <div className="flex flex-wrap items-center gap-2 pt-1">
-                            {(item.priceStandard ?? item.priceSales) != null ? (
-                              <span className="text-sm font-semibold tabular-nums text-foreground">
-                                {(item.priceStandard ??
-                                  item.priceSales)!.toLocaleString("ko-KR")}
-                                원
-                              </span>
-                            ) : null}
-                            {item.salesPoint != null && item.salesPoint > 0 ? (
-                              <span className="text-xs text-muted-foreground">
-                                판매지수{" "}
-                                {item.salesPoint.toLocaleString("ko-KR")}
-                              </span>
-                            ) : null}
-                          </div>
-                          {item.isbn13 || item.isbn ? (
-                            <p className="font-mono text-[11px] text-muted-foreground">
-                              {item.isbn13 || item.isbn}
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </AladinItemCardLink>
+                {itemLinkMode === "discovery" && discoveryHref ? (
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      href={discoveryHref as Route}
+                      aria-label={`${(item.title || "도서").trim()} — 상세 보기`}
+                      className="block rounded-xl outline-none transition-opacity hover:opacity-[0.98] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    >
+                      <AladinItemCardInner
+                        item={item}
+                        index={index}
+                        categorySegments={categorySegments}
+                      />
+                    </Link>
+                    {aladinHref ? (
+                      <a
+                        href={aladinHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-center text-[11px] font-medium text-[#1A3C2F]/80 underline-offset-4 hover:underline"
+                      >
+                        알라딘에서 보기
+                      </a>
+                    ) : null}
+                  </div>
+                ) : (
+                  <AladinItemCardLink
+                    href={aladinHref}
+                    ariaLabel={
+                      aladinHref
+                        ? `${(item.title || "도서").trim()} — 알라딘에서 보기`
+                        : undefined
+                    }
+                  >
+                    <AladinItemCardInner
+                      item={item}
+                      index={index}
+                      categorySegments={categorySegments}
+                    />
+                  </AladinItemCardLink>
+                )}
               </li>
             );
           })}
@@ -234,5 +188,105 @@ function AladinItemCardLink({
     >
       {children}
     </a>
+  );
+}
+
+/**
+ * 알라딘 카드 내용(Card 래핑 공통).
+ *
+ * @history
+ * - 2026-05-04: 목록 내 링크 모드 분리로 추출(`AladinItemCardInner`)
+ */
+function AladinItemCardInner({
+  item,
+  index,
+  categorySegments,
+}: {
+  item: AladinFeedItem;
+  index: number;
+  categorySegments: string[];
+}) {
+  return (
+    <Card className="h-full overflow-hidden border-border/80 transition-shadow hover:shadow-md">
+      <CardContent className="flex flex-col gap-3 p-4">
+        {categorySegments.length > 0 ? (
+          <div
+            className="flex flex-wrap items-center gap-1.5"
+            aria-label="도서 분류"
+          >
+            {categorySegments.map((seg, ci) => (
+              <Badge
+                key={`${item.itemId}-${ci}-${seg}`}
+                variant="outline"
+                className="max-w-full border-border/80 bg-muted/40 px-2 py-0.5 text-[11px] font-normal leading-snug whitespace-normal break-words text-foreground"
+              >
+                {seg}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
+        <div className="flex gap-4">
+          <div className="relative h-36 w-24 shrink-0 overflow-hidden rounded-md bg-muted">
+            {item.cover ? (
+              // eslint-disable-next-line @next/next/no-img-element -- 외부 알라딘 CDN
+              <img
+                src={item.cover}
+                alt=""
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center px-1 text-center text-xs text-muted-foreground">
+                표지 없음
+              </div>
+            )}
+            <span
+              className="absolute left-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-xs font-bold tabular-nums shadow-sm"
+              aria-hidden
+            >
+              {index + 1}
+            </span>
+          </div>
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="line-clamp-3 text-sm font-semibold leading-snug">
+              {item.title || "(제목 없음)"}
+            </p>
+            {item.author ? (
+              <p className="line-clamp-2 text-xs text-muted-foreground">
+                작가: {item.author}
+              </p>
+            ) : null}
+            {item.publisher ? (
+              <p className="text-xs text-muted-foreground">
+                출판사: {item.publisher}
+              </p>
+            ) : null}
+            {item.pubDate ? (
+              <p className="line-clamp-2 text-xs text-muted-foreground">
+                출판일: {item.pubDate}
+              </p>
+            ) : null}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {(item.priceStandard ?? item.priceSales) != null ? (
+                <span className="text-sm font-semibold tabular-nums text-foreground">
+                  {(item.priceStandard ?? item.priceSales)!.toLocaleString("ko-KR")}
+                  원
+                </span>
+              ) : null}
+              {item.salesPoint != null && item.salesPoint > 0 ? (
+                <span className="text-xs text-muted-foreground">
+                  판매지수 {item.salesPoint.toLocaleString("ko-KR")}
+                </span>
+              ) : null}
+            </div>
+            {item.isbn13 || item.isbn ? (
+              <p className="font-mono text-[11px] text-muted-foreground">
+                {item.isbn13 || item.isbn}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

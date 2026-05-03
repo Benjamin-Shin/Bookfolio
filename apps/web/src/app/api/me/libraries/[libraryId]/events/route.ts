@@ -27,6 +27,7 @@ function isEventKind(v: unknown): v is LibraryEventKind {
  * 모임서가 일정 목록(`GET ?from=&to=`) 및 변경(`POST` + `action`).
  *
  * @history
+ * - 2026-05-04: 응답 본문 각 `LibraryEventSummary.rsvpTally` 포함
  * - 2026-05-03: 신규 — `list_library_events_in_range`·생성·수정·취소·삭제
  */
 export async function GET(request: NextRequest, context: RouteContext) {

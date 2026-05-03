@@ -1,6 +1,7 @@
 import type {
   LibraryEventKind,
   LibraryEventRsvpStatus,
+  LibraryEventRsvpTally,
   LibraryEventSummary,
 } from "@bookfolio/shared";
 
@@ -70,9 +71,20 @@ function isLibraryEventKind(v: string): v is LibraryEventKind {
   return v === "meeting" || v === "social" || v === "deadline";
 }
 
+function emptyRsvpTally(memberCount: number): LibraryEventRsvpTally {
+  return {
+    going: 0,
+    maybe: 0,
+    declined: 0,
+    pending: 0,
+    noResponse: memberCount,
+  };
+}
+
 function mapEventRow(
   row: DbLibraryEventRow,
   myRsvpStatus: LibraryEventRsvpStatus | null,
+  rsvpTally: LibraryEventRsvpTally,
 ): LibraryEventSummary {
   const ek = row.event_kind;
   return {
@@ -89,7 +101,105 @@ function mapEventRow(
     updatedAt: row.updated_at,
     cancelledAt: row.cancelled_at,
     myRsvpStatus,
+    rsvpTally,
   };
+}
+
+async function countLibraryMembers(
+  supabase: SupabaseClient,
+  libraryId: string,
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("library_members")
+    .select("user_id", { count: "exact", head: true })
+    .eq("library_id", libraryId);
+  if (error) {
+    throw error;
+  }
+  return count ?? 0;
+}
+
+/**
+ * 일정 ID마다 RSVP 상태별 인원 수·미작성 인원(`멤버 − RSVP 행 수`).
+ *
+ * @history
+ * - 2026-05-04: 모임서가 일정 상세 참석 현황 표시용
+ */
+async function fetchRsvpTalliesForEvents(
+  supabase: SupabaseClient,
+  eventIds: string[],
+  memberCount: number,
+): Promise<Map<string, LibraryEventRsvpTally>> {
+  const out = new Map<string, LibraryEventRsvpTally>();
+  for (const id of eventIds) {
+    out.set(id, emptyRsvpTally(memberCount));
+  }
+  if (eventIds.length === 0) {
+    return out;
+  }
+  const { data, error } = await supabase
+    .from("library_event_rsvps")
+    .select("library_event_id, status")
+    .in("library_event_id", eventIds);
+  if (error) {
+    throw error;
+  }
+  const acc = new Map<
+    string,
+    { going: number; maybe: number; declined: number; pending: number; total: number }
+  >();
+  for (const id of eventIds) {
+    acc.set(id, { going: 0, maybe: 0, declined: 0, pending: 0, total: 0 });
+  }
+  for (const r of data ?? []) {
+    const eid = (r as { library_event_id: string }).library_event_id;
+    const st = (r as { status: string }).status;
+    const cur = acc.get(eid);
+    if (!cur) {
+      continue;
+    }
+    cur.total += 1;
+    if (st === "going") {
+      cur.going += 1;
+    } else if (st === "maybe") {
+      cur.maybe += 1;
+    } else if (st === "declined") {
+      cur.declined += 1;
+    } else if (st === "pending") {
+      cur.pending += 1;
+    }
+  }
+  for (const id of eventIds) {
+    const cur = acc.get(id)!;
+    out.set(id, {
+      going: cur.going,
+      maybe: cur.maybe,
+      declined: cur.declined,
+      pending: cur.pending,
+      noResponse: Math.max(0, memberCount - cur.total),
+    });
+  }
+  return out;
+}
+
+async function mapEventsWithRsvpAndTally(
+  supabase: SupabaseClient,
+  libraryId: string,
+  list: DbLibraryEventRow[],
+  requesterUserId: string,
+): Promise<LibraryEventSummary[]> {
+  if (list.length === 0) {
+    return [];
+  }
+  const memberCount = await countLibraryMembers(supabase, libraryId);
+  const ids = list.map((r) => r.id);
+  const [tallyMap, rsvpMap] = await Promise.all([
+    fetchRsvpTalliesForEvents(supabase, ids, memberCount),
+    fetchMyRsvpStatuses(supabase, ids, requesterUserId),
+  ]);
+  return list.map((r) =>
+    mapEventRow(r, rsvpMap.get(r.id) ?? null, tallyMap.get(r.id) ?? emptyRsvpTally(memberCount)),
+  );
 }
 
 async function fetchMyRsvpStatuses(
@@ -128,6 +238,7 @@ async function fetchMyRsvpStatuses(
  * 구간과 겹치는 모임 일정 목록 + 현재 사용자 RSVP.
  *
  * @history
+ * - 2026-05-04: 멤버별 RSVP 집계 `rsvpTally` 포함
  * - 2026-05-03: `list_library_events_in_range` RPC·RSVP 조회
  */
 export async function listLibraryEventsInRange(
@@ -149,11 +260,7 @@ export async function listLibraryEventsInRange(
     throw error;
   }
   const list = (rows ?? []) as DbLibraryEventRow[];
-  const ids = list.map((r) => r.id);
-  const rsvpMap = await fetchMyRsvpStatuses(supabase, ids, requesterUserId);
-  return list.map((r) =>
-    mapEventRow(r, rsvpMap.get(r.id) ?? null),
-  );
+  return mapEventsWithRsvpAndTally(supabase, libraryId, list, requesterUserId);
 }
 
 export type CreateLibraryEventInput = {
@@ -166,18 +273,19 @@ export type CreateLibraryEventInput = {
 };
 
 /**
- * 모임서가 일정 생성(소유자만).
+ * 모임서가 일정 생성(멤버 누구나).
  *
  * @history
+ * - 2026-05-04: `assertLibraryMember` — 소유자가 아닌 멤버도 일정 추가 가능
  * - 2026-05-03: 신규
  */
 export async function createLibraryEvent(
   libraryId: string,
   input: CreateLibraryEventInput,
-  ownerUserId: string,
+  creatorUserId: string,
   context?: RepositoryContext,
 ): Promise<LibraryEventSummary> {
-  await assertLibraryOwner(libraryId, ownerUserId, context);
+  await assertLibraryMember(libraryId, creatorUserId, context);
   const supabase = await getClient(context);
   const kind = input.eventKind ?? "meeting";
   const { data, error } = await supabase
@@ -190,7 +298,7 @@ export async function createLibraryEvent(
       event_kind: kind,
       starts_at: input.startsAt,
       ends_at: input.endsAt ?? null,
-      created_by: ownerUserId,
+      created_by: creatorUserId,
     })
     .select(
       "id, library_id, title, description, location, event_kind, starts_at, ends_at, created_by, cancelled_at, created_at, updated_at",
@@ -199,7 +307,9 @@ export async function createLibraryEvent(
   if (error) {
     throw error;
   }
-  return mapEventRow(data as DbLibraryEventRow, null);
+  const row = data as DbLibraryEventRow;
+  const mapped = await mapEventsWithRsvpAndTally(supabase, libraryId, [row], creatorUserId);
+  return mapped[0]!;
 }
 
 export type UpdateLibraryEventInput = {
@@ -256,12 +366,8 @@ export async function updateLibraryEvent(
   if (!data) {
     throw new Error("일정을 찾을 수 없습니다.");
   }
-  const rsvpMap = await fetchMyRsvpStatuses(
-    supabase,
-    [input.eventId],
-    ownerUserId,
-  );
-  return mapEventRow(data as DbLibraryEventRow, rsvpMap.get(input.eventId) ?? null);
+  const mapped = await mapEventsWithRsvpAndTally(supabase, libraryId, [data as DbLibraryEventRow], ownerUserId);
+  return mapped[0]!;
 }
 
 /**
@@ -322,8 +428,8 @@ export async function cancelLibraryEvent(
   if (!data) {
     throw new Error("일정을 찾을 수 없습니다.");
   }
-  const rsvpMap = await fetchMyRsvpStatuses(supabase, [eventId], ownerUserId);
-  return mapEventRow(data as DbLibraryEventRow, rsvpMap.get(eventId) ?? null);
+  const mapped = await mapEventsWithRsvpAndTally(supabase, libraryId, [data as DbLibraryEventRow], ownerUserId);
+  return mapped[0]!;
 }
 
 /**

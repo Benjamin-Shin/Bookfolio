@@ -10,7 +10,7 @@ import type {
 
 import { auth } from "@/auth";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
-import { normalizeIsbn } from "@/lib/books/lookup";
+import { expandNormalizedIsbnForDbLookup, normalizeIsbn } from "@/lib/books/lookup";
 import { replaceBookAuthorLinks } from "@/lib/books/replace-book-author-links";
 import { tryRecordDailyActivityCheckIn } from "@/lib/points/daily-check-in";
 import { awardPointsUserBookRegister } from "@/lib/points/award-points";
@@ -261,6 +261,34 @@ export async function findCanonicalBookByIsbn(
 }
 
 /**
+ * ISBN-10/13 변형 중 DB에 일치하는 `books` 행이 있으면 한 건만 반환합니다.
+ *
+ * @history
+ * - 2026-05-04: 발견 상세·공유 서지 조회에서 10·13 혼용 매칭
+ */
+export async function findFirstCanonicalBookByIsbnVariants(
+  supabase: SupabaseClient,
+  normalizedIsbn: string,
+): Promise<DbCanonicalBook | null> {
+  const n = normalizeIsbn(normalizedIsbn).replace(/x/gi, "X");
+  if (!n) {
+    return null;
+  }
+  const keys = expandNormalizedIsbnForDbLookup(n);
+  if (keys.length === 0) {
+    return null;
+  }
+  const { data, error } = await supabase
+    .from("books")
+    .select("*")
+    .in("isbn", keys)
+    .limit(1);
+
+  if (error) throw error;
+  return (data?.[0] as DbCanonicalBook | undefined) ?? null;
+}
+
+/**
  * 공유 서지 `books` 행을 제목 메타 검색 API 응답 형태로 변환합니다.
  *
  * @history
@@ -351,6 +379,8 @@ async function insertCanonicalBook(
     price_krw: number | null;
     source: string;
     format?: BookFormat;
+    genre_slugs?: string[] | null;
+    page_count?: number | null;
   },
 ): Promise<DbCanonicalBook> {
   const { data, error } = await supabase
@@ -365,6 +395,12 @@ async function insertCanonicalBook(
       price_krw: row.price_krw,
       source: row.source,
       format: row.format ?? "paper",
+      ...(row.genre_slugs && row.genre_slugs.length > 0
+        ? { genre_slugs: row.genre_slugs }
+        : {}),
+      ...(row.page_count != null && row.page_count >= 1
+        ? { page_count: Math.floor(row.page_count) }
+        : {}),
     })
     .select("*")
     .single();
@@ -388,6 +424,9 @@ async function insertCanonicalBook(
 
 /**
  * 모임서가 등 user_books 없이 `books` 행만 필요할 때 — ISBN·제목으로 카탈로그 행을 찾거나 만듭니다.
+ *
+ * @history
+ * - 2026-05-04: `catalogSource`·`genreSlugs`·`pageCount`·ISBN 10/13 변형 조회(`findFirstCanonicalBookByIsbnVariants`)
  */
 export async function resolveCanonicalBookForSharedLibrary(
   supabase: SupabaseClient,
@@ -402,13 +441,29 @@ export async function resolveCanonicalBookForSharedLibrary(
     | "description"
     | "priceKrw"
     | "format"
-  >,
+  > & {
+    /** `books.source` (기본 `manual`). */
+    catalogSource?: string | null;
+    /** 외부 조회 등에서 받은 장르 슬러그. 비어 있으면 갱신하지 않음(삽입 시 제외). */
+    genreSlugs?: string[] | null;
+    /** `books.page_count` (유효한 양수일 때만 반영). */
+    pageCount?: number | null;
+  },
 ): Promise<DbCanonicalBook> {
+  const catalogSource = input.catalogSource?.trim() || "manual";
   const normalized = input.isbn ? normalizeIsbn(input.isbn) : "";
   const isbnValue = normalized.length > 0 ? normalized : null;
+  const genrePatch =
+    input.genreSlugs && input.genreSlugs.length > 0 ? input.genreSlugs : null;
+  const pageCountPatch =
+    input.pageCount != null &&
+    Number.isFinite(input.pageCount) &&
+    input.pageCount >= 1
+      ? Math.min(50_000, Math.floor(Number(input.pageCount)))
+      : null;
 
   if (isbnValue) {
-    const found = await findCanonicalBookByIsbn(supabase, isbnValue);
+    const found = await findFirstCanonicalBookByIsbnVariants(supabase, isbnValue);
     if (found) {
       const { error: upErr } = await supabase
         .from("books")
@@ -420,6 +475,8 @@ export async function resolveCanonicalBookForSharedLibrary(
           description: input.description ?? null,
           price_krw: input.priceKrw ?? found.price_krw,
           format: input.format ?? "paper",
+          ...(genrePatch ? { genre_slugs: genrePatch } : {}),
+          ...(pageCountPatch != null ? { page_count: pageCountPatch } : {}),
         })
         .eq("id", found.id);
       if (upErr) throw upErr;
@@ -441,8 +498,10 @@ export async function resolveCanonicalBookForSharedLibrary(
       cover_url: input.coverUrl ?? null,
       description: input.description ?? null,
       price_krw: input.priceKrw ?? null,
-      source: "manual",
+      source: catalogSource,
       format: input.format ?? "paper",
+      genre_slugs: genrePatch,
+      page_count: pageCountPatch,
     });
   }
 
@@ -455,8 +514,10 @@ export async function resolveCanonicalBookForSharedLibrary(
     cover_url: input.coverUrl ?? null,
     description: input.description ?? null,
     price_krw: input.priceKrw ?? null,
-    source: "manual",
+    source: catalogSource,
     format: input.format ?? "paper",
+    genre_slugs: genrePatch,
+    page_count: pageCountPatch,
   });
 }
 
@@ -600,6 +661,39 @@ export async function getCanonicalBookById(
 
   if (error) throw error;
   return data as DbCanonicalBook | null;
+}
+
+/**
+ * 로그인 사용자 기준, 캐논 `book_id`별 내 `user_books.id` 매핑(해당 ID만).
+ *
+ * @history
+ * - 2026-05-04: 서가담 집계 「소장 책 순위」 카드 링크 — 내 서가면 `/dashboard/books/:id`, 아니면 발견 상세
+ */
+export async function findMyUserBookIdsByCanonicalBookIds(
+  canonicalBookIds: string[],
+  context: RepositoryContext,
+): Promise<Map<string, string>> {
+  const ids = [...new Set(canonicalBookIds.map((id) => id.trim()).filter(Boolean))];
+  const out = new Map<string, string>();
+  if (ids.length === 0) {
+    return out;
+  }
+  const { supabase, userId } = await getClientAndUser(context);
+  const { data, error } = await supabase
+    .from("user_books")
+    .select("id, book_id")
+    .eq("user_id", userId)
+    .in("book_id", ids);
+
+  if (error) throw error;
+  for (const row of data ?? []) {
+    const bid = row.book_id as string;
+    const ubid = row.id as string;
+    if (bid && ubid) {
+      out.set(bid, ubid);
+    }
+  }
+  return out;
 }
 
 /** 상세 화면용: 서지는 `getUserBook` 결과에 포함됩니다. */
