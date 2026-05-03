@@ -68,14 +68,14 @@ export default async function HomePage() {
             id="seogadam-hero-heading"
             className="mx-auto mb-8 max-w-3xl font-serif text-[2.5rem] font-semibold leading-[1.2] tracking-tight text-[#1b4332] md:text-[3rem]"
           >
-            전통의 미학을 일상으로,
+            읽고, 담고, 이어가는
             <br />
             <span className="font-normal italic">서가담</span>
           </h1>
           <p className="mx-auto mb-16 max-w-2xl font-sans text-lg leading-[1.6] text-[#414844]">
-            단순히 읽는 것을 넘어, 책을 서가에 정갈하게 담아내는 철학.
+            책을 읽는 순간을 기록하고, 당신만의 서가로 차곡차곡 쌓아보세요.
             <br />
-            당신만의 사유의 공간을 디지털에 구현합니다.
+            작은 기록이 모여 하나의 이야기로 이어집니다.
           </p>
           <Button
             size="lg"
@@ -98,7 +98,10 @@ export default async function HomePage() {
       </section>
 
       {/* Service Intro — 사유가 머무는 세 가지 공간 */}
-      <section className="bg-[#f5f3ef] py-16 md:py-24" aria-labelledby="spaces-heading">
+      <section
+        className="bg-[#f5f3ef] py-16 md:py-24"
+        aria-labelledby="spaces-heading"
+      >
         <div className="mx-auto max-w-[1200px] px-8">
           <div className="mb-16 text-center">
             <h2
@@ -152,7 +155,10 @@ export default async function HomePage() {
       </section>
 
       {/* Branding — 벤토 그리드 */}
-      <section className="bg-[#fbf9f5] py-16 md:py-24" aria-labelledby="philosophy-heading">
+      <section
+        className="bg-[#fbf9f5] py-16 md:py-24"
+        aria-labelledby="philosophy-heading"
+      >
         <div className="mx-auto max-w-[1200px] px-8">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-6">
             <div className="group relative min-h-[400px] overflow-hidden rounded-xl border border-[#e4e2de]/50 shadow-[0_4px_24px_rgba(27,67,50,0.04)] md:col-span-8">

@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
  * 전역 상단 헤더(브랜드·로그인 시 대시보드 바로가기).
  *
  * @history
+ * - 2026-05-04: 비로그인 헤더 `Seogadam_Web_logo2.png` — `h-11`·완화된 `max-w`(과소 `md:8.5rem` 제거)로 표시 확대
  * - 2026-05-04: 공지(`HeaderAnnouncements`·`/announcements`)·개인 알림(`HeaderNotifications`, `user_notifications`)
  * - 2026-05-03: 로그인 레이아웃 — 잎 아이콘·세리프「서가담」·중앙 4메뉴(`LoggedInMainNav`)·검색·알림·계정(시안 정렬)
  * - 2026-05-02: 뷰포트 상단 고정(`fixed`)으로 스크롤 시에도 항상 노출
@@ -57,7 +58,10 @@ export async function SiteHeader() {
   if (user?.id && user.email) {
     try {
       const published = await listPublishedSiteAnnouncements();
-      announcementTeasers = published.map((a) => ({ id: a.id, title: a.title }));
+      announcementTeasers = published.map((a) => ({
+        id: a.id,
+        title: a.title,
+      }));
       unreadNotifications = await countUnreadUserNotifications(user.id);
     } catch {
       announcementTeasers = [];
@@ -80,7 +84,11 @@ export async function SiteHeader() {
                 apkUrl={apkUrl ?? null}
                 user={
                   user.id && user.email
-                    ? { id: user.id, email: user.email, role: user.role ?? null }
+                    ? {
+                        id: user.id,
+                        email: user.email,
+                        role: user.role ?? null,
+                      }
                     : null
                 }
                 displayLabel={displayLabel}
@@ -154,11 +162,11 @@ export async function SiteHeader() {
               className="absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center md:static md:left-auto md:top-auto md:z-auto md:translate-x-0 md:translate-y-0"
             >
               <img
-                src="/assets/Seogadam_Web_logo.png"
+                src="/assets/Seogadam_Web_logo2.png"
                 alt="서가담"
-                width={200}
-                height={48}
-                className="h-8 w-auto max-w-[min(11rem,calc(100vw-5.5rem))] shrink-0 object-contain md:max-w-[8.5rem]"
+                width={313}
+                height={60}
+                className="h-11 w-auto max-h-11 max-w-[min(16rem,calc(100vw-5.5rem))] shrink-0 object-contain object-left md:max-w-[min(20rem,calc(100vw-12rem))]"
               />
             </Link>
             <nav className="flex min-w-0 items-center gap-2">
