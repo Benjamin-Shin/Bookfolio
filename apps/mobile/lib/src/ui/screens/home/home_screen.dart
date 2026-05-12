@@ -18,6 +18,8 @@ import 'package:provider/provider.dart';
 /// 로그인 후 홈 화면(`Home.png`) 기준 재구축 버전.
 ///
 /// History:
+/// - 2026-05-12: 통계 진입은 쉘 `onOpenStats`가 본문 [Navigator]에서 처리(드로어와 동일 패턴)
+/// - 2026-05-12: 베스트·초이스·통계 진입 푸시에 `embeddedInShell: true`
 /// - 2026-04-25: 기존 홈 전면 교체 — 히어로/이어읽기/바로가기/발견/내 모임서가/하단 CTA 구조
 class BookfolioHomeScreen extends StatefulWidget {
   const BookfolioHomeScreen({
@@ -446,7 +448,9 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                 subtitle: '이번 주 인기 도서',
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const BestsellerScreen(),
+                    builder: (_) => const BestsellerScreen(
+                      embeddedInShell: true,
+                    ),
                   ),
                 ),
               ),
@@ -459,7 +463,9 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                 subtitle: '새로 나온 책',
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const ChoiceNewScreen(),
+                    builder: (_) => const ChoiceNewScreen(
+                      embeddedInShell: true,
+                    ),
                   ),
                 ),
               ),
@@ -490,8 +496,8 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => _discoverTab == _DiscoverTab.bestseller
-                        ? const BestsellerScreen()
-                        : const ChoiceNewScreen(),
+                        ? const BestsellerScreen(embeddedInShell: true)
+                        : const ChoiceNewScreen(embeddedInShell: true),
                   ),
                 );
               },

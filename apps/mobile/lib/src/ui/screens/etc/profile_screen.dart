@@ -16,6 +16,8 @@ import 'package:url_launcher/url_launcher.dart';
 /// 포인트·역할·설정 메뉴·법적 고지·로그아웃 (에디토리얼 프로필 허브).
 ///
 /// History:
+/// - 2026-05-12: 해금 기능·포인트 관리(내역·획득·해금)·계정/알림 설정 UI 블록 주석 처리(비노출)
+/// - 2026-05-12: 메인 쉘 `body` 중첩 [Navigator] + `embeddedInShell` — 쉘 상·하단과 본문만 맞춤
 /// - 2026-04-26: 「관심 카테고리 설정」 메뉴를 [ProfileEditScreen]으로 연결
 /// - 2026-04-26: 드로어 「내 서가」 탭 동작 연결(루트 화면 복귀)
 /// - 2026-04-13: 법적 고지 — 이용약관 제20조(탈퇴) 웹 앵커 링크
@@ -429,6 +431,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 12),
+          /*
           Text(
             '해금 가능한 기능',
             style: GoogleFonts.manrope(
@@ -455,7 +458,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: '대표 이미지·테마 같은 꾸미기 기능 해금',
             unlockText: '3,000P 해금',
           ),
-          const SizedBox(height: 12),
+          */
           Text(
             '내 활동',
             style: GoogleFonts.manrope(
@@ -494,6 +497,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           const SizedBox(height: 12),
+          /*
           Text(
             '포인트 관리',
             style: GoogleFonts.manrope(
@@ -538,6 +542,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SnackBar(content: Text('알림 설정은 곧 제공됩니다.')),
             ),
           ),
+          */
           _LegalMenuTile(
             label: '관심 카테고리 설정',
             icon: Icons.favorite_border_rounded,
@@ -709,6 +714,7 @@ class _PointBadgeTile extends StatelessWidget {
   }
 }
 
+/*
 class _UnlockTile extends StatelessWidget {
   const _UnlockTile({
     required this.icon,
@@ -759,6 +765,7 @@ class _UnlockTile extends StatelessWidget {
     );
   }
 }
+*/
 
 class _ActivityCard extends StatelessWidget {
   const _ActivityCard({

@@ -9,6 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+/// 개인 서가 그리드·상단 통계 진입.
+///
+/// History:
+/// - 2026-05-12: 통계 화면 푸시 시 `LibraryAnalysisScreen(embeddedInShell: true)`
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
 
@@ -306,7 +310,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                            builder: (_) => const LibraryAnalysisScreen()),
+                            builder: (_) => const LibraryAnalysisScreen(
+                                  embeddedInShell: true,
+                                )),
                       );
                     },
                     borderRadius: BorderRadius.circular(8),

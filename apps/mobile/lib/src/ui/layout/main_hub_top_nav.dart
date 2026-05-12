@@ -10,6 +10,7 @@ enum MainHubTab { shared, aggregate, bestseller, choice, library }
 /// 루트(내 서가)까지 돌아간 뒤 선택한 허브로 이동합니다.
 ///
 /// History:
+/// - 2026-05-12: 집계·베스트·초이스 푸시 시 `embeddedInShell: true` (메인 쉘 유지)
 /// - 2026-04-05: `MainHubTab.aggregate` → `LibraryAnalysisScreen`(집계 포함)
 /// - 2026-04-07: 「서가담 집계」라벨
 /// - 2026-03-28: 순서 — 공동서가·집계·베스트셀러·초이스 신간·내 서가; `aggregate` 추가
@@ -28,15 +29,23 @@ void openMainHubTab(BuildContext context, MainHubTab tab) {
       break;
     case MainHubTab.aggregate:
       nav.push(MaterialPageRoute<void>(
-          builder: (_) => const LibraryAnalysisScreen()));
+          builder: (_) => const LibraryAnalysisScreen(
+                embeddedInShell: true,
+              )));
       break;
     case MainHubTab.bestseller:
       nav.push(
-          MaterialPageRoute<void>(builder: (_) => const BestsellerScreen()));
+          MaterialPageRoute<void>(
+              builder: (_) => const BestsellerScreen(
+                    embeddedInShell: true,
+                  )));
       break;
     case MainHubTab.choice:
       nav.push(
-          MaterialPageRoute<void>(builder: (_) => const ChoiceNewScreen()));
+          MaterialPageRoute<void>(
+              builder: (_) => const ChoiceNewScreen(
+                    embeddedInShell: true,
+                  )));
       break;
   }
 }

@@ -3,13 +3,16 @@ import 'package:seogadam_mobile/src/ui/screens/library/library_analysis_screen.d
 import 'package:seogadam_mobile/src/ui/screens/discovery/choice_new_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/etc/profile_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/legal/legal_markdown_screen.dart';
-import 'package:seogadam_mobile/src/util/bookfolio_web_urls.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-/// 햄버거 메뉴(내 서가·프로필·통계·집계·공동서가·법적 고지).
+/// 햄버거 메뉴(내 서가·프로필·내 서가 통계·발견·모임서가·법적 고지).
 ///
 /// History:
+/// - 2026-05-12: 햄버거 법적 고지에서 「쿠키 정책」·웹 `/cookies` 열기 제거
+/// - 2026-05-12: `openLibraryStatsInShell`·`openBestsellerInShell`·`openChoiceNewInShell` — 드로어에서 쉘 본문 [Navigator] 푸시
+/// - 2026-05-12: `openProfileInShell` — 메인 쉘 중첩 [Navigator]에서 프로필 열기(상·하단 유지)
+/// - 2026-05-12: `onAfterProfilePop` — 루트 `push` 프로필 복귀 시 콜백(발견 갱신 등)
+/// - 2026-05-12: 「통계·서가담 집계」 항목 제거·프로필·통계·발견 푸시 시 `embeddedInShell: true`
 /// - 2026-04-26: 「내 통계」 라벨을 「내 서가 통계」로 변경하고 `LibraryAnalysisScreen`으로 연동
 /// - 2026-04-26: 드로어 헤더 로고를 `Seogadam_Web_logo.png` 단일 이미지로 교체
 /// - 2026-04-07: 법적 고지 상단 `Divider` 제거·「통계·서가담 집계」라벨·스낵바 카피
@@ -21,6 +24,11 @@ class BookfolioNavigationDrawer extends StatelessWidget {
     super.key,
     this.onTapMyLibrary,
     this.onTapSharedLibrary,
+    this.openProfileInShell,
+    this.openLibraryStatsInShell,
+    this.openBestsellerInShell,
+    this.openChoiceNewInShell,
+    this.onAfterProfilePop,
   });
 
   /// 「내 서가」 — 하단 탭 0·내 서가 모드.
@@ -29,23 +37,20 @@ class BookfolioNavigationDrawer extends StatelessWidget {
   /// 「모임서가」 — 하단 탭 0·공동 서가 모드.
   final VoidCallback? onTapSharedLibrary;
 
-  Future<void> _openBookfolioWebPath(BuildContext context, String path) async {
-    final uri = bookfolioWebPageUri(path);
-    if (!uri.hasScheme || uri.host.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          const SnackBar(content: Text('서가담 API 주소가 설정되지 않았습니다.')),
-        );
-      }
-      return;
-    }
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && context.mounted) {
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        const SnackBar(content: Text('브라우저를 열 수 없습니다.')),
-      );
-    }
-  }
+  /// [MainShellScreen] 등에서 주입 — 쉘 `body` [Navigator]에 프로필을 쌓아 상·하단 탭을 유지한다.
+  final Future<void> Function()? openProfileInShell;
+
+  /// 쉘 본문 [Navigator]에 [LibraryAnalysisScreen] 푸시.
+  final Future<void> Function()? openLibraryStatsInShell;
+
+  /// 쉘 본문 [Navigator]에 [BestsellerScreen] 푸시.
+  final Future<void> Function()? openBestsellerInShell;
+
+  /// 쉘 본문 [Navigator]에 [ChoiceNewScreen] 푸시.
+  final Future<void> Function()? openChoiceNewInShell;
+
+  /// `openProfileInShell`이 없을 때, 루트 `push` 프로필이 닫힌 뒤 호출.
+  final VoidCallback? onAfterProfilePop;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +69,7 @@ class BookfolioNavigationDrawer extends StatelessWidget {
             child: Align(
               alignment: Alignment.bottomLeft,
               child: Image.asset(
-                'assets/brand/Seogadam_Web_logo.png',
+                'assets/brand/600_Login_Back.png',
                 width: 240,
                 fit: BoxFit.contain,
               ),
@@ -81,52 +86,70 @@ class BookfolioNavigationDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.person_outline),
             title: const Text('프로필'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
+              if (openProfileInShell != null) {
+                await openProfileInShell!();
+              } else {
+                await Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                      builder: (_) =>
+                          const ProfileScreen(embeddedInShell: false)),
+                );
+                onAfterProfilePop?.call();
+              }
             },
           ),
           ListTile(
             leading: const Icon(Icons.bar_chart_outlined),
             title: const Text('내 서가 통계'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const LibraryAnalysisScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.leaderboard_outlined),
-            title: const Text('통계·서가담 집계'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(
-                    builder: (_) => const LibraryAnalysisScreen()),
-              );
+              if (openLibraryStatsInShell != null) {
+                await openLibraryStatsInShell!();
+              } else {
+                await Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => const LibraryAnalysisScreen(
+                      embeddedInShell: false,
+                    ),
+                  ),
+                );
+              }
             },
           ),
           ListTile(
             leading: const Icon(Icons.local_fire_department_outlined),
             title: const Text('베스트셀러'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const BestsellerScreen()),
-              );
+              if (openBestsellerInShell != null) {
+                await openBestsellerInShell!();
+              } else {
+                await Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const BestsellerScreen(embeddedInShell: false),
+                  ),
+                );
+              }
             },
           ),
           ListTile(
             leading: const Icon(Icons.new_releases_outlined),
             title: const Text('초이스 신간'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const ChoiceNewScreen()),
-              );
+              if (openChoiceNewInShell != null) {
+                await openChoiceNewInShell!();
+              } else {
+                await Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const ChoiceNewScreen(embeddedInShell: false),
+                  ),
+                );
+              }
             },
           ),
           ListTile(
@@ -178,20 +201,8 @@ class BookfolioNavigationDrawer extends StatelessWidget {
             ),
             onTap: () {
               Navigator.pop(context);
-              Navigator.of(context).push<void>(LegalMarkdownScreen.termsRoute());
-            },
-          ),
-          ListTile(
-            dense: true,
-            visualDensity: VisualDensity.compact,
-            leading: Icon(Icons.cookie_outlined, size: 20, color: onSurfaceVar),
-            title: Text(
-              '쿠키 정책',
-              style: textTheme.bodySmall?.copyWith(fontSize: 13),
-            ),
-            onTap: () {
-              Navigator.pop(context);
-              _openBookfolioWebPath(context, '/cookies');
+              Navigator.of(context)
+                  .push<void>(LegalMarkdownScreen.termsRoute());
             },
           ),
         ],

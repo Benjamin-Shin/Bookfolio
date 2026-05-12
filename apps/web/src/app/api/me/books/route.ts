@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getRequestUserId } from "@/lib/auth/request-user";
+import { absoluteRedirectUrl } from "@/lib/http/redirect-url";
 import {
   fetchCommunityRatingsByBookIds,
   mergeCommunityRatingsIntoUserBooks
@@ -123,6 +124,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * @history
+ * - 2026-05-12: 폼 등록 리다이렉트 — `absoluteRedirectUrl`로 `0.0.0.0` 호스트 보정
+ */
 export async function POST(request: NextRequest) {
   const contentType = request.headers.get("content-type") ?? "";
   try {
@@ -140,7 +145,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(enriched, { status: 201 });
     }
 
-    return NextResponse.redirect(new URL(`/dashboard/books/${created.id}`, request.url), 303);
+    return NextResponse.redirect(
+      absoluteRedirectUrl(request, `/dashboard/books/${created.id}`),
+      303,
+    );
   } catch (error) {
     if (error instanceof UserBookAlreadyInShelfError) {
       if (contentType.includes("application/json")) {
@@ -154,8 +162,11 @@ export async function POST(request: NextRequest) {
         );
       }
       return NextResponse.redirect(
-        new URL(`/dashboard/books/${error.existingUserBookId}?already_in_shelf=1`, request.url),
-        303
+        absoluteRedirectUrl(
+          request,
+          `/dashboard/books/${error.existingUserBookId}?already_in_shelf=1`,
+        ),
+        303,
       );
     }
     const message = error instanceof Error ? error.message : "Failed to create book";

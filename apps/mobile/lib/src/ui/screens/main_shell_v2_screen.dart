@@ -4,6 +4,8 @@ import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/state/library_controller.dart';
 import 'package:seogadam_mobile/src/theme/bookfolio_design_tokens.dart';
 import 'package:seogadam_mobile/src/ui/screens/book_form_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/discovery/bestseller_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/discovery/choice_new_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/discovery/discover_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/home/home_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/library/library_screen.dart';
@@ -11,10 +13,20 @@ import 'package:seogadam_mobile/src/ui/screens/library/library_analysis_screen.d
 import 'package:seogadam_mobile/src/ui/screens/etc/profile_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/shared_library/shared_libraries_screen.dart';
 import 'package:seogadam_mobile/src/ui/layout/bookfolio_navigation_drawer.dart';
+import 'package:seogadam_mobile/src/ui/layout/main_shell_tab_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+/// 메인 5탭 쉘 — 글래스 앱바·하단 내비·드로어.
+///
+/// History:
+/// - 2026-05-12: 드로어에서 내 서가 통계·베스트·초이스 — `open*InShell`로 본문 [Navigator] 푸시(상·하단 유지)
+/// - 2026-05-12: `_goTab` 시 본문 [Navigator] `popUntil` 첫 라우트 — 베스트/초이스 등 덮인 채로 탭만 바뀌던 문제 수정
+/// - 2026-05-12: [MainShellTabScope] — 발견 브레드크럼 등에서 `goTab` 노출
+/// - 2026-05-12: `body`에 중첩 [Navigator] — [ProfileScreen]을 루트가 아닌 쉘 내부 스택에서 열어 상·하단 유지
+/// - 2026-05-12: `_discoverRefreshSignal` — 발견 탭 재선택·프로필 복귀 시 관심 CID 재로드
+/// - 2026-05-12: 프로필·통계 푸시 시 `embeddedInShell: true`로 본문만(쉘 앱바와 맞춤)
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
 
@@ -24,14 +36,33 @@ class MainShellScreen extends StatefulWidget {
 
 class _MainShellScreenState extends State<MainShellScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  int _tabIndex = 0;
+  final GlobalKey<NavigatorState> _shellBodyNavKey = GlobalKey<NavigatorState>();
+
+  final ValueNotifier<int> _tabIndexNotifier = ValueNotifier<int>(0);
+  final ValueNotifier<int> _homeRefreshNotifier = ValueNotifier<int>(0);
+  final ValueNotifier<int> _discoverRefreshNotifier = ValueNotifier<int>(0);
+
+  late final Listenable _shellTabsListenable;
+
   String? _toolbarAvatarUrl;
-  int _homeRefreshSignal = 0;
 
   @override
   void initState() {
     super.initState();
+    _shellTabsListenable = Listenable.merge([
+      _tabIndexNotifier,
+      _homeRefreshNotifier,
+      _discoverRefreshNotifier,
+    ]);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadToolbarAvatar());
+  }
+
+  @override
+  void dispose() {
+    _tabIndexNotifier.dispose();
+    _homeRefreshNotifier.dispose();
+    _discoverRefreshNotifier.dispose();
+    super.dispose();
   }
 
   Future<void> _loadToolbarAvatar() async {
@@ -52,16 +83,31 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
 
+  void _popShellBodyToTabStack() {
+    final nav = _shellBodyNavKey.currentState;
+    if (nav != null && nav.canPop()) {
+      nav.popUntil((route) => route.isFirst);
+    }
+  }
+
   void _goTab(int tabIndex) {
-    final was = _tabIndex;
-    setState(() {
-      _tabIndex = tabIndex;
-      if (tabIndex == 0 && was != 0) _homeRefreshSignal++;
-    });
+    final was = _tabIndexNotifier.value;
+    _popShellBodyToTabStack();
+    if (was == tabIndex) {
+      return;
+    }
+    _tabIndexNotifier.value = tabIndex;
+    if (tabIndex == 0 && was != 0) {
+      _homeRefreshNotifier.value++;
+    }
+    if (tabIndex == 3 && was != 3) {
+      _discoverRefreshNotifier.value++;
+    }
+    setState(() {});
   }
 
   String _titleForTab() {
-    switch (_tabIndex) {
+    switch (_tabIndexNotifier.value) {
       case 1:
         return '내 서가';
       case 2:
@@ -72,6 +118,42 @@ class _MainShellScreenState extends State<MainShellScreen> {
       default:
         return '홈';
     }
+  }
+
+  Future<void> _openProfileInShell() async {
+    await _shellBodyNavKey.currentState?.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const ProfileScreen(embeddedInShell: true),
+      ),
+    );
+    if (!mounted) return;
+    _discoverRefreshNotifier.value++;
+    setState(() {});
+    await _loadToolbarAvatar();
+  }
+
+  Future<void> _openLibraryStatsInShell() async {
+    await _shellBodyNavKey.currentState?.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const LibraryAnalysisScreen(embeddedInShell: true),
+      ),
+    );
+  }
+
+  Future<void> _openBestsellerInShell() async {
+    await _shellBodyNavKey.currentState?.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const BestsellerScreen(embeddedInShell: true),
+      ),
+    );
+  }
+
+  Future<void> _openChoiceNewInShell() async {
+    await _shellBodyNavKey.currentState?.push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const ChoiceNewScreen(embeddedInShell: true),
+      ),
+    );
   }
 
   Future<void> _goAddBook() async {
@@ -88,12 +170,18 @@ class _MainShellScreenState extends State<MainShellScreen> {
     final scheme = Theme.of(context).colorScheme;
     final glassSurface = scheme.surface;
     final appBarFg = scheme.onSurface;
-    return Scaffold(
+    return MainShellTabScope(
+      goTab: _goTab,
+      child: Scaffold(
       key: _scaffoldKey,
       extendBody: true,
       drawer: BookfolioNavigationDrawer(
         onTapMyLibrary: () => _goTab(1),
         onTapSharedLibrary: () => _goTab(2),
+        openProfileInShell: _openProfileInShell,
+        openLibraryStatsInShell: _openLibraryStatsInShell,
+        openBestsellerInShell: _openBestsellerInShell,
+        openChoiceNewInShell: _openChoiceNewInShell,
       ),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(topInset + 56),
@@ -137,15 +225,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
                           ),
                         ),
                         IconButton(
-                          onPressed: () async {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const ProfileScreen(),
-                              ),
-                            );
-                            if (!mounted) return;
-                            await _loadToolbarAvatar();
-                          },
+                          onPressed: _openProfileInShell,
                           tooltip: '내 프로필',
                           icon: ProfileToolbarAvatar(
                             imageUrl: _toolbarAvatarUrl,
@@ -161,31 +241,51 @@ class _MainShellScreenState extends State<MainShellScreen> {
           ),
         ),
       ),
-      body: IndexedStack(
-        index: _tabIndex,
-        children: [
-          BookfolioHomeScreen(
-            refreshSignal: _homeRefreshSignal,
-            onOpenSharedLibraries: () => _goTab(2),
-            onOpenMyLibrary: () => _goTab(1),
-            onOpenStats: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const LibraryAnalysisScreen(),
-                ),
-              );
-            },
-          ),
-          const LibraryScreen(),
-          const SharedLibrariesScreen(embeddedInShell: true),
-          const DiscoverScreen(embeddedInShell: true),
-        ],
+      body: Navigator(
+        key: _shellBodyNavKey,
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name != '/') {
+            return MaterialPageRoute<void>(
+              builder: (_) => const SizedBox.shrink(),
+            );
+          }
+          return MaterialPageRoute<void>(
+            settings: settings,
+            builder: (_) => ListenableBuilder(
+              listenable: _shellTabsListenable,
+              builder: (context, _) {
+                final tabIndex = _tabIndexNotifier.value;
+                return IndexedStack(
+                  index: tabIndex,
+                  children: [
+                    BookfolioHomeScreen(
+                      refreshSignal: _homeRefreshNotifier.value,
+                      onOpenSharedLibraries: () => _goTab(2),
+                      onOpenMyLibrary: () => _goTab(1),
+                      onOpenStats: () {
+                        _openLibraryStatsInShell();
+                      },
+                    ),
+                    const LibraryScreen(),
+                    const SharedLibrariesScreen(embeddedInShell: true),
+                    DiscoverScreen(
+                      embeddedInShell: true,
+                      refreshSignal: _discoverRefreshNotifier.value,
+                    ),
+                  ],
+                );
+              },
+            ),
+          );
+        },
       ),
       bottomNavigationBar: _BookfolioBottomNavBar(
-        currentIndex: _tabIndex,
+        currentIndex: _tabIndexNotifier.value,
         onChanged: _goTab,
         onTapAdd: _goAddBook,
       ),
+    ),
     );
   }
 }

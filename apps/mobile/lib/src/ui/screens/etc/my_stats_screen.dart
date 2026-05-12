@@ -10,9 +10,14 @@ import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
 import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 
+/// 내 서가 통계·성향 카드 UI (`My_Stat` 시안).
+///
+/// History:
+/// - 2026-05-12: `embeddedInShell` 필드 문서 보강(쉘 앱바·하단 탭과 병용)
 class MyStatsScreen extends StatefulWidget {
   const MyStatsScreen({super.key, this.embeddedInShell = false});
 
+  /// `true`이면 [Scaffold]/자체 앱바 없이 본문만(메인 쉘 위 푸시).
   final bool embeddedInShell;
 
   @override

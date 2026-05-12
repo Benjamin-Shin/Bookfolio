@@ -3,6 +3,9 @@ import 'package:seogadam_mobile/src/ui/screens/etc/my_stats_screen.dart';
 
 /// 내 서가 분석 화면 진입점.
 ///
+/// History:
+/// - 2026-05-12: `embeddedInShell` — 메인 쉘 위 푸시 시 본문만 표시
+///
 /// `My_Stat` 시안 기반 UI는 `etc/my_stats_screen.dart`에서 렌더링하며,
 /// 기존 진입처 호환을 위해 이 래퍼를 유지한다.
 class LibraryAnalysisScreen extends StatelessWidget {

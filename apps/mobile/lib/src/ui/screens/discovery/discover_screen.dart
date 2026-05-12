@@ -16,28 +16,44 @@ import 'package:provider/provider.dart';
 /// [categoryId]에 맞는 [AladinCategoryOption]을 찾고, 없으면 분야 탐색용 플레이스홀더를 만든다.
 ///
 /// History:
+/// - 2026-05-12: 동일 CID가 CSV에 여러 행일 때 가장 깊은 depth·긴 `label` 우선(첫 행만 잡히던 라벨 왜곡 완화)
 /// - 2026-05-03: 국내도서 몰 우선, 없으면 동일 CID 임의 몰, 없으면 synthetic (하단 칩·더보기 일관성)
 AladinCategoryOption _resolveAladinCategoryForDiscovery(
   int categoryId,
   List<AladinCategoryOption> all,
 ) {
-  AladinCategoryOption? firstWhere(bool Function(AladinCategoryOption c) pred) {
-    for (final c in all) {
-      if (c.categoryId == categoryId && pred(c)) return c;
-    }
-    return null;
+  int depthScore(AladinCategoryOption o) {
+    var s = 0;
+    if (o.depth1.isNotEmpty) s += 1;
+    if (o.depth2.isNotEmpty) s += 2;
+    if (o.depth3.isNotEmpty) s += 4;
+    return s;
   }
 
-  return firstWhere((c) => c.mall == '국내도서') ??
-      firstWhere((_) => true) ??
-      AladinCategoryOption(
-        categoryId: categoryId,
-        mall: '국내도서',
-        depth1: '',
-        depth2: '',
-        depth3: '',
-        label: '분야 #$categoryId',
-      );
+  final domestic =
+      all.where((c) => c.categoryId == categoryId && c.mall == '국내도서').toList();
+  if (domestic.length > 1) {
+    domestic.sort((a, b) {
+      final byDepth = depthScore(b).compareTo(depthScore(a));
+      if (byDepth != 0) return byDepth;
+      return b.label.length.compareTo(a.label.length);
+    });
+    return domestic.first;
+  }
+  if (domestic.isNotEmpty) return domestic.single;
+
+  for (final c in all) {
+    if (c.categoryId == categoryId) return c;
+  }
+
+  return AladinCategoryOption(
+    categoryId: categoryId,
+    mall: '국내도서',
+    depth1: '',
+    depth2: '',
+    depth3: '',
+    label: '분야 #$categoryId',
+  );
 }
 
 String _displayLabelForAladinCategory(AladinCategoryOption c) {
@@ -51,11 +67,20 @@ String _displayLabelForAladinCategory(AladinCategoryOption c) {
 /// 발견 탭 — 알라딘 베스트/신간·분야 탐색.
 ///
 /// History:
+/// - 2026-05-12: `refreshSignal` — 프로필 저장 후·발견 탭 재진입 시 `_load()`로 관심 CID 반영
+/// - 2026-05-12: 베스트·초이스 전체 화면 푸시 시 `embeddedInShell: true`
 /// - 2026-05-03: 프로필 관심 CID 기준으로 하단 분야 칩·섹션 제목·캡션 정합; 카테고리 목록 매칭 실패 시에도 칩 표시(해석 보강)
 class DiscoverScreen extends StatefulWidget {
-  const DiscoverScreen({super.key, this.embeddedInShell = false});
+  const DiscoverScreen({
+    super.key,
+    this.embeddedInShell = false,
+    this.refreshSignal = 0,
+  });
 
   final bool embeddedInShell;
+
+  /// [MainShellScreen] 등에서 증가시키면 프로필·탭 전환 후 데이터를 다시 불러온다.
+  final int refreshSignal;
 
   @override
   State<DiscoverScreen> createState() => _DiscoverScreenState();
@@ -76,6 +101,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  @override
+  void didUpdateWidget(covariant DiscoverScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshSignal != widget.refreshSignal) {
+      _load();
+    }
   }
 
   Future<void> _load() async {
@@ -214,7 +247,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                           '베스트셀러 (${_usingProfileFavoriteCategories ? _compactCategoryTitleSuffix() : '기본(소설)'})',
                       onMore: () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                              builder: (_) => const BestsellerScreen())),
+                              builder: (_) => const BestsellerScreen(
+                                    embeddedInShell: true,
+                                  ))),
                       items: _bestseller.take(4).toList(),
                     ),
                     const SizedBox(height: 12),
@@ -223,7 +258,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                           '초이스 신간 (${_usingProfileFavoriteCategories ? _compactCategoryTitleSuffix() : '기본(소설)'})',
                       onMore: () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                              builder: (_) => const ChoiceNewScreen())),
+                              builder: (_) => const ChoiceNewScreen(
+                                    embeddedInShell: true,
+                                  ))),
                       items: _itemNew.take(4).toList(),
                     ),
                     if (_favoriteCategoryIds.isNotEmpty)

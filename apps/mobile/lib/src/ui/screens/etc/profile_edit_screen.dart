@@ -4,11 +4,13 @@ import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/state/library_controller.dart';
 import 'package:seogadam_mobile/src/theme/bookfolio_design_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-/// 프로필 편집: 화면 설정·인구통계·포인트·회원 탈퇴.
+/// 프로필 편집: 인구통계·관심 카테고리·연간 목표·포인트/VIP 요약.
 ///
 /// History:
+/// - 2026-05-12: 「계정 관리」·회원 탈퇴 UI 제거; Manrope·카드·필드·로딩 UX를 다른 편집 화면과 정렬
 /// - 2026-04-27: 화면 설정(테마 모드) 제거, 관심 카테고리 추가를 depth1/depth2/depth3 드롭다운 선택으로 변경
 /// - 2026-04-26: 알라딘 국내도서 관심 카테고리(최대 5개) 선택/저장
 /// - 2026-04-12: 성별 `DropdownButtonFormField` — `value` → `initialValue`, 새로고침 반영용 `ValueKey`
@@ -55,112 +57,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   void dispose() {
     _annualGoalCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _confirmDeleteAccount(BuildContext context) async {
-    var loading = false;
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setLocal) {
-          Future<void> onConfirm() async {
-            setLocal(() => loading = true);
-            try {
-              final api = context.read<LibraryController>().api;
-              await api.deleteAccount();
-              if (!context.mounted) return;
-              Navigator.of(ctx).pop();
-              await context.read<AuthController>().signOut();
-            } on BookfolioApiException catch (e) {
-              if (!ctx.mounted) return;
-              setLocal(() => loading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(e.message)),
-              );
-            } catch (e) {
-              if (!ctx.mounted) return;
-              setLocal(() => loading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('네트워크 오류가 발생했습니다. ($e)')),
-              );
-            }
-          }
-
-          return AlertDialog(
-            title: const Text('회원 탈퇴'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '탈퇴를 확인하면 아래 정보가 물리적으로 삭제되며 복구할 수 없습니다.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    '· 보유 포인트 및 포인트 원장 전체\n'
-                    '· 내 서가(소장 도서), 메모, 독서 이벤트 기록, 한줄평\n'
-                    '· 내가 만든 모임서가 — 다른 멤버가 없으면 탈퇴와 함께 삭제되고, 있으면 탈퇴 전 소유권 이전 필요\n'
-                    '· 다른 사람 서가에 참여 중이던 멤버십\n'
-                    '· 프로필·계정(로그인) 정보',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 12),
-                  Material(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .tertiaryContainer
-                        .withValues(alpha: 0.65),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        '소유한 모임서가에 다른 멤버가 있으면 탈퇴할 수 없습니다. '
-                        '해당 서가 화면에서 소유권을 다른 멤버에게 이전한 뒤 탈퇴해 주세요. '
-                        '본인만 남은 모임서가는 별도 삭제 없이 탈퇴 시 함께 정리됩니다.',
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '여러 사용자가 쓰는 공유 서지(books)는 삭제되지 않을 수 있습니다.',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: loading ? null : () => Navigator.of(ctx).pop(),
-                child: const Text('취소'),
-              ),
-              FilledButton(
-                onPressed: loading ? null : onConfirm,
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  foregroundColor: Theme.of(context).colorScheme.onError,
-                ),
-                child: loading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Theme.of(ctx).colorScheme.onError,
-                        ),
-                      )
-                    : const Text('탈퇴 확인'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
   }
 
   Future<void> _load() async {
@@ -232,6 +128,57 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       final d = picked.day.toString().padLeft(2, '0');
       setState(() => _birthDateIso = '$y-$m-$d');
     }
+  }
+
+  Widget _buildBirthDateField(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final r = BorderRadius.circular(12);
+    final display = _birthDateIso ?? '선택 안 함';
+    return Material(
+      color: colorScheme.surface,
+      borderRadius: r,
+      child: InkWell(
+        onTap: _demographicsSaving ? null : () => _pickBirthDate(context),
+        borderRadius: r,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: r,
+            border: Border.all(color: BookfolioDesignTokens.ghostOutline(0.28)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '생년월일',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: BookfolioDesignTokens.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      display,
+                      style: GoogleFonts.manrope(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: BookfolioDesignTokens.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.calendar_today_outlined,
+                  size: 20, color: colorScheme.primary),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   String _categoryLabelById(int categoryId) {
@@ -348,22 +295,25 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     required String title,
     String? subtitle,
   }) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          style: BookfolioDesignTokens.titleMd(
+            BookfolioDesignTokens.onSurface,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         if (subtitle != null) ...[
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+            style: GoogleFonts.manrope(
+              fontSize: 13,
               height: 1.4,
+              fontWeight: FontWeight.w500,
+              color: BookfolioDesignTokens.onSurfaceVariant,
             ),
           ),
         ],
@@ -375,12 +325,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final loggedIn = auth.isAuthenticated;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('프로필 편집'),
+        title: Text(
+          '프로필 편집',
+          style: GoogleFonts.manrope(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: loggedIn ? _load : null,
@@ -390,7 +346,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          12,
+          16,
+          28 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
         children: [
           if (!loggedIn)
             _buildSectionCard(
@@ -402,14 +363,26 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   Expanded(
                     child: Text(
                       '로그인 후 프로필 편집과 통계를 이용할 수 있습니다.',
-                      style: textTheme.bodyMedium
-                          ?.copyWith(color: colorScheme.onSurface),
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        height: 1.35,
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ],
               ),
             )
           else ...[
+            if (_loading && _meProfile != null)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(2)),
+                  child: LinearProgressIndicator(minHeight: 3),
+                ),
+              ),
             if (_meProfile != null) ...[
               _buildSectionCard(
                 context: context,
@@ -426,9 +399,27 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     DropdownButtonFormField<String?>(
                       key: ValueKey(_genderChoice),
                       initialValue: _normalizedGenderChoice,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: '성별',
-                        border: OutlineInputBorder(),
+                        isDense: true,
+                        filled: true,
+                        fillColor: colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BookfolioDesignTokens.ghostOutline(0.28),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: BookfolioDesignTokens.inputFocus,
+                            width: 1.4,
+                          ),
+                        ),
                       ),
                       items: const [
                         DropdownMenuItem(value: null, child: Text('선택 안 함')),
@@ -446,76 +437,115 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
                           '저장된 성별 값이 목록에 없어 "선택 안 함"으로 표시 중입니다. 저장 시 현재 목록 값으로 덮어씁니다.',
-                          style: textTheme.labelSmall
-                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                          style: GoogleFonts.manrope(
+                            fontSize: 11,
+                            height: 1.35,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
                     const SizedBox(height: 12),
-                    ListTile(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                          color: BookfolioDesignTokens.ghostOutline(0.2),
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 2,
-                      ),
-                      title: const Text('생년월일'),
-                      subtitle: Text(_birthDateIso ?? '선택 안 함'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.calendar_today_outlined),
-                        onPressed: () => _pickBirthDate(context),
-                      ),
-                    ),
+                    _buildBirthDateField(context),
                     if (_birthDateIso != null)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
-                          onPressed: () => setState(() => _birthDateIso = null),
-                          child: const Text('생년월일 지우기'),
+                          onPressed: _demographicsSaving
+                              ? null
+                              : () => setState(() => _birthDateIso = null),
+                          child: Text(
+                            '생년월일 지우기',
+                            style: GoogleFonts.manrope(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
                       ),
-                    const Divider(height: 22),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('성별을 통계에 포함'),
-                      value: _genderPublic,
-                      onChanged: (v) => setState(() => _genderPublic = v),
+                    const SizedBox(height: 6),
+                    Divider(
+                      height: 24,
+                      thickness: 1,
+                      color: BookfolioDesignTokens.ghostOutline(0.12),
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('생년(출생연도)을 통계에 포함'),
+                      title: Text(
+                        '성별을 통계에 포함',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      value: _genderPublic,
+                      onChanged: _demographicsSaving
+                          ? null
+                          : (v) => setState(() => _genderPublic = v),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        '생년(출생연도)을 통계에 포함',
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       value: _birthDatePublic,
-                      onChanged: (v) => setState(() => _birthDatePublic = v),
+                      onChanged: _demographicsSaving
+                          ? null
+                          : (v) => setState(() => _birthDatePublic = v),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _annualGoalCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: '올해 완독 목표 (권)',
                         hintText: '비우면 목표 없음',
-                        border: OutlineInputBorder(),
+                        isDense: true,
+                        filled: true,
+                        fillColor: colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BookfolioDesignTokens.ghostOutline(0.28),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: BookfolioDesignTokens.inputFocus,
+                            width: 1.4,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       '홈·통계에서 올해 완독 수와 함께 표시됩니다. 1~500 권.',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
                         height: 1.35,
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 18),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: Text(
                             '관심 카테고리 (국내도서, 최대 5개)',
-                            style: textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.w700),
+                            style: GoogleFonts.manrope(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: BookfolioDesignTokens.onSurface,
+                            ),
                           ),
                         ),
                         TextButton.icon(
@@ -523,7 +553,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                               ? null
                               : () => _addFavoriteCategory(context),
                           icon: const Icon(Icons.add, size: 18),
-                          label: const Text('추가'),
+                          label: Text(
+                            '추가',
+                            style: GoogleFonts.manrope(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -531,9 +566,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     if (_favoriteCategoryIds.isEmpty)
                       Text(
                         '선택된 카테고리가 없습니다. 발견 탭의 베스트셀러/초이스 신간은 이 목록 기준으로 노출됩니다.',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                        style: GoogleFonts.manrope(
+                          fontSize: 12,
                           height: 1.35,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       )
                     else
@@ -560,111 +597,163 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
                           _demographicsError!,
-                          style: TextStyle(color: colorScheme.error, fontSize: 13),
+                          style: GoogleFonts.manrope(
+                            color: colorScheme.error,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     const SizedBox(height: 14),
                     SizedBox(
                       width: double.infinity,
-                      child: FilledButton.tonal(
+                      child: FilledButton(
                         onPressed: _demographicsSaving
                             ? null
                             : () => _saveDemographics(context),
-                        child:
-                            Text(_demographicsSaving ? '저장 중…' : '프로필·목표 저장'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          _demographicsSaving ? '저장 중…' : '프로필·목표 저장',
+                          style: GoogleFonts.manrope(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: BookfolioDesignTokens.sectionGapSm),
             ],
-            if (_loading)
+            if (_loading && _meProfile == null)
               const Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
+                  padding: EdgeInsets.symmetric(vertical: 32),
                   child: CircularProgressIndicator(),
                 ),
               )
             else if (_loadError != null)
-              Material(
-                color: colorScheme.errorContainer.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  child: Text(
-                    _loadError!,
-                    style: TextStyle(
-                      color: colorScheme.onErrorContainer,
-                      fontSize: 13,
+              _buildSectionCard(
+                context: context,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.error_outline_rounded,
+                        color: colorScheme.error, size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _loadError!,
+                        style: GoogleFonts.manrope(
+                          color: colorScheme.error,
+                          fontSize: 13,
+                          height: 1.35,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               )
             else if (_points != null)
               _buildSectionCard(
                 context: context,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ListTile(
-                      leading:
-                          Icon(Icons.stars_outlined, color: colorScheme.primary),
-                      title: const Text('포인트'),
-                      subtitle: Text(
-                        '${_points!.balance} P',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
+                    _buildSectionTitle(
+                      context,
+                      title: '포인트 · VIP',
+                      subtitle: '현재 잔액과 멤버십 상태입니다.',
                     ),
-                    const Divider(height: 4),
-                    ListTile(
-                      leading: Icon(
-                        _points!.vipActive
-                            ? Icons.workspace_premium
-                            : Icons.workspace_premium_outlined,
-                        color: colorScheme.primary,
-                      ),
-                      title: const Text('VIP'),
-                      subtitle: Text(_points!.vipActive ? '활성' : '비활성'),
+                    const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.stars_outlined,
+                            color: colorScheme.primary, size: 24),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '보유 포인트',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: BookfolioDesignTokens.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${_points!.balance} P',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w800,
+                                  color: BookfolioDesignTokens.onSurface,
+                                  height: 1.1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: BookfolioDesignTokens.ghostOutline(0.12),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _points!.vipActive
+                              ? Icons.workspace_premium
+                              : Icons.workspace_premium_outlined,
+                          color: colorScheme.primary,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'VIP',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: BookfolioDesignTokens.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _points!.vipActive ? '활성' : '비활성',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: BookfolioDesignTokens.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            const SizedBox(height: 18),
-            _buildSectionCard(
-              context: context,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '계정 관리',
-                    style:
-                        textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '계정을 삭제하면 포인트와 개인 데이터가 모두 제거되며 복구할 수 없습니다.',
-                    style: textTheme.bodySmall
-                        ?.copyWith(color: colorScheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () => _confirmDeleteAccount(context),
-                    style: TextButton.styleFrom(
-                      foregroundColor: colorScheme.error,
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      alignment: Alignment.centerLeft,
-                    ),
-                    child: const Text('회원 탈퇴…'),
-                  ),
-                ],
-              ),
-            ),
           ],
         ],
       ),

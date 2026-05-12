@@ -10,6 +10,7 @@ import {
 
 import { auth } from "@/auth";
 import { getRequestUserId } from "@/lib/auth/request-user";
+import { absoluteRedirectUrl } from "@/lib/http/redirect-url";
 import { fetchCommunityRatingsByBookIds, mergeCommunityRatingsIntoUserBooks } from "@/lib/books/book-community-ratings";
 import {
   deleteUserBook,
@@ -244,6 +245,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
+/**
+ * 폼 POST(삭제·서가 갱신) 시 리다이렉트 `Location`은 `absoluteRedirectUrl`로 구성합니다.
+ *
+ * @history
+ * - 2026-05-12: `Host: 0.0.0.0` 환경에서 `new URL(..., request.url)` 리다이렉트 실패 방지
+ */
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const contentType = request.headers.get("content-type") ?? "";
@@ -303,7 +310,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
     if (method === "DELETE") {
       await deleteUserBook(id, { userId, useAdmin: true });
-      return NextResponse.redirect(new URL("/dashboard", request.url), 303);
+      return NextResponse.redirect(absoluteRedirectUrl(request, "/dashboard"), 303);
     }
 
     const session = await auth();
@@ -317,7 +324,10 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       const shelf = parseFormDataToShelfOnly(formData);
       await updateUserBookShelfOnly(id, shelf, { userId, useAdmin: true });
     }
-    return NextResponse.redirect(new URL(`/dashboard/books/${id}`, request.url), 303);
+    return NextResponse.redirect(
+      absoluteRedirectUrl(request, `/dashboard/books/${id}`),
+      303,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Request failed";
     const contentType = request.headers.get("content-type") ?? "";
@@ -328,8 +338,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       );
     }
     return NextResponse.redirect(
-      new URL(`/dashboard?bookError=${encodeURIComponent(message)}`, request.url),
-      303
+      absoluteRedirectUrl(
+        request,
+        `/dashboard?bookError=${encodeURIComponent(message)}`,
+      ),
+      303,
     );
   }
 }

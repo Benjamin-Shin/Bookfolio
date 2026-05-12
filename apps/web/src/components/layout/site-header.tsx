@@ -1,9 +1,10 @@
 import type { Route } from "next";
 import Link from "next/link";
-import { Leaf, LogOutIcon, Search } from "lucide-react";
+import { Leaf, LogOutIcon } from "lucide-react";
 
 import { auth } from "@/auth";
 import { AdminHeaderMenu } from "@/components/layout/admin-header-menu";
+import { HeaderBookSearchPanel } from "@/components/layout/header-book-search-panel.client";
 import { HeaderAnnouncements } from "@/components/layout/header-announcements.client";
 import { HeaderNotifications } from "@/components/layout/header-notifications.client";
 import { HeaderAccount } from "@/components/layout/header-account";
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils";
  * @history
  * - 2026-05-04: 비로그인 헤더 `Seogadam_Web_logo2.png` — `h-11`·완화된 `max-w`(과소 `md:8.5rem` 제거)로 표시 확대
  * - 2026-05-04: 공지(`HeaderAnnouncements`·`/announcements`)·개인 알림(`HeaderNotifications`, `user_notifications`)
+ * - 2026-05-12: 헤더 인라인 도서 검색(`HeaderBookSearchPanel`·`/api/me/header-book-search`·바코드 스캔)
  * - 2026-05-03: 로그인 레이아웃 — 잎 아이콘·세리프「서가담」·중앙 4메뉴(`LoggedInMainNav`)·검색·알림·계정(시안 정렬)
  * - 2026-05-02: 뷰포트 상단 고정(`fixed`)으로 스크롤 시에도 항상 노출
  * - 2026-04-27: `/login` 경로에서는 비로그인 `로그인` CTA를 숨기도록 클라이언트 경로 분기 추가
@@ -34,7 +36,8 @@ import { cn } from "@/lib/utils";
  * - 2026-04-12: 브랜드 링크 — 로그인 시 `/`(랜딩) 대신 `/dashboard`(내 서가)
  * - 2026-04-12: 모바일(`md` 미만) 브랜드 링크·로고 뷰포트 가운데 정렬; PNG 경로 `Seogadam_Web_logo.png`·`alt` 정리
  * - 2026-04-07: 헤더 브랜드 마크·표시명 서가담(`seogadam_logo.png`)
- * - 2026-03-29: `md` 미만 Sheet 햄버거 — 전역 내비·푸터와 동일 법적 고지 링크(개인정보·약관·쿠키)
+ * - 2026-05-12: 모바일 Sheet 햄버거 법적 고지에서 쿠키 정책 링크 제거(`SiteHeaderMobileNav`)
+ * - 2026-03-29: `md` 미만 Sheet 햄버거 — 전역 내비·푸터와 동일 법적 고지 링크(개인정보·약관)
  * - 2026-03-26: 로그인 네비에 베스트셀러·초이스 신간 링크 추가(이후 `/discovery/*`로 이전)
  * - 2026-03-29: 소유 모임서가(타 멤버 있음) 시 탈퇴 막힘 목록을 헤더·모바일 메뉴에 전달
  */
@@ -119,19 +122,7 @@ export async function SiteHeader() {
             <LoggedInMainNav className="mx-auto hidden min-w-0 flex-1 justify-center md:flex" />
 
             <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hidden text-[#1A3C2F] sm:inline-flex"
-                asChild
-              >
-                <Link
-                  href={"/dashboard?tab=owned" as Route}
-                  aria-label="내 서가에서 검색"
-                >
-                  <Search className="size-5" />
-                </Link>
-              </Button>
+              <HeaderBookSearchPanel />
               <HeaderAnnouncements items={announcementTeasers} />
               <HeaderNotifications initialUnreadCount={unreadNotifications} />
               <HeaderAccount

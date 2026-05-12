@@ -86,10 +86,11 @@ function MobileNavLink({
  * 좁은 화면에서 Sheet로 전역 헤더 내비·법적 고지 링크를 띄웁니다.
  *
  * @history
+ * - 2026-05-12: Sheet 푸터 법적 고지에서 「쿠키 정책」 링크 제거
  * - 2026-04-27: `/login`에서는 비로그인 모바일 메뉴의 로그인 링크를 숨겨 중복 CTA 제거
  * - 2026-04-27: 비로그인 상태 모바일 메뉴에서 `내 서가` 링크를 숨기고 로그인만 노출
  * - 2026-04-13: 계정·데이터 삭제 → `/terms#article-20-withdrawal`
- * - 2026-03-29: 신규 — 햄버거 메뉴·개인정보·약관·쿠키(푸터 동일 경로)
+ * - 2026-03-29: 신규 — 햄버거 메뉴·개인정보·약관(푸터와 유사 경로)
  * - 2026-03-29: `sharedLibrariesBlockingWithdrawal`을 프로필(탈퇴)로 전달
  * - 2026-04-05: 「서가담 집계」 표기
  * - 2026-05-04: 로그인 메뉴에 공지(`/announcements`) 링크
@@ -251,13 +252,6 @@ export function SiteHeaderMobileNav({
                 className="rounded-sm px-1 py-1 hover:text-foreground"
               >
                 서비스 약관
-              </Link>
-              <Link
-                href="/cookies"
-                onClick={close}
-                className="rounded-sm px-1 py-1 hover:text-foreground"
-              >
-                쿠키 정책
               </Link>
               <Link
                 href={"/terms#article-20-withdrawal" as Route}
