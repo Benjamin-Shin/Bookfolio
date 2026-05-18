@@ -499,6 +499,27 @@ RLS 활성화.
 
 ---
 
+## `public.user_feedback` (`0045`)
+
+| 컬럼            | 타입          | 제약 / 기본                                                       |
+| --------------- | ------------- | ----------------------------------------------------------------- |
+| `id`            | `uuid`        | PK                                                                |
+| `created_at`    | `timestamptz` | NOT NULL, default `now()`                                         |
+| `updated_at`    | `timestamptz` | NOT NULL, default `now()` — UPDATE 시 트리거                      |
+| `user_id`       | `uuid`        | NULL, FK → `app_users` ON DELETE SET NULL                         |
+| `platform`      | `text`        | NOT NULL, default `unknown`, CHECK `web` \| `mobile` \| `unknown` |
+| `category`      | `text`        | NOT NULL, default `other`, CHECK `bug` \| `idea` \| `other`       |
+| `body`          | `text`        | NOT NULL                                                          |
+| `contact_email` | `text`        | NULL — 회신용(선택)                                               |
+| `app_version`   | `text`        | NULL                                                              |
+| `device_info`   | `jsonb`       | NOT NULL, default `{}`                                            |
+| `status`        | `text`        | NOT NULL, default `new`, CHECK `new` \| `read` \| `archived`      |
+| `admin_note`    | `text`        | NULL — 관리자 메모                                                |
+
+인덱스: `created_at DESC`, `user_id`, `status`. RLS: 활성화, 정책 없음 — `POST /api/me/feedback`·`/admin/feedback`는 `service_role`만 사용.
+
+---
+
 ## `public.user_book_interactions` (`0039`)
 
 | 컬럼                | 타입            | 제약 / 기본                                                                                                    |

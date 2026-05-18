@@ -166,6 +166,22 @@ export default async function AdminHomePage() {
         </Card>
         <Card className="border-border/80">
           <CardHeader>
+            <CardTitle className="text-lg">사용자 피드백</CardTitle>
+            <CardDescription>
+              의견 보내기 메뉴로 접수된 버그·제안·기타 의견을 확인합니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/admin/feedback"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              피드백 목록 열기
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="border-border/80">
+          <CardHeader>
             <CardTitle className="text-lg">클라이언트 오류</CardTitle>
             <CardDescription>
               앱·웹이 전송한 오류 로그를 최신순으로 봅니다.

@@ -7,6 +7,7 @@ const sep = <span className="text-muted-foreground/70" aria-hidden>|</span>;
  * 전역 하단 푸터 — 저작권(중앙)·정책 링크(우측, 큰 화면 기준).
  *
  * @history
+ * - 2026-05-18: 「의견 보내기」 → `/feedback`
  * - 2026-05-12: 「쿠키 정책」 링크 제거(전용 `/cookies` 페이지 폐지·`/privacy`로 리다이렉트)
  * - 2026-05-02: 뷰포트 하단 고정(`fixed`)·가독을 위해 상단 보더·배경 명시
  * - 2026-04-13: 계정·데이터 삭제 → 이용약관 제20조 앵커 링크
@@ -25,7 +26,7 @@ export function SiteFooter() {
         </p>
         <nav
           className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm sm:justify-end"
-          aria-label="법적 고지"
+          aria-label="푸터 링크"
         >
           <Link href="/privacy" className="text-foreground/90 underline-offset-4 hover:text-foreground hover:underline">
             개인정보처리방침
@@ -33,6 +34,10 @@ export function SiteFooter() {
           {sep}
           <Link href="/terms" className="text-foreground/90 underline-offset-4 hover:text-foreground hover:underline">
             서비스 약관
+          </Link>
+          {sep}
+          <Link href="/feedback" className="text-foreground/90 underline-offset-4 hover:text-foreground hover:underline">
+            의견 보내기
           </Link>
           {sep}
           <Link

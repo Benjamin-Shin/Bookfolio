@@ -1,6 +1,7 @@
 import 'package:seogadam_mobile/src/ui/screens/discovery/bestseller_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/library/library_analysis_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/discovery/choice_new_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/etc/feedback_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/etc/profile_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/legal/legal_markdown_screen.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 /// 햄버거 메뉴(내 서가·프로필·내 서가 통계·발견·모임서가·법적 고지).
 ///
 /// History:
+/// - 2026-05-18: 「의견 보내기」 — [FeedbackScreen]
 /// - 2026-05-12: 햄버거 법적 고지에서 「쿠키 정책」·웹 `/cookies` 열기 제거
 /// - 2026-05-12: `openLibraryStatsInShell`·`openBestsellerInShell`·`openChoiceNewInShell` — 드로어에서 쉘 본문 [Navigator] 푸시
 /// - 2026-05-12: `openProfileInShell` — 메인 쉘 중첩 [Navigator]에서 프로필 열기(상·하단 유지)
@@ -158,6 +160,16 @@ class BookfolioNavigationDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               onTapSharedLibrary?.call();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.feedback_outlined),
+            title: const Text('의견 보내기'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.of(context).push<void>(
+                MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+              );
             },
           ),
           const SizedBox(height: 12),

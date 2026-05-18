@@ -13,6 +13,7 @@ import {
   LogInIcon,
   LogOutIcon,
   MegaphoneIcon,
+  MessageSquareIcon,
   MenuIcon,
   ShieldIcon,
   SparklesIcon,
@@ -178,6 +179,10 @@ export function SiteHeaderMobileNav({
                       <MegaphoneIcon className="size-4 opacity-80" />
                       공지 관리
                     </MobileNavLink>
+                    <MobileNavLink href="/admin/feedback" onNavigate={close}>
+                      <MessageSquareIcon className="size-4 opacity-80" />
+                      사용자 피드백
+                    </MobileNavLink>
                     <MobileNavLink href="/admin" onNavigate={close}>
                       <ShieldIcon className="size-4 opacity-80" />
                       관리 홈
@@ -206,6 +211,10 @@ export function SiteHeaderMobileNav({
                 <MobileNavLink href="/announcements" onNavigate={close}>
                   <MegaphoneIcon className="size-4 opacity-80" />
                   공지사항
+                </MobileNavLink>
+                <MobileNavLink href="/feedback" onNavigate={close}>
+                  <MessageSquareIcon className="size-4 opacity-80" />
+                  의견 보내기
                 </MobileNavLink>
                 <form
                   action="/auth/signout"

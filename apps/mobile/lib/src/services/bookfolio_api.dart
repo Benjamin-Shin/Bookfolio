@@ -1133,6 +1133,37 @@ class BookfolioApi {
     return out;
   }
 
+  /// `POST /api/me/feedback` — 사용자 의견 제출.
+  ///
+  /// @history
+  /// - 2026-05-18: `platform` — Flutter 웹 실행 시 `web` 전달
+  /// - 2026-05-18: 신규
+  Future<void> submitUserFeedback({
+    required String category,
+    required String body,
+    String? contactEmail,
+    String? appVersion,
+    String platform = 'mobile',
+    Map<String, dynamic>? deviceInfo,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/me/feedback');
+    final response = await _client.post(
+      uri,
+      headers: await _headers(),
+      body: jsonEncode({
+        'category': category,
+        'body': body,
+        if (contactEmail != null && contactEmail.trim().isNotEmpty)
+          'contactEmail': contactEmail.trim(),
+        'platform': platform,
+        if (appVersion != null && appVersion.trim().isNotEmpty)
+          'appVersion': appVersion.trim(),
+        'deviceInfo': deviceInfo ?? const <String, dynamic>{},
+      }),
+    );
+    _throwIfFailed(response);
+  }
+
   void _throwIfFailed(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return;

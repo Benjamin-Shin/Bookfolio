@@ -464,3 +464,25 @@ export type ShareToLibraryInput =
 export interface SharedLibraryMyReadingInput {
   readingStatus: ReadingStatus;
 }
+
+export const USER_FEEDBACK_CATEGORIES = ["bug", "idea", "other"] as const;
+export type UserFeedbackCategory = (typeof USER_FEEDBACK_CATEGORIES)[number];
+
+export const USER_FEEDBACK_STATUSES = ["new", "read", "archived"] as const;
+export type UserFeedbackStatus = (typeof USER_FEEDBACK_STATUSES)[number];
+
+export const USER_FEEDBACK_PLATFORMS = ["web", "mobile", "unknown"] as const;
+export type UserFeedbackPlatform = (typeof USER_FEEDBACK_PLATFORMS)[number];
+
+/** 웹·모바일 UI용 한글 표기. */
+export const USER_FEEDBACK_CATEGORY_LABEL_KO = {
+  bug: "버그·오류",
+  idea: "기능 제안",
+  other: "기타 의견",
+} as const satisfies Record<UserFeedbackCategory, string>;
+
+export const USER_FEEDBACK_STATUS_LABEL_KO = {
+  new: "신규",
+  read: "확인함",
+  archived: "보관",
+} as const satisfies Record<UserFeedbackStatus, string>;
