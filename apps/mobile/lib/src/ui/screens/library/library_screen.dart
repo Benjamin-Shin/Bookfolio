@@ -5,6 +5,7 @@ import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 import 'package:seogadam_mobile/src/ui/screens/library/book_detail_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/library/library_analysis_screen.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
+import 'package:seogadam_mobile/src/util/user_book_tags.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +39,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
     _searchCtrl = TextEditingController(text: lib.booksSearchQuery);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<LibraryController>().loadBooks();
+      final lib = context.read<LibraryController>();
+      lib.loadBooks();
+      lib.refreshBookTagOptions();
     });
   }
 
@@ -113,6 +116,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
             const SizedBox(height: 14),
             _searchSortRow(),
+            const SizedBox(height: 8),
+            _tagFilterRow(library),
             const SizedBox(height: 12),
             if (library.isLoading)
               const Padding(
@@ -434,6 +439,40 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
+  Widget _tagFilterRow(LibraryController library) {
+    final options = library.bookTagOptions;
+    if (options.isEmpty && library.booksTagFilter == null) {
+      return const SizedBox.shrink();
+    }
+    final selected = library.booksTagFilter;
+    Widget chip(String label, String? value) {
+      final on = value == null ? selected == null : selected == value;
+      return FilterChip(
+        label: Text(label),
+        selected: on,
+        onSelected: (_) async {
+          if (value == null) {
+            await library.setBooksListFilters(tagAll: true);
+          } else {
+            await library.setBooksListFilters(tag: value);
+          }
+        },
+      );
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          chip('전체', null),
+          if (library.books.any((b) => b.tags.isEmpty))
+            chip('미분류', kUserBookTagUntaggedFilter),
+          for (final tag in options) chip(tag, tag),
+        ],
+      ),
+    );
+  }
+
   Widget _emptyPanel() {
     final scheme = Theme.of(context).colorScheme;
     return Container(
@@ -491,6 +530,8 @@ class _LibraryListCard extends StatelessWidget {
                         cover,
                         fit: BoxFit.cover,
                         headers: kCoverImageRequestHeaders,
+                        errorBuilder: (_, __, ___) =>
+                            kCoverImageErrorPlaceholder,
                       )
                     : const ColoredBox(color: Color(0xFFE9E3DE)),
               ),

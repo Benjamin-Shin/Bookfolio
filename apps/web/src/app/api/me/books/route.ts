@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { normalizeUserBookTags, parseUserBookTagsCsv } from "@bookfolio/shared";
+
 import { getRequestUserId } from "@/lib/auth/request-user";
 import { absoluteRedirectUrl } from "@/lib/http/redirect-url";
 import {
@@ -57,7 +59,12 @@ function parseFormDataToCreate(input: FormData) {
     publishedDate: optionalString(input, "publishedDate"),
     description: optionalString(input, "description"),
     priceKrw: optionalPriceKrw(input, "priceKrw"),
-    location: optionalString(input, "location")
+    location: optionalString(input, "location"),
+    tags: input.has("tagsCsv")
+      ? normalizeUserBookTags(
+          parseUserBookTagsCsv(input.get("tagsCsv")?.toString() ?? ""),
+        )
+      : undefined,
   };
 }
 
@@ -74,20 +81,26 @@ export async function GET(request: NextRequest) {
         searchParams.get("search")?.trim() ||
         searchParams.get("q")?.trim() ||
         undefined;
-      const { items, total } = await listUserBooksPaged(
-        {
-          search,
-          limit: pageSize,
-          offset: (page - 1) * pageSize,
-          format: (searchParams.get("format") as "all" | "paper" | "ebook" | null) ?? undefined,
-          readingStatus: (searchParams.get("readingStatus") as
+      const readingStatus = (searchParams.get("readingStatus") as
             | "all"
             | "unread"
             | "reading"
             | "completed"
             | "paused"
             | "dropped"
-            | null) ?? undefined
+            | null) ?? undefined;
+      const tag =
+        searchParams.get("tag")?.trim() ||
+        searchParams.get("tags")?.trim() ||
+        undefined;
+      const { items, total } = await listUserBooksPaged(
+        {
+          search,
+          limit: pageSize,
+          offset: (page - 1) * pageSize,
+          format: (searchParams.get("format") as "all" | "paper" | "ebook" | null) ?? undefined,
+          readingStatus,
+          tag,
         },
         { userId, useAdmin: true }
       );
@@ -112,7 +125,11 @@ export async function GET(request: NextRequest) {
           | "completed"
           | "paused"
           | "dropped"
-          | null) ?? undefined
+          | null) ?? undefined,
+        tag:
+          searchParams.get("tag")?.trim() ||
+          searchParams.get("tags")?.trim() ||
+          undefined,
       },
       { userId, useAdmin: true }
     );

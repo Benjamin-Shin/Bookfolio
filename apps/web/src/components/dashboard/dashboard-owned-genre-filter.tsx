@@ -16,12 +16,14 @@ import {
 function ownedDashboardHref(
   q: string,
   genre: string | undefined,
+  tag: string | undefined,
   page: number,
   ownedSort: DashboardOwnedSort,
 ) {
   return buildDashboardHref({
     q,
     genre,
+    tag,
     page,
     tab: "owned",
     ownedSort: ownedSort === "title" ? "title" : undefined,
@@ -32,6 +34,7 @@ type DashboardOwnedGenreFilterProps = {
   genres: string[];
   selectedGenre: string;
   searchQuery: string;
+  tagSlug?: string;
   ownedSort: DashboardOwnedSort;
 };
 
@@ -39,6 +42,7 @@ export function DashboardOwnedGenreFilter({
   genres,
   selectedGenre,
   searchQuery,
+  tagSlug = "",
   ownedSort,
 }: DashboardOwnedGenreFilterProps) {
   if (genres.length === 0) {
@@ -46,6 +50,7 @@ export function DashboardOwnedGenreFilter({
   }
 
   const q = searchQuery;
+  const tag = tagSlug.trim() || undefined;
   const active = !selectedGenre;
 
   return (
@@ -58,7 +63,7 @@ export function DashboardOwnedGenreFilter({
       </span>
       <div className="flex flex-wrap gap-1.5">
         <Badge variant={active ? "default" : "outline"} asChild>
-          <Link href={ownedDashboardHref(q, undefined, 1, ownedSort)} prefetch={false}>
+          <Link href={ownedDashboardHref(q, undefined, tag, 1, ownedSort)} prefetch={false}>
             전체
           </Link>
         </Badge>
@@ -66,7 +71,7 @@ export function DashboardOwnedGenreFilter({
           const on = selectedGenre === slug;
           return (
             <Badge key={slug} variant={on ? "default" : "outline"} asChild>
-              <Link href={ownedDashboardHref(q, slug, 1, ownedSort)} prefetch={false}>
+              <Link href={ownedDashboardHref(q, slug, tag, 1, ownedSort)} prefetch={false}>
                 {slug}
               </Link>
             </Badge>

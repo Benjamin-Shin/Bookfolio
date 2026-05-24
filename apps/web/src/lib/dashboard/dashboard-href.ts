@@ -49,6 +49,8 @@ export function parseDashboardOwnedSort(
 type BuildDashboardHrefOptions = {
   q?: string;
   genre?: string;
+  /** `user_books.tags` 필터 (`0046`). */
+  tag?: string;
   page?: number;
   tab?: DashboardTab;
   /** 소장 탭에서만 목록 정렬에 사용(`sort=title`). */
@@ -59,6 +61,7 @@ type BuildDashboardHrefOptions = {
  * `/dashboard` 링크·폼용 쿼리 문자열.
  *
  * @history
+ * - 2026-05-24: `tag` — 사용자 태그 필터
  * - 2026-04-12: `tab`에 `hall`(Hall of Fame 전용 화면)
  * - 2026-04-12: `ownedSort` — 소장 제목순 URL 유지
  * - 2026-03-26: 신규
@@ -67,8 +70,10 @@ export function buildDashboardHref(opts: BuildDashboardHrefOptions): Route {
   const sp = new URLSearchParams();
   const q = opts.q?.trim() ?? "";
   const genre = opts.genre?.trim() ?? "";
+  const tag = opts.tag?.trim() ?? "";
   if (q) sp.set("q", q);
   if (genre) sp.set("genre", genre);
+  if (tag) sp.set("tag", tag);
   if (opts.page !== undefined && opts.page > 1) {
     sp.set("page", String(opts.page));
   }

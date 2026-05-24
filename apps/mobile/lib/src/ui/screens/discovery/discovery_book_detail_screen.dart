@@ -1,11 +1,16 @@
 import 'package:seogadam_mobile/src/models/aladin_bestseller_models.dart';
 import 'package:seogadam_mobile/src/models/book_models.dart';
+import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 import 'package:seogadam_mobile/src/ui/screens/book_form_screen.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// 알라딘 발견 도서 상세 — 담기·외부 링크·관련 도서.
+///
+/// History:
+/// - 2026-05-24: ListView 하단 `bookfolioShellPushedDetailScrollPadding` — 쉘 하단 탭 가림 보정
 class DiscoveryBookDetailScreen extends StatelessWidget {
   const DiscoveryBookDetailScreen({
     super.key,
@@ -57,7 +62,7 @@ class DiscoveryBookDetailScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: bookfolioShellPushedDetailScrollPadding(context),
         children: [
           Container(
             decoration: BoxDecoration(
@@ -75,7 +80,12 @@ class DiscoveryBookDetailScreen extends StatelessWidget {
                     width: 120,
                     height: 170,
                     child: cover != null
-                        ? Image.network(cover, fit: BoxFit.cover)
+                        ? Image.network(
+                            cover,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                kCoverImageErrorPlaceholder,
+                          )
                         : const ColoredBox(color: Color(0xFFE9E3DE)),
                   ),
                 ),
@@ -150,7 +160,7 @@ class DiscoveryBookDetailScreen extends StatelessWidget {
           //   style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(46)),
           //   child: const Text('교보문고에서 보기'),
           // ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 32),
           Row(
             children: [
               Expanded(
@@ -206,7 +216,12 @@ class DiscoveryBookDetailScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: cover != null
-                    ? Image.network(cover, fit: BoxFit.cover)
+                    ? Image.network(
+                        cover,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            kCoverImageErrorPlaceholder,
+                      )
                     : const ColoredBox(color: Color(0xFFE9E3DE)),
               ),
             ),

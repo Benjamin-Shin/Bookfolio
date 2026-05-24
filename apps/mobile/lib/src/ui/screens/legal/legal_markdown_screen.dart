@@ -2,26 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:seogadam_mobile/src/theme/bookfolio_design_tokens.dart';
+import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum LegalDocumentType { terms, privacy }
 
+/// 약관·개인정보처리방침 — 에셋 마크다운 표시.
+///
+/// History:
+/// - 2026-05-23: `embeddedInShell`·`bookfolioLegalMarkdownPadding` — 드로어(쉘) 진입 시 하단 탭 가림 보정
 class LegalMarkdownScreen extends StatelessWidget {
-  const LegalMarkdownScreen({super.key, required this.documentType});
+  const LegalMarkdownScreen({
+    super.key,
+    required this.documentType,
+    this.embeddedInShell = false,
+  });
 
   final LegalDocumentType documentType;
+  final bool embeddedInShell;
 
-  static Route<void> termsRoute() {
+  static Route<void> termsRoute({bool embeddedInShell = false}) {
     return MaterialPageRoute(
-      builder: (_) =>
-          const LegalMarkdownScreen(documentType: LegalDocumentType.terms),
+      builder: (_) => LegalMarkdownScreen(
+        documentType: LegalDocumentType.terms,
+        embeddedInShell: embeddedInShell,
+      ),
     );
   }
 
-  static Route<void> privacyRoute() {
+  static Route<void> privacyRoute({bool embeddedInShell = false}) {
     return MaterialPageRoute(
-      builder: (_) =>
-          const LegalMarkdownScreen(documentType: LegalDocumentType.privacy),
+      builder: (_) => LegalMarkdownScreen(
+        documentType: LegalDocumentType.privacy,
+        embeddedInShell: embeddedInShell,
+      ),
     );
   }
 
@@ -66,7 +80,10 @@ class LegalMarkdownScreen extends StatelessWidget {
           }
           final markdown = snapshot.data ?? '';
           return Markdown(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+            padding: bookfolioLegalMarkdownPadding(
+              context,
+              embeddedInShell: embeddedInShell,
+            ),
             data: markdown,
             onTapLink: (text, href, title) async {
               if (href == null || href.isEmpty) return;
@@ -74,9 +91,13 @@ class LegalMarkdownScreen extends StatelessWidget {
               if (href.startsWith('bfapp://')) {
                 final host = Uri.parse(href).host;
                 if (host == 'privacy') {
-                  Navigator.of(context).push<void>(privacyRoute());
+                  Navigator.of(context).push<void>(
+                    privacyRoute(embeddedInShell: embeddedInShell),
+                  );
                 } else if (host == 'terms') {
-                  Navigator.of(context).push<void>(termsRoute());
+                  Navigator.of(context).push<void>(
+                    termsRoute(embeddedInShell: embeddedInShell),
+                  );
                 }
                 return;
               }

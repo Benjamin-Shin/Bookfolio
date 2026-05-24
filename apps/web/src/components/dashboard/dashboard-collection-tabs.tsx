@@ -12,6 +12,7 @@ export interface DashboardCollectionTabsProps {
   currentTab: DashboardTab;
   searchQuery: string;
   genreSlug: string;
+  tagSlug?: string;
   ownedSort: DashboardOwnedSort;
   counts: {
     owned: number;
@@ -41,11 +42,13 @@ export function DashboardCollectionTabs({
   currentTab,
   searchQuery,
   genreSlug,
+  tagSlug = "",
   ownedSort,
   counts,
 }: DashboardCollectionTabsProps) {
   const q = searchQuery;
   const genre = genreSlug;
+  const tag = tagSlug.trim() || undefined;
 
   return (
     <nav className="mb-6" aria-label="서가 컬렉션">
@@ -55,6 +58,7 @@ export function DashboardCollectionTabs({
             q,
             tab: "owned",
             genre: genre || undefined,
+            tag,
             ownedSort: ownedSort === "title" ? "title" : undefined,
           })}
           className={tabBtn(currentTab === "owned")}

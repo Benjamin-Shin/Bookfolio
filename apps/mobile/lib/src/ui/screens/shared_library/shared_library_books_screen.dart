@@ -463,6 +463,8 @@ class _SharedLibraryOwnedBookCard extends StatelessWidget {
                         cover,
                         fit: BoxFit.cover,
                         headers: kCoverImageRequestHeaders,
+                        errorBuilder: (_, __, ___) =>
+                            ColoredBox(color: scheme.surfaceContainerHigh),
                       )
                     : ColoredBox(color: scheme.surfaceContainerHigh),
               ),

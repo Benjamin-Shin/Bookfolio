@@ -8,65 +8,18 @@ import 'package:seogadam_mobile/src/ui/screens/discovery/bestseller_screen.dart'
 import 'package:seogadam_mobile/src/ui/screens/discovery/category_discovery_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/discovery/choice_new_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/discovery/discovery_book_detail_screen.dart';
+import 'package:seogadam_mobile/src/util/aladin_category_display.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-/// [categoryId]에 맞는 [AladinCategoryOption]을 찾고, 없으면 분야 탐색용 플레이스홀더를 만든다.
-///
-/// History:
-/// - 2026-05-12: 동일 CID가 CSV에 여러 행일 때 가장 깊은 depth·긴 `label` 우선(첫 행만 잡히던 라벨 왜곡 완화)
-/// - 2026-05-03: 국내도서 몰 우선, 없으면 동일 CID 임의 몰, 없으면 synthetic (하단 칩·더보기 일관성)
-AladinCategoryOption _resolveAladinCategoryForDiscovery(
-  int categoryId,
-  List<AladinCategoryOption> all,
-) {
-  int depthScore(AladinCategoryOption o) {
-    var s = 0;
-    if (o.depth1.isNotEmpty) s += 1;
-    if (o.depth2.isNotEmpty) s += 2;
-    if (o.depth3.isNotEmpty) s += 4;
-    return s;
-  }
-
-  final domestic =
-      all.where((c) => c.categoryId == categoryId && c.mall == '국내도서').toList();
-  if (domestic.length > 1) {
-    domestic.sort((a, b) {
-      final byDepth = depthScore(b).compareTo(depthScore(a));
-      if (byDepth != 0) return byDepth;
-      return b.label.length.compareTo(a.label.length);
-    });
-    return domestic.first;
-  }
-  if (domestic.isNotEmpty) return domestic.single;
-
-  for (final c in all) {
-    if (c.categoryId == categoryId) return c;
-  }
-
-  return AladinCategoryOption(
-    categoryId: categoryId,
-    mall: '국내도서',
-    depth1: '',
-    depth2: '',
-    depth3: '',
-    label: '분야 #$categoryId',
-  );
-}
-
-String _displayLabelForAladinCategory(AladinCategoryOption c) {
-  if (c.depth3.isNotEmpty) return c.depth3;
-  if (c.depth2.isNotEmpty) return c.depth2;
-  if (c.depth1.isNotEmpty) return c.depth1;
-  if (c.label.isNotEmpty) return c.label;
-  return 'CID ${c.categoryId}';
-}
-
 /// 발견 탭 — 알라딘 베스트/신간·분야 탐색.
 ///
 /// History:
+/// - 2026-05-24: 카테고리 캡션·칩 — CID/내부 ID 숨기고 장르 이름만 표시
+/// - 2026-05-24: 「나에게 맞는 책 추천」미구현 더보기 제거
+/// - 2026-05-21: `embeddedInShell` 하단 인셋·분야별 탐색 아래 여백 — 카테고리 칩 풸터 가림 완화
 /// - 2026-05-12: `refreshSignal` — 프로필 저장 후·발견 탭 재진입 시 `_load()`로 관심 CID 반영
 /// - 2026-05-12: 베스트·초이스 전체 화면 푸시 시 `embeddedInShell: true`
 /// - 2026-05-03: 프로필 관심 CID 기준으로 하단 분야 칩·섹션 제목·캡션 정합; 카테고리 목록 매칭 실패 시에도 칩 표시(해석 보강)
@@ -152,7 +105,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       ]);
       final allCategories = await api.fetchAladinCategories();
       final favoriteCategories = categoryIds
-          .map((cid) => _resolveAladinCategoryForDiscovery(cid, allCategories))
+          .map((cid) => resolveAladinCategoryForDiscovery(cid, allCategories))
           .toList();
       if (!mounted) return;
       setState(() {
@@ -197,16 +150,26 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       return _usingProfileFavoriteCategories ? '내 관심 분야' : '기본(소설)';
     }
     final parts =
-        _favoriteCategories.map(_displayLabelForAladinCategory).toList();
+        _favoriteCategories.map(displayLabelForAladinCategory).toList();
     if (parts.length <= 2) return parts.join(' · ');
     return '${parts[0]} · ${parts[1]} 외 ${parts.length - 2}';
   }
 
   String _appliedCategoriesCaption() {
     if (_usingProfileFavoriteCategories) {
-      return '적용 분야: ${_favoriteCategories.map(_displayLabelForAladinCategory).join(', ')}';
+      return '적용 분야: ${_favoriteCategories.map(displayLabelForAladinCategory).join(', ')}';
     }
-    return '기본 카테고리 적용: 소설 (CID 112011)';
+    final name = _favoriteCategories.isNotEmpty
+        ? displayLabelForAladinCategory(_favoriteCategories.first)
+        : '소설';
+    return '기본 카테고리 적용: $name';
+  }
+
+  EdgeInsets _scrollPadding(BuildContext context) {
+    if (widget.embeddedInShell) {
+      return bookfolioShellPushedListScrollPadding();
+    }
+    return bookfolioShellTabScrollPadding(context);
   }
 
   @override
@@ -219,7 +182,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             : RefreshIndicator(
                 onRefresh: _load,
                 child: ListView(
-                  padding: bookfolioShellTabScrollPadding(context),
+                  padding: _scrollPadding(context),
                   children: [
                     TextField(
                       decoration: InputDecoration(
@@ -281,7 +244,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
               );
 
-    if (widget.embeddedInShell) return body;
+    if (widget.embeddedInShell) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: bookfolioShellBottomNavInset(context)),
+        child: body,
+      );
+    }
     return Scaffold(appBar: AppBar(title: const Text('발견')), body: body);
   }
 
@@ -375,8 +343,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             child: AspectRatio(
               aspectRatio: 0.72,
               child: cover != null
-                  ? Image.network(cover,
-                      fit: BoxFit.cover, headers: kCoverImageRequestHeaders)
+                  ? Image.network(
+                      cover,
+                      fit: BoxFit.cover,
+                      headers: kCoverImageRequestHeaders,
+                      errorBuilder: (_, __, ___) =>
+                          kCoverImageErrorPlaceholder,
+                    )
                   : const ColoredBox(color: Color(0xFFE9E3DE)),
             ),
           ),
@@ -412,14 +385,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     final items = [..._bestseller.take(2), ..._itemNew.take(2)];
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-                child: Text('나에게 맞는 책 추천',
-                    style: GoogleFonts.manrope(
-                        fontSize: 28 / 2, fontWeight: FontWeight.w800))),
-            TextButton(onPressed: () {}, child: const Text('더보기')),
-          ],
+        Text(
+          '나에게 맞는 책 추천',
+          style: GoogleFonts.manrope(
+            fontSize: 28 / 2,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         for (final item in items)
           Container(
@@ -461,8 +432,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
       child: cover != null
-          ? Image.network(cover,
-              fit: BoxFit.cover, headers: kCoverImageRequestHeaders)
+          ? Image.network(
+              cover,
+              fit: BoxFit.cover,
+              headers: kCoverImageRequestHeaders,
+              errorBuilder: (_, __, ___) =>
+                  ColoredBox(color: scheme.surfaceContainerHigh),
+            )
           : ColoredBox(color: scheme.surfaceContainerHigh),
     );
   }
@@ -520,7 +496,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         builder: (_) => CategoryDiscoveryScreen(
                           categoryId: category.categoryId,
                           categoryLabel:
-                              _displayLabelForAladinCategory(category),
+                              displayLabelForAladinCategory(category),
+                          embeddedInShell: widget.embeddedInShell,
                         ),
                       ),
                     );
@@ -541,7 +518,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            _displayLabelForAladinCategory(category),
+                            displayLabelForAladinCategory(category),
                             style: GoogleFonts.manrope(fontSize: 12),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -553,6 +530,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 ),
             ],
           ),
+        const SizedBox(height: 32),
       ],
     );
   }

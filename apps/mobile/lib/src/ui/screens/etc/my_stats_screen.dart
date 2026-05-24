@@ -13,6 +13,7 @@ import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 /// 내 서가 통계·성향 카드 UI (`My_Stat` 시안).
 ///
 /// History:
+/// - 2026-05-23: ListView 하단 `SizedBox(32)` — 쉘 탭바 가림 보정(홈 CTA와 동일)
 /// - 2026-05-12: `embeddedInShell` 필드 문서 보강(쉘 앱바·하단 탭과 병용)
 class MyStatsScreen extends StatefulWidget {
   const MyStatsScreen({super.key, this.embeddedInShell = false});
@@ -113,6 +114,7 @@ class _MyStatsScreenState extends State<MyStatsScreen> {
             _FiveIndicatorsCard(snapshot: agg.tendency),
             const SizedBox(height: 16),
             _GrowthMetricsCard(aggregate: agg),
+            const SizedBox(height: 32),
           ],
         );
       },

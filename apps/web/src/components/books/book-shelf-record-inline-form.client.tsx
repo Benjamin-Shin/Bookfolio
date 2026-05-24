@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { BOOK_FORMAT_LABEL_KO } from "@bookfolio/shared";
 import type { UserBookDetail } from "@bookfolio/shared";
 
@@ -7,6 +9,7 @@ import {
   RatingChoiceFieldset,
   ReadingStatusChoiceFieldset,
 } from "@/components/books/shelf-choice-fields";
+import { UserBookTagsField } from "@/components/books/user-book-tags-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +25,7 @@ import {
  * 내 서가 `user_books` 필드만 상세 화면에서 바로 수정(POST `/api/me/books/:id`).
  *
  * @history
+ * - 2026-05-24: `tags` 입력·`/api/me/book-tags` 제안
  * - 2026-05-03: 제목·안내를 「내 서가 기록」단일 조회·수정 UX로 정리; 서지 형식은 읽기 전용 표시
  * - 2026-05-03: 기존 `/dashboard/books/:id/edit` 폼을 상세로 이전
  */
@@ -36,11 +40,24 @@ export function BookShelfRecordInlineForm(props: {
     | "currentPage"
     | "readingTotalPages"
     | "isOwned"
+    | "tags"
   >;
 }) {
   const { userBookId, userBook } = props;
   const formatLabel =
     BOOK_FORMAT_LABEL_KO[userBook.format] ?? userBook.format;
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    void fetch("/api/me/book-tags")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTagSuggestions(data.filter((x): x is string => typeof x === "string"));
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   return (
     <Card className="border-[#1A3C2F]/10 bg-white/90 shadow-sm">
@@ -67,6 +84,10 @@ export function BookShelfRecordInlineForm(props: {
             defaultStatus={userBook.readingStatus}
           />
           <RatingChoiceFieldset defaultRating={userBook.rating ?? null} />
+          <UserBookTagsField
+            defaultTags={userBook.tags ?? []}
+            suggestions={tagSuggestions}
+          />
           <div className="space-y-2">
             <Label htmlFor="shelf-location">위치</Label>
             <Input

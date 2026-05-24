@@ -12,11 +12,14 @@ import 'package:seogadam_mobile/src/ui/screens/library/library_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/library/library_analysis_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/etc/profile_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/shared_library/shared_libraries_screen.dart';
+import 'package:seogadam_mobile/src/ui/screens/legal/legal_markdown_screen.dart';
 import 'package:seogadam_mobile/src/ui/layout/bookfolio_navigation_drawer.dart';
 import 'package:seogadam_mobile/src/ui/layout/main_shell_tab_scope.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:seogadam_mobile/src/ui/app_root_scaffold.dart';
 
 /// 메인 5탭 쉘 — 글래스 앱바·하단 내비·드로어.
 ///
@@ -24,6 +27,8 @@ import 'package:provider/provider.dart';
 /// - 2026-05-12: 드로어에서 내 서가 통계·베스트·초이스 — `open*InShell`로 본문 [Navigator] 푸시(상·하단 유지)
 /// - 2026-05-12: `_goTab` 시 본문 [Navigator] `popUntil` 첫 라우트 — 베스트/초이스 등 덮인 채로 탭만 바뀌던 문제 수정
 /// - 2026-05-12: [MainShellTabScope] — 발견 브레드크럼 등에서 `goTab` 노출
+/// - 2026-05-23: 드로어 약관·개인정보 — 쉘 본문 [Navigator] 푸시(`embeddedInShell`)
+/// - 2026-05-23: [PopScope] — 쉘·루트 스택 pop 우선, 루트 탭에서만 «한번 더 누르면 종료» 스낵바 후 `SystemNavigator.pop`
 /// - 2026-05-12: `body`에 중첩 [Navigator] — [ProfileScreen]을 루트가 아닌 쉘 내부 스택에서 열어 상·하단 유지
 /// - 2026-05-12: `_discoverRefreshSignal` — 발견 탭 재선택·프로필 복귀 시 관심 CID 재로드
 /// - 2026-05-12: 프로필·통계 푸시 시 `embeddedInShell: true`로 본문만(쉘 앱바와 맞춤)
@@ -45,6 +50,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
   late final Listenable _shellTabsListenable;
 
   String? _toolbarAvatarUrl;
+  DateTime? _lastExitBackPressAt;
+  static const _exitConfirmWindow = Duration(seconds: 2);
 
   @override
   void initState() {
@@ -156,12 +163,60 @@ class _MainShellScreenState extends State<MainShellScreen> {
     );
   }
 
+  Future<void> _openPrivacyInShell() async {
+    await _shellBodyNavKey.currentState?.push<void>(
+      LegalMarkdownScreen.privacyRoute(embeddedInShell: true),
+    );
+  }
+
+  Future<void> _openTermsInShell() async {
+    await _shellBodyNavKey.currentState?.push<void>(
+      LegalMarkdownScreen.termsRoute(embeddedInShell: true),
+    );
+  }
+
   Future<void> _goAddBook() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const BookFormScreen()),
     );
     if (!mounted) return;
     _goTab(0);
+  }
+
+  void _handleSystemBack() {
+    final scaffold = _scaffoldKey.currentState;
+    if (scaffold?.isDrawerOpen ?? false) {
+      scaffold!.closeDrawer();
+      return;
+    }
+
+    final shellNav = _shellBodyNavKey.currentState;
+    if (shellNav != null && shellNav.canPop()) {
+      shellNav.pop();
+      return;
+    }
+
+    final rootNav = Navigator.maybeOf(context);
+    if (rootNav != null && rootNav.canPop()) {
+      rootNav.pop();
+      return;
+    }
+
+    final now = DateTime.now();
+    final last = _lastExitBackPressAt;
+    if (last != null && now.difference(last) < _exitConfirmWindow) {
+      SystemNavigator.pop();
+      return;
+    }
+    _lastExitBackPressAt = now;
+    bookfolioRootScaffoldMessengerKey.currentState
+      ?..clearSnackBars()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('한번 더 누르면 프로그램이 종료됩니다.'),
+          duration: _exitConfirmWindow,
+        ),
+      );
   }
 
   @override
@@ -172,6 +227,12 @@ class _MainShellScreenState extends State<MainShellScreen> {
     final appBarFg = scheme.onSurface;
     return MainShellTabScope(
       goTab: _goTab,
+      child: PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _handleSystemBack();
+      },
       child: Scaffold(
       key: _scaffoldKey,
       extendBody: true,
@@ -182,6 +243,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
         openLibraryStatsInShell: _openLibraryStatsInShell,
         openBestsellerInShell: _openBestsellerInShell,
         openChoiceNewInShell: _openChoiceNewInShell,
+        openPrivacyInShell: _openPrivacyInShell,
+        openTermsInShell: _openTermsInShell,
       ),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(topInset + 56),
@@ -285,6 +348,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
         onChanged: _goTab,
         onTapAdd: _goAddBook,
       ),
+    ),
     ),
     );
   }

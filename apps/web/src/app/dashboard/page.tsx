@@ -12,6 +12,7 @@ import { DashboardBookCollectionViewClient } from "@/components/dashboard/dashbo
 import { DashboardCollectionTabs } from "@/components/dashboard/dashboard-collection-tabs";
 import { DashboardShelfEmptyState } from "@/components/dashboard/dashboard-shelf-empty-state";
 import { DashboardOwnedGenreFilter } from "@/components/dashboard/dashboard-owned-genre-filter";
+import { DashboardOwnedTagFilter } from "@/components/dashboard/dashboard-owned-tag-filter";
 import { DashboardCurrentReadingFeatured } from "@/components/dashboard/dashboard-current-reading-featured";
 import { DashboardHomeHero } from "@/components/dashboard/dashboard-home-hero";
 import { DashboardMonthReadingStats } from "@/components/dashboard/dashboard-month-reading-stats";
@@ -33,6 +34,7 @@ import {
 import { cn } from "@/lib/utils";
 import {
   listUserBooksPaged,
+  listUserBookTags,
   listUserOwnedGenreSlugs,
 } from "@/lib/books/repository";
 import { getReadingEventsCalendar } from "@/lib/books/user-book-sidecars";
@@ -40,6 +42,7 @@ import { aggregateUtcMonthCalendarToWeekBars } from "@/lib/dashboard/reading-cal
 import { getAppProfile } from "@/lib/auth/app-profiles";
 
 import type { UserBookSummary } from "@bookfolio/shared";
+import { USER_BOOK_TAG_UNTAGGED_FILTER } from "@bookfolio/shared";
 
 const PAGE_SIZE = BOOKS_PER_SHELF;
 const READING_SHELF_LIMIT = 50;
@@ -66,6 +69,7 @@ type DashboardPageProps = {
     q?: string;
     page?: string;
     genre?: string;
+    tag?: string;
     tab?: string;
     sort?: string;
   }>;
@@ -109,12 +113,14 @@ export default async function DashboardPage({
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const genreFilter = (sp.genre ?? "").trim();
+  const tagFilter = (sp.tag ?? "").trim();
   const tab = parseDashboardTab(sp.tab);
   const ownedSort = parseDashboardOwnedSort(sp.sort);
   const pageRaw = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const ctx = { userId: session.user.id, useAdmin: true } as const;
   const searchOpt = q ? q : undefined;
   const genreSlugOpt = genreFilter ? genreFilter : undefined;
+  const tagOpt = tagFilter ? tagFilter : undefined;
   const ownedListSort = ownedSort === "title" ? ("title" as const) : undefined;
 
   const refUtc = new Date();
@@ -237,6 +243,7 @@ export default async function DashboardPage({
             isOwned: true,
             search: searchOpt,
             genreSlug: genreSlugOpt,
+            tag: tagOpt,
             limit: PAGE_SIZE,
             offset: (pageRaw - 1) * PAGE_SIZE,
             sort: ownedListSort,
@@ -274,6 +281,7 @@ export default async function DashboardPage({
     completedRes,
     ownedRes,
     ownedGenres,
+    ownedTagsBundle,
     monthStatsBundle,
   ] = await Promise.all([
     readingForShelfP,
@@ -284,6 +292,20 @@ export default async function DashboardPage({
     tab === "owned"
       ? listUserOwnedGenreSlugs(ctx)
       : Promise.resolve([] as string[]),
+    tab === "owned"
+      ? Promise.all([
+          listUserBookTags(ctx),
+          listUserBooksPaged(
+            {
+              isOwned: true,
+              tag: USER_BOOK_TAG_UNTAGGED_FILTER,
+              limit: 1,
+              offset: 0,
+            },
+            ctx,
+          ),
+        ])
+      : Promise.resolve([[] as string[], { items: [], total: 0 }] as const),
     monthStatsP,
   ]);
 
@@ -296,6 +318,9 @@ export default async function DashboardPage({
   const ownedBooks = ownedRes.items;
   const hallBooks = hallRes.items;
   const hallListTotal = hallRes.total;
+
+  const [ownedBookTags, ownedUntaggedProbe] = ownedTagsBundle;
+  const ownedUntaggedTotal = ownedUntaggedProbe.total;
 
   let weekBars = [0, 0, 0, 0];
   let booksFinishedThisMonth = 0;
@@ -481,6 +506,7 @@ export default async function DashboardPage({
                 listTotal={listTotalForToolbar}
                 currentTab={tab}
                 genreSlug={genreFilter}
+                tagSlug={tagFilter}
                 ownedSort={ownedSort}
                 renderedCount={
                   tab === "reading" ? readingBooks.length : undefined
@@ -494,6 +520,7 @@ export default async function DashboardPage({
             currentTab={tab}
             searchQuery={q}
             genreSlug={genreFilter}
+            tagSlug={tagFilter}
             ownedSort={ownedSort}
             counts={{
               owned: ownedAllCountProbe.total,
@@ -762,7 +789,16 @@ export default async function DashboardPage({
                     genres={ownedGenres}
                     selectedGenre={genreFilter}
                     searchQuery={q}
+                    tagSlug={tagFilter}
                     ownedSort={ownedSort}
+                  />
+                  <DashboardOwnedTagFilter
+                    tags={ownedBookTags}
+                    selectedTag={tagFilter}
+                    searchQuery={q}
+                    genreSlug={genreFilter}
+                    ownedSort={ownedSort}
+                    untaggedCount={ownedUntaggedTotal}
                   />
                   {ownedBooks.length > 0 ? (
                     <>
@@ -776,6 +812,7 @@ export default async function DashboardPage({
                         pageSize={PAGE_SIZE}
                         total={ownedTotalForPager}
                         genreSlug={genreFilter}
+                        tagSlug={tagFilter}
                         tab="owned"
                         sectionLabel="소장"
                         ownedSort={ownedSort}
@@ -784,13 +821,13 @@ export default async function DashboardPage({
                   ) : (
                     <DashboardShelfEmptyState
                       title={
-                        q.length > 0 || genreFilter.length > 0
+                        q.length > 0 || genreFilter.length > 0 || tagFilter.length > 0
                           ? "조건에 맞는 도서가 없습니다"
                           : "표시할 소장 도서가 없습니다"
                       }
                       description={
-                        q.length > 0 || genreFilter.length > 0
-                          ? "검색어·장르 필터를 바꾸거나 초기화해 보세요."
+                        q.length > 0 || genreFilter.length > 0 || tagFilter.length > 0
+                          ? "검색어·장르·태그 필터를 바꾸거나 초기화해 보세요."
                           : "아직 이 목록에 올 책이 없습니다."
                       }
                     />

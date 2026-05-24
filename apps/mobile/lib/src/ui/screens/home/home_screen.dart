@@ -18,6 +18,7 @@ import 'package:provider/provider.dart';
 /// 로그인 후 홈 화면(`Home.png`) 기준 재구축 버전.
 ///
 /// History:
+/// - 2026-05-23: 하단 `내 서가 통계보기` CTA 아래 여백 추가(쉘 탭바 가림 보정)
 /// - 2026-05-12: 통계 진입은 쉘 `onOpenStats`가 본문 [Navigator]에서 처리(드로어와 동일 패턴)
 /// - 2026-05-12: 베스트·초이스·통계 진입 푸시에 `embeddedInShell: true`
 /// - 2026-04-25: 기존 홈 전면 교체 — 히어로/이어읽기/바로가기/발견/내 모임서가/하단 CTA 구조
@@ -187,6 +188,7 @@ class _BookfolioHomeScreenState extends State<BookfolioHomeScreen> {
             _myLibrariesSection(),
             const SizedBox(height: 10),
             _statsCta(),
+            const SizedBox(height: 32),
           ],
         ],
       ),

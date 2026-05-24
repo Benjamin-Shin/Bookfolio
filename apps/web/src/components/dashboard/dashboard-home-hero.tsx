@@ -2,6 +2,7 @@ import { BookMarked, Star, Library } from "lucide-react";
 
 import { DashboardProfileOpenButton } from "@/components/dashboard/dashboard-profile-open-button.client";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
+import { pickDashboardHomeQuoteForDay } from "@/lib/dashboard/home-hero-quotes";
 
 export interface DashboardHomeHeroProps {
   displayLabel: string;
@@ -20,6 +21,7 @@ export interface DashboardHomeHeroProps {
  * 내 서가 상단 프로필·요약 통계·명언 카드(시안 상단 와이드 카드).
  *
  * @history
+ * - 2026-05-24: 명언 카드 — KST 하루 고정 문장 풀에서 1개 표시
  * - 2026-05-03: 통계 라벨 한 줄 유지(이번 달 읽은 책)·통계 행 아이콘·간격 소폭 압축
  * - 2026-05-03: 히어로 좌측 프로필 블록(아바타·타이틀·태그라인) 간격·타이포 소폭 축소
  * - 2026-05-03: 신규
@@ -35,6 +37,7 @@ export function DashboardHomeHero({
   const src = normalizeCoverUrlForClient(avatarUrl);
   const avgText =
     averageRating != null ? `${averageRating.toFixed(1)} / 5` : "—";
+  const dailyQuote = pickDashboardHomeQuoteForDay();
 
   return (
     <section
@@ -119,10 +122,10 @@ export function DashboardHomeHero({
 
         <div className="rounded-xl bg-[#F0F2F4] p-5 lg:col-span-3">
           <p className="font-serif text-sm italic leading-relaxed text-[#3d4a42] md:text-base">
-            &ldquo;책은 삶의 조용한 대화다.&rdquo;
+            &ldquo;{dailyQuote.text}&rdquo;
           </p>
           <p className="mt-2 text-right text-xs font-medium text-[#5c6560]">
-            — 서가담
+            — {dailyQuote.attribution}
           </p>
         </div>
       </div>

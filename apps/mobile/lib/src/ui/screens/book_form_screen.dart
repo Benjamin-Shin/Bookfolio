@@ -6,7 +6,9 @@ import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 import 'package:seogadam_mobile/src/ui/screens/barcode_scan_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/camera_permission_rationale_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/title_keyword_lookup_screen.dart';
+import 'package:seogadam_mobile/src/ui/widgets/user_book_tags_input.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
+import 'package:seogadam_mobile/src/util/mutation_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -34,6 +36,9 @@ class _BookFormScreenState extends State<BookFormScreen> {
   ReadingStatus _status = ReadingStatus.unread;
   int _rating = 4;
   bool _busy = false;
+  bool _saving = false;
+  List<String> _tags = const [];
+  final _saveGate = AsyncActionGate();
 
   @override
   void initState() {
@@ -55,6 +60,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
       _status = ex.readingStatus;
       _rating = ex.rating ?? 4;
       _locationCtrl.text = ex.location ?? '';
+      _tags = List<String>.from(ex.tags);
     }
   }
 
@@ -122,46 +128,59 @@ class _BookFormScreenState extends State<BookFormScreen> {
       );
       return;
     }
-    try {
-      if (widget.isEditing) {
-        await context.read<LibraryController>().updateBook(
-          widget.existingBook!.id,
-          {
-            'readingStatus': _status.name,
-            'rating': _rating,
-            'location': _locationCtrl.text.trim().isEmpty ? null : _locationCtrl.text.trim(),
-          },
-        );
-      } else {
-        final book = UserBook(
-          id: '',
-          bookId: '',
-          title: selected.title,
-          authors: selected.authors,
-          format: BookFormat.paper,
-          readingStatus: _status,
-          rating: _rating,
-          coverUrl: selected.coverUrl,
-          publisher: selected.publisher,
-          publishedDate: selected.publishedDate,
-          description: selected.description,
-          isbn: selected.isbn.isEmpty ? null : selected.isbn,
-          isOwned: true,
-          priceKrw: selected.priceKrw,
-          location: _locationCtrl.text.trim().isEmpty ? null : _locationCtrl.text.trim(),
-        );
-        await context.read<LibraryController>().createBook(book);
-      }
+    await _saveGate.run('save', () async {
+      if (mounted) setState(() => _saving = true);
+      try {
+        if (widget.isEditing) {
+          await context.read<LibraryController>().updateBook(
+            widget.existingBook!.id,
+            {
+              'readingStatus': _status.name,
+              'rating': _rating,
+              'location': _locationCtrl.text.trim().isEmpty
+                  ? null
+                  : _locationCtrl.text.trim(),
+              'tags': _tags,
+            },
+          );
+        } else {
+          final book = UserBook(
+            id: '',
+            bookId: '',
+            title: selected.title,
+            authors: selected.authors,
+            format: BookFormat.paper,
+            readingStatus: _status,
+            rating: _rating,
+            coverUrl: selected.coverUrl,
+            publisher: selected.publisher,
+            publishedDate: selected.publishedDate,
+            description: selected.description,
+            isbn: selected.isbn.isEmpty ? null : selected.isbn,
+            isOwned: true,
+            priceKrw: selected.priceKrw,
+            location: _locationCtrl.text.trim().isEmpty
+                ? null
+                : _locationCtrl.text.trim(),
+            tags: _tags,
+          );
+          await context.read<LibraryController>().createBook(book);
+        }
 
-      if (!mounted) return;
-      Navigator.of(context).pop();
-    } on BookfolioApiException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-    }
+        if (!mounted) return;
+        Navigator.of(context).pop();
+      } on BookfolioApiException catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      } finally {
+        if (mounted) setState(() => _saving = false);
+      }
+    });
   }
 
   @override
@@ -194,8 +213,17 @@ class _BookFormScreenState extends State<BookFormScreen> {
           _personalCard(),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: _save,
-            icon: const Icon(Icons.library_add, size: 20),
+            onPressed: _saving ? null : _save,
+            icon: _saving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.library_add, size: 20),
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(52),
               backgroundColor: _kPrimary,
@@ -203,7 +231,11 @@ class _BookFormScreenState extends State<BookFormScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            label: Text(widget.isEditing ? '수정 저장' : '내 서가에 담기'),
+            label: Text(
+              _saving
+                  ? '저장 중…'
+                  : (widget.isEditing ? '수정 저장' : '내 서가에 담기'),
+            ),
           ),
           const SizedBox(height: 10),
           OutlinedButton(
@@ -309,7 +341,15 @@ class _BookFormScreenState extends State<BookFormScreen> {
                 child: SizedBox(
                   width: 122,
                   height: 166,
-                  child: cover != null ? Image.network(cover, fit: BoxFit.cover, headers: kCoverImageRequestHeaders) : const ColoredBox(color: Color(0xFFE9E3DE)),
+                  child: cover != null
+                      ? Image.network(
+                          cover,
+                          fit: BoxFit.cover,
+                          headers: kCoverImageRequestHeaders,
+                          errorBuilder: (_, __, ___) =>
+                              kCoverImageErrorPlaceholder,
+                        )
+                      : const ColoredBox(color: Color(0xFFE9E3DE)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -382,6 +422,12 @@ class _BookFormScreenState extends State<BookFormScreen> {
               hintText: '거실 책장 / 침실 / 서재',
               border: OutlineInputBorder(),
             ),
+          ),
+          const SizedBox(height: 12),
+          UserBookTagsInput(
+            tags: _tags,
+            suggestions: context.watch<LibraryController>().bookTagOptions,
+            onChanged: (next) => setState(() => _tags = next),
           ),
           const SizedBox(height: 10),
           TextField(

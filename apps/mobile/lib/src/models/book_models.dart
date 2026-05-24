@@ -174,6 +174,7 @@ class UserBook {
     this.currentPage,
     this.readingTotalPages,
     this.genreSlugs = const [],
+    this.tags = const [],
     this.createdAt,
     this.updatedAt,
   });
@@ -205,6 +206,9 @@ class UserBook {
 
   /// 서지 `books.genre_slugs` (목록·상세 API).
   final List<String> genreSlugs;
+
+  /// `user_books.tags` (최대 5).
+  final List<String> tags;
 
   /// `user_books.created_at` (ISO8601).
   final String? createdAt;
@@ -242,6 +246,7 @@ class UserBook {
       'currentPage': currentPage,
       'readingTotalPages': readingTotalPages,
       'genreSlugs': genreSlugs,
+      'tags': tags,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -261,6 +266,8 @@ class UserBook {
 
     final rawGenres = json['genreSlugs'] as List<dynamic>? ??
         json['genre_slugs'] as List<dynamic>?;
+
+    final rawTags = json['tags'] as List<dynamic>?;
 
     return UserBook(
       id: json['id'] as String,
@@ -287,6 +294,10 @@ class UserBook {
           .map((e) => e.toString().trim())
           .where((e) => e.isNotEmpty)
           .toList(),
+      tags: (rawTags ?? const [])
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList(),
       createdAt: json['createdAt'] as String? ?? json['created_at'] as String?,
       updatedAt: json['updatedAt'] as String? ?? json['updated_at'] as String?,
     );
@@ -308,6 +319,7 @@ class UserBook {
       'isOwned': isOwned,
       'location': location,
     };
+    if (tags.isNotEmpty) m['tags'] = tags;
     if (currentPage != null) m['currentPage'] = currentPage;
     if (readingTotalPages != null) m['readingTotalPages'] = readingTotalPages;
     return m;

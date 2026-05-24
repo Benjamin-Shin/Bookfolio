@@ -2,12 +2,13 @@
 
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 import type { BookLookupResult, UserBookDetail } from "@bookfolio/shared";
 import { BOOK_FORMATS, READING_STATUSES } from "@bookfolio/shared";
 
 import { BookCoverUploadField } from "@/components/books/book-cover-upload-field";
+import { UserBookTagsField } from "@/components/books/user-book-tags-field";
 import {
   BookFormatChoiceFieldset,
   RatingChoiceFieldset,
@@ -40,6 +41,19 @@ export function NewBookForm() {
   const [priceKrwInput, setPriceKrwInput] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    void fetch("/api/me/book-tags")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTagSuggestions(data.filter((x): x is string => typeof x === "string"));
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   const titleRef = useRef<HTMLInputElement>(null);
   const authorsRef = useRef<HTMLInputElement>(null);
@@ -149,7 +163,8 @@ export function NewBookForm() {
       location: (() => {
         const loc = String(fd.get("location") ?? "").trim();
         return loc ? loc : null;
-      })()
+      })(),
+      tags,
     };
 
     setSubmitting(true);
@@ -264,6 +279,10 @@ export function NewBookForm() {
         <p className="text-xs text-muted-foreground">집·회사·빌려준 곳 등 이 권이 있는 곳을 적어 두면 나중에 찾기 쉽습니다.</p>
         <Input id="location" name="location" placeholder="예: 집 / 회사 책장" />
       </div>
+      <UserBookTagsField
+        suggestions={tagSuggestions}
+        onTagsChange={setTags}
+      />
       <div className="space-y-2">
         <Label htmlFor="description">책 소개</Label>
         <Textarea

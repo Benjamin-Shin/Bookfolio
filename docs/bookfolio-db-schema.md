@@ -196,6 +196,7 @@ RLS: 인증 사용자 SELECT.
 | `reading_total_pages` | `integer`     | NULL — 총 쪽 사용자 재정의(1–50000); 없으면 `books.page_count` (`0030`) |
 | `is_owned`            | `boolean`     | NOT NULL, default true                                                  |
 | `location`            | `text`        | 물리적 위치·대여처 등                                                   |
+| `tags`                | `text[]`      | NOT NULL, default `'{}'`, CHECK `cardinality(tags) <= 5` — 개인 태그 |
 | `created_at`          | `timestamptz` | NOT NULL, default `now()`                                               |
 | `updated_at`          | `timestamptz` | NOT NULL, default `now()`                                               |
 
@@ -691,7 +692,8 @@ UNIQUE `(period_month, user_id)`. 인덱스: `(period_month, rank)`.
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `set_updated_at()`                                | 여러 테이블 `BEFORE UPDATE`에서 `updated_at = now()`                                                                                                                                                                                             |
 | `handle_auth_user_created`                        | `auth.users` INSERT → `profiles` upsert                                                                                                                                                                                                          |
-| `list_user_books_paged(...)`                      | 서비스 롤: 페이지 목록; `format`은 `books.format` 기준 필터·반환 (`0021`); 행에 `book_page_count`·`current_page`·`reading_total_pages` 포함 (`0030`); 선택 `p_sort='title'` 시 제목순 (`0037`); 선택 `p_hall_of_fame` 시 완독·평점 4+만 (`0038`) |
+| `list_user_books_paged(...)`                      | 서비스 롤: 페이지 목록; `format`은 `books.format` 기준 필터·반환 (`0021`); 행에 `book_page_count`·`current_page`·`reading_total_pages`·`tags` 포함; 선택 `p_genre_slug`·`p_tag`(`__untagged__`=태그 없음); 선택 `p_sort='title'` (`0037`); 선택 `p_hall_of_fame` (`0038`) |
+| `list_user_book_tags(user_id)`                    | 서비스 롤: 사용자 태그 목록 JSON(정렬·중복 제거, `0046`) |
 | `reading_leaderboard(user_id, kind, top_n)`       | 서비스 롤: 완독/소장 권수 리더보드 JSON (`0018`)                                                                                                                                                                                                 |
 | `points_leaderboard(user_id, top_n)`              | 서비스 롤: `v_user_points_balance` 기준 잔액 &gt; 0 회원 순위 JSON (`0026`)                                                                                                                                                                      |
 | `owned_book_popularity_leaderboard(top_n)`        | 서비스 롤: `user_books` 소장 건수 기준 도서별 등록 횟수 TOP JSON (`0026`)                                                                                                                                                                        |

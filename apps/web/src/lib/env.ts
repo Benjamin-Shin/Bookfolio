@@ -6,6 +6,7 @@
  * `process.env.NEXT_PUBLIC_*`는 getter 본문에 그대로 두면 클라이언트 번들에서도 Next가 인라인합니다.
  *
  * @history
+ * - 2026-05-24: `playStoreTestingUrl` — Play Console 비공개 테스트 링크(헤더 Android 아이콘)
  * - 2026-04-22: `aladinApiBaseUrl` — ItemList 공통 베이스 URL(+ttbkey)
  * - 2026-04-08: `aladinTtbKey` — ItemLookUp(비소장 구매 힌트)
  * - 2026-03-25: `aladinApiBaseUrl` 주석 — `next.config` `loadEnvConfig`와의 관계 안내
@@ -14,6 +15,9 @@
 export const env = {
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   appDownloadUrl: process.env.NEXT_PUBLIC_APP_DOWNLOAD_URL?.trim() || undefined,
+  playStoreTestingUrl:
+    process.env.NEXT_PUBLIC_PLAY_STORE_TESTING_URL?.trim() ||
+    "https://play.google.com/apps/testing/app.bookfolio.seogadam",
 
   get supabaseUrl(): string {
     const v = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();

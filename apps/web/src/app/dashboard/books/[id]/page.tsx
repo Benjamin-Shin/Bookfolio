@@ -117,6 +117,7 @@ export default async function BookDetailPage({
                 currentPage: userBook.currentPage ?? null,
                 readingTotalPages: userBook.readingTotalPages ?? null,
                 isOwned: userBook.isOwned,
+                tags: userBook.tags ?? [],
               }}
             />
 

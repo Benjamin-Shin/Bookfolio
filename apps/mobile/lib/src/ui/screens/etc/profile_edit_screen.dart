@@ -3,6 +3,7 @@ import 'package:seogadam_mobile/src/models/aladin_bestseller_models.dart';
 import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/state/library_controller.dart';
 import 'package:seogadam_mobile/src/theme/bookfolio_design_tokens.dart';
+import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ import 'package:provider/provider.dart';
 /// 프로필 편집: 인구통계·관심 카테고리·연간 목표·포인트/VIP 요약.
 ///
 /// History:
+/// - 2026-05-23: `embeddedInShell` — 쉘 프로필 스택에서 푸시 시 하단 5탭 가림 보정
 /// - 2026-05-12: 「계정 관리」·회원 탈퇴 UI 제거; Manrope·카드·필드·로딩 UX를 다른 편집 화면과 정렬
 /// - 2026-04-27: 화면 설정(테마 모드) 제거, 관심 카테고리 추가를 depth1/depth2/depth3 드롭다운 선택으로 변경
 /// - 2026-04-26: 알라딘 국내도서 관심 카테고리(최대 5개) 선택/저장
@@ -18,7 +20,10 @@ import 'package:provider/provider.dart';
 /// - 2026-04-06: 연간 완독 목표(권) — `app_profiles.annual_reading_goal`
 /// - 2026-04-05: [ProfileScreen] 목업 분리 — 메인 프로필은 카드형, 상세 편집은 본 화면으로 이동
 class ProfileEditScreen extends StatefulWidget {
-  const ProfileEditScreen({super.key});
+  const ProfileEditScreen({super.key, this.embeddedInShell = false});
+
+  /// [ProfileScreen]이 메인 쉘 본문 위에 있을 때 `true`.
+  final bool embeddedInShell;
 
   @override
   State<ProfileEditScreen> createState() => _ProfileEditScreenState();
@@ -321,6 +326,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
+  EdgeInsets _listPadding(BuildContext context) {
+    if (widget.embeddedInShell) {
+      final inset = bookfolioShellBottomNavInset(context);
+      return EdgeInsets.fromLTRB(16, 12, 16, 16 + inset + 32);
+    }
+    final safeBottom = MediaQuery.viewPaddingOf(context).bottom;
+    return EdgeInsets.fromLTRB(16, 12, 16, 28 + safeBottom);
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
@@ -346,12 +360,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         ],
       ),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          28 + MediaQuery.viewPaddingOf(context).bottom,
-        ),
+        padding: _listPadding(context),
         children: [
           if (!loggedIn)
             _buildSectionCard(

@@ -6,10 +6,12 @@ import 'package:seogadam_mobile/src/models/book_models.dart';
 import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
 import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/util/jwt_sub.dart';
+import 'package:seogadam_mobile/src/util/mutation_guard.dart';
 import 'package:flutter/foundation.dart';
 
 class LibraryController extends ChangeNotifier {
   final BookfolioApi _api = BookfolioApi();
+  final AsyncActionGate _mutationGate = AsyncActionGate();
 
   /// 상세 화면 등에서 토큰이 붙은 API 클라이언트가 필요할 때 사용합니다.
   ///
@@ -38,6 +40,8 @@ class LibraryController extends ChangeNotifier {
   int _total = 0;
   String _searchQuery = '';
   String? _readingStatusFilter;
+  String? _tagFilter;
+  List<String> _bookTagOptions = const [];
   UserOwnedBooksPriceStats? _ownedBooksPriceStats;
 
   /// 목록 요청이 [booksListRequestTimeout]으로 끊긴 뒤, UI에서 한 번만 소비.
@@ -81,6 +85,10 @@ class LibraryController extends ChangeNotifier {
 
   String? get booksReadingStatusFilter => _readingStatusFilter;
 
+  String? get booksTagFilter => _tagFilter;
+
+  List<String> get bookTagOptions => _bookTagOptions;
+
   /// 웹 대시보드와 동일한 소장 가격 집계. 로드 실패 시 null.
   ///
   /// History:
@@ -111,8 +119,11 @@ class LibraryController extends ChangeNotifier {
       _page = 1;
       _searchQuery = '';
       _readingStatusFilter = null;
+      _tagFilter = null;
+      _bookTagOptions = const [];
       _bookDetailOverrides.clear();
       loadBooks();
+      refreshBookTagOptions();
     }
     if (!auth.isAuthenticated) {
       _books = const [];
@@ -185,12 +196,15 @@ class LibraryController extends ChangeNotifier {
             search: _searchQuery.isEmpty ? null : _searchQuery,
             readingStatus: _readingStatusFilter,
             format: 'paper',
+            tag: _tagFilter,
           )
           .timeout(booksListRequestTimeout);
     }
 
     final bool defaultPaperListScope =
-        _searchQuery.isEmpty && _readingStatusFilter == null;
+        _searchQuery.isEmpty &&
+        _readingStatusFilter == null &&
+        _tagFilter == null;
 
     try {
       var requestPage = math.max(1, page);
@@ -301,6 +315,8 @@ class LibraryController extends ChangeNotifier {
     String? search,
     String? readingStatus,
     bool readingStatusAll = false,
+    String? tag,
+    bool tagAll = false,
   }) async {
     if (search != null) {
       _searchQuery = search.trim();
@@ -310,7 +326,23 @@ class LibraryController extends ChangeNotifier {
     } else if (readingStatus != null) {
       _readingStatusFilter = readingStatus == 'all' ? null : readingStatus;
     }
+    if (tagAll) {
+      _tagFilter = null;
+    } else if (tag != null) {
+      final t = tag.trim();
+      _tagFilter = t.isEmpty ? null : t;
+    }
     await loadBooksAtPage(1);
+  }
+
+  Future<void> refreshBookTagOptions() async {
+    if (!(_auth?.isAuthenticated ?? false)) return;
+    try {
+      _bookTagOptions = await _api.fetchUserBookTags();
+      notifyListeners();
+    } catch (_) {
+      /* ignore */
+    }
   }
 
   Future<void> goToBooksPage(int page) async {
@@ -319,23 +351,41 @@ class LibraryController extends ChangeNotifier {
     await loadBooksAtPage(p);
   }
 
+  /// History:
+  /// - 2026-05-24: 저장 연타 시 목록 재로드·API 중복 방지
   Future<void> createBook(UserBook book) async {
-    await _api.createBook(book);
-    _page = 1;
-    await loadBooksAtPage(1);
+    await _mutationGate.run('library:create', () async {
+      await _api.createBook(book);
+      _page = 1;
+      await loadBooksAtPage(1);
+    });
   }
 
+  /// History:
+  /// - 2026-05-24: 수정 연타 시 목록 재로드·API 중복 방지
   Future<UserBook> updateBook(String id, Map<String, dynamic> payload) async {
-    final updated = await _api.updateBook(id, payload);
-    _rememberUpdatedBook(updated);
-    await loadBooksAtPage(_page);
-    _rememberUpdatedBook(updated);
-    return updated;
+    final updated = await _mutationGate.run('library:update:$id', () async {
+      final book = await _api.updateBook(id, payload);
+      _rememberUpdatedBook(book);
+      await loadBooksAtPage(_page);
+      _rememberUpdatedBook(book);
+      return book;
+    });
+    if (updated != null) return updated;
+    return _bookDetailOverrides[id] ??
+        _books.firstWhere(
+          (b) => b.id == id,
+          orElse: () => throw StateError('도서를 찾을 수 없습니다.'),
+        );
   }
 
+  /// History:
+  /// - 2026-05-24: 삭제 연타 방지
   Future<void> deleteBook(String id) async {
-    await _api.deleteBook(id);
-    await loadBooksAtPage(_page);
+    await _mutationGate.run('library:delete:$id', () async {
+      await _api.deleteBook(id);
+      await loadBooksAtPage(_page);
+    });
   }
 
   Future<BookLookupResult> lookupByIsbn(String isbn) {

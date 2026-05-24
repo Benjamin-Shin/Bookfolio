@@ -7,6 +7,7 @@ import type {
   UserBookDetail,
   UserBookSummary,
 } from "@bookfolio/shared";
+import { normalizeUserBookTags } from "@bookfolio/shared";
 
 import { auth } from "@/auth";
 import { normalizeCoverUrlForClient } from "@/lib/books/cover-url";
@@ -41,6 +42,7 @@ type DbUserBook = {
   genre_slugs?: string[];
   is_owned: boolean;
   location: string | null;
+  tags?: string[];
   created_at: string;
   updated_at: string;
 };
@@ -55,6 +57,7 @@ type DbUserBookOwner = {
   reading_total_pages?: number | null;
   is_owned: boolean;
   location: string | null;
+  tags?: string[];
   created_at: string;
   updated_at: string;
 };
@@ -109,10 +112,16 @@ function pickNestedBook(row: DbUserBookNestedSelect): DbCanonicalBook | null {
   return Array.isArray(b) ? (b[0] ?? null) : b;
 }
 
+function mapTags(row: { tags?: string[] | null }): string[] | undefined {
+  const tags = normalizeUserBookTags(row.tags ?? []);
+  return tags.length > 0 ? tags : undefined;
+}
+
 /**
  * RPC/조인 행을 클라이언트용 요약으로 변환합니다.
  *
  * @history
+ * - 2026-05-24: `tags` (`user_books.tags`)
  * - 2026-04-06: `pageCount`·`currentPage`·`readingTotalPages` (`0030`)
  * - 2026-03-26: `bookId`를 항상 문자열로 직렬화(누락 시 빈 문자열) — 모바일에서 키 생략 시 잘못된 API URL 방지
  */
@@ -149,6 +158,7 @@ function mapFlatRow(row: DbUserBook): UserBookDetail {
         : null,
     isOwned: row.is_owned,
     location: row.location ?? null,
+    tags: mapTags(row),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     genreSlugs: genreSlugs.length > 0 ? genreSlugs : undefined,
@@ -180,6 +190,7 @@ function mapJoinedRow(row: DbUserBookNestedSelect): UserBookDetail {
     reading_total_pages: row.reading_total_pages ?? null,
     is_owned: row.is_owned,
     location: row.location,
+    tags: row.tags,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -223,6 +234,7 @@ const USER_BOOK_WITH_BOOKS_SELECT = `
   reading_total_pages,
   is_owned,
   location,
+  tags,
   created_at,
   updated_at,
   books!inner (
@@ -531,6 +543,8 @@ export type ListUserBooksPagedOptions = {
   isOwned?: boolean;
   /** `books.genre_slugs`에 포함된 슬러그로 한정 (0015 RPC). */
   genreSlug?: string;
+  /** `user_books.tags` 포함 필터 (`0046`). `__untagged__`는 태그 없음. */
+  tag?: string;
   /** `title`: 제목순(RPC `p_sort`). 생략: `updated_at` 내림차순. */
   sort?: "title" | "updated";
   /** `true`면 완독·개인 평점 4+만 (`0038` `p_hall_of_fame`). */
@@ -575,6 +589,7 @@ function parseListUserBooksPagedPayload(data: unknown): {
  * 사용자 도서 목록 페이지(RPC `list_user_books_paged`).
  *
  * @history
+ * - 2026-05-24: `p_tag`·행 `tags` (`0046`)
  * - 2026-04-12: `p_hall_of_fame` — 완독·평점 4+만 (`0038`, `hallOfFameOnly`일 때만 RPC에 전달)
  * - 2026-04-12: `p_sort`는 `sort==='title'`일 때만 RPC 인자에 포함(PostgREST가 `null` 키로 9인자 시그니처를 찾는 문제·`0037` 미적용 DB 호환)
  * - 2026-04-12: `p_sort`(`0037`) — 제목순·기본 수정일순
@@ -588,6 +603,7 @@ export async function listUserBooksPaged(
 ): Promise<{ items: UserBookSummary[]; total: number }> {
   const { supabase, userId } = await getClientAndUser(context);
   const genreTrim = opts.genreSlug?.trim();
+  const tagTrim = opts.tag?.trim();
   const { data, error } = await supabase.rpc("list_user_books_paged", {
     p_user_id: userId,
     p_search: opts.search?.trim() ? opts.search.trim() : null,
@@ -602,6 +618,7 @@ export async function listUserBooksPaged(
     p_genre_slug: genreTrim ? genreTrim : null,
     ...(opts.sort === "title" ? { p_sort: "title" as const } : {}),
     ...(opts.hallOfFameOnly ? { p_hall_of_fame: true as const } : {}),
+    ...(tagTrim ? { p_tag: tagTrim } : {}),
   });
 
   if (error) throw error;
@@ -623,6 +640,7 @@ export async function listUserBooks(
       offset: 0,
       format: query.format,
       readingStatus: query.readingStatus,
+      tag: query.tag,
     },
     context,
   );
@@ -801,6 +819,7 @@ export async function createUserBook(
   }
 
   const loc = input.location?.trim();
+  const tags = normalizeUserBookTags(input.tags ?? []);
   const payload = {
     user_id: userId,
     book_id: canonical.id,
@@ -808,6 +827,7 @@ export async function createUserBook(
     rating: input.rating ?? null,
     is_owned: input.isOwned ?? true,
     location: loc ? loc : null,
+    tags,
     current_page:
       input.currentPage !== undefined && input.currentPage !== null
         ? Math.floor(Math.min(Math.max(0, input.currentPage), 50_000))
@@ -916,6 +936,9 @@ export async function updateUserBook(
         ? null
         : Math.floor(Math.min(Math.max(1, input.readingTotalPages), 50_000));
   }
+  if (input.tags !== undefined) {
+    userPatch.tags = normalizeUserBookTags(input.tags);
+  }
 
   if (Object.keys(userPatch).length > 0) {
     const { error: uErr } = await supabase
@@ -941,6 +964,7 @@ export type UserBookShelfPatchInput = Pick<
   | "location"
   | "currentPage"
   | "readingTotalPages"
+  | "tags"
 >;
 
 /**
@@ -992,6 +1016,9 @@ export async function updateUserBookShelfOnly(
       input.readingTotalPages === null
         ? null
         : Math.floor(Math.min(Math.max(1, input.readingTotalPages), 50_000));
+  }
+  if (input.tags !== undefined) {
+    userPatch.tags = normalizeUserBookTags(input.tags);
   }
 
   if (Object.keys(userPatch).length === 0) {
@@ -1051,6 +1078,40 @@ export async function getUserOwnedBooksPriceStats(
     pricedOwnedCount: Number(row.pricedOwnedCount ?? 0),
     ownedCount: Number(row.ownedCount ?? 0),
   };
+}
+
+/**
+ * 사용자 태그 목록(정렬·중복 제거).
+ *
+ * @history
+ * - 2026-05-24: RPC `list_user_book_tags`
+ */
+export async function listUserBookTags(
+  context?: RepositoryContext,
+): Promise<string[]> {
+  const { supabase, userId } = await getClientAndUser(context);
+  const { data, error } = await supabase.rpc("list_user_book_tags", {
+    p_user_id: userId,
+  });
+  if (error) throw error;
+  let raw: unknown = data;
+  if (typeof raw === "string") {
+    try {
+      raw = JSON.parse(raw) as unknown;
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const out: string[] = [];
+  for (const x of raw) {
+    if (typeof x === "string" && x.trim()) {
+      out.push(x.trim());
+    }
+  }
+  return out;
 }
 
 /**

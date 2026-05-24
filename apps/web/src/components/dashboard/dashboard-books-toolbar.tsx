@@ -18,6 +18,8 @@ type DashboardBooksToolbarProps = {
   currentTab: DashboardTab;
   /** URL `genre` — 페이지 링크·폼에 유지(소장 탭) */
   genreSlug?: string;
+  /** URL `tag` — 사용자 태그 필터(소장 탭) */
+  tagSlug?: string;
   /** 소장 탭 제목순 유지 */
   ownedSort?: DashboardOwnedSort;
   /**
@@ -49,6 +51,7 @@ export function DashboardBooksToolbar({
   listTotal,
   currentTab,
   genreSlug = "",
+  tagSlug = "",
   ownedSort = "recent",
   renderedCount: renderedCountProp,
   showSearch = true,
@@ -80,6 +83,9 @@ export function DashboardBooksToolbar({
           />
           {genreSlug.trim() ? (
             <input type="hidden" name="genre" value={genreSlug.trim()} />
+          ) : null}
+          {tagSlug.trim() ? (
+            <input type="hidden" name="tag" value={tagSlug.trim()} />
           ) : null}
           {currentTab !== "reading" ? (
             <input type="hidden" name="tab" value={currentTab} />
@@ -132,6 +138,7 @@ type DashboardBooksPaginationProps = {
   pageSize: number;
   total: number;
   genreSlug?: string;
+  tagSlug?: string;
   tab: DashboardTab;
   /** 접근성·라벨용, 예: 「소장」 */
   sectionLabel: string;
@@ -154,6 +161,7 @@ export function DashboardBooksPagination({
   pageSize,
   total,
   genreSlug,
+  tagSlug,
   tab,
   sectionLabel,
   ownedSort = "recent",
@@ -180,6 +188,7 @@ export function DashboardBooksPagination({
               href={buildDashboardHref({
                 q: searchQuery,
                 genre: genreSlug,
+                tag: tagSlug,
                 page: page - 1,
                 tab,
                 ownedSort:
@@ -199,6 +208,7 @@ export function DashboardBooksPagination({
               href={buildDashboardHref({
                 q: searchQuery,
                 genre: genreSlug,
+                tag: tagSlug,
                 page: page + 1,
                 tab,
                 ownedSort:

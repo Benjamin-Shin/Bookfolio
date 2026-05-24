@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   BOOK_FORMATS,
   READING_STATUSES,
+  normalizeUserBookTags,
+  parseUserBookTagsCsv,
   type BookFormat,
   type ReadingStatus,
   type UpdateUserBookInput,
@@ -169,6 +171,9 @@ function pickShelfFieldsFromJson(body: Record<string, unknown>): UpdateUserBookI
       if (n >= 1) out.readingTotalPages = Math.min(n, 50_000);
     }
   }
+  if ("tags" in body) {
+    out.tags = normalizeUserBookTags(body.tags);
+  }
   return out;
 }
 
@@ -225,6 +230,11 @@ function parseFormDataToShelfOnly(input: FormData): UpdateUserBookInput {
     }
   }
   out.isOwned = input.get("isOwned") === "true";
+  if (input.has("tagsCsv")) {
+    out.tags = normalizeUserBookTags(
+      parseUserBookTagsCsv(input.get("tagsCsv")?.toString() ?? ""),
+    );
+  }
   return out;
 }
 

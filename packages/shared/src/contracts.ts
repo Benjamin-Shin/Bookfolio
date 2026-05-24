@@ -105,6 +105,13 @@ export interface UserBookSummary {
   isOwned: boolean;
   /** 집·회사·빌려줌 대상 등 물리적 위치(자유 입력). */
   location: string | null;
+  /**
+   * 사용자 개인 태그(`user_books.tags`, 책당 최대 5).
+   *
+   * @history
+   * - 2026-05-24: 내 서가 정리·필터용
+   */
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
   /**
@@ -151,6 +158,8 @@ export interface CreateUserBookInput {
   /** @history 2026-04-06: `user_books` 독서 진행 */
   currentPage?: number | null;
   readingTotalPages?: number | null;
+  /** @history 2026-05-24: `user_books.tags` */
+  tags?: string[];
 }
 
 export interface UpdateUserBookInput {
@@ -170,6 +179,8 @@ export interface UpdateUserBookInput {
   /** @history 2026-04-06: `user_books` 독서 진행 */
   currentPage?: number | null;
   readingTotalPages?: number | null;
+  /** @history 2026-05-24: `user_books.tags` */
+  tags?: string[];
 }
 
 /** 진행률 분모. 둘 다 없으면 null(진행률 미표시). */
@@ -282,6 +293,8 @@ export interface BooksQuery {
   search?: string;
   format?: BookFormat | "all";
   readingStatus?: ReadingStatus | "all";
+  /** `user_books.tags` 포함 필터. `__untagged__`는 태그 없음. */
+  tag?: string;
 }
 
 export const LIBRARY_KINDS = ["family", "club"] as const;

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart' show ColoredBox, Color, Widget;
 
 /// iOS ATS · Android cleartext 제한을 피하기 위해 `http://` → `https://` 로 맞춥니다.
 /// DB/API에 예전 형식이 남아 있어도 표시 단계에서 보정합니다.
@@ -18,6 +19,13 @@ String? resolveCoverImageUrl(String? raw) {
   if (uri.host.isEmpty) return null;
   return uri.toString();
 }
+
+/// 표지 [Image.network] 로드 실패 시 공통 placeholder (`errorBuilder`).
+///
+/// @history
+/// - 2026-05-24: CDN·네트워크 실패 시 FlutterError 방지
+const Widget kCoverImageErrorPlaceholder =
+    ColoredBox(color: Color(0xFFE9E3DE));
 
 /// 일부 표지 CDN이 비브라우저 클라이언트를 차단하는 경우가 있어 모바일·데스크톱 빌드에는 UA를 붙입니다.
 ///

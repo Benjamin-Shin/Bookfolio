@@ -18,6 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// History:
 /// - 2026-05-12: 해금 기능·포인트 관리(내역·획득·해금)·계정/알림 설정 UI 블록 주석 처리(비노출)
 /// - 2026-05-12: 메인 쉘 `body` 중첩 [Navigator] + `embeddedInShell` — 쉘 상·하단과 본문만 맞춤
+/// - 2026-05-23: [ProfileEditScreen] 푸시 시 `embeddedInShell` 전달(하단 탭 가림 보정)
 /// - 2026-04-26: 「관심 카테고리 설정」 메뉴를 [ProfileEditScreen]으로 연결
 /// - 2026-04-26: 드로어 「내 서가」 탭 동작 연결(루트 화면 복귀)
 /// - 2026-04-13: 법적 고지 — 이용약관 제20조(탈퇴) 웹 앵커 링크
@@ -145,7 +146,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _openInterestCategorySettings() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => const ProfileEditScreen(),
+        builder: (_) => ProfileEditScreen(
+          embeddedInShell: widget.embeddedInShell,
+        ),
       ),
     );
     if (!mounted) return;
@@ -255,7 +258,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             onPressed: () async {
                               await Navigator.of(context).push<void>(
                                 MaterialPageRoute<void>(
-                                  builder: (_) => const ProfileEditScreen(),
+                                  builder: (_) => ProfileEditScreen(
+                                    embeddedInShell: widget.embeddedInShell,
+                                  ),
                                 ),
                               );
                               if (mounted) await _load();

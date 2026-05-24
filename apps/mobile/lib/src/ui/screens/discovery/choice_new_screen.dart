@@ -3,6 +3,7 @@ import 'package:seogadam_mobile/src/state/library_controller.dart';
 import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
 import 'package:seogadam_mobile/src/ui/screens/discovery/discovery_book_detail_screen.dart';
 import 'package:seogadam_mobile/src/ui/screens/discovery/discovery_flow_breadcrumb.dart';
+import 'package:seogadam_mobile/src/util/aladin_category_display.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +12,8 @@ import 'package:provider/provider.dart';
 /// 알라딘 초이스 신간 목록.
 ///
 /// History:
+/// - 2026-05-24: 목록 상단 카테고리 안내 — CID 제거·관심 분야 장르 이름 표시
+/// - 2026-05-21: `embeddedInShell` 시 본문 하단 `bookfolioShellBottomNavInset` — 마지막 목록이 풋터에 가리던 문제
 /// - 2026-05-12: `embeddedInShell` — 메인 쉘 상·하단 유지, 본문 상단 브레드크럼
 class ChoiceNewScreen extends StatefulWidget {
   const ChoiceNewScreen({super.key, this.embeddedInShell = false});
@@ -27,6 +30,7 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
   static const String _breadcrumbLeaf = '초이스 신간';
   List<AladinBestsellerItem> _items = const [];
   List<int> _favoriteCategoryIds = const [];
+  List<AladinCategoryOption> _favoriteCategories = const [];
   bool _loading = true;
   String? _error;
 
@@ -63,9 +67,14 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
           merged.add(item);
         }
       }
+      final allCategories = await api.fetchAladinCategories();
+      final favoriteCategories = categoryIds
+          .map((cid) => resolveAladinCategoryForDiscovery(cid, allCategories))
+          .toList();
       if (!mounted) return;
       setState(() {
         _favoriteCategoryIds = categoryIds;
+        _favoriteCategories = favoriteCategories;
         _items = merged;
         _loading = false;
       });
@@ -80,7 +89,7 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
 
   EdgeInsets _listPadding(BuildContext context) {
     if (widget.embeddedInShell) {
-      return bookfolioShellTabScrollPadding(context).copyWith(top: 4);
+      return bookfolioShellPushedListScrollPadding();
     }
     final b = MediaQuery.viewPaddingOf(context).bottom;
     return EdgeInsets.fromLTRB(16, 8, 16, 24 + b);
@@ -115,9 +124,10 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Text(
-                preferredCategoryApplied
-                    ? '국내도서 관심 카테고리 ${_favoriteCategoryIds.length}개 기준'
-                    : '국내도서 기본 카테고리: 소설(CID 112011) 기준',
+                aladinDiscoveryFeedCategoryCaption(
+                  usingProfileFavorites: preferredCategoryApplied,
+                  categories: _favoriteCategories,
+                ),
                 style: GoogleFonts.manrope(
                     fontSize: 12, color: const Color(0xFF666666)),
               ),
@@ -161,7 +171,12 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
                         width: 62,
                         height: 90,
                         child: cover != null
-                            ? Image.network(cover, fit: BoxFit.cover)
+                            ? Image.network(
+                                cover,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    kCoverImageErrorPlaceholder,
+                              )
                             : const ColoredBox(color: Color(0xFFE9E3DE)),
                       ),
                     ),
@@ -206,12 +221,15 @@ class _ChoiceNewScreenState extends State<ChoiceNewScreen> {
   Widget build(BuildContext context) {
     final body = _buildBody(context);
     if (widget.embeddedInShell) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _breadcrumbPadded(),
-          Expanded(child: body),
-        ],
+      return Padding(
+        padding: EdgeInsets.only(bottom: bookfolioShellBottomNavInset(context)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _breadcrumbPadded(),
+            Expanded(child: body),
+          ],
+        ),
       );
     }
     return Scaffold(

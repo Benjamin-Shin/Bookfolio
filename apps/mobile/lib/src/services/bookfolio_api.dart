@@ -11,6 +11,7 @@ import 'package:seogadam_mobile/src/models/book_models.dart'
         UserBook,
         UserBookMemo;
 import 'package:seogadam_mobile/src/models/shared_library_models.dart';
+import 'package:seogadam_mobile/src/util/mutation_guard.dart';
 import 'package:http/http.dart' as http;
 
 /// API가 JSON `{ "error": "..." }` 로 돌려준 메시지를 담습니다 (예: 중복 등록 409).
@@ -405,9 +406,17 @@ class BookfolioApi {
   final http.Client _client;
   final String _baseUrl =
       const String.fromEnvironment('BOOKFOLIO_API_BASE_URL');
+  final MutationInFlightGuard _mutations = MutationInFlightGuard();
 
   /// [AuthController] 등에서 설정합니다.
   String? Function()? accessToken;
+
+  /// 변경(POST/PATCH/DELETE) 요청 연타 시 동일 키는 진행 중인 [Future]를 공유합니다.
+  ///
+  /// @history
+  /// - 2026-05-24: 저장·수정 버튼 연타로 인한 중복 API 방지
+  Future<T> _mutate<T>(String key, Future<T> Function() action) =>
+      _mutations.coalesce(key, action);
 
   Future<Map<String, String>> _headers() async {
     final token = accessToken?.call();
@@ -427,6 +436,7 @@ class BookfolioApi {
     String? search,
     String? readingStatus,
     String? format,
+    String? tag,
   }) async {
     final qp = <String, String>{
       'page': '${page.clamp(1, 1 << 20)}',
@@ -443,6 +453,10 @@ class BookfolioApi {
     final fmt = format?.trim();
     if (fmt != null && fmt.isNotEmpty && fmt != 'all') {
       qp['format'] = fmt;
+    }
+    final tagTrim = tag?.trim();
+    if (tagTrim != null && tagTrim.isNotEmpty) {
+      qp['tag'] = tagTrim;
     }
     final uri =
         Uri.parse('$_baseUrl/api/me/books').replace(queryParameters: qp);
@@ -563,33 +577,55 @@ class BookfolioApi {
         .toList();
   }
 
-  Future<UserBook> createBook(UserBook book) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/books'),
+  Future<List<String>> fetchUserBookTags() async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/api/me/book-tags'),
       headers: await _headers(),
-      body: jsonEncode(book.toCreatePayload()),
     );
     _throwIfFailed(response);
-    return UserBook.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    final decoded = jsonDecode(response.body);
+    if (decoded is! List<dynamic>) return const [];
+    return decoded
+        .map((e) => e.toString().trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+  }
+
+  Future<UserBook> createBook(UserBook book) async {
+    return _mutate('POST /api/me/books', () async {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/api/me/books'),
+        headers: await _headers(),
+        body: jsonEncode(book.toCreatePayload()),
+      );
+      _throwIfFailed(response);
+      return UserBook.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>);
+    });
   }
 
   Future<UserBook> updateBook(String id, Map<String, dynamic> payload) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/books/$id'),
-      headers: await _headers(),
-      body: jsonEncode({...payload, 'action': 'update'}),
-    );
-    _throwIfFailed(response);
-    return UserBook.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return _mutate('POST /api/me/books/$id#update', () async {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/api/me/books/$id'),
+        headers: await _headers(),
+        body: jsonEncode({...payload, 'action': 'update'}),
+      );
+      _throwIfFailed(response);
+      return UserBook.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>);
+    });
   }
 
   Future<void> deleteBook(String id) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/books/$id'),
-      headers: await _headers(),
-      body: jsonEncode({'action': 'delete'}),
-    );
-    _throwIfFailed(response);
+    return _mutate('POST /api/me/books/$id#delete', () async {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/api/me/books/$id'),
+        headers: await _headers(),
+        body: jsonEncode({'action': 'delete'}),
+      );
+      _throwIfFailed(response);
+    });
   }
 
   Future<List<SharedLibrarySummary>> fetchSharedLibraries() async {
@@ -615,20 +651,22 @@ class BookfolioApi {
     String? description,
     String? imageUrl,
   }) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/libraries'),
-      headers: await _headers(),
-      body: jsonEncode({
-        'name': name,
-        'kind': kind,
-        'description': description,
-        'imageUrl': imageUrl,
-      }),
-    );
-    _throwIfFailed(response);
-    return SharedLibrarySummary.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return _mutate('POST /api/me/libraries', () async {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/api/me/libraries'),
+        headers: await _headers(),
+        body: jsonEncode({
+          'name': name,
+          'kind': kind,
+          'description': description,
+          'imageUrl': imageUrl,
+        }),
+      );
+      _throwIfFailed(response);
+      return SharedLibrarySummary.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    });
   }
 
   /// 모임서가 수정.
@@ -642,21 +680,23 @@ class BookfolioApi {
     String? description,
     String? imageUrl,
   }) async {
-    final payload = <String, dynamic>{};
-    if (name != null) payload['name'] = name;
-    if (kind != null) payload['kind'] = kind;
-    if (description != null) payload['description'] = description;
-    if (imageUrl != null) payload['imageUrl'] = imageUrl;
+    return _mutate('PATCH /api/me/libraries/$libraryId', () async {
+      final payload = <String, dynamic>{};
+      if (name != null) payload['name'] = name;
+      if (kind != null) payload['kind'] = kind;
+      if (description != null) payload['description'] = description;
+      if (imageUrl != null) payload['imageUrl'] = imageUrl;
 
-    final response = await _client.patch(
-      Uri.parse('$_baseUrl/api/me/libraries/$libraryId'),
-      headers: await _headers(),
-      body: jsonEncode(payload),
-    );
-    _throwIfFailed(response);
-    return SharedLibrarySummary.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+      final response = await _client.patch(
+        Uri.parse('$_baseUrl/api/me/libraries/$libraryId'),
+        headers: await _headers(),
+        body: jsonEncode(payload),
+      );
+      _throwIfFailed(response);
+      return SharedLibrarySummary.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    });
   }
 
   Future<List<SharedLibraryBookSummary>> fetchSharedLibraryBooks(
@@ -845,32 +885,38 @@ class BookfolioApi {
 
   Future<UserBookMemo> createUserBookMemo(
       String userBookId, String bodyMd) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/books/$userBookId/memos'),
-      headers: await _headers(),
-      body: jsonEncode({'action': 'create', 'bodyMd': bodyMd}),
-    );
-    _throwIfFailed(response);
-    return UserBookMemo.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>);
+    return _mutate('POST /api/me/books/$userBookId/memos', () async {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/api/me/books/$userBookId/memos'),
+        headers: await _headers(),
+        body: jsonEncode({'action': 'create', 'bodyMd': bodyMd}),
+      );
+      _throwIfFailed(response);
+      return UserBookMemo.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>);
+    });
   }
 
   Future<void> upsertOneLiner(String userBookId, String body) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/books/$userBookId/one-liner'),
-      headers: await _headers(),
-      body: jsonEncode({'action': 'upsert', 'body': body}),
-    );
-    _throwIfFailed(response);
+    return _mutate('POST /api/me/books/$userBookId/one-liner#upsert', () async {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/api/me/books/$userBookId/one-liner'),
+        headers: await _headers(),
+        body: jsonEncode({'action': 'upsert', 'body': body}),
+      );
+      _throwIfFailed(response);
+    });
   }
 
   Future<void> clearOneLiner(String userBookId) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/books/$userBookId/one-liner'),
-      headers: await _headers(),
-      body: jsonEncode({'action': 'clear'}),
-    );
-    _throwIfFailed(response);
+    return _mutate('POST /api/me/books/$userBookId/one-liner#clear', () async {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/api/me/books/$userBookId/one-liner'),
+        headers: await _headers(),
+        body: jsonEncode({'action': 'clear'}),
+      );
+      _throwIfFailed(response);
+    });
   }
 
   Future<List<BookOneLinerItem>> fetchBookOneLiners(String bookId) async {
@@ -903,19 +949,25 @@ class BookfolioApi {
     Map<String, dynamic>? payload,
     String? setReadingStatus,
   }) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/books/$userBookId/reading-events'),
-      headers: await _headers(),
-      body: jsonEncode({
-        'action': 'append',
-        'eventType': eventType,
-        'payload': payload ?? <String, dynamic>{},
-        if (setReadingStatus != null) 'setReadingStatus': setReadingStatus,
-      }),
+    return _mutate(
+      'POST /api/me/books/$userBookId/reading-events',
+      () async {
+        final response = await _client.post(
+          Uri.parse('$_baseUrl/api/me/books/$userBookId/reading-events'),
+          headers: await _headers(),
+          body: jsonEncode({
+            'action': 'append',
+            'eventType': eventType,
+            'payload': payload ?? <String, dynamic>{},
+            if (setReadingStatus != null)
+              'setReadingStatus': setReadingStatus,
+          }),
+        );
+        _throwIfFailed(response);
+        return ReadingEventItem.fromJson(
+            jsonDecode(response.body) as Map<String, dynamic>);
+      },
     );
-    _throwIfFailed(response);
-    return ReadingEventItem.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// `GET /api/me/stats/bookfolio-aggregate?top=10`
@@ -948,11 +1000,13 @@ class BookfolioApi {
   /// History:
   /// - 2026-03-29: 모바일 프로필 탈퇴 연동
   Future<void> deleteAccount() async {
-    final response = await _client.delete(
-      Uri.parse('$_baseUrl/api/me/account'),
-      headers: await _headers(),
-    );
-    _throwIfFailed(response);
+    return _mutate('DELETE /api/me/account', () async {
+      final response = await _client.delete(
+        Uri.parse('$_baseUrl/api/me/account'),
+        headers: await _headers(),
+      );
+      _throwIfFailed(response);
+    });
   }
 
   /// `GET /api/me/mobile-home` — 홈 탭용 프로필·요약·포인트·도서 샘플 일괄 조회.
@@ -1005,19 +1059,24 @@ class BookfolioApi {
     String? requestId,
     Map<String, dynamic>? metadata,
   }) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/recommendations/interactions'),
-      headers: await _headers(),
-      body: jsonEncode({
-        'bookId': bookId,
-        'interactionType': interactionType,
-        'surface': surface,
-        if (requestId != null && requestId.trim().isNotEmpty)
-          'requestId': requestId.trim(),
-        if (metadata != null) 'metadata': metadata,
-      }),
+    return _mutate(
+      'POST /api/me/recommendations/interactions',
+      () async {
+        final response = await _client.post(
+          Uri.parse('$_baseUrl/api/me/recommendations/interactions'),
+          headers: await _headers(),
+          body: jsonEncode({
+            'bookId': bookId,
+            'interactionType': interactionType,
+            'surface': surface,
+            if (requestId != null && requestId.trim().isNotEmpty)
+              'requestId': requestId.trim(),
+            if (metadata != null) 'metadata': metadata,
+          }),
+        );
+        _throwIfFailed(response);
+      },
     );
-    _throwIfFailed(response);
   }
 
   /// `GET /api/me/points/balance`
@@ -1038,19 +1097,24 @@ class BookfolioApi {
     String? refType,
     String? refId,
   }) async {
-    final payload = <String, dynamic>{
-      'eventCode': eventCode,
-      'idempotencyKey': idempotencyKey,
-      if (refType != null && refType.isNotEmpty) 'refType': refType,
-      if (refId != null && refId.isNotEmpty) 'refId': refId,
-    };
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/points/apply-event'),
-      headers: await _headers(),
-      body: jsonEncode(payload),
+    return _mutate(
+      'POST /api/me/points/apply-event#$idempotencyKey',
+      () async {
+        final payload = <String, dynamic>{
+          'eventCode': eventCode,
+          'idempotencyKey': idempotencyKey,
+          if (refType != null && refType.isNotEmpty) 'refType': refType,
+          if (refId != null && refId.isNotEmpty) 'refId': refId,
+        };
+        final response = await _client.post(
+          Uri.parse('$_baseUrl/api/me/points/apply-event'),
+          headers: await _headers(),
+          body: jsonEncode(payload),
+        );
+        _throwIfFailed(response);
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      },
     );
-    _throwIfFailed(response);
-    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
   /// `GET /api/me/profile`
@@ -1073,14 +1137,16 @@ class BookfolioApi {
   /// - 2026-04-06: `onboardingCompleted` — 온보딩 완료 플래그
   /// - 2026-04-02: 신규
   Future<MeAppProfile> updateMeProfile(Map<String, dynamic> fields) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/me/profile'),
-      headers: await _headers(),
-      body: jsonEncode({'action': 'update', ...fields}),
-    );
-    _throwIfFailed(response);
-    return MeAppProfile.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>);
+    return _mutate('POST /api/me/profile#update', () async {
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/api/me/profile'),
+        headers: await _headers(),
+        body: jsonEncode({'action': 'update', ...fields}),
+      );
+      _throwIfFailed(response);
+      return MeAppProfile.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>);
+    });
   }
 
   /// `GET /api/me/stats/personal-library-summary`
@@ -1146,22 +1212,24 @@ class BookfolioApi {
     String platform = 'mobile',
     Map<String, dynamic>? deviceInfo,
   }) async {
-    final uri = Uri.parse('$_baseUrl/api/me/feedback');
-    final response = await _client.post(
-      uri,
-      headers: await _headers(),
-      body: jsonEncode({
-        'category': category,
-        'body': body,
-        if (contactEmail != null && contactEmail.trim().isNotEmpty)
-          'contactEmail': contactEmail.trim(),
-        'platform': platform,
-        if (appVersion != null && appVersion.trim().isNotEmpty)
-          'appVersion': appVersion.trim(),
-        'deviceInfo': deviceInfo ?? const <String, dynamic>{},
-      }),
-    );
-    _throwIfFailed(response);
+    return _mutate('POST /api/me/feedback', () async {
+      final uri = Uri.parse('$_baseUrl/api/me/feedback');
+      final response = await _client.post(
+        uri,
+        headers: await _headers(),
+        body: jsonEncode({
+          'category': category,
+          'body': body,
+          if (contactEmail != null && contactEmail.trim().isNotEmpty)
+            'contactEmail': contactEmail.trim(),
+          'platform': platform,
+          if (appVersion != null && appVersion.trim().isNotEmpty)
+            'appVersion': appVersion.trim(),
+          'deviceInfo': deviceInfo ?? const <String, dynamic>{},
+        }),
+      );
+      _throwIfFailed(response);
+    });
   }
 
   void _throwIfFailed(http.Response response) {

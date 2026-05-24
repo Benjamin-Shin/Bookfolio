@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 /// 햄버거 메뉴(내 서가·프로필·내 서가 통계·발견·모임서가·법적 고지).
 ///
 /// History:
+/// - 2026-05-23: `openPrivacyInShell`·`openTermsInShell` — 법적 고지 쉘 본문 푸시(하단 탭 가림 보정)
 /// - 2026-05-18: 「의견 보내기」 — [FeedbackScreen]
 /// - 2026-05-12: 햄버거 법적 고지에서 「쿠키 정책」·웹 `/cookies` 열기 제거
 /// - 2026-05-12: `openLibraryStatsInShell`·`openBestsellerInShell`·`openChoiceNewInShell` — 드로어에서 쉘 본문 [Navigator] 푸시
@@ -30,6 +31,8 @@ class BookfolioNavigationDrawer extends StatelessWidget {
     this.openLibraryStatsInShell,
     this.openBestsellerInShell,
     this.openChoiceNewInShell,
+    this.openPrivacyInShell,
+    this.openTermsInShell,
     this.onAfterProfilePop,
   });
 
@@ -50,6 +53,12 @@ class BookfolioNavigationDrawer extends StatelessWidget {
 
   /// 쉘 본문 [Navigator]에 [ChoiceNewScreen] 푸시.
   final Future<void> Function()? openChoiceNewInShell;
+
+  /// 쉘 본문 [Navigator]에 [LegalMarkdownScreen] (개인정보) 푸시.
+  final Future<void> Function()? openPrivacyInShell;
+
+  /// 쉘 본문 [Navigator]에 [LegalMarkdownScreen] (약관) 푸시.
+  final Future<void> Function()? openTermsInShell;
 
   /// `openProfileInShell`이 없을 때, 루트 `push` 프로필이 닫힌 뒤 호출.
   final VoidCallback? onAfterProfilePop;
@@ -196,10 +205,15 @@ class BookfolioNavigationDrawer extends StatelessWidget {
               '개인정보처리방침',
               style: textTheme.bodySmall?.copyWith(fontSize: 13),
             ),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Navigator.of(context)
-                  .push<void>(LegalMarkdownScreen.privacyRoute());
+              if (openPrivacyInShell != null) {
+                await openPrivacyInShell!();
+              } else {
+                await Navigator.of(context).push<void>(
+                  LegalMarkdownScreen.privacyRoute(),
+                );
+              }
             },
           ),
           ListTile(
@@ -211,10 +225,15 @@ class BookfolioNavigationDrawer extends StatelessWidget {
               '서비스 약관',
               style: textTheme.bodySmall?.copyWith(fontSize: 13),
             ),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Navigator.of(context)
-                  .push<void>(LegalMarkdownScreen.termsRoute());
+              if (openTermsInShell != null) {
+                await openTermsInShell!();
+              } else {
+                await Navigator.of(context).push<void>(
+                  LegalMarkdownScreen.termsRoute(),
+                );
+              }
             },
           ),
         ],
