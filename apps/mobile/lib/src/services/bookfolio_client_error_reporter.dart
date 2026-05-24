@@ -7,12 +7,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
 import 'package:seogadam_mobile/src/state/auth_controller.dart';
 import 'package:seogadam_mobile/src/ui/app_root_scaffold.dart';
 
 /// 서버 `POST /api/client-errors`로 모바일 오류를 **사용자 동의 후** 전송합니다.
 ///
 /// History:
+/// - 2026-05-24: `BookfolioApiException`(4xx) — UI 안내용, 진단 리포트 제외
 /// - 2026-05-03: 확인 다이얼로그 후 전송 — 자동 전송 제거
 /// - 2026-05-03: 신규 — 전역 핸들러·환경 context·선택 Bearer
 class BookfolioClientErrorReporter {
@@ -57,9 +59,20 @@ class BookfolioClientErrorReporter {
 
     final previousPlatformOnError = PlatformDispatcher.instance.onError;
     PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+      if (_isUserFacingApiError(error)) {
+        return true;
+      }
       unawaited(reportAsyncError(error, stack));
       return previousPlatformOnError?.call(error, stack) ?? false;
     };
+  }
+
+  /// API 4xx 등 UI에서 안내할 예상 오류 — 진단 전송·플랫폼 미처리 오류로 취급하지 않음.
+  ///
+  /// History:
+  /// - 2026-05-24: 중복 등록(409) 등 `BookfolioApiException` 제외
+  bool _isUserFacingApiError(Object error) {
+    return error is BookfolioApiException && error.isUserFacing;
   }
 
   /// 위젯 프레임워크 오류 1건 — **전송 확인** 후 서버로 보냅니다.
@@ -68,6 +81,9 @@ class BookfolioClientErrorReporter {
   /// - 2026-05-03: 확인 다이얼로그 경유
   /// - 2026-05-03: 신규
   Future<void> reportFlutterError(FlutterErrorDetails details) async {
+    if (_isUserFacingApiError(details.exception)) {
+      return;
+    }
     final buffer = StringBuffer();
     buffer.writeln(details.exceptionAsString());
     if (details.library != null) {
@@ -90,6 +106,9 @@ class BookfolioClientErrorReporter {
   /// - 2026-05-03: 확인 다이얼로그 경유
   /// - 2026-05-03: 신규
   Future<void> reportAsyncError(Object error, StackTrace stack) async {
+    if (_isUserFacingApiError(error)) {
+      return;
+    }
     await _offerReport(
       kind: 'zone_async',
       message: error.toString(),

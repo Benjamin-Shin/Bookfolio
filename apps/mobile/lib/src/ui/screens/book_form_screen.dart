@@ -128,59 +128,61 @@ class _BookFormScreenState extends State<BookFormScreen> {
       );
       return;
     }
-    await _saveGate.run('save', () async {
-      if (mounted) setState(() => _saving = true);
-      try {
-        if (widget.isEditing) {
-          await context.read<LibraryController>().updateBook(
-            widget.existingBook!.id,
-            {
-              'readingStatus': _status.name,
-              'rating': _rating,
-              'location': _locationCtrl.text.trim().isEmpty
+    try {
+      await _saveGate.run('save', () async {
+        if (mounted) setState(() => _saving = true);
+        try {
+          if (widget.isEditing) {
+            await context.read<LibraryController>().updateBook(
+              widget.existingBook!.id,
+              {
+                'readingStatus': _status.name,
+                'rating': _rating,
+                'location': _locationCtrl.text.trim().isEmpty
+                    ? null
+                    : _locationCtrl.text.trim(),
+                'tags': _tags,
+              },
+            );
+          } else {
+            final book = UserBook(
+              id: '',
+              bookId: '',
+              title: selected.title,
+              authors: selected.authors,
+              format: BookFormat.paper,
+              readingStatus: _status,
+              rating: _rating,
+              coverUrl: selected.coverUrl,
+              publisher: selected.publisher,
+              publishedDate: selected.publishedDate,
+              description: selected.description,
+              isbn: selected.isbn.isEmpty ? null : selected.isbn,
+              isOwned: true,
+              priceKrw: selected.priceKrw,
+              location: _locationCtrl.text.trim().isEmpty
                   ? null
                   : _locationCtrl.text.trim(),
-              'tags': _tags,
-            },
-          );
-        } else {
-          final book = UserBook(
-            id: '',
-            bookId: '',
-            title: selected.title,
-            authors: selected.authors,
-            format: BookFormat.paper,
-            readingStatus: _status,
-            rating: _rating,
-            coverUrl: selected.coverUrl,
-            publisher: selected.publisher,
-            publishedDate: selected.publishedDate,
-            description: selected.description,
-            isbn: selected.isbn.isEmpty ? null : selected.isbn,
-            isOwned: true,
-            priceKrw: selected.priceKrw,
-            location: _locationCtrl.text.trim().isEmpty
-                ? null
-                : _locationCtrl.text.trim(),
-            tags: _tags,
-          );
-          await context.read<LibraryController>().createBook(book);
-        }
+              tags: _tags,
+            );
+            await context.read<LibraryController>().createBook(book);
+          }
 
-        if (!mounted) return;
-        Navigator.of(context).pop();
-      } on BookfolioApiException catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
-      } finally {
-        if (mounted) setState(() => _saving = false);
-      }
-    });
+          if (!mounted) return;
+          Navigator.of(context).pop();
+        } finally {
+          if (mounted) setState(() => _saving = false);
+        }
+      });
+    } on BookfolioApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 
   @override

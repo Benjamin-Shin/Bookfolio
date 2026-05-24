@@ -6,6 +6,13 @@
     "apps/*",
     "packages/*"
   ],
+  "pnpm": {
+    "overrides": {
+      "lodash": ">=4.18.0",
+      "ws": ">=8.20.1",
+      "postcss": ">=8.5.10"
+    }
+  },
   "scripts": {
     "dev:web": "pnpm --filter @bookfolio/web run dev",
     "build:web": "pnpm --filter @bookfolio/web run build",

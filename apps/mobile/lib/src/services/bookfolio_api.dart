@@ -15,11 +15,17 @@ import 'package:seogadam_mobile/src/util/mutation_guard.dart';
 import 'package:http/http.dart' as http;
 
 /// API가 JSON `{ "error": "..." }` 로 돌려준 메시지를 담습니다 (예: 중복 등록 409).
+///
+/// @history
+/// - 2026-05-24: `isUserFacing` — 4xx는 진단 리포트 제외
 class BookfolioApiException implements Exception {
   BookfolioApiException(this.statusCode, this.message);
 
   final int statusCode;
   final String message;
+
+  /// 서버가 사용자에게 보여줄 수 있는 4xx 응답인지 (진단 리포트·크래시 핸들러 제외용).
+  bool get isUserFacing => statusCode >= 400 && statusCode < 500;
 
   @override
   String toString() => message;
