@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 /// 로그인 여부·온보딩·네트워크 가드 후 메인 쉘.
 ///
 /// @history
+/// - 2026-06-05: `isRestoring` 대기·401 refresh/signOut·포그라운드 resume 갱신
 /// - 2026-04-29: 앱 시작 시 `AppUpdateService`로 Android/iOS 스토어 업데이트 체크를 연결
 /// - 2026-04-06: `NetworkGate`·프로필 기반 `OnboardingScreen`·`SharedLibraryInviteLifecycle` 순서 정리
 /// - 2026-04-02: 로그인 후 `MainShellScreen`(하단 내비·드로어)
@@ -39,6 +40,11 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     return Consumer<AuthController>(
       builder: (context, auth, _) {
+        if (auth.isRestoring) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
         if (!auth.isAuthenticated) {
           return const NetworkGate(child: LoginScreen());
         }
@@ -56,7 +62,8 @@ class _AuthenticatedSessionRoot extends StatefulWidget {
       _AuthenticatedSessionRootState();
 }
 
-class _AuthenticatedSessionRootState extends State<_AuthenticatedSessionRoot> {
+class _AuthenticatedSessionRootState extends State<_AuthenticatedSessionRoot>
+    with WidgetsBindingObserver {
   MeAppProfile? _profile;
   bool _loading = true;
   String? _error;
@@ -64,9 +71,23 @@ class _AuthenticatedSessionRootState extends State<_AuthenticatedSessionRoot> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_loadProfile());
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(context.read<AuthController>().maybeRefreshSession());
+    }
   }
 
   Future<void> _loadProfile() async {
@@ -76,7 +97,8 @@ class _AuthenticatedSessionRootState extends State<_AuthenticatedSessionRoot> {
     });
     try {
       final api = context.read<LibraryController>().api;
-      final p = await api.fetchMeProfile();
+      final auth = context.read<AuthController>();
+      final p = await _fetchProfileWithAuthRetry(api, auth);
       if (!mounted) return;
       setState(() {
         _profile = p;
@@ -85,10 +107,27 @@ class _AuthenticatedSessionRootState extends State<_AuthenticatedSessionRoot> {
       });
     } catch (e) {
       if (!mounted) return;
+      if (!context.read<AuthController>().isAuthenticated) {
+        return;
+      }
       setState(() {
-        _error = e.toString();
+        _error = e is BookfolioApiException ? e.message : e.toString();
         _loading = false;
       });
+    }
+  }
+
+  Future<MeAppProfile> _fetchProfileWithAuthRetry(
+    BookfolioApi api,
+    AuthController auth,
+  ) async {
+    try {
+      return await api.fetchMeProfile();
+    } on BookfolioApiException catch (e) {
+      if (e.statusCode != 401) rethrow;
+      final refreshed = await auth.handleUnauthorizedResponse();
+      if (!refreshed) rethrow;
+      return api.fetchMeProfile();
     }
   }
 

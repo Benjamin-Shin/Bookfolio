@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:seogadam_mobile/src/util/jwt_claims.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,6 +20,7 @@ class AuthSession {
 /// Bearer 세션, 이메일·Google 로그인, 이메일 가입.
 ///
 /// History:
+/// - 2026-06-05: sliding JWT refresh·401 시 재발급·grace/absolute max 정책
 /// - 2026-04-30: 카카오 토큰 교환 요청에 `x-bookfolio-auth-trace` 헤더를 추가해 서버 access log 대조 가능하도록 개선
 /// - 2026-04-30: 디버그 빌드에서 로그인 단계 추적을 위해 인앱 로그 버퍼(`loginTrace`) 추가
 /// - 2026-04-30: 카카오 로그인 무에러 정체 디버깅을 위해 토큰 저장 예외/무에러 실패 기본 메시지 추가
@@ -36,6 +38,7 @@ class AuthController extends ChangeNotifier {
   bool _isRestoring = true;
   String? _error;
   final List<String> _loginTrace = <String>[];
+  DateTime? _lastRefreshAttemptAt;
 
   AuthSession? get session => _session;
   bool get isLoading => _isLoading;
@@ -108,13 +111,87 @@ class AuthController extends ChangeNotifier {
           await prefs.remove(_tokenKey);
         }
       }
+      if (raw != null && raw.isNotEmpty && !mobileJwtIsStoredTokenUsable(raw)) {
+        await _secureStorage.delete(key: _tokenKey);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_tokenKey);
+        raw = null;
+      }
       _session = (raw != null && raw.isNotEmpty) ? AuthSession(raw) : null;
+      if (_session != null) {
+        await maybeRefreshSession(bypassDebounce: true);
+      }
     } catch (e) {
       _session = null;
       _error = '저장된 로그인 정보를 복원하지 못했습니다: $e';
     } finally {
       _isRestoring = false;
       notifyListeners();
+    }
+  }
+
+  /// `exp` 7일 미만·grace 만료 토큰이면 `POST /api/auth/mobile/refresh`로 연장합니다.
+  ///
+  /// @history
+  /// - 2026-06-05: restore/resume·401 대응용 sliding refresh
+  Future<bool> maybeRefreshSession({bool bypassDebounce = false}) async {
+    final token = _session?.accessToken.trim();
+    if (token == null || token.isEmpty) return false;
+    if (!mobileJwtShouldProactiveRefresh(token)) return false;
+
+    if (!bypassDebounce && _lastRefreshAttemptAt != null) {
+      final elapsed = DateTime.now().difference(_lastRefreshAttemptAt!);
+      if (elapsed < mobileJwtRefreshDebounce) return false;
+    }
+
+    _lastRefreshAttemptAt = DateTime.now();
+    return _refreshAccessToken(token);
+  }
+
+  /// API 401 응답 시 refresh 1회 시도. 실패하면 [signOut]합니다.
+  ///
+  /// @history
+  /// - 2026-06-05: 재시작·만료 JWT Unauthorized 화면 대신 로그인 유도
+  Future<bool> handleUnauthorizedResponse() async {
+    final token = _session?.accessToken.trim();
+    if (token == null || token.isEmpty) {
+      await signOut();
+      return false;
+    }
+    if (!mobileJwtIsStoredTokenUsable(token)) {
+      await signOut();
+      return false;
+    }
+
+    _lastRefreshAttemptAt = DateTime.now();
+    final ok = await _refreshAccessToken(token);
+    if (!ok) {
+      await signOut();
+    }
+    return ok;
+  }
+
+  Future<bool> _refreshAccessToken(String currentToken) async {
+    if (_apiBase.trim().isEmpty) return false;
+    try {
+      final response = await http.post(
+        _apiUri('/api/auth/mobile/refresh'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $currentToken',
+        },
+      );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final map = jsonDecode(response.body) as Map<String, dynamic>;
+        final newToken = map['accessToken'] as String?;
+        if (newToken != null && newToken.isNotEmpty) {
+          await _storeAccessToken(newToken);
+          return true;
+        }
+      }
+      return false;
+    } catch (_) {
+      return false;
     }
   }
 

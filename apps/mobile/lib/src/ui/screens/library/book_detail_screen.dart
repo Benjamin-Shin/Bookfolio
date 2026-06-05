@@ -3,9 +3,11 @@ import 'package:seogadam_mobile/src/services/bookfolio_api.dart';
 import 'package:seogadam_mobile/src/state/library_controller.dart';
 import 'package:seogadam_mobile/src/ui/book_ui_labels.dart';
 import 'package:seogadam_mobile/src/ui/layout/mobile_scroll_padding.dart';
+import 'package:seogadam_mobile/src/ui/widgets/user_book_tags_input.dart';
 import 'package:seogadam_mobile/src/util/cover_image_url.dart';
 import 'package:seogadam_mobile/src/util/mutation_guard.dart';
 import 'package:seogadam_mobile/src/util/quote_ocr.dart';
+import 'package:seogadam_mobile/src/util/user_book_tags.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,6 +17,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 /// 내 서가 도서 상세 — 독서 기록·메모·캐논 공개 한줄평.
 ///
 /// History:
+/// - 2026-05-24: 내 서가 태그 추가·삭제·저장 (`UserBookTagsInput`)
 /// - 2026-05-24: 기록 수정·상태·평점 저장 연타 방지 (`AsyncActionGate`)
 /// - 2026-05-24: 캐논 공개 한줄평 작성·저장·삭제(500자) UI
 class BookDetailScreen extends StatefulWidget {
@@ -45,7 +48,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   bool _savingMemo = false;
   bool _savingOneLiner = false;
   bool _savingProgress = false;
+  bool _savingTags = false;
   bool _voiceInProgress = false;
+  late List<String> _draftTags;
   final _actionGate = AsyncActionGate();
 
   @override
@@ -55,7 +60,11 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     _currentPageCtrl.text = b.currentPage?.toString() ?? '';
     _totalPageCtrl.text =
         b.readingTotalPages?.toString() ?? b.pageCount?.toString() ?? '';
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSidecars());
+    _draftTags = List<String>.from(b.tags);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSidecars();
+      context.read<LibraryController>().refreshBookTagOptions();
+    });
   }
 
   @override
@@ -118,6 +127,40 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    });
+  }
+
+  bool _tagsDirty(UserBook saved) {
+    final draft = normalizeUserBookTags(_draftTags);
+    final current = normalizeUserBookTags(saved.tags);
+    if (draft.length != current.length) return true;
+    for (var i = 0; i < draft.length; i++) {
+      if (draft[i] != current[i]) return true;
+    }
+    return false;
+  }
+
+  Future<void> _saveTags() async {
+    await _actionGate.run('saveTags', () async {
+      if (mounted) setState(() => _savingTags = true);
+      final normalized = normalizeUserBookTags(_draftTags);
+      try {
+        final library = context.read<LibraryController>();
+        await library.updateBook(widget.book.id, {'tags': normalized});
+        await library.refreshBookTagOptions();
+        if (!mounted) return;
+        final saved = library.bookForDetail(widget.book);
+        setState(() => _draftTags = List<String>.from(saved.tags));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('태그를 저장했습니다.')),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      } finally {
+        if (mounted) setState(() => _savingTags = false);
       }
     });
   }
@@ -345,6 +388,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           const SizedBox(height: 12),
           _recordCard(b, progress, current, total),
           const SizedBox(height: 12),
+          _tagsCard(b),
+          const SizedBox(height: 12),
           _ratingCard(b.rating),
           const SizedBox(height: 12),
           _memoCard(),
@@ -515,6 +560,23 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _tagsCard(UserBook saved) {
+    final library = context.watch<LibraryController>();
+    final dirty = _tagsDirty(saved);
+    return _card(
+      title: '태그',
+      trailing: TextButton(
+        onPressed: (!_savingTags && dirty) ? _saveTags : null,
+        child: Text(_savingTags ? '저장 중…' : '저장'),
+      ),
+      child: UserBookTagsInput(
+        tags: _draftTags,
+        suggestions: library.bookTagOptions,
+        onChanged: (next) => setState(() => _draftTags = next),
       ),
     );
   }

@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 /// 개인 서가 그리드·상단 통계 진입.
 ///
 /// History:
+/// - 2026-05-24: 「전체」탭에서만 태그 칩 필터·다른 탭 전환 시 서버 태그 필터 해제
 /// - 2026-05-12: 통계 화면 푸시 시 `LibraryAnalysisScreen(embeddedInShell: true)`
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -55,6 +56,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
     await context
         .read<LibraryController>()
         .setBooksListFilters(search: _searchCtrl.text);
+  }
+
+  Future<void> _onShelfTabSelected(_ShelfTab value) async {
+    if (_tab == value) return;
+    setState(() => _tab = value);
+    if (value != _ShelfTab.all) {
+      final library = context.read<LibraryController>();
+      if (library.booksTagFilter != null) {
+        await library.setBooksListFilters(tagAll: true);
+      }
+    }
   }
 
   List<UserBook> _applyViewFilters(List<UserBook> books) {
@@ -116,8 +128,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
             const SizedBox(height: 14),
             _searchSortRow(),
-            const SizedBox(height: 8),
-            _tagFilterRow(library),
+            if (_tab == _ShelfTab.all) ...[
+              const SizedBox(height: 8),
+              _tagFilterRow(library),
+            ],
             const SizedBox(height: 12),
             if (library.isLoading)
               const Padding(
@@ -184,7 +198,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       final selected = _tab == value;
       return Expanded(
         child: InkWell(
-          onTap: () => setState(() => _tab = value),
+          onTap: () => _onShelfTabSelected(value),
           borderRadius: BorderRadius.circular(999),
           child: Container(
             height: 44,
