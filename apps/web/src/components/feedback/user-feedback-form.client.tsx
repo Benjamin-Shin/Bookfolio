@@ -21,6 +21,7 @@ type UserFeedbackFormProps = {
  * 의견 보내기 폼 — `POST /api/me/feedback`.
  *
  * @history
+ * - 2026-06-10: 유형 선택 — select 대신 버튼(칩) 방식
  * - 2026-05-18: 신규
  */
 export function UserFeedbackForm({ defaultContactEmail }: UserFeedbackFormProps) {
@@ -32,9 +33,12 @@ export function UserFeedbackForm({ defaultContactEmail }: UserFeedbackFormProps)
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
+  const shellClass =
+    "space-y-5 rounded-2xl border border-[#E9E3DE] bg-white p-4 shadow-sm sm:p-6";
+
   if (done) {
     return (
-      <div className="rounded-xl border border-[#1A3C2F]/10 bg-white/90 p-6 shadow-sm">
+      <div className={shellClass}>
         <p className="font-medium text-[#1A3C2F]">의견을 보냈습니다. 감사합니다.</p>
         <p className="mt-2 text-sm text-[#434843]">
           검토 후 필요하면 연락 이메일로 답변드릴 수 있습니다.
@@ -61,7 +65,7 @@ export function UserFeedbackForm({ defaultContactEmail }: UserFeedbackFormProps)
 
   return (
     <form
-      className="space-y-5 rounded-xl border border-[#1A3C2F]/10 bg-white/90 p-6 shadow-sm"
+      className={shellClass}
       onSubmit={async (e) => {
         e.preventDefault();
         setSaving(true);
@@ -95,20 +99,24 @@ export function UserFeedbackForm({ defaultContactEmail }: UserFeedbackFormProps)
       }}
     >
       <div className="space-y-2">
-        <Label htmlFor="feedback-category">유형</Label>
-        <select
-          id="feedback-category"
-          className="flex h-9 w-full max-w-md rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          value={category}
-          onChange={(ev) => setCategory(ev.target.value as UserFeedbackCategory)}
-          disabled={saving}
-        >
+        <Label>유형</Label>
+        <div className="flex flex-wrap gap-2">
           {USER_FEEDBACK_CATEGORIES.map((c) => (
-            <option key={c} value={c}>
+            <Button
+              key={c}
+              type="button"
+              size="sm"
+              variant={category === c ? "default" : "outline"}
+              className={
+                category === c ? "bg-[#0E6A3C] text-white hover:bg-[#0E6A3C]/90" : undefined
+              }
+              onClick={() => setCategory(c)}
+              disabled={saving}
+            >
               {USER_FEEDBACK_CATEGORY_LABEL_KO[c]}
-            </option>
+            </Button>
           ))}
-        </select>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -117,7 +125,7 @@ export function UserFeedbackForm({ defaultContactEmail }: UserFeedbackFormProps)
           id="feedback-body"
           value={body}
           onChange={(ev) => setBody(ev.target.value)}
-          placeholder="불편했던 점, 개선 아이디어, 오류 상황 등을 자유롭게 적어 주세요."
+          placeholder="불편했던 점, 개선 아이디어, 오류 상황 등"
           rows={8}
           required
           minLength={4}
@@ -143,12 +151,12 @@ export function UserFeedbackForm({ defaultContactEmail }: UserFeedbackFormProps)
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <p className="text-xs text-[#675d53]">
-        스토어 별점·리뷰와는 별도입니다. 앱스토어 평가는 각 스토어에서 남겨 주세요.
-      </p>
-
       <div className="flex flex-wrap gap-2 pt-1">
-        <Button type="submit" disabled={saving || body.trim().length < 4}>
+        <Button
+          type="submit"
+          disabled={saving || body.trim().length < 4}
+          className="bg-[#0E6A3C] hover:bg-[#0E6A3C]/90"
+        >
           {saving ? "보내는 중…" : "의견 보내기"}
         </Button>
         <Button type="button" variant="outline" asChild>

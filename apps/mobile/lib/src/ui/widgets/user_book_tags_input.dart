@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 /// 책당 최대 5개 사용자 태그 입력.
 ///
 /// History:
+/// - 2026-06-05: 태그 추가(엔터·버튼) 후 입력란 포커스 유지
 /// - 2026-05-24: `user_books.tags` — 책 추가·수정 공통
 class UserBookTagsInput extends StatefulWidget {
   const UserBookTagsInput({
@@ -23,20 +24,35 @@ class UserBookTagsInput extends StatefulWidget {
 
 class _UserBookTagsInputState extends State<UserBookTagsInput> {
   final _draftCtrl = TextEditingController();
+  final _draftFocus = FocusNode();
 
   @override
   void dispose() {
     _draftCtrl.dispose();
+    _draftFocus.dispose();
     super.dispose();
+  }
+
+  void _refocusDraftField() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_draftFocus.canRequestFocus) return;
+      _draftFocus.requestFocus();
+    });
   }
 
   void _addDraft() {
     final next = normalizeUserBookTags([...widget.tags, _draftCtrl.text]);
     if (next.length == widget.tags.length && _draftCtrl.text.trim().isNotEmpty) {
+      _refocusDraftField();
+      return;
+    }
+    if (_draftCtrl.text.trim().isEmpty) {
+      _refocusDraftField();
       return;
     }
     widget.onChanged(next);
     _draftCtrl.clear();
+    _refocusDraftField();
   }
 
   void _remove(String tag) {
@@ -83,6 +99,7 @@ class _UserBookTagsInputState extends State<UserBookTagsInput> {
               Expanded(
                 child: TextField(
                   controller: _draftCtrl,
+                  focusNode: _draftFocus,
                   maxLength: kUserBookTagMaxLength,
                   decoration: const InputDecoration(
                     hintText: '예: 업무, 재독',

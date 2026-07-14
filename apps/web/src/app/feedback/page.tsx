@@ -8,6 +8,7 @@ import { UserFeedbackForm } from "@/components/feedback/user-feedback-form.clien
  * 로그인 사용자 의견 보내기.
  *
  * @history
+ * - 2026-06-10: 안내 문구·폼 레이아웃 — 모바일·팝업 시안과 동일 톤
  * - 2026-05-18: 신규
  */
 export default async function FeedbackPage() {
@@ -24,8 +25,9 @@ export default async function FeedbackPage() {
             Feedback
           </p>
           <h1 className="font-serif text-3xl text-[#1A3C2F] md:text-4xl">의견 보내기</h1>
-          <p className="text-sm text-[#434843]">
-            버그, 기능 제안, 사용 중 불편한 점을 알려 주세요.{" "}
+          <p className="text-sm leading-relaxed text-[#434843]">
+            버그, 기능 제안, 사용 중 불편한 점을 알려 주세요. 스토어 별점·리뷰와는 별도
+            채널입니다.{" "}
             <Link
               href="/dashboard"
               className="underline underline-offset-4 hover:text-[#1A3C2F]"
